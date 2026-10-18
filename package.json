@@ -1,0 +1,11 @@
+{
+  "name": "inventorybot-wiki",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Genera una wiki per @InventoryBot basata sul tuo progresso personale",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  }
+}
