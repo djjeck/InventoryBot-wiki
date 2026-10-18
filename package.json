@@ -5,20 +5,31 @@
   "description": "Genera una wiki per @InventoryBot basata sul tuo progresso personale",
   "license": "MIT",
   "type": "module",
+  "imports": {
+    "#src/*": "./src/*"
+  },
   "engines": {
     "node": ">=24"
   },
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "typecheck": "tsc",
     "test": "vitest run",
-    "ci": "npm run format:check && npm run typecheck && npm test"
+    "ci": "npm run format:check && npm run lint && npm run typecheck && npm test"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.5",
     "@types/node": "24.19.1",
+    "eslint": "9.39.5",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-simple-import-sort": "14.0.0",
+    "eslint-plugin-unused-imports": "4.4.1",
     "prettier": "3.9.9",
     "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
     "vitest": "4.1.11"
   }
 }

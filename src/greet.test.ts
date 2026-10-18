@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-
 import { greet } from './greet.ts';
 
 describe('greet', () => {
