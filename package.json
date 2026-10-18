@@ -11,9 +11,12 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "ci": "npm run format:check"
+    "typecheck": "tsc",
+    "ci": "npm run format:check && npm run typecheck"
   },
   "devDependencies": {
-    "prettier": "3.9.9"
+    "@types/node": "24.19.1",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3"
   }
 }
