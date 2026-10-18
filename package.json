@@ -18,11 +18,13 @@
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc",
     "test": "vitest run",
-    "ci": "npm run format:check && npm run lint && npm run typecheck && npm test"
+    "test:coverage": "vitest run --coverage",
+    "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test:coverage"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "@types/node": "24.19.1",
+    "@vitest/coverage-v8": "4.1.11",
     "eslint": "9.39.5",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-simple-import-sort": "14.0.0",
