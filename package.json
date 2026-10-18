@@ -7,5 +7,13 @@
   "type": "module",
   "engines": {
     "node": ">=22"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "ci": "npm run format:check"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
   }
 }
