@@ -3,7 +3,8 @@
 Documented as of 2026-10-17 (Telegram Desktop); [§11](#11-the-macos-export) as of
 2026-10-18. If the export format changes, update this document.
 
-This is the input of stage 1 of the pipeline ([`src/parse-export.ts`](../src/parse-export.ts)):
+This is the input of phase 1 of the pipeline, export parsing
+([`src/telegram/export/parse-export.ts`](../src/telegram/export/parse-export.ts)):
 the HTML chat history that Telegram Desktop writes. It describes the format for someone
 who has never seen it; how the parser reads each element is summarised in
 [§9](#9-how-the-parser-reads-each-element). All names and ids in examples are invented.
@@ -405,28 +406,28 @@ media. A media block contains its own `div.body` and `div.title bold`.
 
 ## 9. How the parser reads each element
 
-| Element                                                                | Function                                                                                   | Emits                                                                                                                                                                                                                                                                   |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `messages*.html` in folders (any depth)                                | [`iterPages`](../src/export-files.ts), [`pageKey`](../src/parse-export.ts)                 | Pages (`messages.html`, `messagesN.html`, N ≥ 2 unpadded; other names ignored) in (folder, page number) order, folders and their entries sorted by name (code point order) at every level; `result.json` without pages → [`warnJson`](../src/export-files.ts), skipped. |
-| Page folder (label minus last component, `\` → `/`)                    | [`exportKey`](../src/parse-export.ts), [`parsePages`](../src/parse-export.ts)              | Export key (`.` for a bare page name): the last sender is carried to the next page only within the same export.                                                                                                                                                         |
-| First `div.text bold`; macOS: `div.name bold` inside `div.page_header` | [`ExportParser.starttag`](../src/parse-export.ts), [`data`](../src/parse-export.ts)        | `chat` (stripped); `dm` = (`chat == "InventoryBot"`). The macOS `div.subtitle details` is ignored.                                                                                                                                                                      |
-| `div` with class starting `message default`                            | [`ExportParser.starttag`](../src/parse-export.ts), [`flush`](../src/parse-export.ts)       | Starts a message, flushes the previous one; `id` from `message<N>`. A `message service` div also flushes it, and its content is ignored.                                                                                                                                |
-| `div.date details[title]` outside the forwarded block                  | `ExportParser.starttag`                                                                    | `date`, verbatim.                                                                                                                                                                                                                                                       |
-| macOS date title (`27 November 2025, 19:00:02`)                        | [`parseMacDate`](../src/dates.ts), `exportOffsets`, [`parsePages`](../src/parse-export.ts) | `date` in the Windows form (`27.11.2025 19:00:02 UTC-05:00`) with the export's offset ([§11.3](#113-dates-without-an-offset)); a stderr line says which offset and where it comes from.                                                                                 |
-| macOS `img.userpic` in the message's own `div.pull_left userpic_wrap`  | `ExportParser.avatar`, `flush`, `parsePages`                                               | The sender's user id, inherited by joined messages like the name; written only as the opaque `sender_key` ([§11.4](#114-sender-ids)).                                                                                                                                   |
-| Outer `div.from_name`                                                  | `ExportParser.endtag`, `flush`                                                             | `sender` (stripped, trailing `via @bot` removed); if absent, the previous message's sender.                                                                                                                                                                             |
-| `div.reply_to` → `<a href=…go_to_message(-?\d+)>`                      | `ExportParser.starttag`                                                                    | `reply_to`, negative ids included.                                                                                                                                                                                                                                      |
-| `div.forwarded body` → `div.from_name` (its `date` span skipped)       | `ExportParser.starttag`, `endtag`, `flush`                                                 | `forwarded_from` (trailing `via @bot` removed); a joined forward without it takes the previous forward's.                                                                                                                                                               |
-| `div.text` (`<br>` → `\n`, entities decoded, tags dropped)             | `ExportParser.starttag`, `startendtag`, `data`, `endtag`                                   | `text`; messages without it are not emitted but still set the sender.                                                                                                                                                                                                   |
-| Original author (`forwarded_from`, else `sender`)                      | `ExportParser.flush`                                                                       | `from_bot` = author stripped equals `InventoryBot`.                                                                                                                                                                                                                     |
-| Leading `/cmd@BotName`                                                 | [`normalize`](../src/parse-export.ts)                                                      | `text` without `@BotName`; `other_bot` = BotName ≠ InventoryBot (case-insensitive).                                                                                                                                                                                     |
-| (chat, id)                                                             | `parsePages`                                                                               | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` is kept.                                                                                                           |
-| Date title                                                             | [`parseWindowsDate`](../src/dates.ts), [`sortMessages`](../src/parse-export.ts)            | Output sorted by instant, then chat, then id; a date not in the exact form of [§5.1](#51-date) counts as missing, and an undated message takes its chat neighbour's instant (by id).                                                                                    |
+| Element                                                                | Function                                                                                                             | Emits                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `messages*.html` in folders (any depth)                                | [`iterPages`](../src/telegram/export/export-files.ts), [`pageKey`](../src/telegram/export/parse-export.ts)           | Pages (`messages.html`, `messagesN.html`, N ≥ 2 unpadded; other names ignored) in (folder, page number) order, folders and their entries sorted by name (code point order) at every level; `result.json` without pages → [`warnJson`](../src/telegram/export/export-files.ts), skipped. |
+| Page folder (label minus last component, `\` → `/`)                    | [`exportKey`](../src/telegram/export/parse-export.ts), [`parsePages`](../src/telegram/export/parse-export.ts)        | Export key (`.` for a bare page name): the last sender is carried to the next page only within the same export.                                                                                                                                                                         |
+| First `div.text bold`; macOS: `div.name bold` inside `div.page_header` | [`ExportParser.starttag`](../src/telegram/export/parse-export.ts), [`data`](../src/telegram/export/parse-export.ts)  | `chat` (stripped); `dm` = (`chat` == the bot's DM title, `InventoryBot`). The macOS `div.subtitle details` is ignored.                                                                                                                                                                  |
+| `div` with class starting `message default`                            | [`ExportParser.starttag`](../src/telegram/export/parse-export.ts), [`flush`](../src/telegram/export/parse-export.ts) | Starts a message, flushes the previous one; `id` from `message<N>`. A `message service` div also flushes it, and its content is ignored.                                                                                                                                                |
+| `div.date details[title]` outside the forwarded block                  | `ExportParser.starttag`                                                                                              | `date`, verbatim.                                                                                                                                                                                                                                                                       |
+| macOS date title (`27 November 2025, 19:00:02`)                        | [`parseMacDate`](../src/lib/dates.ts), `exportOffsets`, [`parsePages`](../src/telegram/export/parse-export.ts)       | `date` in the Windows form (`27.11.2025 19:00:02 UTC-05:00`) with the export's offset ([§11.3](#113-dates-without-an-offset)); a stderr line says which offset and where it comes from.                                                                                                 |
+| macOS `img.userpic` in the message's own `div.pull_left userpic_wrap`  | `ExportParser.avatar`, `flush`, `parsePages`                                                                         | The sender's user id, inherited by joined messages like the name; written only as the opaque `sender_key` ([§11.4](#114-sender-ids)).                                                                                                                                                   |
+| Outer `div.from_name`                                                  | `ExportParser.endtag`, `flush`                                                                                       | `sender` (stripped, trailing `via @bot` removed); if absent, the previous message's sender.                                                                                                                                                                                             |
+| `div.reply_to` → `<a href=…go_to_message(-?\d+)>`                      | `ExportParser.starttag`                                                                                              | `reply_to`, negative ids included.                                                                                                                                                                                                                                                      |
+| `div.forwarded body` → `div.from_name` (its `date` span skipped)       | `ExportParser.starttag`, `endtag`, `flush`                                                                           | `forwarded_from` (trailing `via @bot` removed); a joined forward without it takes the previous forward's.                                                                                                                                                                               |
+| `div.text` (`<br>` → `\n`, entities decoded, tags dropped)             | `ExportParser.starttag`, `startendtag`, `data`, `endtag`                                                             | `text`; messages without it are not emitted but still set the sender.                                                                                                                                                                                                                   |
+| Original author (`forwarded_from`, else `sender`)                      | `ExportParser.flush`                                                                                                 | `from_bot` = author stripped equals the bot's name, `InventoryBot`.                                                                                                                                                                                                                     |
+| (chat, id)                                                             | `parsePages`                                                                                                         | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` is kept.                                                                                                                           |
+| Date title                                                             | [`parseWindowsDate`](../src/lib/dates.ts), [`sortMessages`](../src/telegram/export/parse-export.ts)                  | Output sorted by instant, then chat, then id; a date not in the exact form of [§5.1](#51-date) counts as missing, and an undated message takes its chat neighbour's instant (by id).                                                                                                    |
 
 Media, reactions, inline keyboards, avatars (except the macOS sender id), pagination
-links and service entries are ignored. Output: one compact JSON object per line in
-`data/messages.jsonl` (LF line ends, paths in stderr lines written with `/`) with keys `chat`, `dm`, `id`, `date`, `from_bot`, `sender`,
-`forwarded_from`, `reply_to`, `text`, then `other_bot` and `sender_key` when applicable.
+links and service entries are ignored. A leading `/cmd@BotName` is kept as written.
+Output: one `Message` ([`src/telegram/messages.ts`](../src/telegram/messages.ts)) per
+message, kept in memory, with keys `chat`, `dm`, `id`, `date`, `from_bot`, `sender`,
+`forwarded_from`, `reply_to`, `text`, then `sender_key` when applicable.
 
 ## 10. Annotated sample page
 
@@ -672,15 +673,15 @@ ChatExport_InventoryBot/     named after the chat title
 Windows export: a message present in both shows the same wall clock in both.
 
 An instant cannot be computed from such a date alone. The pipeline gives each macOS
-export one UTC offset and converts its dates to the Windows form in stage 1, so later
-stages see a single format. The offset comes, in this order, from:
+export one UTC offset and converts its dates to the Windows form in phase 1, so later
+phases see a single format. The offset comes, in this order, from:
 
 1. the other exports of the run that share messages with it (same chat title, same id)
    and show the same wall clock for them: their offset (the most frequent, if several),
    which reproduces the Windows labelling of [§5.1](#51-date); shared messages with
    another wall clock or offset are reported on stderr;
-2. the `--utc-offset ±HH:MM` option of `parse` and `pipeline`;
-3. otherwise stage 1 stops with an error that asks for `--utc-offset`.
+2. the UTC offset `±HH:MM` given by the user (`ParseOptions.utcOffset`);
+3. otherwise phase 1 stops with an error that asks for it (`MissingUtcOffsetError`).
 
 The computer's own time zone is never used. A message present in a Windows and a macOS
 export is kept once, with the date the Windows export wrote.
@@ -692,12 +693,10 @@ id. Unlike the display name it is unique and does not change when the user renam
 themselves, so it identifies senders far better (two people named `Andrea` are told
 apart).
 
-**Rule: the user id never leaves stage 1's memory.** No output may contain it:
-`data/messages.jsonl`, `data/events.jsonl`, the `site/` files and stderr carry only an
-opaque `sender_key` (`u1`, `u2`, … numbered in output order), the same for one user
-within one run and meaningless outside it. Stage 2 uses the key in place of the display
-name to map senders to @usernames and to pair group replies with commands
-([`docs/edge-cases.md`](edge-cases.md), M9).
+**Rule: the user id never leaves phase 1's memory.** No output may contain it: messages
+carry only an opaque `sender_key` (`u1`, `u2`, … numbered in output order), the same for
+one user within one run and meaningless outside it, which tells senders apart better
+than their display names.
 
 ## 12. Unknowns
 

@@ -19,9 +19,8 @@ of older group history. How Telegram Desktop exports these messages is in
 5. [Groups](#5-groups)
 6. [Replies](#6-replies)
 7. [Older formats](#7-older-formats)
-8. [Where the pipeline reads each reply](#8-where-the-pipeline-reads-each-reply)
-9. [Example blocks](#9-example-blocks)
-10. [Unknowns](#10-unknowns)
+8. [Example blocks](#8-example-blocks)
+9. [Unknowns](#9-unknowns)
 
 ## 1. Notation
 
@@ -227,7 +226,7 @@ The bot plays in groups too, and there:
 ## 6. Replies
 
 Each section gives the command, the grammar, the meaning and examples (the example
-format is in section 9).
+format is in section 8).
 
 ### 6.1 Adventure drop
 
@@ -929,54 +928,21 @@ E' pronto a combattere.
 - un astrolabio da cartografo [L1]
 ```
 
-## 8. Where the pipeline reads each reply
+## 8. Example blocks
 
-| Reply                                | Function in `src/extract.ts` | Event type                             |
-| ------------------------------------ | ---------------------------- | -------------------------------------- |
-| adventure drop, lucky adventure      | `cDrop`, `cLucky`            | `drop`                                 |
-| cooldown                             | `cTooEarly`                  | `cooldown`                             |
-| recipe list                          | `cRecipeList`                | `recipe_list`                          |
-| recipe detail                        | `cRecipeDetail`              | `recipe_detail`                        |
-| craft                                | `cCraft`                     | `craft`                                |
-| item info                            | `cItemInfo`                  | `item_info`                            |
-| inventory                            | `cInventory`                 | `inventory`                            |
-| `/titolo`                            | `cTitle`                     | `title`                                |
-| travel, where am I, blocked          | `cTravel`                    | `travel`, `location`, `travel_blocked` |
-| old item-narrated arrival            | `cNarratedArrival`           | `travel`                               |
-| place requirement notice             | `cTravelRequirement`         | `travel_requirement`                   |
-| gift notice                          | `cGift`                      | `gift`                                 |
-| give                                 | `cGive`                      | `give`                                 |
-| show                                 | `cShow`                      | `show`                                 |
-| use                                  | `cUse`, `useItems`           | `use`                                  |
-| item cooldown                        | `cItemCooldown`              | `item_cooldown`                        |
-| stats                                | `cStats`                     | `stats`                                |
-| FAQ                                  | `cFaq`                       | `faq`                                  |
-| other replies (named patterns), 6.17 | `cNoise`, `KNOWN_REPLIES`    | `miss`                                 |
-| older formats (section 7)            | `cOldFormat`, `OLD_FORMATS`  | `old_format`                           |
-| Pakkomon sphere use                  | `cPakkomonSphere`            | `use`                                  |
-| anything else                        |                              | `unknown`                              |
+Every reply example above is a block with the info string `bot-reply` and attributes
+`key=value`, `key="value"` (`\"` escapes a quote) or `key='value'`, which say what the
+reply means:
 
-Addressing is read by `playerOf`, titles by `learnTitles` and `titleStripper`, item
-lines by `itemFromLine`.
+- `type`: the kind of reply (required); `query`: the command it answers (default none);
+- `chat=group`: the reply was sent in a group, and a leading `[W] ` is not part of it;
+  `titles="a|b"`: these player titles are not part of it (`Sua Maestà ` never is, at the
+  start and after `Avventuriero `);
+- `addressee`: the player the reply names (`null` for none);
+- any other key: a value read from the reply, by dotted path (`items.0.qty`): text for
+  strings, compact JSON otherwise.
 
-## 9. Example blocks
-
-For contributors: every reply example above is a block with the info string
-`bot-reply` and attributes `key=value`, `key="value"` (`\"` escapes a quote) or
-`key='value'`. `test/docs-examples.test.ts` runs `classify(text, query)` from `src/extract.ts` on each
-block and checks:
-
-- `type`: the event type returned (required); `query`: the command answered (default
-  none);
-- `chat=group`: strip a leading `[W] ` first; `titles="a|b"`: strip these titles first
-  (`Sua Maestà ` is always stripped at the start and after `Avventuriero `);
-- `addressee`: the result of `player_of` (`null` for none);
-- any other key: an event field by dotted path (`items.0.qty`), compared as text for
-  strings and as compact JSON otherwise;
-- `known-gap` (with `should`): the classifier currently gets this reply wrong; the block
-  asserts the current result.
-
-## 10. Unknowns
+## 9. Unknowns
 
 - What `M` means.
 - Whether the lucky adventure of the day is one per day for all players or one per player.

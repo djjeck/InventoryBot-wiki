@@ -1,0 +1,569 @@
+/**
+ * Phase 1: Telegram Desktop HTML export pages -> normalised messages.
+ * The input format is docs/telegram-export.md (the Windows export and the macOS export,
+ * section 11).
+ *
+ * Generic: the bot is a parameter (BotIdentity), which decides `dm` and `from_bot`.
+ * Texts are kept as written, `/cmd@Bot` included.
+ *
+ * Pure logic only (no Node APIs): pages come in as strings, grouped by input path.
+ * Finding the pages on disk is export-files.ts.
+ */
+import {
+  formatOffset,
+  formatWindowsDate,
+  parseMacDate,
+  parseOffset,
+  parseWindowsDate,
+  type WallClock,
+  windowsDateSeconds,
+  type ZonedDate,
+} from '#src/lib/dates.ts';
+import { pathName } from '#src/lib/paths.ts';
+import {
+  compareCodePoints,
+  parseDecimalInt,
+  stripWs,
+  WORD_CLASS,
+  WS_CLASS,
+} from '#src/lib/text.ts';
+import { type BotIdentity } from '#src/telegram/bot.ts';
+import { type Message, type Page } from '#src/telegram/messages.ts';
+import { type Attrs, feedHtml, type HtmlEvents } from './html-events.ts';
+
+/**
+ * A page file name as Telegram writes it, matched against the whole path:
+ * `messages.html` (page 1), then `messages2.html`, `messages3.html`, ... (no zero
+ * padding; `messages1.html` and `messages01.html` are not pages).
+ */
+export const PAGE = /(^|\/)messages(?:[2-9]|[1-9][0-9]+)?\.html(?=\n?$)/u;
+const PAGE_KEY = /messages((?:[2-9]|[1-9][0-9]+)?)\.html(?=\n?$)/u;
+/** Reply link target: `#go_to_message<N>` or `messagesK.html#go_to_message<N>`, N possibly negative. */
+const GO_TO_MESSAGE = /go_to_message(-?\p{Nd}+)/u;
+/** `Mario Rossi via @gif`: a message sent through an inline bot; the suffix is not part of the name. */
+const VIA_BOT = new RegExp(`${WS_CLASS}+via${WS_CLASS}+@${WORD_CLASS}+$`, 'u');
+/** macOS export avatar: `photos/author_<numeric Telegram user id>.jpg`. */
+const AUTHOR_PHOTO = /(?:^|\/)author_(-?[0-9]+)\.[A-Za-z0-9]+$/u;
+
+interface Current {
+  id: number;
+  from?: string;
+  fwd_from?: string;
+  date?: string | null;
+  reply_to?: number;
+  text?: string;
+  ctx: string;
+  joined: boolean;
+  /** Has a `forwarded body` block. */
+  forwarded?: boolean;
+  /** Telegram user id from the sender's avatar file (macOS export). Never output. */
+  authorId?: string;
+}
+
+/**
+ * Extracts messages from one messagesN.html page.
+ *
+ * Per message: id, timestamp, sender, text, the id it replies to and, for
+ * forwarded messages, the original author (the inner from_name). The state machine
+ * also handles the markup's irregular cases: joined messages and joined forwards, which
+ * inherit their sender or original author; a trailing `via @bot` in a name; negative ids
+ * in reply links; and service entries (day separators, pins), which close the current
+ * message without adding to it.
+ */
+export class ExportParser implements HtmlEvents {
+  readonly messages: Message[] = [];
+  /**
+   * Numeric Telegram user id of each message's sender, when the export gives it (the
+   * macOS export's avatar file names). Kept off the messages: it must never be written
+   * anywhere; parsePages() turns it into an opaque per-run `sender_key`.
+   */
+  readonly authorIds = new Map<Message, string>();
+  chat: string | null = null;
+  /** Sender of the last message entry; joined messages inherit it. */
+  lastSender: string | null;
+  /** User id of the last message entry's sender, if known; joined messages inherit it. */
+  lastSenderId: string | null;
+  /** Original author of the last message entry if it was a forward, else null. */
+  private lastFwdFrom: string | null = null;
+  private cur: Current | null = null;
+  private capture: 'from_name' | 'text' | null = null;
+  private captureDepth = 0;
+  private buf: string[] = [];
+  private skipSpan = 0; // inside a <span class="... date ..."> within from_name
+  private depth = 0; // div depth inside the current message
+  private fwdDepth: number | null = null; // div depth of the "forwarded body" block
+  private inHeader = false;
+  /** Inside `div.page_header`, before the first history entry (macOS chat title). */
+  private inPageHeader = false;
+  /** Div depth of the message's own `pull_left userpic_wrap` (not the forwarded one). */
+  private userpicDepth: number | null = null;
+  /** That block has ended: later images (reactions, forwards) are not the sender's. */
+  private userpicDone = false;
+
+  /**
+   * `bot` decides which chat is the DM and which messages are the bot's; `lastSender`
+   * and `lastSenderId` come from the previous page of the same export.
+   */
+  readonly bot: BotIdentity;
+
+  constructor(
+    bot: BotIdentity,
+    lastSender: string | null = null,
+    lastSenderId: string | null = null
+  ) {
+    this.bot = bot;
+    this.lastSender = lastSender;
+    this.lastSenderId = lastSenderId;
+  }
+
+  feed(html: string): void {
+    feedHtml(html, this);
+  }
+
+  close(): void {
+    this.flush();
+  }
+
+  starttag(tag: string, a: Attrs): void {
+    const cls = a.get('class') || '';
+    if (tag === 'div' && cls === 'text bold' && this.chat === null) {
+      this.inHeader = true;
+      return;
+    }
+    if (tag === 'div' && /^page_header(?:\s|$)/u.test(cls)) this.inPageHeader = true;
+    // macOS export: the title is `div.name bold` in the header (no `div.text bold`).
+    if (tag === 'div' && cls === 'name bold' && this.chat === null && this.inPageHeader) {
+      this.inHeader = true;
+      return;
+    }
+    if (tag === 'div' && cls === 'history') this.inPageHeader = false;
+    if (tag === 'div' && cls.startsWith('message default')) {
+      this.inPageHeader = false;
+      this.flush();
+      const id = a.get('id');
+      if (id === undefined || id === null)
+        throw new Error(`message div without id: class="${cls}"`);
+      this.cur = {
+        id: parseDecimalInt(id.startsWith('message') ? id.slice('message'.length) : id),
+        ctx: '',
+        joined: /(^|\s)joined(\s|$)/u.test(cls),
+      };
+      this.depth = 0;
+      this.fwdDepth = null;
+      this.userpicDepth = null;
+      this.userpicDone = false;
+      return;
+    }
+    if (tag === 'div' && /^message service(?:\s|$)/u.test(cls)) {
+      // A service entry ends the current message; its own content is ignored.
+      this.flush();
+      return;
+    }
+    const cur = this.cur;
+    if (cur === null) return;
+    if (tag === 'br' && this.capture) {
+      this.buf.push('\n');
+      return;
+    }
+    if (tag === 'span' && this.capture === 'from_name' && cls.includes('date')) {
+      this.skipSpan++;
+      return;
+    }
+    if (tag === 'a' && cur.ctx.includes('reply_to')) {
+      const m = GO_TO_MESSAGE.exec(a.get('href') || '');
+      if (m) cur.reply_to = parseDecimalInt(m[1] as string);
+    }
+    if (tag === 'img') {
+      this.avatar(a);
+      return;
+    }
+    if (tag !== 'div') return;
+    this.depth++;
+    if (this.capture) return;
+    if (cls === 'pull_left userpic_wrap' && this.userpicDepth === null && !this.userpicDone) {
+      this.userpicDepth = this.depth;
+    } else if (cls.startsWith('forwarded body')) {
+      this.fwdDepth = this.depth;
+      cur.forwarded = true;
+    } else if (cls.includes('date details') && a.has('title') && this.fwdDepth === null) {
+      cur.date = a.get('title') ?? null;
+    } else if (cls.startsWith('reply_to')) {
+      cur.ctx = 'reply_to';
+    } else if (cls === 'from_name' || cls === 'text') {
+      this.capture = cls;
+      this.captureDepth = this.depth;
+      this.buf = [];
+    }
+  }
+
+  startendtag(tag: string, a: Attrs): void {
+    if (this.capture && tag === 'br') this.buf.push('\n');
+    if (tag === 'img' && this.cur !== null) this.avatar(a);
+  }
+
+  /** `<img class="userpic" src="photos/author_<id>.jpg">` in the sender's avatar block. */
+  private avatar(a: Attrs): void {
+    const cur = this.cur;
+    if (
+      cur === null ||
+      this.userpicDepth === null ||
+      this.userpicDone ||
+      this.depth < this.userpicDepth
+    )
+      return;
+    const m = AUTHOR_PHOTO.exec(a.get('src') || '');
+    if (m) cur.authorId = m[1] as string;
+  }
+
+  endtag(tag: string): void {
+    const cur = this.cur;
+    if (cur === null) return;
+    if (tag === 'span' && this.skipSpan) {
+      this.skipSpan--;
+      return;
+    }
+    if (tag !== 'div') return;
+    if (this.capture && this.depth === this.captureDepth) {
+      const value = stripWs(this.buf.join(''));
+      if (this.capture === 'from_name') {
+        const name = value.replace(VIA_BOT, '');
+        if (this.fwdDepth !== null) cur.fwd_from = name;
+        else cur.from = name;
+      } else {
+        cur.text = value;
+      }
+      this.capture = null;
+    }
+    if (cur.ctx === 'reply_to') cur.ctx = '';
+    if (this.fwdDepth !== null && this.depth === this.fwdDepth) this.fwdDepth = null;
+    if (this.userpicDepth !== null && !this.userpicDone && this.depth === this.userpicDepth)
+      this.userpicDone = true;
+    this.depth--;
+  }
+
+  data(text: string): void {
+    if (this.inHeader) {
+      this.chat = stripWs(text);
+      this.inHeader = false;
+    }
+    if (this.capture && !this.skipSpan) this.buf.push(text);
+  }
+
+  private flush(): void {
+    const cur = this.cur;
+    if (cur === null) return;
+    const sender = cur.from || this.lastSender;
+    this.lastSender = sender;
+    // The id goes with the name: a message with its own sender block has its own avatar.
+    const senderId = cur.authorId ?? (cur.from ? null : this.lastSenderId);
+    this.lastSenderId = senderId;
+    // A joined forward without an inner from_name has the previous forward's author.
+    let fwdFrom = cur.fwd_from ?? null;
+    if (!fwdFrom && cur.forwarded && cur.joined && this.lastFwdFrom) fwdFrom = this.lastFwdFrom;
+    this.lastFwdFrom = cur.forwarded ? fwdFrom : null;
+    if (cur.text !== undefined) {
+      const author = fwdFrom || sender;
+      const m: Message = {
+        chat: this.chat,
+        dm: this.chat === this.bot.dmTitle, // the private chat with the bot
+        id: cur.id,
+        date: cur.date ?? null,
+        from_bot: author !== null && stripWs(author) === this.bot.name,
+        sender,
+        forwarded_from: fwdFrom,
+        reply_to: cur.reply_to ?? null,
+        text: cur.text,
+      };
+      this.messages.push(m);
+      if (senderId !== null) this.authorIds.set(m, senderId);
+    }
+    this.cur = null;
+  }
+}
+
+/** Page number of a page path: `messages.html` is 1, `messages10.html` is 10. */
+export function pageKey(path: string): number {
+  const m = PAGE_KEY.exec(pathName(path));
+  if (!m) throw new Error(`not an export page: ${path}`);
+  return m[1] ? parseDecimalInt(m[1]) : 1;
+}
+
+type SortKey = [ts: number, chat: string, id: number];
+type Sortable = Pick<Message, 'date' | 'chat' | 'id'>;
+
+/**
+ * Sort key: (instant, chat or "", id); ids only order within one chat. `ts` overrides
+ * the instant of the message's own date (see sortMessages).
+ */
+export function sortKey(m: Sortable, ts: number = windowsDateSeconds(m.date) ?? 0): SortKey {
+  return [ts, m.chat || '', m.id];
+}
+
+function compareSortKeys(a: SortKey, b: SortKey): number {
+  if (a[0] !== b[0]) return a[0] < b[0] ? -1 : 1;
+  return compareCodePoints(a[1], b[1]) || a[2] - b[2];
+}
+
+/**
+ * Instants for sorting: a message whose date is missing or unparsable takes the instant
+ * of the nearest earlier message (by id) of its chat that has one, else of the nearest
+ * later one, so it keeps its place by id; 0 if no message of the chat has a date.
+ */
+function sortInstants<T extends Sortable>(xs: readonly T[]): Map<T, number> {
+  const byChat = new Map<string, T[]>();
+  for (const m of xs) {
+    const k = m.chat || '';
+    const list = byChat.get(k);
+    if (list) list.push(m);
+    else byChat.set(k, [m]);
+  }
+  const out = new Map<T, number>();
+  for (const list of byChat.values()) {
+    const sorted = [...list].sort((a, b) => a.id - b.id);
+    const own = sorted.map((m) => windowsDateSeconds(m.date));
+    let prev: number | null = null;
+    const filled = own.map((t) => (prev = t ?? prev));
+    let next: number | null = null;
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      next = own[i] ?? next;
+      out.set(sorted[i] as T, filled[i] ?? next ?? 0);
+    }
+  }
+  return out;
+}
+
+/** Stable sort by sortKey, undated messages placed by id within their chat (sortInstants). */
+export function sortMessages<T extends Sortable>(xs: readonly T[]): T[] {
+  const ts = sortInstants(xs);
+  return xs
+    .map((m) => ({ m, k: sortKey(m, ts.get(m)) }))
+    .sort((a, b) => compareSortKeys(a.k, b.k))
+    .map((x) => x.m);
+}
+
+/**
+ * The export a page belongs to: its label minus the last path component (`\` read
+ * as `/`; a bare file name is in the current folder, "."). The last sender is carried
+ * to the next page only within one export.
+ */
+export function exportKey(label: string): string {
+  const s = label.replaceAll('\\', '/');
+  const i = s.lastIndexOf('/');
+  return i < 0 ? '.' : s.slice(0, i);
+}
+
+// ---- macOS export dates -------------------------------------------------------------
+
+/** `UTC±HH:MM`, the offset label of a Windows date title. */
+const offsetLabel = (minutes: number): string => `UTC${formatOffset(minutes)}`;
+
+const sameWallClock = (w: WallClock, d: ZonedDate): boolean =>
+  w.year === d.year &&
+  w.month === d.month &&
+  w.day === d.day &&
+  w.hour === d.hour &&
+  w.minute === d.minute &&
+  w.second === d.second;
+
+/** Exports whose dates have no UTC offset, with none to take from the run and none given. */
+export class MissingUtcOffsetError extends Error {
+  readonly exports: readonly string[];
+
+  constructor(exports: readonly string[]) {
+    super(
+      `${exports.join(', ')}: date senza fuso orario, e nessun'altra esportazione della stessa ` +
+        'chat ha messaggi in comune con le stesse date da cui ricavarlo. Indica il fuso orario ' +
+        "(±HH:MM) del computer che ha fatto l'esportazione, per esempio -05:00."
+    );
+    this.exports = exports;
+  }
+}
+
+// ---- reading the exports ------------------------------------------------------------
+
+export interface ParseOptions {
+  /** The bot the exports are about. */
+  bot: BotIdentity;
+  /** The user's UTC offset (`±HH:MM`): for exports whose dates have no offset and none can be inferred. */
+  utcOffset?: string | null;
+}
+
+export interface ParseResult {
+  /**
+   * De-duplicated by (chat, id), the copy read last winning, except that a date read with
+   * its UTC offset is kept over one converted from a macOS export; sorted by sortKey.
+   */
+  messages: Message[];
+  /** Number of distinct export keys seen. */
+  exports: number;
+  /** Chat titles, sorted by code point; a missing or empty title is "?". */
+  chats: string[];
+  /** stderr lines about the UTC offset given to the dates of macOS exports. */
+  warnings: string[];
+}
+
+/** One parsed copy of a message, with what the second pass needs. */
+interface Copy {
+  m: Message;
+  /** Export key of its page. */
+  exp: string;
+  /** Sender's Telegram user id (macOS export); never output. */
+  authorId: string | null;
+  /** Wall clock of a date title without offset (macOS export), else null. */
+  local: WallClock | null;
+}
+
+/**
+ * The UTC offset, in minutes east of UTC, for each export with offset-less dates: the offset of
+ * the other exports in the run that share messages with it (same chat and id) and show
+ * the same wall clock for them (the most frequent, if several); else `utcOffset`; else
+ * MissingUtcOffsetError. Writes one stderr line per such export to `warnings`.
+ */
+function exportOffsets(
+  copies: readonly Copy[],
+  utcOffset: string | null,
+  warnings: string[]
+): Map<string, number> {
+  const out = new Map<string, number>();
+  const local = new Map<string, Copy[]>();
+  for (const c of copies) {
+    if (c.local === null) continue;
+    const list = local.get(c.exp);
+    if (list) list.push(c);
+    else local.set(c.exp, [c]);
+  }
+  if (local.size === 0) return out;
+  const native = new Map<string, { exp: string; parts: ZonedDate }[]>();
+  for (const c of copies) {
+    const parts = c.local === null ? parseWindowsDate(c.m.date) : null;
+    if (parts === null) continue;
+    const k = JSON.stringify([c.m.chat, c.m.id]);
+    const list = native.get(k);
+    if (list) list.push({ exp: c.exp, parts });
+    else native.set(k, [{ exp: c.exp, parts }]);
+  }
+  const option = utcOffset === null ? null : parseOffset(utcOffset);
+  if (utcOffset !== null && option === null)
+    throw new Error(`fuso orario non valido: ${utcOffset} (formato atteso: ±HH:MM)`);
+  const missing: string[] = [];
+  for (const [exp, list] of local) {
+    // Each shared message: the offsets of its other copies with the same wall clock.
+    const shared: (number | null)[][] = [];
+    const votes = new Map<number, number>();
+    for (const c of list) {
+      const others = (native.get(JSON.stringify([c.m.chat, c.m.id])) ?? []).filter(
+        (n) => n.exp !== exp
+      );
+      if (others.length === 0) continue;
+      const labels = others.map((n) =>
+        sameWallClock(c.local as WallClock, n.parts) ? n.parts.offsetMinutes : null
+      );
+      shared.push(labels);
+      for (const l of new Set(labels)) if (l !== null) votes.set(l, (votes.get(l) ?? 0) + 1);
+    }
+    const best =
+      [...votes].sort(
+        (a, b) => b[1] - a[1] || compareCodePoints(offsetLabel(a[0]), offsetLabel(b[0]))
+      )[0]?.[0] ?? null;
+    const disagree = shared.filter((labels) => labels.some((l) => l !== best)).length;
+    const n = shared.length;
+    if (best !== null) {
+      out.set(exp, best);
+      let line = `${exp}: date senza fuso orario, lette come ${offsetLabel(best)} come le altre esportazioni della stessa chat (${n} messaggi in comune)`;
+      if (disagree > 0)
+        line += `; in ${disagree} di questi un'altra esportazione mostra un'altra data o un altro fuso orario`;
+      if (option !== null && option !== best)
+        line += `; il fuso orario indicato (${utcOffset}) non è stato usato`;
+      warnings.push(line);
+    } else if (option !== null) {
+      out.set(exp, option);
+      let line = `${exp}: date senza fuso orario, lette come ${offsetLabel(option)} (il fuso orario indicato)`;
+      if (n > 0)
+        line += `; i ${n} messaggi in comune con altre esportazioni della stessa chat vi mostrano altre date`;
+      warnings.push(line);
+    } else {
+      missing.push(exp);
+    }
+  }
+  if (missing.length > 0) throw new MissingUtcOffsetError(missing);
+  return out;
+}
+
+/**
+ * Parses the pages of each input path (one inner iterable per command-line PATH).
+ *
+ * Two passes, so that the core stays pure: the first parses every page; the second gives
+ * macOS dates their UTC offset (exportOffsets) and converts them to the Windows form, so
+ * later phases see one date format, then de-duplicates, sorts, and replaces Telegram user
+ * ids with opaque sender keys (`u1`, `u2`, ... in output order), which are all that is
+ * written.
+ */
+export function parsePages(paths: Iterable<Iterable<Page>>, options: ParseOptions): ParseResult {
+  const copies: Copy[] = [];
+  const exports = new Set<string>();
+  for (const pages of paths) {
+    let prevExport: string | null = null;
+    let lastSender: string | null = null;
+    let lastSenderId: string | null = null;
+    for (const page of pages) {
+      const exp = exportKey(page.label);
+      // Pages of one export are consecutive: carry the sender across page breaks.
+      const same = exp === prevExport;
+      const p: ExportParser = new ExportParser(
+        options.bot,
+        same ? lastSender : null,
+        same ? lastSenderId : null
+      );
+      p.feed(page.html);
+      p.close();
+      prevExport = exp;
+      lastSender = p.lastSender;
+      lastSenderId = p.lastSenderId;
+      exports.add(exp);
+      for (const m of p.messages) {
+        copies.push({
+          m,
+          exp,
+          authorId: p.authorIds.get(m) ?? null,
+          local: parseMacDate(m.date),
+        });
+      }
+    }
+  }
+  const warnings: string[] = [];
+  const offsets = exportOffsets(copies, options.utcOffset ?? null, warnings);
+  const byKey = new Map<string, Copy>();
+  for (const c of copies) {
+    if (c.local !== null)
+      c.m.date = formatWindowsDate({ ...c.local, offsetMinutes: offsets.get(c.exp) as number });
+    const k = JSON.stringify([c.m.chat, c.m.id]);
+    const prev = byKey.get(k);
+    if (prev !== undefined) {
+      // One date per message: a converted date gives way to one Telegram wrote with its offset.
+      if (c.local !== null && prev.local === null && parseWindowsDate(prev.m.date) !== null) {
+        c.m.date = prev.m.date;
+        c.local = null;
+      }
+      c.authorId ??= prev.authorId;
+    }
+    byKey.set(k, c);
+  }
+  const kept = [...byKey.values()];
+  const authorOf = new Map(kept.map((c) => [c.m, c.authorId]));
+  const messages = sortMessages(kept.map((c) => c.m));
+  const keys = new Map<string, string>();
+  for (const m of messages) {
+    const id = authorOf.get(m);
+    if (id === null || id === undefined) continue;
+    let key = keys.get(id);
+    if (key === undefined) keys.set(id, (key = `u${keys.size + 1}`));
+    m.sender_key = key;
+  }
+  const chats = [...new Set(messages.map((m) => m.chat || '?'))].sort(compareCodePoints);
+  return { messages, exports: exports.size, chats, warnings };
+}
+
+/** The stderr line printed after parsing. */
+export function summaryLine(r: ParseResult): string {
+  return `cartelle di esportazione: ${r.exports}; chat: ${r.chats.join(', ')}`;
+}

@@ -40,6 +40,22 @@ committed still fail.
 **Stop and wait for review:** After completing each change, stop and wait for author approval
 before proceeding. Do not chain changes without an explicit instruction to continue.
 
+## Architecture
+
+The pipeline is a chain of phases, each a function with typed input and output that a caller
+runs in order. So far there is phase 1:
+
+1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become
+   `Message`s (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the
+   pages as strings; `export-files.ts` finds and reads them on disk (`parseExportPaths`).
+
+The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
+`src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,
+`src/telegram/bot.ts`), so the layer could serve another bot, and a change in the game's wording
+never touches it. Everything about InventoryBot belongs in its own layer, `src/inventorybot/`, and
+only the command line, `src/cli.ts`, joins the two. `src/layers.test.ts` fails on any import from
+the generic layer into either.
+
 ## Conventions
 
 - **Language**: authors and contributors work in English, so everything for developers is in
@@ -55,9 +71,10 @@ before proceeding. Do not chain changes without an explicit instruction to conti
   group, inline `type` specifiers, unused ones removed). Import across directories through the
   `#src/*` alias (`package.json` `imports`), never with `../`.
 - **Formatting**: Prettier, for every file it supports, including Markdown.
-- **Tests** sit next to the code they test (`foo.ts`, `foo.test.ts`) and run with Vitest. Coverage
-  of `src/` must stay at or above 90% on statements, branches, functions and lines; entry points
-  that only wire modules together (`src/cli.ts`) are excluded.
+- **Tests** sit next to the code they test (`foo.ts`, `foo.test.ts`) and run with Vitest. Helpers
+  shared by several tests live in `test/` and are imported through the `#test/*` alias; production
+  code never imports them (ESLint rejects it), so it can be shipped without them. Coverage of
+  `src/` must stay at or above 90% on statements, branches, functions and lines.
 - **Dependencies**: as few as possible, pinned to exact versions in `package.json`, with
   `package-lock.json` committed. `package.json` is the only record of them.
 - **Held-back versions**: TypeScript stays on 6.x because typescript-eslint does not support

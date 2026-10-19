@@ -6,8 +6,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.ts'],
-      // Entry points only wire modules together and have no logic of their own.
-      exclude: ['src/**/*.test.ts', 'src/cli.ts'],
+      exclude: ['src/**/*.test.ts'],
       thresholds: {
         statements: 90,
         branches: 90,
