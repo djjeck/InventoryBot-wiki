@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatWindowsDate, parseOffset, parseWindowsDate, windowsDateSeconds } from './dates.ts';
+import {
+  formatWindowsDate,
+  isTimeZone,
+  parseWindowsDate,
+  wallClockOffset,
+  windowsDateSeconds,
+} from './dates.ts';
 
 describe('dates', () => {
   it('parseWindowsDate reads only the Windows date title, and checks the date exists', () => {
@@ -25,10 +31,33 @@ describe('dates', () => {
     expect(d && formatWindowsDate(d)).toBe('07.03.2026 05:04:03 UTC-05:00');
   });
 
-  it('parseOffset reads ±HH:MM', () => {
-    expect(parseOffset('-05:00')).toBe(-300);
-    expect(parseOffset('+05:45')).toBe(345);
-    for (const bad of ['05:00', '+5:00', '+24:00', '+01:60', 'UTC+01:00'])
-      expect(parseOffset(bad)).toBeNull();
+  it('wallClockOffset follows daylight saving time', () => {
+    const at = (month: number, day: number, hour: number) => ({
+      year: 2025,
+      month,
+      day,
+      hour,
+      minute: 30,
+      second: 0,
+    });
+    const rome = (month: number, day: number, hour: number) =>
+      wallClockOffset(at(month, day, hour), 'Europe/Rome');
+    expect([rome(11, 28, 19), rome(7, 1, 19)]).toStrictEqual([60, 120]);
+    // 30 March: 02:30 never happens (clocks go forward): the offset from before.
+    expect(rome(3, 30, 2)).toBe(60);
+    expect(rome(3, 30, 4)).toBe(120); // hours after the change: the new offset
+    // 26 October: 02:30 happens twice (clocks go back): the first one.
+    expect([rome(10, 26, 2), rome(10, 26, 3)]).toStrictEqual([120, 60]);
+    expect(wallClockOffset(at(11, 28, 0), 'Asia/Kolkata')).toBe(330);
+    expect(wallClockOffset(at(11, 28, 0), 'UTC')).toBe(0);
+  });
+
+  it('isTimeZone knows IANA zones only', () => {
+    expect(['Europe/Rome', 'UTC', 'America/New_York'].map(isTimeZone)).toStrictEqual([
+      true,
+      true,
+      true,
+    ]);
+    expect(['Mars/Base', 'Italia'].map(isTimeZone)).toStrictEqual([false, false]);
   });
 });

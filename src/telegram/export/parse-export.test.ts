@@ -21,15 +21,10 @@ import {
 } from '#test/helpers.ts';
 import { tempDir } from '#test/temp-dir.ts';
 import { iterPages } from './export-files.ts';
-import {
-  ExportParser,
-  MissingUtcOffsetError,
-  pageKey,
-  parsePages,
-  sortMessages,
-} from './parse-export.ts';
+import { ExportParser, pageKey, parsePages, sortMessages } from './parse-export.ts';
 
-const OPTS = { bot: BOT_IDENTITY };
+/** The test exports' dates are in New York's winter time (UTC-05:00, test/helpers.ts). */
+const OPTS = { bot: BOT_IDENTITY, timeZone: 'America/New_York' };
 
 function parseHtml(
   title: string,
@@ -596,16 +591,16 @@ describe('macOS dates', () => {
     expect(err).not.toContain('show another date');
   });
 
-  it('inferred_offset_wins_over_the_option_and_disagreement_is_reported', () => {
+  it('inferred_offset_wins_over_the_time_zone_and_disagreement_is_reported', () => {
     const dir = tempDir();
     const c = macDm();
     const win = c.messages.map((m) => ({ ...m }));
     (win[1] as Item).date = tgDate(3600 + 1); // another wall clock for one shared message
     writeExport(path.join(dir, 'Win'), BOT, [win.slice(0, 3)]);
     writeMacExport(path.join(dir, 'Mac'), BOT, c.messages, IDS);
-    const { msgs, err } = runParse([dir], '+02:00');
+    const { msgs, err } = runParse([dir], 'Europe/Athens');
     expect(err).toContain(
-      "lette come UTC-05:00 come le altre esportazioni della stessa chat (3 messaggi in comune); in 1 di questi un'altra esportazione mostra un'altra data o un altro fuso orario; il fuso orario indicato (+02:00) non è stato usato"
+      "lette come UTC-05:00 come le altre esportazioni della stessa chat (3 messaggi in comune); in 1 di questi un'altra esportazione mostra un'altra data o un altro fuso orario"
     );
     // The Windows copy's date is kept, so message 5001 sorts at its own instant.
     expect(msgs.map((m) => [m.id, m.date])).toStrictEqual(
@@ -613,7 +608,7 @@ describe('macOS dates', () => {
     );
   });
 
-  it('other_chat_or_other_wall_clock_gives_no_offset', () => {
+  it('other_chat_or_other_wall_clock_falls_back_to_the_time_zone', () => {
     const dir = tempDir();
     const c = macDm();
     const rome: Instant = { epoch: c.base.epoch, offsetMinutes: 60 };
@@ -624,40 +619,56 @@ describe('macOS dates', () => {
     g.user('Mario', 'ciao', 0);
     writeExport(path.join(dir, 'Group'), 'G', [g.messages]); // same ids and wall clock, other chat
     writeMacExport(path.join(dir, 'Mac'), BOT, c.messages, IDS);
-    expect(() =>
-      parsePages([[{ label: 'Mac/messages.html', html: macPageHtml(BOT, c.messages, IDS) }]], OPTS)
-    ).toThrow(MissingUtcOffsetError);
-    expect(() => runParse([dir])).toThrow(
-      "Mac: date senza fuso orario, e nessun'altra esportazione della stessa chat ha messaggi in comune con le stesse date"
-    );
-    const ok = runParse([dir], '-05:00');
-    expect(ok.err).toContain(
-      'Mac: date senza fuso orario, lette come UTC-05:00 (il fuso orario indicato); i 4 messaggi in comune con altre esportazioni della stessa chat vi mostrano altre date'
+    const { err } = runParse([dir]);
+    expect(err).toContain(
+      'Mac: date senza fuso orario, lette nel fuso orario America/New_York; i 4 messaggi in comune con altre esportazioni della stessa chat vi mostrano altre date'
     );
   });
 
-  it('malformed_option_rejected', () => {
+  it('unknown_time_zone_rejected', () => {
     const pages = [{ label: 'Mac/messages.html', html: macPageHtml(BOT, macDm().messages, IDS) }];
-    for (const bad of ['-5', 'UTC-05:00', '+24:00', '-05:60', '0500'])
-      expect(() => parsePages([pages], { ...OPTS, utcOffset: bad }), bad).toThrow(
-        `fuso orario non valido: ${bad} (formato atteso: ±HH:MM)`
+    for (const bad of ['Mars/Base', 'Italia'])
+      expect(() => parsePages([pages], { ...OPTS, timeZone: bad }), bad).toThrow(
+        `fuso orario sconosciuto: ${bad}`
       );
   });
 
-  it('option_converts_dates_and_never_the_system_zone', () => {
+  it('each_date_takes_the_offset_of_its_season', () => {
+    const summer = new Chat(BOT, 100, {
+      epoch: Date.UTC(2025, 6, 1, 10) / 1000,
+      offsetMinutes: 120,
+    });
+    summer.user('Mario', 'estate', 0);
+    const winter = new Chat(BOT, 200, {
+      epoch: Date.UTC(2025, 11, 1, 10) / 1000,
+      offsetMinutes: 60,
+    });
+    winter.user('Mario', 'inverno', 0);
+    const all = [...summer.messages, ...winter.messages];
+    const r = parsePages([[{ label: 'Mac/messages.html', html: macPageHtml(BOT, all) }]], {
+      ...OPTS,
+      timeZone: 'Europe/Rome',
+    });
+    expect(r.messages.map((m) => m.date)).toStrictEqual([
+      '01.07.2025 12:00:00 UTC+02:00',
+      '01.12.2025 11:00:00 UTC+01:00',
+    ]);
+  });
+
+  it('time_zone_converts_dates_and_never_the_system_zone', () => {
     const c = macDm();
     const r = parsePages(
       [[{ label: 'Mac/messages.html', html: macPageHtml(BOT, c.messages, IDS) }]],
-      { ...OPTS, utcOffset: '+05:30' }
+      { ...OPTS, timeZone: 'Asia/Kolkata' }
     );
     expect(r.messages[0]?.date).toBe(`${tgDate(0).slice(0, 19)} UTC+05:30`);
     expect(r.warnings).toStrictEqual([
-      'Mac: date senza fuso orario, lette come UTC+05:30 (il fuso orario indicato)',
+      'Mac: date senza fuso orario, lette nel fuso orario Asia/Kolkata',
     ]);
     // Only macOS exports need it: Windows dates are untouched and no line is printed.
     const w = parsePages([[{ label: 'Win/messages.html', html: pageHtml(BOT, c.messages) }]], {
       ...OPTS,
-      utcOffset: '+05:30',
+      timeZone: 'Asia/Kolkata',
     });
     expect(w.messages.map((m) => m.date)).toStrictEqual(c.messages.map((m) => m.date));
     expect(w.warnings).toStrictEqual([]);
@@ -688,7 +699,7 @@ describe('sender user ids', () => {
       { label: 'G/messages.html', html: macPageHtml('G', g.messages.slice(0, 4), IDS) },
       { label: 'G/messages2.html', html: macPageHtml('G', g.messages.slice(4), IDS) },
     ];
-    const r = parsePages([pages], { ...OPTS, utcOffset: '-05:00' });
+    const r = parsePages([pages], OPTS);
     expect(r.messages.map((m) => [m.sender, m.sender_key])).toStrictEqual([
       ['Mario', 'u1'],
       ['Mario', 'u1'],
@@ -712,7 +723,7 @@ describe('sender user ids', () => {
         [{ label: 'A/messages.html', html: macPageHtml('G', g.messages.slice(1), IDS) }],
         [{ label: 'B/messages.html', html: macPageHtml('G', g.messages.slice(0, 1), IDS) }],
       ],
-      { ...OPTS, utcOffset: '+00:00' }
+      { ...OPTS, timeZone: 'UTC' }
     );
     expect(a.messages.map((m) => [m.sender, m.sender_key])).toStrictEqual([
       ['Mario', 'u1'],
@@ -727,7 +738,7 @@ describe('sender user ids', () => {
     g.user('Bea', 'dopo', 2);
     const r = parsePages(
       [[{ label: 'G/messages.html', html: macPageHtml('G', g.messages, { Mario: IDS.Mario }) }]],
-      { ...OPTS, utcOffset: '+00:00' }
+      { ...OPTS, timeZone: 'UTC' }
     );
     expect(r.messages.map((m) => m.sender_key)).toStrictEqual([undefined, 'u1', undefined]);
     const w = parsePages([[{ label: 'W/messages.html', html: pageHtml('G', g.messages) }]], OPTS);
@@ -750,7 +761,7 @@ describe('Windows and macOS copies of a message', () => {
       // Another offset than the Windows one: the converted date gives way where both exist.
       const r = parsePages(
         order.map((n) => [page(n)]),
-        { ...OPTS, utcOffset: '+01:00' }
+        { ...OPTS, timeZone: 'Europe/Rome' }
       );
       expect(
         r.messages.map((m) => m.id),
@@ -761,7 +772,7 @@ describe('Windows and macOS copies of a message', () => {
     }
   });
 
-  it('native_date_kept_when_the_offset_is_given', () => {
+  it('native_date_kept_over_the_converted_one', () => {
     const c = macDm();
     const win = c.messages.map((m) => ({ ...m, date: tgDate(0, c.base, 60) })); // another wall clock: no inference
     const r = parsePages(
@@ -769,7 +780,7 @@ describe('Windows and macOS copies of a message', () => {
         [{ label: 'Win/messages.html', html: pageHtml(BOT, win.slice(0, 1)) }],
         [{ label: 'Mac/messages.html', html: macPageHtml(BOT, c.messages.slice(0, 2), IDS) }],
       ],
-      { ...OPTS, utcOffset: '-05:00' }
+      OPTS
     );
     expect(r.messages.map((m) => m.date)).toStrictEqual([win[0]?.date, c.messages[1]?.date]);
     expect(macDate(c.messages[1]?.date as string)).toBe('27 November 2025, 19:00:01');

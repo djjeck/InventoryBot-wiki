@@ -1,0 +1,88 @@
+/**
+ * Phase 1, the part of finding export pages that needs no file system: given every entry
+ * under an input folder, which are Telegram pages and in which order, and which warnings
+ * to print (JSON exports, zip files). Pure functions, no Node or browser APIs; the
+ * adapters list the entries (export-files.ts on disk, browser-files.ts for the files a
+ * browser folder picker gives) and read the pages.
+ *
+ * The order of the pages and of the warnings is that of a depth-first walk with the
+ * entries of every folder sorted by name (comparePaths): a folder before its subfolders,
+ * siblings by name. It decides the output, so it is the same on every OS, file system and
+ * browser.
+ */
+import { comparePaths, pathName, pathParent } from '#src/lib/paths.ts';
+import { PAGE, pageKey } from './parse-export.ts';
+
+/** One entry (file, folder or anything else) under an input folder. */
+export interface ExportEntry {
+  /** Normalised path, starting with the input folder as given (`inbox/x/messages.html`). */
+  path: string;
+  /** Whether it is a file (or a link to one); asked only of the entries named `*.zip`. */
+  isFile(): boolean;
+}
+
+/** What an input folder holds, as the pipeline reads it. */
+export interface ExportListing {
+  /** The paths of the export pages, in (folder, page number) order. */
+  pages: string[];
+  /** Warnings for the user, in order: JSON exports, then zip files. */
+  warnings: string[];
+}
+
+const PAGE_NAME = /^messages[^/]*\.html$/; // glob "messages*.html"
+const ZIP_NAME = /^[^/]*\.zip$/; // glob "*.zip"
+const RESULT_JSON = 'result.json';
+
+const utf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
+
+/** A text file's content: strict UTF-8, BOM kept, `\r\n` and `\r` turned into `\n`. */
+export function decodeText(bytes: Uint8Array): string {
+  return utf8.decode(bytes).replace(/\r\n?/g, '\n');
+}
+
+/** The warning for a folder holding a JSON export (`result.json`) and no HTML page. */
+export function jsonWarning(folder: string): string {
+  return (
+    `salto ${folder}: esportazione in formato JSON, è supportato solo il formato HTML ` +
+    '(Telegram Desktop -> Esporta cronologia chat -> Formato: HTML)'
+  );
+}
+
+/** The warning for a zip file, which is never opened. */
+export function zipWarning(file: string): string {
+  return `salto ${file}: i file zip non vengono letti, estrai l'esportazione in una cartella`;
+}
+
+/** The warning for an input path that is neither a folder nor a zip file. */
+export function notAFolderWarning(p: string): string {
+  return `salto ${p}: non è una cartella né un file .zip`;
+}
+
+/**
+ * The pages and warnings of one input folder, from all its entries (in any order). A
+ * folder with a `result.json` and no `messages*.html` entry is a JSON export; every
+ * `*.zip` file is skipped with a warning; the pages are the `messages*.html` entries
+ * whose name is a page name (PAGE), in folder order, then page number.
+ */
+export function listExport(entries: readonly ExportEntry[]): ExportListing {
+  const withPageName = new Set<string>();
+  for (const e of entries)
+    if (PAGE_NAME.test(pathName(e.path))) withPageName.add(pathParent(e.path));
+  const warnings: string[] = [];
+  const json = entries
+    .filter((e) => pathName(e.path) === RESULT_JSON)
+    .map((e) => pathParent(e.path))
+    .sort(comparePaths);
+  for (const folder of json) if (!withPageName.has(folder)) warnings.push(jsonWarning(folder));
+  const zips = entries
+    .filter((e) => ZIP_NAME.test(pathName(e.path)))
+    .sort((a, b) => comparePaths(a.path, b.path));
+  for (const z of zips) if (z.isFile()) warnings.push(zipWarning(z.path));
+  const pages = entries
+    .map((e) => e.path)
+    .filter((p) => PAGE_NAME.test(pathName(p)) && PAGE.test(p))
+    .map((p) => ({ p, parent: pathParent(p), page: pageKey(p) }))
+    .sort((a, b) => comparePaths(a.parent, b.parent) || a.page - b.page)
+    .map(({ p }) => p);
+  return { pages, warnings };
+}

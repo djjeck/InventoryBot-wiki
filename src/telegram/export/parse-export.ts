@@ -12,10 +12,11 @@
 import {
   formatOffset,
   formatWindowsDate,
+  isTimeZone,
   parseMacDate,
-  parseOffset,
   parseWindowsDate,
   type WallClock,
+  wallClockOffset,
   windowsDateSeconds,
   type ZonedDate,
 } from '#src/lib/dates.ts';
@@ -365,27 +366,16 @@ const sameWallClock = (w: WallClock, d: ZonedDate): boolean =>
   w.minute === d.minute &&
   w.second === d.second;
 
-/** Exports whose dates have no UTC offset, with none to take from the run and none given. */
-export class MissingUtcOffsetError extends Error {
-  readonly exports: readonly string[];
-
-  constructor(exports: readonly string[]) {
-    super(
-      `${exports.join(', ')}: date senza fuso orario, e nessun'altra esportazione della stessa ` +
-        'chat ha messaggi in comune con le stesse date da cui ricavarlo. Indica il fuso orario ' +
-        "(±HH:MM) del computer che ha fatto l'esportazione, per esempio -05:00."
-    );
-    this.exports = exports;
-  }
-}
-
 // ---- reading the exports ------------------------------------------------------------
 
 export interface ParseOptions {
   /** The bot the exports are about. */
   bot: BotIdentity;
-  /** The user's UTC offset (`±HH:MM`): for exports whose dates have no offset and none can be inferred. */
-  utcOffset?: string | null;
+  /**
+   * The IANA time zone (`Europe/Rome`) of the computer that made the exports, for the
+   * dates of macOS exports, which have no offset, when the run gives none (exportOffsets).
+   */
+  timeZone: string;
 }
 
 export interface ParseResult {
@@ -413,18 +403,22 @@ interface Copy {
   local: WallClock | null;
 }
 
+/** The UTC offset, in minutes east of UTC, of each offset-less date of an export. */
+type ExportOffset = (w: WallClock) => number;
+
 /**
- * The UTC offset, in minutes east of UTC, for each export with offset-less dates: the offset of
- * the other exports in the run that share messages with it (same chat and id) and show
- * the same wall clock for them (the most frequent, if several); else `utcOffset`; else
- * MissingUtcOffsetError. Writes one stderr line per such export to `warnings`.
+ * The UTC offset of the dates of each export with offset-less dates: the offset of the
+ * other exports in the run that share messages with it (same chat and id) and show the
+ * same wall clock for them (the most frequent, if several), which reproduces their
+ * labelling; else, for each date, the offset `timeZone` had then. Writes one line per
+ * such export to `warnings`.
  */
 function exportOffsets(
   copies: readonly Copy[],
-  utcOffset: string | null,
+  timeZone: string,
   warnings: string[]
-): Map<string, number> {
-  const out = new Map<string, number>();
+): Map<string, ExportOffset> {
+  const out = new Map<string, ExportOffset>();
   const local = new Map<string, Copy[]>();
   for (const c of copies) {
     if (c.local === null) continue;
@@ -433,6 +427,7 @@ function exportOffsets(
     else local.set(c.exp, [c]);
   }
   if (local.size === 0) return out;
+  if (!isTimeZone(timeZone)) throw new Error(`fuso orario sconosciuto: ${timeZone}`);
   const native = new Map<string, { exp: string; parts: ZonedDate }[]>();
   for (const c of copies) {
     const parts = c.local === null ? parseWindowsDate(c.m.date) : null;
@@ -442,10 +437,6 @@ function exportOffsets(
     if (list) list.push({ exp: c.exp, parts });
     else native.set(k, [{ exp: c.exp, parts }]);
   }
-  const option = utcOffset === null ? null : parseOffset(utcOffset);
-  if (utcOffset !== null && option === null)
-    throw new Error(`fuso orario non valido: ${utcOffset} (formato atteso: ±HH:MM)`);
-  const missing: string[] = [];
   for (const [exp, list] of local) {
     // Each shared message: the offsets of its other copies with the same wall clock.
     const shared: (number | null)[][] = [];
@@ -468,24 +459,19 @@ function exportOffsets(
     const disagree = shared.filter((labels) => labels.some((l) => l !== best)).length;
     const n = shared.length;
     if (best !== null) {
-      out.set(exp, best);
+      out.set(exp, () => best);
       let line = `${exp}: date senza fuso orario, lette come ${offsetLabel(best)} come le altre esportazioni della stessa chat (${n} messaggi in comune)`;
       if (disagree > 0)
         line += `; in ${disagree} di questi un'altra esportazione mostra un'altra data o un altro fuso orario`;
-      if (option !== null && option !== best)
-        line += `; il fuso orario indicato (${utcOffset}) non è stato usato`;
       warnings.push(line);
-    } else if (option !== null) {
-      out.set(exp, option);
-      let line = `${exp}: date senza fuso orario, lette come ${offsetLabel(option)} (il fuso orario indicato)`;
+    } else {
+      out.set(exp, (w) => wallClockOffset(w, timeZone));
+      let line = `${exp}: date senza fuso orario, lette nel fuso orario ${timeZone}`;
       if (n > 0)
         line += `; i ${n} messaggi in comune con altre esportazioni della stessa chat vi mostrano altre date`;
       warnings.push(line);
-    } else {
-      missing.push(exp);
     }
   }
-  if (missing.length > 0) throw new MissingUtcOffsetError(missing);
   return out;
 }
 
@@ -531,11 +517,14 @@ export function parsePages(paths: Iterable<Iterable<Page>>, options: ParseOption
     }
   }
   const warnings: string[] = [];
-  const offsets = exportOffsets(copies, options.utcOffset ?? null, warnings);
+  const offsets = exportOffsets(copies, options.timeZone, warnings);
   const byKey = new Map<string, Copy>();
   for (const c of copies) {
     if (c.local !== null)
-      c.m.date = formatWindowsDate({ ...c.local, offsetMinutes: offsets.get(c.exp) as number });
+      c.m.date = formatWindowsDate({
+        ...c.local,
+        offsetMinutes: (offsets.get(c.exp) as ExportOffset)(c.local),
+      });
     const k = JSON.stringify([c.m.chat, c.m.id]);
     const prev = byKey.get(k);
     if (prev !== undefined) {

@@ -44,7 +44,6 @@ const WINDOWS_DATE =
 const MAC_DATE = new RegExp(
   `^([0-9]{1,2}) (${MONTHS.join('|')}) ([0-9]{4}), ([0-9]{2}):([0-9]{2}):([0-9]{2})$`
 );
-const OFFSET = /^([+-])([0-9]{2}):([0-9]{2})$/;
 
 /** Epoch seconds of a wall clock read as UTC, or null if the date or time does not exist. */
 function utcSeconds(w: WallClock): number | null {
@@ -101,12 +100,6 @@ export function parseMacDate(s: string | null | undefined): WallClock | null {
   return utcSeconds(w) === null ? null : w;
 }
 
-/** Minutes east of UTC of a `±HH:MM` offset (hours 00-23, minutes 00-59), or null. */
-export function parseOffset(s: string): number | null {
-  const m = OFFSET.exec(s);
-  return m ? offsetMinutes(m[1] as string, m[2] as string, m[3] as string) : null;
-}
-
 /** Epoch seconds of a date. */
 export function epochSeconds(d: ZonedDate): number {
   return (utcSeconds(d) as number) - d.offsetMinutes * 60;
@@ -132,4 +125,52 @@ export function formatWindowsDate(d: ZonedDate): string {
 export function windowsDateSeconds(s: string | null | undefined): number | null {
   const d = parseWindowsDate(s);
   return d === null ? null : epochSeconds(d);
+}
+
+/** Formatters by time zone, which are costly to build. */
+const zoneFormats = new Map<string, Intl.DateTimeFormat>();
+
+function zoneFormat(timeZone: string): Intl.DateTimeFormat {
+  let f = zoneFormats.get(timeZone);
+  if (f === undefined) {
+    f = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'longOffset' });
+    zoneFormats.set(timeZone, f);
+  }
+  return f;
+}
+
+/** Whether `timeZone` is an IANA time zone the runtime knows (`Europe/Rome`, `UTC`). */
+export function isTimeZone(timeZone: string): boolean {
+  try {
+    zoneFormat(timeZone);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Minutes east of UTC that `timeZone` had at an instant (epoch seconds). */
+function zoneOffsetAt(timeZone: string, epoch: number): number {
+  const name = zoneFormat(timeZone)
+    .formatToParts(new Date(epoch * 1000))
+    .find((p) => p.type === 'timeZoneName')?.value;
+  // "GMT" for UTC itself, else "GMT+01:00".
+  const m = /^GMT([+-])(\d\d):(\d\d)$/.exec(name ?? '');
+  return m ? (offsetMinutes(m[1] as string, m[2] as string, m[3] as string) ?? 0) : 0;
+}
+
+/**
+ * The UTC offset, in minutes east of UTC, that a wall clock had in `timeZone`, daylight
+ * saving time included. When the clocks go back, a wall clock that happens twice takes
+ * its first occurrence (the earlier offset); when they go forward, one that never happens
+ * takes the offset from before the change.
+ */
+export function wallClockOffset(w: WallClock, timeZone: string): number {
+  const local = utcSeconds(w) ?? 0;
+  // A change of offset is never within 12 hours of another.
+  const before = zoneOffsetAt(timeZone, local - 12 * 3600);
+  const after = zoneOffsetAt(timeZone, local + 12 * 3600);
+  const fits = (o: number): boolean => zoneOffsetAt(timeZone, local - o * 60) === o;
+  if (fits(before)) return before;
+  return fits(after) ? after : before;
 }

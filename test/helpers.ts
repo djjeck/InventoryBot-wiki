@@ -428,9 +428,9 @@ export function writeMacExport(
 /** Runs phase 1 on paths -> messages and the stderr text. */
 export function runParse(
   paths: readonly string[],
-  utcOffset: string | null = null
+  timeZone = 'America/New_York' // the zone of BASE in winter
 ): { msgs: Message[]; err: string } {
   const lines: string[] = [];
-  const msgs = parseExportPaths(paths, (l) => lines.push(l), { bot: BOT_IDENTITY, utcOffset });
+  const msgs = parseExportPaths(paths, (l) => lines.push(l), { bot: BOT_IDENTITY, timeZone });
   return { msgs, err: lines.map((l) => l + '\n').join('') };
 }

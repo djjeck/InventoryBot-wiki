@@ -672,19 +672,23 @@ ChatExport_InventoryBot/     named after the chat title
 24-hour time. There is **no UTC offset**. The wall clock is the local time, as in the
 Windows export: a message present in both shows the same wall clock in both.
 
-An instant cannot be computed from such a date alone. The pipeline gives each macOS
-export one UTC offset and converts its dates to the Windows form in phase 1, so later
-phases see a single format. The offset comes, in this order, from:
+An instant cannot be computed from such a date alone. Phase 1 gives every date of a macOS
+export a UTC offset and converts it to the Windows form, so later phases see a single
+format. The offset comes from:
 
 1. the other exports of the run that share messages with it (same chat title, same id)
    and show the same wall clock for them: their offset (the most frequent, if several),
-   which reproduces the Windows labelling of [§5.1](#51-date); shared messages with
-   another wall clock or offset are reported on stderr;
-2. the UTC offset `±HH:MM` given by the user (`ParseOptions.utcOffset`);
-3. otherwise phase 1 stops with an error that asks for it (`MissingUtcOffsetError`).
+   for every date of the export, which reproduces the Windows labelling of
+   [§5.1](#51-date); shared messages with another wall clock or offset are reported;
+2. otherwise the time zone of the computer that made the export
+   (`ParseOptions.timeZone`, an IANA zone such as `Europe/Rome`): each date takes the
+   offset the zone had at that date, daylight saving time included. A wall clock that
+   happens twice, when the clocks go back, is read as the first one. The web app
+   proposes the browser's own time zone, on the assumption that the exports were made on
+   the same computer.
 
-The computer's own time zone is never used. A message present in a Windows and a macOS
-export is kept once, with the date the Windows export wrote.
+A message present in a Windows and a macOS export is kept once, with the date the Windows
+export wrote.
 
 ### 11.4 Sender ids
 
