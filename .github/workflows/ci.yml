@@ -35,6 +35,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check game content
+        run: npm run check:universe
+
       - name: Typecheck
         run: npm run typecheck
 

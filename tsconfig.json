@@ -19,7 +19,7 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "test", "vitest.config.ts", "vite.config.ts"],
+  "include": ["src", "test", "scripts", "vitest.config.ts", "vite.config.ts"],
   // Browser-only code, checked with the DOM types by tsconfig.web.json.
   "exclude": ["src/web/main.ts"]
 }

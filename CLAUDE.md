@@ -78,6 +78,40 @@ never touches it. Everything about InventoryBot belongs in its own layer, `src/i
 only the web app, `src/web/`, joins the two. `src/layers.test.ts` fails on any import from
 the generic layer into either.
 
+## Respect for the game
+
+InventoryBot is meant to be discovered: its own `/faq` invites players to find things out
+("Scoprite quale!") and bans cheating (multiple accounts, scripts that automate adventures,
+exploiting bugs). This project must stay on the right side of that.
+
+- **A personal tool, not a public wiki.** The pipeline turns a player's own exports into a page for
+  that player. Nothing generated from an export is ever committed, published or shared; each player
+  builds their own.
+- **Read-only.** Nothing in this project sends messages to the bot or automates play. Do not add
+  features that interact with Telegram or the bot.
+- **No spoilers in the repository.** Docs and tests describe the bot's message formats and the
+  game's mechanics, but never real game content that players are meant to discover: real recipes
+  and their ingredients or outputs, which item unlocks which place, where exclusive items drop,
+  real item, recipe and place names. Public facts the bot itself tells every player (the `/faq`
+  legend and rules, command names, fixed reply texts) are fine.
+  - Examples use the invented world of [scripts/universe.md](scripts/universe.md), in the real
+    format: take names from it, and when a new test case or example needs a new item, recipe,
+    place or Telegram username, invent one and add it there in the same change. Real usernames are
+    worse than real items: they identify people.
+  - This is enforced, not left to judgement: `npm run check:universe` (`scripts/check-universe.ts`,
+    run by `validate`, `ci` and GitHub CI) fails on any entity, found where the bot's reply formats
+    put one, and on any `@username`, that is not in the universe. Do not try to decide by eye whether a name is real; the
+    author reviews additions to the universe.
+- **Group history is other players' discoveries.** Using it for one's own page is what any member
+  can do by scrolling the group; publishing it is not. Keep it out of anything shared.
+- **The published page is the tool, never data.** GitHub Pages serves the web app, published from
+  `main` by the CI workflow; the repository and the page contain no game content. Each player's
+  wiki is built in their own browser from their own exports and stays there (the page cannot
+  connect anywhere). Nothing generated from an export is ever part of the published site.
+- **The game's author has the last word.** The game's author will be contacted about this project;
+  if their answer sets conditions (for example on group history or on what may be published), they
+  override these rules and this section is updated.
+
 ## Conventions
 
 - **Language**: authors and contributors work in English, so everything for developers is in
