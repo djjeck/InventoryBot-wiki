@@ -6,7 +6,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts'],
+      // The web app's page and worker entry are browser-only wiring (src/web/main.ts,
+      // src/web/worker.ts), checked in a browser; what they call is tested.
+      exclude: ['src/**/*.test.ts', 'src/web/main.ts', 'src/web/worker.ts'],
       thresholds: {
         statements: 90,
         branches: 90,

@@ -2,8 +2,8 @@
 
 A pipeline that rebuilds the recipes, items and places of the Telegram game
 [@InventoryBot](https://t.me/InventoryBot) from Telegram Desktop exports of the bot chat, and shows
-them in a small static web app. It is written in TypeScript and run with Node.js; end users are
-players who run it on their own exports.
+them in a web app. Everything runs in the player's browser: the exports are read there and never
+sent anywhere. It is written in TypeScript; Node.js runs the tests and the tooling.
 
 See [README.md](README.md) for the end-user description (in Italian).
 
@@ -47,13 +47,21 @@ runs in order. So far there is phase 1:
 
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become
    `Message`s (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the
-   pages as strings; `export-files.ts` finds and reads them on disk (`parseExportPaths`).
+   pages as strings. Which files of an export folder are pages is decided by `export-listing.ts`,
+   also pure; two adapters list and read them: `browser-files.ts` for the files of a browser
+   folder picker, `export-files.ts` on disk (used by the tests).
+
+The web app (`src/web/`, `npm run web:dev`) is the interface: the page (`main.ts`) lets the player
+pick export folders and runs the pipeline in a Web Worker (`worker.ts`, `run.ts`), so the page
+stays responsive; for now it shows a summary of what phase 1 read. `run.ts` uses no browser API
+and is tested in Node; `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
+(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,
 `src/telegram/bot.ts`), so the layer could serve another bot, and a change in the game's wording
 never touches it. Everything about InventoryBot belongs in its own layer, `src/inventorybot/`, and
-only the command line, `src/cli.ts`, joins the two. `src/layers.test.ts` fails on any import from
+only the web app, `src/web/`, joins the two. `src/layers.test.ts` fails on any import from
 the generic layer into either.
 
 ## Conventions
@@ -61,7 +69,7 @@ the generic layer into either.
 - **Language**: authors and contributors work in English, so everything for developers is in
   English: code, comments, tests, commit messages, `CLAUDE.md` and `docs/`. The game is Italian, and
   so are its players: everything they see is in Italian, including the end-user documentation
-  (`README.md`), command line messages and the web app.
+  (`README.md`), messages and the web app.
 - **Node.js 24**, pinned in `.nvmrc`; `engines` in `package.json` matches it.
 - **No build step.** Node runs the `.ts` sources directly by stripping types, and `tsc` only
   type-checks (`noEmit`). So imports use `.ts` extensions, and only erasable TypeScript syntax is

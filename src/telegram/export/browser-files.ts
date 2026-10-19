@@ -1,0 +1,103 @@
+/**
+ * Browser adapter for phase 1 (export parsing): the files a folder picker gives
+ * (`<input type="file" webkitdirectory>`, one `File` per file of the picked folder, its
+ * path in `webkitRelativePath`) become input folders like the folders export-files.ts
+ * reads on disk, and their pages are read. Which files are pages, and the warnings, are decided by
+ * export-listing.ts, as on disk.
+ *
+ * No DOM types: a file is anything with a relative path and its bytes (FileLike), so the
+ * adapter also runs in Node, on objects built by the tests.
+ */
+import { normalizePath } from '#src/lib/paths.ts';
+import { type Page } from '#src/telegram/messages.ts';
+import { decodeText, type ExportEntry, listExport } from './export-listing.ts';
+
+/** What the adapter needs of a browser `File`. */
+export interface FileLike {
+  readonly name: string;
+  /** `picked folder/sub/name`; empty for a file not picked as part of a folder. */
+  readonly webkitRelativePath: string;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+/** One input folder: what a folder on disk is to export-files.ts. */
+export interface InputFolder {
+  /** The folder's name, as warnings and page labels show it. */
+  name: string;
+  /** Path under the folder (with the folder's name first) -> file. */
+  files: Map<string, FileLike>;
+}
+
+/** The path a picked file has, starting with its top folder's name. */
+function relativePath(f: FileLike): string {
+  return normalizePath(f.webkitRelativePath || f.name);
+}
+
+/** The top folder of a relative path; `.` for a loose file. */
+function topFolder(p: string): string {
+  const i = p.indexOf('/');
+  return i < 0 ? '.' : p.slice(0, i);
+}
+
+/**
+ * The input folders of one or more picks, in pick order: each top folder of each pick is
+ * one input folder (a pick usually has one). A folder whose name an earlier one already
+ * has, picked again or another folder with the same name, is renamed `name (2)`,
+ * `name (3)`…, so that two folders never share page labels. The same files picked twice
+ * are two copies of one export, which phase 1 de-duplicates.
+ */
+export function inputFolders(picks: readonly (readonly FileLike[])[]): InputFolder[] {
+  const out: InputFolder[] = [];
+  const taken = new Set<string>();
+  for (const pick of picks) {
+    const byTop = new Map<string, Map<string, FileLike>>();
+    for (const f of pick) {
+      const p = relativePath(f);
+      const top = topFolder(p);
+      let files = byTop.get(top);
+      if (files === undefined) byTop.set(top, (files = new Map()));
+      files.set(p, f);
+    }
+    for (const [top, files] of byTop) {
+      let name = top;
+      for (let n = 2; taken.has(name); n++) name = `${top} (${n})`;
+      taken.add(name);
+      if (name === top) {
+        out.push({ name, files });
+        continue;
+      }
+      const renamed = new Map<string, FileLike>();
+      for (const [p, f] of files)
+        renamed.set(top === '.' ? `${name}/${p}` : name + p.slice(top.length), f);
+      out.push({ name, files: renamed });
+    }
+  }
+  return out;
+}
+
+/** The page paths and warnings of an input folder. */
+export function listFolder(folder: InputFolder): { pages: string[]; warnings: string[] } {
+  const entries: ExportEntry[] = [...folder.files.keys()].map((path) => ({
+    path,
+    isFile: () => true, // a picker gives files only
+  }));
+  return listExport(entries);
+}
+
+/**
+ * Reads the pages of an input folder, in order, as export-files.ts reads them from disk
+ * (decodeText); `onPage` is called after each page. Throws on a page that is not UTF-8.
+ */
+export async function readFolderPages(
+  folder: InputFolder,
+  pages: readonly string[],
+  onPage: (label: string) => void = () => {}
+): Promise<Page[]> {
+  const out: Page[] = [];
+  for (const label of pages) {
+    const file = folder.files.get(label) as FileLike;
+    out.push({ label, html: decodeText(new Uint8Array(await file.arrayBuffer())) });
+    onPage(label);
+  }
+  return out;
+}

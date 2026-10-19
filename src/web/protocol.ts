@@ -1,0 +1,69 @@
+/**
+ * The messages between the web page (main.ts) and the worker that runs the pipeline
+ * (worker.ts, run.ts). The page sends one RunRequest; the worker answers with progress
+ * messages, then exactly one final message: `done`, `stopped` or `error`.
+ *
+ * Everything sent is structured-cloneable: browser `File` objects (which stay handles to
+ * the files on disk: only the export pages are read, in the worker) and plain data.
+ */
+import { type FileLike } from '#src/telegram/export/browser-files.ts';
+
+export interface RunOptions {
+  /**
+   * The IANA time zone of the computer that made the exports (the page proposes this
+   * browser's), for the dates of macOS exports, which have no offset.
+   */
+  timeZone: string;
+}
+
+/** Page -> worker: run the pipeline on these picks (each the files of one folder pick). */
+export interface RunRequest {
+  type: 'run';
+  picks: FileLike[][];
+  options: RunOptions;
+}
+
+/** Worker -> page: a step started. `read` counts the pages read so far. */
+export interface ProgressMessage {
+  type: 'progress';
+  phase: 'read' | 'parse';
+  done?: number;
+  total?: number;
+}
+
+/** What a run produced: for now, what phase 1 found. */
+export interface RunResult {
+  /** The report lines: warnings, then the summary. */
+  report: string[];
+  /** Names of the input folders. */
+  folders: string[];
+  /** Number of export pages read. */
+  pages: number;
+  /** Number of messages after de-duplication, and how many of them are the bot's. */
+  messages: number;
+  fromBot: number;
+  /** Duration of the run in the worker, in milliseconds. */
+  ms: number;
+}
+
+export interface DoneMessage {
+  type: 'done';
+  result: RunResult;
+}
+
+/** The run stopped on something the user can fix: no export page in the picked folders. */
+export interface StoppedMessage {
+  type: 'stopped';
+  reason: 'no-pages';
+  /** The lines logged until then. */
+  report: string[];
+}
+
+/** An unexpected failure (a page that is not UTF-8, a bug). */
+export interface ErrorMessage {
+  type: 'error';
+  message: string;
+  report: string[];
+}
+
+export type WorkerMessage = ProgressMessage | DoneMessage | StoppedMessage | ErrorMessage;

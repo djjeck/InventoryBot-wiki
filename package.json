@@ -17,9 +17,10 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "typecheck": "tsc",
+    "typecheck": "tsc && tsc -p tsconfig.web.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "web:dev": "vite",
     "ci": "npm run format:check && npm run lint && npm run typecheck && npm run test:coverage",
     "validate": "npm run format && npm run format:check && npm run lint:fix && npm run lint && npm run typecheck && npm run test:coverage"
   },
@@ -34,6 +35,7 @@
     "prettier": "3.9.9",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1",
+    "vite": "8.3.2",
     "vitest": "4.1.11"
   },
   "dependencies": {

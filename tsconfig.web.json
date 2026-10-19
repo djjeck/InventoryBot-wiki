@@ -1,0 +1,11 @@
+{
+  // The web app's page (src/web/main.ts), checked with the browser's DOM types; the rest
+  // of src/ is checked by tsconfig.json, without them.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "types": []
+  },
+  "include": ["src/web/main.ts", "src/web/env.d.ts"],
+  "exclude": []
+}

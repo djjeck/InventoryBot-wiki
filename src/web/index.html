@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Ricette, oggetti e luoghi di InventoryBot dalle tue esportazioni di Telegram Desktop, nel tuo browser."
+    />
+    <title>InventoryBot Wiki</title>
+    <link rel="icon" href="data:," />
+    <script type="module" src="./main.ts"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Vai al contenuto</a>
+    <main id="main" tabindex="-1">
+      <section id="start" class="shell" aria-labelledby="start-title">
+        <header class="shell-head">
+          <h1 id="start-title">InventoryBot Wiki</h1>
+          <p class="lead">
+            Ricette, oggetti e luoghi di InventoryBot ricostruiti dalla cronologia delle tue chat
+            con il bot. Tutto avviene in questo browser: le chat non vengono inviate da nessuna
+            parte.
+          </p>
+        </header>
+
+        <ol class="steps">
+          <li>
+            In <b>Telegram Desktop</b> apri la chat con il bot, menu <b>⋮</b> →
+            <b>Esporta cronologia chat</b>, formato <b>HTML</b>. Le foto e gli altri allegati non
+            servono.
+          </li>
+          <li>Scegli qui sotto la cartella creata dall'esportazione.</li>
+          <li>
+            Premi <b>Leggi le esportazioni</b>. Per ora viene mostrato solo un riepilogo di ciò che
+            è stato letto: la wiki arriverà in seguito.
+          </li>
+        </ol>
+
+        <div class="card">
+          <h2>Cartelle delle esportazioni</h2>
+          <p class="hint" id="pick-hint">
+            Puoi aggiungere più cartelle, una alla volta, oppure scegliere una cartella che le
+            contiene tutte.
+          </p>
+          <div class="row-actions">
+            <input
+              id="folders"
+              class="visually-hidden"
+              type="file"
+              webkitdirectory
+              multiple
+              aria-describedby="pick-hint"
+            />
+            <label for="folders" class="btn" id="pick-label">Aggiungi una cartella…</label>
+            <button type="button" class="btn ghost" id="clear-picks" hidden>Svuota l'elenco</button>
+          </div>
+          <ul id="picked" class="picked" aria-label="Cartelle scelte"></ul>
+        </div>
+
+        <form class="card" id="options" novalidate>
+          <div class="field">
+            <label for="time-zone">Fuso orario delle esportazioni</label>
+            <select id="time-zone" name="time-zone" aria-describedby="time-zone-hint"></select>
+            <p class="hint" id="time-zone-hint">
+              Quello del computer che ha fatto le esportazioni: di solito è questo, già scelto.
+              Serve solo per le esportazioni fatte su macOS, le cui date non lo indicano.
+            </p>
+          </div>
+          <div class="row-actions">
+            <button type="submit" class="btn primary" id="run" disabled>
+              Leggi le esportazioni
+            </button>
+          </div>
+          <div id="progress" class="progress" role="status" aria-live="polite" hidden>
+            <progress id="progress-bar" max="100" value="0"></progress>
+            <span id="progress-text"></span>
+          </div>
+          <div id="error" class="error" role="alert" tabindex="-1" hidden></div>
+        </form>
+      </section>
+
+      <section id="result" class="shell" aria-labelledby="result-title" hidden>
+        <div class="card">
+          <h2 id="result-title">Riepilogo</h2>
+          <p id="result-info"></p>
+          <pre id="report"></pre>
+          <div class="row-actions">
+            <button type="button" class="btn ghost" id="edit">Cartelle e opzioni</button>
+          </div>
+        </div>
+      </section>
+      <p id="announce" class="visually-hidden" role="status" aria-live="polite"></p>
+    </main>
+  </body>
+</html>
