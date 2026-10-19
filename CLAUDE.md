@@ -51,11 +51,15 @@ runs in order. So far there is phase 1:
    also pure; two adapters list and read them: `browser-files.ts` for the files of a browser
    folder picker, `export-files.ts` on disk (used by the tests).
 
-The web app (`src/web/`, `npm run web:dev`) is the interface: the page (`main.ts`) lets the player
-pick export folders and runs the pipeline in a Web Worker (`worker.ts`, `run.ts`), so the page
-stays responsive; for now it shows a summary of what phase 1 read. `run.ts` uses no browser API
-and is tested in Node; `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
-(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
+The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
+`.github/workflows/pages.yml` on every push to `main` that passes the checks (`npm run web:build`
+builds it into `web-dist/`). The built page carries a Content-Security-Policy that forbids any
+network connection, so the browser itself guarantees that the exports are never sent anywhere.
+The page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker
+(`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phase 1
+read. `run.ts` uses no browser API and is tested in Node; `main.ts` and `worker.ts` are
+browser-only wiring, checked in a browser (type-checked with the DOM types by `tsconfig.web.json`,
+and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,

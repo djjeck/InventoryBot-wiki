@@ -11,6 +11,8 @@ const PARENT_IMPORTS = {
 };
 
 export default tseslint.config(
+  // The built web app (npm run web:build).
+  { ignores: ['web-dist/'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   {

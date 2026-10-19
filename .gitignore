@@ -1,4 +1,6 @@
 node_modules/
 coverage/
+# The built web app (npm run web:build).
+web-dist/
 
 .DS_Store

@@ -4,6 +4,11 @@ Ricostruisce ricette, oggetti e luoghi di [@InventoryBot](https://t.me/Inventory
 a partire dall'export della propria chat Telegram, e li mostra in una piccola webapp
 statica.
 
+**Usala qui: <https://djjeck.github.io/InventoryBot-wiki/>.** Tutto avviene nel tuo
+browser: le esportazioni non vengono inviate da nessuna parte.
+
+## A che serve
+
 Il gioco dimentica le ricette già eseguite e non dice cosa producono: qui ogni
 osservazione fatta in passato resta, così si può vedere a colpo d'occhio cosa produce
 una ricetta, quali ricette si contendono lo stesso ingrediente e quali catene portano
