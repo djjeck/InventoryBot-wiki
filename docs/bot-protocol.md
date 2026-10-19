@@ -189,8 +189,9 @@ visible recipes. Several matches give an ambiguity reply; none gives a not-found
 | `/usa`            | `troppi oggetti trovati con quel nome(<arg>)` | `@u, non hai niente del genere di usabile.`    |
 | `/viaggio`        | `troppi luoghi trovati con quel nome(<arg>)`  | `@u, non vedi nessun luogo con quel nome, qui` |
 
-The ambiguity replies are not addressed and repeat the argument as written, also when
-it is empty (`troppi oggetti trovati con quel nome()`).
+`/esamina` also gives `troppe ricette trovate con quel nome`, when the argument matches
+several recipes. The ambiguity replies are not addressed and repeat the argument as
+written, also when it is empty (`troppi oggetti trovati con quel nome()`).
 
 ## 4. Addressing
 
