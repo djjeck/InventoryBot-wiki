@@ -1,19 +1,20 @@
 # The invented universe
 
 Every item, recipe, place and Telegram username in the tests and docs of this repository is
-invented: real game
-content is meant to be discovered by playing, and never belongs here. This file lists the invented
-world. Tests and docs use names from it; a new invented name is added here, in the same change.
+invented: real game content is meant to be discovered by playing, and never belongs here. This file
+lists the invented world. Tests and docs use names from it; a new invented name is added here, in
+the same change.
 
 `npm run check:universe` (`scripts/check-universe.ts`, run by `validate`, `ci` and GitHub CI)
 enforces it: wherever the bot's reply formats put an item, a recipe or a place, and wherever an
-`@username` is written (`scripts/universe.ts`), the name must be in the lists below. Names are compared ignoring case and
-runs of spaces; places include their preposition and emoji, as the bot writes them.
+`@username` is written (`scripts/universe.ts`), the name must be in the lists below. Names are
+compared ignoring case and runs of spaces; places include their preposition and emoji, as the bot
+writes them.
 
 Before adding a name, make sure it is not a real one. Public facts the bot tells every player
 (command names, the `/faq`, fixed reply texts) are not entities and need no entry. The rare real
-name that every player sees anyway is listed with a trailing `<!-- public: … -->` comment saying
-why it is allowed.
+name that every player sees anyway is listed with a trailing `<!-- public: … -->` comment saying why
+it is allowed.
 
 ## Items
 

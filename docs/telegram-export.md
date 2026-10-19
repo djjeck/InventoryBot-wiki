@@ -1,19 +1,19 @@
 # Telegram Desktop HTML chat export
 
-Documented as of 2026-10-17 (Telegram Desktop); [§11](#11-the-macos-export) as of
-2026-10-18. If the export format changes, update this document.
+Documented as of 2026-10-17 (Telegram Desktop); [§11](#11-the-macos-export) as of 2026-10-18. If the
+export format changes, update this document.
 
 This is the input of phase 1 of the pipeline, export parsing
-([`src/telegram/export/parse-export.ts`](../src/telegram/export/parse-export.ts)):
-the HTML chat history that Telegram Desktop writes. It describes the format for someone
-who has never seen it; how the parser reads each element is summarised in
-[§9](#9-how-the-parser-reads-each-element). All names and ids in examples are invented.
+([`src/telegram/export/parse-export.ts`](../src/telegram/export/parse-export.ts)): the HTML chat
+history that Telegram Desktop writes. It describes the format for someone who has never seen it; how
+the parser reads each element is summarised in [§9](#9-how-the-parser-reads-each-element). All names
+and ids in examples are invented.
 
-Two variants of the markup are known, both from Telegram Desktop: the **Windows export**
-(written by Telegram Desktop on Windows), described in sections 2-10, and the **macOS
-export** (Telegram Desktop on macOS), which differs in the points of
-[§11](#11-the-macos-export). They are named after the system that produced them; whether
-the differences come from the operating system or from the app version is not known.
+Two variants of the markup are known, both from Telegram Desktop: the **Windows export** (written by
+Telegram Desktop on Windows), described in sections 2-10, and the **macOS export** (Telegram Desktop
+on macOS), which differs in the points of [§11](#11-the-macos-export). They are named after the
+system that produced them; whether the differences come from the operating system or from the app
+version is not known.
 
 ## Contents
 
@@ -50,17 +50,16 @@ the differences come from the operating system or from the app version is not kn
 
 ## 1. Producing an export
 
-Telegram Desktop → open the chat → chat menu (⋮) → _Export chat history_. The dialog
-offers media types to include (photos, videos, voice messages, stickers, files…), a size
-limit, a date range and the format.
+Telegram Desktop → open the chat → chat menu (⋮) → _Export chat history_. The dialog offers media
+types to include (photos, videos, voice messages, stickers, files…), a size limit, a date range and
+the format.
 
-- **Format**: HTML or machine-readable JSON (or both). HTML writes `messages*.html`
-  pages; JSON writes a single `result.json`. Only HTML is supported; a JSON-only export
-  is reported and skipped.
-- **Media** can all be deselected. Media messages then still appear in the HTML as
-  placeholders ([§5.6](#56-media-placeholders)).
-- **Date range**: an export can cover part of the history, so two exports of the same
-  chat may overlap or leave a gap.
+- **Format**: HTML or machine-readable JSON (or both). HTML writes `messages*.html` pages; JSON
+  writes a single `result.json`. Only HTML is supported; a JSON-only export is reported and skipped.
+- **Media** can all be deselected. Media messages then still appear in the HTML as placeholders
+  ([§5.6](#56-media-placeholders)).
+- **Date range**: an export can cover part of the history, so two exports of the same chat may
+  overlap or leave a gap.
 
 ## 2. What is on disk
 
@@ -75,15 +74,14 @@ ChatExport_2025-11-28/       one export = one folder
   images/                    UI icons only
 ```
 
-- The folder is named `ChatExport_YYYY-MM-DD` after the export date. It carries no
-  information about the chat. (The macOS export's folder is named after the chat,
-  [§11.1](#111-on-disk).)
-- Pages are `messages.html` (page 1) and `messagesN.html` for N ≥ 2, without zero
-  padding. Page order is numeric (`messages10.html` follows `messages9.html`).
-- Pages are chronological: page 1 holds the oldest messages, and within an export
-  timestamps never decrease and ids increase from page to page.
-- Every page but the last holds 1000 history entries (messages and service events; day
-  separators are extra).
+- The folder is named `ChatExport_YYYY-MM-DD` after the export date. It carries no information about
+  the chat. (The macOS export's folder is named after the chat, [§11.1](#111-on-disk).)
+- Pages are `messages.html` (page 1) and `messagesN.html` for N ≥ 2, without zero padding. Page
+  order is numeric (`messages10.html` follows `messages9.html`).
+- Pages are chronological: page 1 holds the oldest messages, and within an export timestamps never
+  decrease and ids increase from page to page.
+- Every page but the last holds 1000 history entries (messages and service events; day separators
+  are extra).
 - Pages are UTF-8 (`<meta charset="utf-8"/>`).
 - With media deselected there are no media folders.
 
@@ -120,11 +118,11 @@ ChatExport_2025-11-28/       one export = one folder
 </html>
 ```
 
-- The markup is pretty-printed: text nodes are wrapped in newlines and indentation, so
-  every value must be stripped.
-- `div.page_header div.text bold` holds the **chat title**, repeated on every page: the
-  group name for a group, the other party's display name for a private chat. The private
-  chat with the bot is titled `InventoryBot`.
+- The markup is pretty-printed: text nodes are wrapped in newlines and indentation, so every value
+  must be stripped.
+- `div.page_header div.text bold` holds the **chat title**, repeated on every page: the group name
+  for a group, the other party's display name for a private chat. The private chat with the bot is
+  titled `InventoryBot`.
 - `<title>` is always `Exported Data`.
 - A single-page export has no pagination links.
 
@@ -140,10 +138,10 @@ Each entry in `div.history` is a `div` whose class starts with `message`:
 
 ### 4.1 Joined messages
 
-A joined message has no `div.pull_left.userpic_wrap` and no `div.from_name`; its sender
-is the sender of the previous message entry. Telegram joins messages by the same
-sender sent less than 15 minutes apart, though not every such pair is joined. The first
-message of a page and the first message after a day separator carry a full sender block.
+A joined message has no `div.pull_left.userpic_wrap` and no `div.from_name`; its sender is the
+sender of the previous message entry. Telegram joins messages by the same sender sent less than 15
+minutes apart, though not every such pair is joined. The first message of a page and the first
+message after a day separator carry a full sender block.
 
 ```html
 <div class="message default clearfix joined" id="message1002">
@@ -162,10 +160,10 @@ message of a page and the first message after a day separator carry a full sende
 </div>
 ```
 
-- **Day separators**: body `D Month YYYY` with an English month name. Their ids are
-  `-1, -2, …`, numbered through the whole export, so they differ between exports.
-- **Service events** (members joining, pinned messages, title changes…) carry real
-  message ids and may contain `GoToMessage` links.
+- **Day separators**: body `D Month YYYY` with an English month name. Their ids are `-1, -2, …`,
+  numbered through the whole export, so they differ between exports.
+- **Service events** (members joining, pinned messages, title changes…) carry real message ids and
+  may contain `GoToMessage` links.
 - Service entries have no date div and no `from_name`.
 
 ## 5. Anatomy of a message
@@ -209,20 +207,19 @@ message of a page and the first message after a day separator carry a full sende
 
 ### 5.1 Date
 
-`title="27.11.2025 19:14:19 UTC-05:00"`, i.e. `DD.MM.YYYY HH:MM:SS UTC±HH:MM`: day first,
-the local wall-clock time of the exporting computer, then a UTC offset label. The element
-text is only `HH:MM`.
+`title="27.11.2025 19:14:19 UTC-05:00"`, i.e. `DD.MM.YYYY HH:MM:SS UTC±HH:MM`: day first, the local
+wall-clock time of the exporting computer, then a UTC offset label. The element text is only
+`HH:MM`.
 
-- Compare timestamps as instants (parse with the offset, convert to UTC), never as
-  strings: `27.11.2025 20:00:00 UTC-05:00` is later than `28.11.2025 00:30:00 UTC+00:00`.
-- **The offset label does not follow daylight saving time.** A Windows export labels
-  every date with one constant UTC offset, while the time written is the local
-  wall-clock time including daylight saving time. During daylight saving time the label
-  is therefore one hour off the true offset, and so is an instant computed from it: in a
-  zone at `UTC-05:00` in winter, summer dates also read `UTC-05:00`. Whether the constant
-  is the zone's standard offset written by Telegram, or comes from a time zone setting
-  without daylight saving time, is not known. The pipeline takes the dates as written:
-  only a duration that spans a daylight-saving change can be one hour off.
+- Compare timestamps as instants (parse with the offset, convert to UTC), never as strings:
+  `27.11.2025 20:00:00 UTC-05:00` is later than `28.11.2025 00:30:00 UTC+00:00`.
+- **The offset label does not follow daylight saving time.** A Windows export labels every date with
+  one constant UTC offset, while the time written is the local wall-clock time including daylight
+  saving time. During daylight saving time the label is therefore one hour off the true offset, and
+  so is an instant computed from it: in a zone at `UTC-05:00` in winter, summer dates also read
+  `UTC-05:00`. Whether the constant is the zone's standard offset written by Telegram, or comes from
+  a time zone setting without daylight saving time, is not known. The pipeline takes the dates as
+  written: only a duration that spans a daylight-saving change can be one hour off.
 - Resolution is one second; a command and the bot's reply often share a timestamp.
 - There is no edited marker: an edited message looks like any other.
 
@@ -232,12 +229,11 @@ text is only `HH:MM`.
 <div class="from_name">InventoryBot</div>
 ```
 
-- Plain text: the sender's **display name**, with no link, user id or @username (the
-  macOS export gives a user id in the avatar instead, [§11.4](#114-sender-ids)).
+- Plain text: the sender's **display name**, with no link, user id or @username (the macOS export
+  gives a user id in the avatar instead, [§11.4](#114-sender-ids)).
 - An account without a last name is followed by a space (`InventoryBot `).
 - A deleted account is shown as `Deleted Account`, shared by every deleted account.
-- A message sent through an inline bot reads `Mario Rossi via @gif` in `from_name`, as
-  plain text.
+- A message sent through an inline bot reads `Mario Rossi via @gif` in `from_name`, as plain text.
 
 ### 5.3 Text
 
@@ -260,8 +256,8 @@ text is only `HH:MM`.
 | `<a onclick="return ShowMentionName()">Name</a>`                                       | Mention of a user without a username; the visible text is a display name. |
 | `ShowHashtag`, `ShowTextCopied`, `ShowSpoiler`, `ShowNotLoadedEmoji` anchors           | Hashtags, copyable code, spoilers, custom emoji.                          |
 
-The visible text of a message is the concatenation of the text nodes, with `<br>` as a
-newline, stripped. A `div.text` is never empty.
+The visible text of a message is the concatenation of the text nodes, with `<br>` as a newline,
+stripped. A `div.text` is never empty.
 
 ### 5.4 Replies
 
@@ -273,8 +269,8 @@ newline, stripped. A `div.text` is never empty.
 ```
 
 - Fixed text `In reply to` and a link `this message`; the quoted text is not included.
-- `href` is `#go_to_messageN` when the target is on the same page,
-  `messagesK.html#go_to_messageN` when it is on page K (`messages.html#…` for page 1).
+- `href` is `#go_to_messageN` when the target is on the same page, `messagesK.html#go_to_messageN`
+  when it is on page K (`messages.html#…` for page 1).
 - N can be negative (`#go_to_message-999732842`) in chats with negative ids.
 - The target may be missing from the export (deleted, or outside the exported range).
 
@@ -299,15 +295,14 @@ newline, stripped. A `div.text` is never empty.
 </div>
 ```
 
-- The outer sender (explicit or inherited) is who forwarded; the date div is the time of
-  forwarding.
-- The inner `from_name` inside `div.forwarded body` is the **original author**, followed
-  by a `span.date details` with the original timestamp (same format as [§5.1](#51-date)).
+- The outer sender (explicit or inherited) is who forwarded; the date div is the time of forwarding.
+- The inner `from_name` inside `div.forwarded body` is the **original author**, followed by a
+  `span.date details` with the original timestamp (same format as [§5.1](#51-date)).
 - The forwarded text or media is inside the forwarded block; there is no outer `div.text`.
-- Consecutive forwards are often joined. A joined forward whose original author differs
-  from the previous entry's keeps the forwarded avatar and the inner `from_name`. A
-  **joined forward with the same original author as the previous forward has neither**:
-  its original author is implied by the previous entry.
+- Consecutive forwards are often joined. A joined forward whose original author differs from the
+  previous entry's keeps the forwarded avatar and the inner `from_name`. A **joined forward with the
+  same original author as the previous forward has neither**: its original author is implied by the
+  previous entry.
 - Inner names can also carry `via @somebot`.
 
 ### 5.6 Media placeholders
@@ -334,8 +329,8 @@ newline, stripped. A `div.text` is never empty.
 | `block_link media_location`, `media_live_location`, `media_venue`, `media_game` |                                            |
 | `media_poll` (with `question bold`, `answer`, `details`, `total details`)       |                                            |
 
-A captioned media message has a `div.text` after the `media_wrap`. The bot sends no
-media. A media block contains its own `div.body` and `div.title bold`.
+A captioned media message has a `div.text` after the `media_wrap`. The bot sends no media. A media
+block contains its own `div.body` and `div.title bold`.
 
 ### 5.7 Other blocks
 
@@ -353,23 +348,23 @@ media. A media block contains its own `div.body` and `div.title bold`.
 
 ### 6.2 Messages
 
-- `id="message<N>"`: Telegram's message id, unique within a chat but **not** across
-  chats (different chats reuse the same numbers). A message is identified by
-  **(chat title, id)**; overlapping exports repeat messages with the same ids.
+- `id="message<N>"`: Telegram's message id, unique within a chat but **not** across chats (different
+  chats reuse the same numbers). A message is identified by **(chat title, id)**; overlapping
+  exports repeat messages with the same ids.
 - Ids increase with time within a chat.
-- **Ids can be negative** for regular messages: some chats have an older range of ids
-  around −999 700 000 (increasing) followed by small positive ids.
+- **Ids can be negative** for regular messages: some chats have an older range of ids around −999
+  700 000 (increasing) followed by small positive ids.
 - Day-separator ids are renumbered per export and identify nothing.
 
 ### 6.3 Senders
 
-- In the Windows export senders are known only by display name: it contains **no user
-  ids and no @usernames** for senders. The macOS export also gives each sender's numeric
-  user id ([§11.4](#114-sender-ids)), but no @username either.
-- @usernames appear only in text: mentions (`<a href="https://t.me/mario_r">@mario_r</a>`)
-  and the bot's replies, which address the player by @username.
-- Display names are not unique: `Deleted Account` covers all deleted accounts, and two
-  people can share a name.
+- In the Windows export senders are known only by display name: it contains **no user ids and no
+  @usernames** for senders. The macOS export also gives each sender's numeric user id
+  ([§11.4](#114-sender-ids)), but no @username either.
+- @usernames appear only in text: mentions (`<a href="https://t.me/mario_r">@mario_r</a>`) and the
+  bot's replies, which address the player by @username.
+- Display names are not unique: `Deleted Account` covers all deleted accounts, and two people can
+  share a name.
 - The bot is recognisable only by its display name `InventoryBot`.
 
 ## 7. Commands in text
@@ -378,31 +373,31 @@ media. A media block contains its own `div.body` and `div.title bold`.
   `<a href="" onclick="return ShowBotCommand(&quot;ricetta&quot;)">/ricetta</a> Pratica cestina`.
   Commands mentioned in bot replies use the same markup.
 - In groups a command can be addressed to a bot: visible text `/ricetta@InventoryBot`
-  (`ShowBotCommand(&quot;ricetta@InventoryBot&quot;)`), or `/start@OtherBot` for another
-  bot. The bot name's case may vary.
+  (`ShowBotCommand(&quot;ricetta@InventoryBot&quot;)`), or `/start@OtherBot` for another bot. The
+  bot name's case may vary.
 
 ## 8. Pitfalls
 
 - Page files sort wrongly as strings (`messages10.html` < `messages2.html`).
 - Folder names are arbitrary; on Windows, paths use `\`.
-- A joined message has no sender of its own; one starting a page would need the sender
-  from the previous page of the same export.
+- A joined message has no sender of its own; one starting a page would need the sender from the
+  previous page of the same export.
 - Message ids can be negative, in messages and in reply links.
 - Reply targets can be missing from the export.
 - A joined forwarded message can lack the inner `from_name`.
 - Names can end with a space and can contain `via @somebot`.
-- Textless messages (stickers, photos without caption, polls, voice messages) still
-  define the sender of the joined messages after them.
-- Timestamps must be compared as instants, with their offsets; the macOS export's have
-  none ([§11.3](#113-dates-without-an-offset)), and the Windows export's ignore daylight
-  saving time ([§5.1](#51-date)).
-- Two people can share a display name; only the macOS export's user ids tell them apart,
-  and those ids must not be copied anywhere ([§11.4](#114-sender-ids)).
+- Textless messages (stickers, photos without caption, polls, voice messages) still define the
+  sender of the joined messages after them.
+- Timestamps must be compared as instants, with their offsets; the macOS export's have none
+  ([§11.3](#113-dates-without-an-offset)), and the Windows export's ignore daylight saving time
+  ([§5.1](#51-date)).
+- Two people can share a display name; only the macOS export's user ids tell them apart, and those
+  ids must not be copied anywhere ([§11.4](#114-sender-ids)).
 - An edit between two exports is not marked; the same id may carry different text.
-- The chat title is the only chat key: a group titled `InventoryBot` would look like the
-  DM, and two groups with the same title would look like one chat.
-- Service entries can contain links; a parser must not attribute their content to the
-  previous message.
+- The chat title is the only chat key: a group titled `InventoryBot` would look like the DM, and two
+  groups with the same title would look like one chat.
+- Service entries can contain links; a parser must not attribute their content to the previous
+  message.
 
 ## 9. How the parser reads each element
 
@@ -423,11 +418,11 @@ media. A media block contains its own `div.body` and `div.title bold`.
 | (chat, id)                                                             | `parsePages`                                                                                                         | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` is kept.                                                                                                                           |
 | Date title                                                             | [`parseWindowsDate`](../src/lib/dates.ts), [`sortMessages`](../src/telegram/export/parse-export.ts)                  | Output sorted by instant, then chat, then id; a date not in the exact form of [§5.1](#51-date) counts as missing, and an undated message takes its chat neighbour's instant (by id).                                                                                                    |
 
-Media, reactions, inline keyboards, avatars (except the macOS sender id), pagination
-links and service entries are ignored. A leading `/cmd@BotName` is kept as written.
-Output: one `Message` ([`src/telegram/messages.ts`](../src/telegram/messages.ts)) per
-message, kept in memory, with keys `chat`, `dm`, `id`, `date`, `from_bot`, `sender`,
-`forwarded_from`, `reply_to`, `text`, then `sender_key` when applicable.
+Media, reactions, inline keyboards, avatars (except the macOS sender id), pagination links and
+service entries are ignored. A leading `/cmd@BotName` is kept as written. Output: one `Message`
+([`src/telegram/messages.ts`](../src/telegram/messages.ts)) per message, kept in memory, with keys
+`chat`, `dm`, `id`, `date`, `from_bot`, `sender`, `forwarded_from`, `reply_to`, `text`, then
+`sender_key` when applicable.
 
 ## 10. Annotated sample page
 
@@ -579,10 +574,10 @@ What it contains (all with chat `Gruppo Avventurieri`):
 
 ## 11. The macOS export
 
-The export written by Telegram Desktop on macOS has the history entries, message blocks,
-replies, forwards, media placeholders and text constructs of sections 3-7, with the
-differences below. Message ids are the same as in a Windows export of the same chat,
-and the same messages give the same texts and senders.
+The export written by Telegram Desktop on macOS has the history entries, message blocks, replies,
+forwards, media placeholders and text constructs of sections 3-7, with the differences below.
+Message ids are the same as in a Windows export of the same chat, and the same messages give the
+same texts and senders.
 
 ### 11.1 On disk
 
@@ -652,70 +647,68 @@ ChatExport_InventoryBot/     named after the chat title
 </html>
 ```
 
-- The markup is not indented: one element per line, text right after its tag. Values
-  are still stripped.
-- The **chat title** is `div.name bold` inside `div.page_header`; there is no
-  `div.text bold`. The `div.subtitle details` under it reads `bot` in the chat with the
-  bot. `<title>` is the chat title, not `Exported Data`.
+- The markup is not indented: one element per line, text right after its tag. Values are still
+  stripped.
+- The **chat title** is `div.name bold` inside `div.page_header`; there is no `div.text bold`. The
+  `div.subtitle details` under it reads `bot` in the chat with the bot. `<title>` is the chat title,
+  not `Exported Data`.
 - Day separators are `div.message service` **without an id**.
 - The avatar is an `<img class="userpic">` whose file name carries the sender's user id
-  ([§11.4](#114-sender-ids)); joined messages have no avatar, as in
-  [§4.1](#41-joined-messages).
+  ([§11.4](#114-sender-ids)); joined messages have no avatar, as in [§4.1](#41-joined-messages).
 - `div.from_name` has no trailing space after a name without a last name.
 - In text, `'` is written as is (not `&apos;`) and `"` as `&quot;`; a command is
-  `<a onclick="return ShowBotCommand('cmd')" href="#">/cmd</a>`, sometimes with a
-  `<strong>` inside the anchor. The visible text is the same as in the Windows export.
+  `<a onclick="return ShowBotCommand('cmd')" href="#">/cmd</a>`, sometimes with a `<strong>` inside
+  the anchor. The visible text is the same as in the Windows export.
 
 ### 11.3 Dates without an offset
 
-`title="27 November 2025, 19:00:02"`: day, English month name, year, a comma, then the
-24-hour time. There is **no UTC offset**. The wall clock is the local time, as in the
-Windows export: a message present in both shows the same wall clock in both.
+`title="27 November 2025, 19:00:02"`: day, English month name, year, a comma, then the 24-hour time.
+There is **no UTC offset**. The wall clock is the local time, as in the Windows export: a message
+present in both shows the same wall clock in both.
 
-An instant cannot be computed from such a date alone. Phase 1 gives every date of a macOS
-export a UTC offset and converts it to the Windows form, so later phases see a single
-format. The offset comes from:
+An instant cannot be computed from such a date alone. Phase 1 gives every date of a macOS export a
+UTC offset and converts it to the Windows form, so later phases see a single format. The offset
+comes from:
 
-1. the other exports of the run that share messages with it (same chat title, same id)
-   and show the same wall clock for them: their offset (the most frequent, if several),
-   for every date of the export, which reproduces the Windows labelling of
-   [§5.1](#51-date); shared messages with another wall clock or offset are reported;
-2. otherwise the time zone of the computer that made the export
-   (`ParseOptions.timeZone`, an IANA zone such as `Europe/Rome`): each date takes the
-   offset the zone had at that date, daylight saving time included. A wall clock that
-   happens twice, when the clocks go back, is read as the first one. The web app
-   proposes the browser's own time zone, on the assumption that the exports were made on
-   the same computer.
+1. the other exports of the run that share messages with it (same chat title, same id) and show the
+   same wall clock for them: their offset (the most frequent, if several), for every date of the
+   export, which reproduces the Windows labelling of [§5.1](#51-date); shared messages with another
+   wall clock or offset are reported;
+2. otherwise the time zone of the computer that made the export (`ParseOptions.timeZone`, an IANA
+   zone such as `Europe/Rome`): each date takes the offset the zone had at that date, daylight
+   saving time included. A wall clock that happens twice, when the clocks go back, is read as the
+   first one. The web app proposes the browser's own time zone, on the assumption that the exports
+   were made on the same computer.
 
-A message present in a Windows and a macOS export is kept once, with the date the Windows
-export wrote.
+A message present in a Windows and a macOS export is kept once, with the date the Windows export
+wrote.
 
 ### 11.4 Sender ids
 
-`src="photos/author_123456789.jpg"`: the number is the sender's numeric Telegram user
-id. Unlike the display name it is unique and does not change when the user renames
-themselves, so it identifies senders far better (two people named `Andrea` are told
-apart).
+`src="photos/author_123456789.jpg"`: the number is the sender's numeric Telegram user id. Unlike the
+display name it is unique and does not change when the user renames themselves, so it identifies
+senders far better (two people named `Andrea` are told apart).
 
-**Rule: the user id never leaves phase 1's memory.** No output may contain it: messages
-carry only an opaque `sender_key` (`u1`, `u2`, … numbered in output order), the same for
-one user within one run and meaningless outside it, which tells senders apart better
-than their display names.
+**Rule: the user id never leaves phase 1's memory.** No output may contain it: messages carry only
+an opaque `sender_key` (`u1`, `u2`, … numbered in output order), the same for one user within one
+run and meaningless outside it, which tells senders apart better than their display names.
 
 ## 12. Unknowns
 
-- Why the Windows export's offset label ignores daylight saving time ([§5.1](#51-date)):
-  Telegram's choice, or the exporting computer's time zone setting.
-- Whether the macOS differences ([§11](#11-the-macos-export)) come from the operating
-  system or from the app version.
-- In the macOS export: whether days below 10 are zero-padded in date titles, whether
-  month names follow the app language, how forwarded messages, replies, media and
-  pagination look, and what avatar a sender without a profile picture gets.
-- Whether display names and chat titles are those at export time, or can change between exports of the same chat.
+- Why the Windows export's offset label ignores daylight saving time ([§5.1](#51-date)): Telegram's
+  choice, or the exporting computer's time zone setting.
+- Whether the macOS differences ([§11](#11-the-macos-export)) come from the operating system or from
+  the app version.
+- In the macOS export: whether days below 10 are zero-padded in date titles, whether month names
+  follow the app language, how forwarded messages, replies, media and pagination look, and what
+  avatar a sender without a profile picture gets.
+- Whether display names and chat titles are those at export time, or can change between exports of
+  the same chat.
 - Whether a page can start, or a day separator be followed, by a joined message.
 - The exact rule Telegram uses to join messages.
 - Why some chats have negative message ids, and whether those ids are stable across exports.
-- Whether day-separator month names and fixed strings (`In reply to`, `Previous messages`) depend on the app language.
+- Whether day-separator month names and fixed strings (`In reply to`, `Previous messages`) depend on
+  the app language.
 - How `userpicN` is chosen.
 - The layout of media folders when media are included.
 - Markup of features not covered here (forum topics, channel signatures, stories).

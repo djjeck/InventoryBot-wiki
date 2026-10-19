@@ -2,13 +2,12 @@
 
 Documented as of 2026-10-18. If the bot changes, update this document.
 
-[@InventoryBot](https://t.me/InventoryBot) is an Italian-language Telegram game: players
-go on adventures that yield items, combine items through recipes, travel between places
-and trade with each other, all by sending commands to the bot in a private chat or in a
-group. This document explains the game to someone who has never played it: its concepts,
-the commands, and the grammar and meaning of every kind of reply, including the formats
-of older group history. How Telegram Desktop exports these messages is in
-[`telegram-export.md`](telegram-export.md).
+[@InventoryBot](https://t.me/InventoryBot) is an Italian-language Telegram game: players go on
+adventures that yield items, combine items through recipes, travel between places and trade with
+each other, all by sending commands to the bot in a private chat or in a group. This document
+explains the game to someone who has never played it: its concepts, the commands, and the grammar
+and meaning of every kind of reply, including the formats of older group history. How Telegram
+Desktop exports these messages is in [`telegram-export.md`](telegram-export.md).
 
 ## Contents
 
@@ -54,24 +53,22 @@ DURATION  = INT " giorni e " INT " ore" | INT " ore e " INT " minuti"
           | INT " minuti e " INT " secondi" | INT SP ( "giorni" | "ore" | "minuti" | "secondi" )
 ```
 
-- An **item name** includes its article or quantifier ("un sasso", "l'orologio di
-  un'antica torre", "tre metri di spago colorato") and may contain digits, emoji,
-  quotes, commas and `x` ("un tagliere 30x40 di faggio"). Player-made items can contain
-  line breaks.
+- An **item name** includes its article or quantifier ("un sasso", "l'orologio di un'antica torre",
+  "tre metri di spago colorato") and may contain digits, emoji, quotes, commas and `x` ("un tagliere
+  30x40 di faggio"). Player-made items can contain line breaks.
 - In an `ITEM_LINE`, a missing quantity means 1. Some lists omit the space after `-`
   (`-una moneta d'oro [X] x41`) or the rarity.
-- A **location** includes its preposition and emoji ("nella valle ventosa 🏞",
-  "sul banco corallino 🐠") and is always written the same way.
+- A **location** includes its preposition and emoji ("nella valle ventosa 🏞", "sul banco corallino
+  🐠") and is always written the same way.
 
 ## 2. Game concepts
 
 ### 2.1 Adventures
 
-`/avventura` gives one random item, wrapped in a random sentence. The sentence does not
-depend on where the player is. A player can adventure once every 15 minutes; earlier
-attempts get a cooldown reply. Very rarely an adventure is "l'avventura FORTUNATA del
-giorno" (the lucky adventure of the day) and is followed by a second message with an
-extra item.
+`/avventura` gives one random item, wrapped in a random sentence. The sentence does not depend on
+where the player is. A player can adventure once every 15 minutes; earlier attempts get a cooldown
+reply. Very rarely an adventure is "l'avventura FORTUNATA del giorno" (the lucky adventure of the
+day) and is followed by a second message with an extra item.
 
 ### 2.2 Items and rarity
 
@@ -88,56 +85,54 @@ Every item carries a rarity code:
 | `X`          | oggetti speciali        |
 | `M`          | not explained by `/faq` |
 
-- A `+` after the code (`C+`, `N+`, `R+`, `S+`, `M+`) marks an item that drops in only
-  one place. All other adventure items drop everywhere.
-- A level-`k` recipe usually produces an `Lk` item, but some recipes produce items of
-  other rarities (`C`, `X`).
+- A `+` after the code (`C+`, `N+`, `R+`, `S+`, `M+`) marks an item that drops in only one place.
+  All other adventure items drop everywhere.
+- A level-`k` recipe usually produces an `Lk` item, but some recipes produce items of other rarities
+  (`C`, `X`).
 - `[usabile]` after the rarity marks a usable item (2.6).
 
 ### 2.3 Recipes
 
-A recipe has a name, a level from 1 to 11, ingredients with quantities, and one output.
-A player sees a recipe only when they own at least half of its required items; it is
-marked with `*` when they own all of them. `/ricetta <name>` makes a recipe the player
-can complete, consuming the ingredients and giving one output item. Otherwise it shows
-what is missing. The output is revealed only by making the recipe.
+A recipe has a name, a level from 1 to 11, ingredients with quantities, and one output. A player
+sees a recipe only when they own at least half of its required items; it is marked with `*` when
+they own all of them. `/ricetta <name>` makes a recipe the player can complete, consuming the
+ingredients and giving one output item. Otherwise it shows what is missing. The output is revealed
+only by making the recipe.
 
 ### 2.4 Levels
 
-Players start at level 0. To reach level `n+1` a player makes a recipe of level `n+1`.
-The level-up rewards `10 × level` gold coins ("una moneta d'oro") and a gift box ("un bel
-pacchettino regalo 🎁"). The maximum level is 11.
+Players start at level 0. To reach level `n+1` a player makes a recipe of level `n+1`. The level-up
+rewards `10 × level` gold coins ("una moneta d'oro") and a gift box ("un bel pacchettino regalo
+🎁"). The maximum level is 11.
 
 ### 2.5 Places and travel
 
-The world is a graph of places. `/viaggio` shows where the player is and the adjacent
-places; `/viaggio <place>` moves there. Some places require an item. They are listed
-among the exits like any other place; without the item the move is refused with "Forse
-ti manca qualcosa!", which does not name the item. The bot gives no notice when such a
-route becomes available: the player has to try again. The required item is named in
-the arrival text once the move succeeds (for example "mastichi una foglia di
-Respirella dalla tua scorta…" for the coral bank), and in a notice that names the item
-and the place (6.9). Travelling does not consume the
-item. Adventures happen where the player is, which matters only for `+` items.
+The world is a graph of places. `/viaggio` shows where the player is and the adjacent places;
+`/viaggio <place>` moves there. Some places require an item. They are listed among the exits like
+any other place; without the item the move is refused with "Forse ti manca qualcosa!", which does
+not name the item. The bot gives no notice when such a route becomes available: the player has to
+try again. The required item is named in the arrival text once the move succeeds (for example
+"mastichi una foglia di Respirella dalla tua scorta…" for the coral bank), and in a notice that
+names the item and the place (6.9). Travelling does not consume the item. Adventures happen where
+the player is, which matters only for `+` items.
 
 ### 2.6 Usable items
 
-Each usable item has its own replies to `/usa`: fixed, random (for example a die),
-item-giving, or failures that say what is missing (a key, a complete set of something). Usable
-items have a cooldown, shown by `/esamina` and enforced by `/usa`. Some are consumed by
-use and some are not; the reply does not say which.
+Each usable item has its own replies to `/usa`: fixed, random (for example a die), item-giving, or
+failures that say what is missing (a key, a complete set of something). Usable items have a
+cooldown, shown by `/esamina` and enforced by `/usa`. Some are consumed by use and some are not; the
+reply does not say which.
 
 ### 2.7 Transfers and showing
 
-`/dai` gives items to another player, in a group or in private; with `/notificheon` the
-receiver gets a private notice. `/mostra <item>` shows the chat how many of an item the
-player owns.
+`/dai` gives items to another player, in a group or in private; with `/notificheon` the receiver
+gets a private notice. `/mostra <item>` shows the chat how many of an item the player owns.
 
 ### 2.8 Titles and favourite item
 
-Some items give a title ("il fornaio", "il cartografo", "l'incappellato", "il Lucente",
-"il Cartomante", "il capitano"). The bot prints it after the username wherever it names
-that player. `/preferito <item>` sets the favourite item shown by `/stats` (6.17).
+Some items give a title ("il fornaio", "il cartografo", "l'incappellato", "il Lucente", "il
+Cartomante", "il capitano"). The bot prints it after the username wherever it names that player.
+`/preferito <item>` sets the favourite item shown by `/stats` (6.17).
 
 ## 3. Commands
 
@@ -159,26 +154,25 @@ The bot's own list (`/faqcomandi`):
 | `/nascondi`                     | `recipe` \| `*` \| none | hide or show a recipe, all recipes, or list the hidden ones | 6.17       |
 | `/notificheon`, `/notificheoff` |                         | turn gift notices on or off                                 | 6.10       |
 
-Other commands: `/start` and `/registrami` (registration, private chat only), `/faq`
-(help, rarity legend, level rule), `/faqcomandi` (the list above), `/gruppi` (unofficial
-groups), `/titolo` (title-giving items owned), `/preferito <item>` (set the favourite
-item, 6.17), `/quest` (the current quest, 6.17), `/biglietto` (lottery ticket while a
-lottery is open).
+Other commands: `/start` and `/registrami` (registration, private chat only), `/faq` (help, rarity
+legend, level rule), `/faqcomandi` (the list above), `/gruppi` (unofficial groups), `/titolo`
+(title-giving items owned), `/preferito <item>` (set the favourite item, 6.17), `/quest` (the
+current quest, 6.17), `/biglietto` (lottery ticket while a lottery is open).
 
 Arguments:
 
-- `/dai` is written `/dai @user [quantity] item` (`/dai @lucia_b 10 moneta`); the `@` is
-  optional and the default quantity is 1.
+- `/dai` is written `/dai @user [quantity] item` (`/dai @lucia_b 10 moneta`); the `@` is optional
+  and the default quantity is 1.
 - The teleport capsule takes its destination after `#`: `/usa capsula # molo`.
 - In groups a command may be written `/cmd@InventoryBot args`.
 
-**Name lookup.** Item, recipe and place arguments are matched by words: a name matches
-when every word of the argument occurs in it, also inside another word, ignoring case.
-"otto" finds "un bottone"; "Oro" finds "una moneta d'oro" and "una statuetta di
-Torosco"; "usa getta" finds "un cucchiaino di plastica usa e getta". There is no stemming
-("elenchi" does not find "un elenco"), and bracketed tags are not part of names
-(`[C]`, `usabile` match nothing). `/esamina` searches only the player's items and
-visible recipes. Several matches give an ambiguity reply; none gives a not-found reply:
+**Name lookup.** Item, recipe and place arguments are matched by words: a name matches when every
+word of the argument occurs in it, also inside another word, ignoring case. "otto" finds "un
+bottone"; "Oro" finds "una moneta d'oro" and "una statuetta di Torosco"; "usa getta" finds "un
+cucchiaino di plastica usa e getta". There is no stemming ("elenchi" does not find "un elenco"), and
+bracketed tags are not part of names (`[C]`, `usabile` match nothing). `/esamina` searches only the
+player's items and visible recipes. Several matches give an ambiguity reply; none gives a not-found
+reply:
 
 | Command           | Ambiguous                                     | Not found                                      |
 | ----------------- | --------------------------------------------- | ---------------------------------------------- |
@@ -188,9 +182,9 @@ visible recipes. Several matches give an ambiguity reply; none gives a not-found
 | `/usa`            | `troppi oggetti trovati con quel nome(<arg>)` | `@u, non hai niente del genere di usabile.`    |
 | `/viaggio`        | `troppi luoghi trovati con quel nome(<arg>)`  | `@u, non vedi nessun luogo con quel nome, qui` |
 
-`/esamina` also gives `troppe ricette trovate con quel nome`, when the argument matches
-several recipes. The ambiguity replies are not addressed and repeat the argument as
-written, also when it is empty (`troppi oggetti trovati con quel nome()`).
+`/esamina` also gives `troppe ricette trovate con quel nome`, when the argument matches several
+recipes. The ambiguity replies are not addressed and repeat the argument as written, also when it is
+empty (`troppi oggetti trovati con quel nome()`).
 
 ## 4. Addressing
 
@@ -215,23 +209,22 @@ Most replies begin by naming the player they concern:
 The bot plays in groups too, and there:
 
 - replies are plain messages, never Telegram replies to the command;
-- ordinary chat and other players' commands and replies can come between a command and
-  its reply, which usually follows within seconds;
-- the reply names the player's `@username`, while Telegram shows the sender of the
-  command by display name;
-- messages beginning with `[W] `, `[N] ` or `[BAN] ` do not answer a command in that
-  group. `[W] @user, <adventure>` reports another player's adventure, `[N]` is a notice
-  (gifts, pakkomon fights, pets) and `[BAN]` a ban. In private, `[N]` is the gift notice.
+- ordinary chat and other players' commands and replies can come between a command and its reply,
+  which usually follows within seconds;
+- the reply names the player's `@username`, while Telegram shows the sender of the command by
+  display name;
+- messages beginning with `[W] `, `[N] ` or `[BAN] ` do not answer a command in that group.
+  `[W] @user, <adventure>` reports another player's adventure, `[N]` is a notice (gifts, pakkomon
+  fights, pets) and `[BAN]` a ban. In private, `[N]` is the gift notice.
 
 ## 6. Replies
 
-Each section gives the command, the grammar, the meaning and examples (the example
-format is in section 8).
+Each section gives the command, the grammar, the meaning and examples (the example format is in
+section 8).
 
 ### 6.1 Adventure drop
 
-`/avventura`. One line; the narrative ends with the article and name of the item, with no
-delimiter.
+`/avventura`. One line; the narrative ends with the article and name of the item, with no delimiter.
 
 ```text
 DROP = ADDR NARRATIVE SP RARITY [ SP USABLE ] [ "!" ] EOT
@@ -287,15 +280,15 @@ END         = "Scrivi /ricetta <nome ricetta> per vedere quali oggetti ti mancan
             | LINE " TRONCATO!"
 ```
 
-- `L INT` is the level; `[*]` means every ingredient is owned; `[manca K]` means `K`
-  units are missing in total.
+- `L INT` is the level; `[*]` means every ingredient is owned; `[manca K]` means `K` units are
+  missing in total.
 - Ready recipes come first, then the others by `manca`, ascending.
-- A list longer than Telegram's 4096-character limit is cut mid-line and ends with
-  ` TRONCATO!`; the recipes after the cut are not shown. `/ricetta` takes no filter (not
-  even by level), so no other command lists the recipes after the cut; `/ricetta
-<name>` and `/esamina <name>` still answer for a recipe whose name is known.
-- With no visible recipe: `@u, non hai ricette al momento. Cerca altri oggetti per
-poterli combinare insieme!`
+- A list longer than Telegram's 4096-character limit is cut mid-line and ends with ` TRONCATO!`; the
+  recipes after the cut are not shown. `/ricetta` takes no filter (not even by level), so no other
+  command lists the recipes after the cut; `/ricetta <name>` and `/esamina <name>` still answer for
+  a recipe whose name is known.
+- With no visible recipe:
+  `@u, non hai ricette al momento. Cerca altri oggetti per poterli combinare insieme!`
 
 ```bot-reply type=recipe_list query="/ricetta" truncated=false recipes.0.name="Orto in vaso" recipes.0.level=1 recipes.0.ready=true recipes.2.name="L'ombra dell'albero" recipes.2.level=11 recipes.2.missing=2
 @mario_r, ecco le ricette a tua disposizione:
@@ -315,8 +308,8 @@ Scrivi /ricetta <nome ricetta> per vedere quali oggetti ti mancano per una certa
 
 ### 6.5 Recipe detail
 
-`/ricetta <name>` when something is missing ("per fare X"); `/esamina <name>` of a
-recipe, always ("per fare la ricetta X").
+`/ricetta <name>` when something is missing ("per fare X"); `/esamina <name>` of a recipe, always
+("per fare la ricetta X").
 
 ```text
 DETAIL = ADDR "per fare" SP [ "la ricetta" SP ] RNAME " ti manca:" { NL ITEM_LINE }
@@ -327,8 +320,8 @@ DETAIL = ADDR "per fare" SP [ "la ricetta" SP ] RNAME " ti manca:" { NL ITEM_LIN
   (`needed − owned`). It can be empty.
 - "Mentre hai gia'" lists each ingredient the player owns at least one of, with
   `min(owned, needed)`: the count stops at what the recipe needs.
-- A partly owned ingredient is in both lists, so the recipe needs, for each ingredient,
-  the sum of its two quantities.
+- A partly owned ingredient is in both lists, so the recipe needs, for each ingredient, the sum of
+  its two quantities.
 
 ```bot-reply type=recipe_detail query="/ricetta pennello" recipe="Pennello rustico" missing.0.name="un ciuffo di morbide setole di tasso" missing.0.qty=1 have.0.name="lo stecco di legno di un ghiacciolo"
 @mario_r, per fare Pennello rustico ti manca:
@@ -350,8 +343,7 @@ Mentre hai gia':
 
 ### 6.6 Craft
 
-`/ricetta <name>` when the player has every ingredient. The reply does not name the
-recipe.
+`/ricetta <name>` when the player has every ingredient. The reply does not name the recipe.
 
 ```text
 CRAFT  = ADDR "prendi in mano:" { NL ITEM_LINE } NL FLAVOR NL "Ottieni:" SP NAME [ "!" ] [ NL NL SUFFIX ] EOT
@@ -360,10 +352,9 @@ SUFFIX = "Hai raggiunto il livello " INT "! Per te " INT "x una moneta d'oro e u
        | "Sei il primo al mondo a fare questa ricetta! Complimenti!"
 ```
 
-- The item lines are the recipe's ingredients, all consumed. The output (one unit) is
-  given without rarity.
-- The first suffix is a level-up (2.4); the second marks the first time anyone made the
-  recipe.
+- The item lines are the recipe's ingredients, all consumed. The output (one unit) is given without
+  rarity.
+- The first suffix is a level-up (2.4); the second marks the first time anyone made the recipe.
 
 ```bot-reply type=craft query="/ricetta caffe rist" output="un caffè ristretto" ingredients.0.name="un chicco di caffè" ingredients.0.qty=2
 @mario_r, prendi in mano:
@@ -398,12 +389,12 @@ SOURCE   = "E' un oggetto trovabile in avventura."
 COOLDOWN = "Raffreddamento: " ( "pronto all'uso." | DURATION )
 ```
 
-- `USED_IN` lists the recipes using the item that the player can currently see. Recipe
-  names may themselves contain ", ".
+- `USED_IN` lists the recipes using the item that the player can currently see. Recipe names may
+  themselves contain ", ".
 - `COUNT` is the exact number owned; an item can be examined without owning it.
 - The recipe source is named once the player has made that recipe.
-- `COOLDOWN` is present only for usable items: `DURATION` is the time left before the
-  item can be used again, truncated to the units shown.
+- `COOLDOWN` is present only for usable items: `DURATION` is the time left before the item can be
+  used again, truncated to the units shown.
 
 ```bot-reply type=item_info query="/esamina candela consum" item="una candela mezza consumata" rarity=C used_in_raw="Cera riciclata" count=3 source=adventure addressee=mario_r
 @mario_r una candela mezza consumata [C] al momento ti serve nelle ricette: Cera riciclata.
@@ -436,10 +427,10 @@ INVENTORY = ADDR "possiedi:" ( { NL ITEM_LINE } [ NL "e altre robe che non ci st
 - Each line gives the exact number owned.
 - A list that would not fit in one message stops at about 4,000 characters and ends with
   `e altre robe che non ci stanno..`; the items left out are not identified.
-- `possiedi:` alone means the filter matched nothing; `un bel niente!` means the player
-  owns nothing at all.
-- Unfiltered and text-filtered lists are grouped by rarity (`X`, then `L` from the
-  highest level, `S`, `R`, `N`, `C`); rarity-filtered lists are alphabetical.
+- `possiedi:` alone means the filter matched nothing; `un bel niente!` means the player owns nothing
+  at all.
+- Unfiltered and text-filtered lists are grouped by rarity (`X`, then `L` from the highest level,
+  `S`, `R`, `N`, `C`); rarity-filtered lists are alphabetical.
 
 Filters:
 
@@ -453,8 +444,8 @@ Filters:
 | `M`                          | nothing, even when `M` items are owned           |
 | anything else                | items whose name contains every word (section 3) |
 
-Rarity arguments are case-insensitive: `c` lists the same items as `C`, `r+` as `R+`,
-`l` as `L`, `l1` as `L1`. They never act as text filters.
+Rarity arguments are case-insensitive: `c` lists the same items as `C`, `r+` as `R+`, `l` as `L`,
+`l1` as `L1`. They never act as text filters.
 
 ```bot-reply type=inventory query="/inventario" filtered=false truncated=false items.1.name="un fiorino ƒ" items.1.usable=true items.1.qty=3
 @mario_r, possiedi:
@@ -495,16 +486,15 @@ UNLOCK  = LINE                    (* arrival text of a place that needs an item 
 NEEDED  = NAME " ti serve per passare " LOCATION " sulla via per tornare al villaggio." EOT
 ```
 
-`EXITS` are the places adjacent to `LOCATION`, including those that need an item.
-After `BLOCKED` the player has not moved; the reply does not name the missing item.
-`UNLOCK` names the required item, which is not consumed. Most places that need an item
-have their own arrival text, written as a sentence that ends with the place itself
-("guidato dalla tua bussola fatata … finalmente ti trovi nella palude sussurrante
-🌾"), without "arrivi"; only the exits block marks it as an arrival, and nothing but
-the known place names delimits the place.
+`EXITS` are the places adjacent to `LOCATION`, including those that need an item. After `BLOCKED`
+the player has not moved; the reply does not name the missing item. `UNLOCK` names the required
+item, which is not consumed. Most places that need an item have their own arrival text, written as a
+sentence that ends with the place itself ("guidato dalla tua bussola fatata … finalmente ti trovi
+nella palude sussurrante 🌾"), without "arrivi"; only the exits block marks it as an arrival, and
+nothing but the known place names delimits the place.
 
-`NEEDED` is a separate, unaddressed notice that is not the answer to a command: it
-names the item a place requires, on the player's way back to the village.
+`NEEDED` is a separate, unaddressed notice that is not the answer to a command: it names the item a
+place requires, on the player's way back to the village.
 
 ```bot-reply type=location query="/viaggio" location="nel bosco nebbioso di Valtorbo 🌲" exits.0="nella valle ventosa 🏞" exits.2="nell'immenso deserto di Sabbiora 🏜"
 @mario_r, ti trovi: nel bosco nebbioso di Valtorbo 🌲
@@ -546,8 +536,8 @@ una lanterna cieca ti serve per passare nelle cripte del monastero 👻 sulla vi
 
 ### 6.10 Gift notice
 
-Sent privately to a player who received items, if notices are on. It answers no command
-and names the giver.
+Sent privately to a player who received items, if notices are on. It answers no command and names
+the giver.
 
 ```text
 GIFT = "[N] " [ "Sua Maestà" SP ] "@" USERNAME [ SP TITLE ] " ti ha dato " INT "x " NAME EOT
@@ -615,9 +605,9 @@ SHOW = ADDR "mostri orgogliosamente di possedere " INT "x " NAME SP RARITY [ SP 
 
 ### 6.13 Use
 
-`/usa <item>`. Each usable item has its own texts, so there is no common grammar beyond
-`ADDR TEXT`. Items received are either listed as `ITEM_LINE`s after the first line, or
-named in the text ("Ottieni: un seme di Zaffirella!", "ci trovi dentro 22 monete d'oro!").
+`/usa <item>`. Each usable item has its own texts, so there is no common grammar beyond `ADDR TEXT`.
+Items received are either listed as `ITEM_LINE`s after the first line, or named in the text
+("Ottieni: un seme di Zaffirella!", "ci trovi dentro 22 monete d'oro!").
 
 | Kind                          | Replies                                                                                                                                                                      |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -626,9 +616,9 @@ named in the text ("Ottieni: un seme di Zaffirella!", "ci trovi dentro 22 monete
 | other failures                | the item cooldown (below), `non conosci nessun luogo con quel nome..` (capsule destination)                                                                                  |
 | success                       | anything else                                                                                                                                                                |
 
-An item still cooling down is refused, to `/usa` and to `/dai`, naming the item and
-the time left (truncated to the units shown, as in item info). The `/usa` refusal is
-addressed, the `/dai` one is not:
+An item still cooling down is refused, to `/usa` and to `/dai`, naming the item and the time left
+(truncated to the units shown, as in item info). The `/usa` refusal is addressed, the `/dai` one is
+not:
 
 ```text
 ITEM_COOLDOWN = [ ADDR ] NAME " deve raffreddarsi ancora per " DURATION " prima di poterlo "
@@ -726,10 +716,10 @@ Avventuriero Sua Maestà @msx80
 
 ### 6.15 FAQ
 
-`/faq`. Not addressed. A long help text with blank-line-separated sections: an
-introduction, "Comandi base:", "Livelli" (the level rule), "Legenda oggetti" (the rarity
-legend, then the `+` rule), and sections on abuse, official groups and donations.
-The example is abridged after the legend and without "Comandi base".
+`/faq`. Not addressed. A long help text with blank-line-separated sections: an introduction,
+"Comandi base:", "Livelli" (the level rule), "Legenda oggetti" (the rarity legend, then the `+`
+rule), and sections on abuse, official groups and donations. The example is abridged after the
+legend and without "Comandi base".
 
 ```text
 FAQ    = "Ciao, sono InventoryBot!" ANY NL "Livelli" NL NL RULE NL NL "Legenda oggetti" NL LEGEND NL PLUS [ NL NL ANY ] EOT
@@ -770,14 +760,14 @@ Help, listings and refusals:
 | `⚠ Per favore risolvi il captcha per continuare. …`                    | any command, when the bot asks for a captcha                     |
 | `Ciao, il gioco si e' trasferito sul nuovo bot, @u! …`                 | any command sent to the previous bot after July 2021 (section 7) |
 
-Lotteries are announced in groups; the announcements are not answers to
-a player's command. A lottery opens with `APRE LA BIGLIETTERIA! PRENDETE UN BIGLIETTO
-CON /biglietto!`, players take a ticket with `/biglietto` (a `[N] @u, prendi un
-biglietto!` notice follows), then `LA BIGLIETTERIA E' CHIUSA!! NIENTE PIU' BIGLIETTI!!`, `ABBIAMO N PARTECIPANTI!
-PRONTI ALL'ESTRAZIONE!`, `RULLO DI TAMBURI!!!`, and the draw: `IL FORTUNATO E': @u !
-Evviva! Vince il fantastico Primo Premio della lotteria!` and `PREMIO DI CONSOLAZIONE:
-@u vince un pacchettino di consolazione 🎁!` for the others. The prizes are usable items
-(their `/usa` replies list what they contain).
+Lotteries are announced in groups; the announcements are not answers to a player's command. A
+lottery opens with `APRE LA BIGLIETTERIA! PRENDETE UN BIGLIETTO CON /biglietto!`, players take a
+ticket with `/biglietto` (a `[N] @u, prendi un biglietto!` notice follows), then
+`LA BIGLIETTERIA E' CHIUSA!! NIENTE PIU' BIGLIETTI!!`,
+`ABBIAMO N PARTECIPANTI! PRONTI ALL'ESTRAZIONE!`, `RULLO DI TAMBURI!!!`, and the draw:
+`IL FORTUNATO E': @u ! Evviva! Vince il fantastico Primo Premio della lotteria!` and
+`PREMIO DI CONSOLAZIONE: @u vince un pacchettino di consolazione 🎁!` for the others. The prizes are
+usable items (their `/usa` replies list what they contain).
 
 ```bot-reply type=miss reply=lottery_drumroll addressee=null
 RULLO DI TAMBURI!!!
@@ -797,9 +787,9 @@ ciao @mario_r, per giocare con me devi prima registrarti! Basta scrivermi /start
 Errore NumberFormatException For input string: "pippo"
 ```
 
-`/titolo` (title-giving items owned) answers `@u, non hai oggetti che diano titoli..`
-when the player owns none; the reply of a player who owns some is not known in its
-current form (the 2017-2018 form, which lists them, is in section 7).
+`/titolo` (title-giving items owned) answers `@u, non hai oggetti che diano titoli..` when the
+player owns none; the reply of a player who owns some is not known in its current form (the
+2017-2018 form, which lists them, is in section 7).
 
 ```bot-reply type=title query="/titolo" items=[] addressee=mario_r
 @mario_r, non hai oggetti che diano titoli..
@@ -807,8 +797,8 @@ current form (the 2017-2018 form, which lists them, is in section 7).
 
 ### 6.17 Favourite item, hidden recipes and quests
 
-`/preferito <item>`, `/nascondi [recipe | *]` and `/quest`. These replies confirm or show
-the player's interface preferences and carry no game fact.
+`/preferito <item>`, `/nascondi [recipe | *]` and `/quest`. These replies confirm or show the
+player's interface preferences and carry no game fact.
 
 ```text
 FAVOURITE = ADDR "sei veramente affezionato a " NAME ", e' di gran lunga il tuo oggetto preferito!" EOT
@@ -821,12 +811,11 @@ NO_QUEST  = ADDR "non hai nessuna quest al momento." EOT
 - `FAVOURITE` answers `/preferito <item>`: the item, named without rarity, becomes the
   `Oggetto preferito` of `/stats` (6.14). An item the player does not own gets
   `@u, non hai niente del genere` (section 3).
-- `/nascondi <recipe>` hides a recipe (`HIDE`); the same command for a hidden recipe shows
-  it again (`UNHIDE`). `/nascondi *` hides or shows every recipe. `/nascondi` without
-  arguments lists the hidden recipes (`HIDDEN`), `nessuna` when there are none.
-- `/quest` answers `NO_QUEST` when the player has no quest. The replies about a quest
-  offered, still incomplete or completed are known only in their 2017-2018 forms
-  (section 7).
+- `/nascondi <recipe>` hides a recipe (`HIDE`); the same command for a hidden recipe shows it again
+  (`UNHIDE`). `/nascondi *` hides or shows every recipe. `/nascondi` without arguments lists the
+  hidden recipes (`HIDDEN`), `nessuna` when there are none.
+- `/quest` answers `NO_QUEST` when the player has no quest. The replies about a quest offered, still
+  incomplete or completed are known only in their 2017-2018 forms (section 7).
 
 ```bot-reply type=miss query="/preferito bonsai" reply=favourite command=/preferito addressee=mario_r
 @mario_r, sei veramente affezionato a un piccolo bonsai, e' di gran lunga il tuo oggetto preferito!
@@ -853,49 +842,50 @@ nessuna
 
 Group histories reach back to 2017. These formats belong to earlier periods:
 
-- **Until September 2017**, item info had only its first line (no count, no source);
-  usable items had an empty line, then the `Raffreddamento` line.
-- **Until 2018**, travel replies had no `Puoi andare verso:` block, and arrival texts of
-  places needing an item ended in other ways ("arrivi esausto nella baia di Scogliola
-  🦀", "arrivi (stremato) nell'immenso deserto di Sabbiora 🏜", "… riesci ad accedere al molo
-  dei barcaioli 🎣"): like the current item-narrated arrivals, they end with the place,
-  but without the exits block only the `/viaggio` command they answer marks them as
-  arrivals.
+- **Until September 2017**, item info had only its first line (no count, no source); usable items
+  had an empty line, then the `Raffreddamento` line.
+- **Until 2018**, travel replies had no `Puoi andare verso:` block, and arrival texts of places
+  needing an item ended in other ways ("arrivi esausto nella baia di Scogliola 🦀", "arrivi
+  (stremato) nell'immenso deserto di Sabbiora 🏜", "… riesci ad accedere al molo dei barcaioli 🎣"):
+  like the current item-narrated arrivals, they end with the place, but without the exits block only
+  the `/viaggio` command they answer marks them as arrivals.
 - **Until 2018**, `/inventario M` listed `M` and `M+` items, `+` alone listed every `+` item,
-  `[usabile]` listed the usable items, and an invalid argument got `@u puoi usare solo i
-seguenti parametri: C, N, R, S, L, X, U, M.`
+  `[usabile]` listed the usable items, and an invalid argument got
+  `@u puoi usare solo i seguenti parametri: C, N, R, S, L, X, U, M.`
 - **Until 2025**, some adventure narratives ended without the final `!`.
-- **Until July 2021** the game ran on a previous bot; afterwards that bot answered every
-  command with a notice that the game had moved to `@InventoryBot`.
+- **Until July 2021** the game ran on a previous bot; afterwards that bot answered every command
+  with a notice that the game had moved to `@InventoryBot`.
 - **In 2017-2018** groups also saw:
-  - `/titolo` replies: `@u, ora non hai nessun titolo. Ecco gli oggetti che danno titoli
-che possiedi:` + item lines, `@u, NAME RARITY non da nessun titolo..`, and the title
-    choice `@u, ti fregi del titolo che si confa' al possessore di NAME RARITY.`;
-  - quests (`/quest` is still a command, 6.17): a character asks for help (`@u, un
-robusto valletto … ti si avvicina per chiederti aiuto! … Puoi aiutarlo?` + `Gli serve:` + item lines +
-    the time left), `@u, non hai ancora tutti gli oggetti necessari per aiutare …, ti
-manca:` + item lines (+ `Mentre hai gia':` + item lines) + the minutes left, the
-    completion `Complimenti! Hai trovato tutti gli oggetti! Li consegni a … Ti ricompensa
-donandoti:` + item lines;
-  - parcels: `@u bravissimo, hai trovato un pacchetto! Tutto contento lo apri e dentro ci
-trovi:` + item lines + a pointer to `/faq`, and the gift parcel opened with `/usa`
-    (`@u, ti accingi ad aprire il tuo pacco eccitato come un bambino a natale, …` + item
-    lines);
-  - Pakkomon, creatures obtained by using a sphere (`@u, lanci la tua ITEM,
-si apre a mezz'aria ed esce un Pakkomon di nome NAME RARITY!`) and used to fight other
-    players' Pakkomon (`/usa <pakkomon> # @user`): `@u, sfidi @x a combattere contro il
-tuo NAME`, `@u, sei pronto a sfidare chiunque col tuo NAME !`, the fight `[N] i due
-pakkomon iniziano a combattere furiosamente e alla fine NAME di @x sconfigge NAME di
-@y …`, a Pakkomon's record `@u, NAME ha vinto N battaglie e ne ha perse N.` + its
-    equipment and readiness, and the refusals `@u, il pakkomon del tuo avversario e'
-ancora rintronato per DURATION.` and `@u, NAME e' ancora rintronato dall'ultimo
-combattimento. …`;
+  - `/titolo` replies:
+    `@u, ora non hai nessun titolo. Ecco gli oggetti che danno titoli che possiedi:` + item lines,
+    `@u, NAME RARITY non da nessun titolo..`, and the title choice
+    `@u, ti fregi del titolo che si confa' al possessore di NAME RARITY.`;
+  - quests (`/quest` is still a command, 6.17): a character asks for help
+    (`@u, un robusto valletto … ti si avvicina per chiederti aiuto! … Puoi aiutarlo?` +
+    `Gli serve:` + item lines + the time left),
+    `@u, non hai ancora tutti gli oggetti necessari per aiutare …, ti manca:` + item lines (+
+    `Mentre hai gia':` + item lines) + the minutes left, the completion
+    `Complimenti! Hai trovato tutti gli oggetti! Li consegni a … Ti ricompensa donandoti:` + item
+    lines;
+  - parcels: `@u bravissimo, hai trovato un pacchetto! Tutto contento lo apri e dentro ci trovi:` +
+    item lines + a pointer to `/faq`, and the gift parcel opened with `/usa`
+    (`@u, ti accingi ad aprire il tuo pacco eccitato come un bambino a natale, …` + item lines);
+  - Pakkomon, creatures obtained by using a sphere
+    (`@u, lanci la tua ITEM, si apre a mezz'aria ed esce un Pakkomon di nome NAME RARITY!`) and used
+    to fight other players' Pakkomon (`/usa <pakkomon> # @user`):
+    `@u, sfidi @x a combattere contro il tuo NAME`,
+    `@u, sei pronto a sfidare chiunque col tuo NAME !`, the fight
+    `[N] i due pakkomon iniziano a combattere furiosamente e alla fine NAME di @x sconfigge NAME di @y …`,
+    a Pakkomon's record `@u, NAME ha vinto N battaglie e ne ha perse N.` + its equipment and
+    readiness, and the refusals
+    `@u, il pakkomon del tuo avversario e' ancora rintronato per DURATION.` and
+    `@u, NAME e' ancora rintronato dall'ultimo combattimento. …`;
   - bans (`[BAN] Sei stato bannato per: N ore. Motivazione: …`) and the inventory header
     `Inventario di @u, al YYYY/MM/DD HH:MM:SS`.
-- **In 2017**, `/nascondi` with a recipe not found answered `nessuna ricetta trovata
-con quel nome (ARG)`.
-- **Items get renamed**: "un Gufetto d'Argento" became "un Premio Sgranocchio" in 2026, with
-  the same recipes and rarity. Recipes can also change their ingredients.
+- **In 2017**, `/nascondi` with a recipe not found answered
+  `nessuna ricetta trovata con quel nome (ARG)`.
+- **Items get renamed**: "un Gufetto d'Argento" became "un Premio Sgranocchio" in 2026, with the
+  same recipes and rarity. Recipes can also change their ingredients.
 
 ```bot-reply type=travel query="/viaggio cima" location="in cima al monte Grevolo 🏔" exits=[] narrative=null
 @mario_r, ti metti in cammino e dopo un lunghissimo viaggio arrivi in cima al monte Grevolo 🏔
@@ -930,17 +920,16 @@ E' pronto a combattere.
 
 ## 8. Example blocks
 
-Every reply example above is a block with the info string `bot-reply` and attributes
-`key=value`, `key="value"` (`\"` escapes a quote) or `key='value'`, which say what the
-reply means:
+Every reply example above is a block with the info string `bot-reply` and attributes `key=value`,
+`key="value"` (`\"` escapes a quote) or `key='value'`, which say what the reply means:
 
 - `type`: the kind of reply (required); `query`: the command it answers (default none);
 - `chat=group`: the reply was sent in a group, and a leading `[W] ` is not part of it;
-  `titles="a|b"`: these player titles are not part of it (`Sua Maestà ` never is, at the
-  start and after `Avventuriero `);
+  `titles="a|b"`: these player titles are not part of it (`Sua Maestà ` never is, at the start and
+  after `Avventuriero `);
 - `addressee`: the player the reply names (`null` for none);
-- any other key: a value read from the reply, by dotted path (`items.0.qty`): text for
-  strings, compact JSON otherwise.
+- any other key: a value read from the reply, by dotted path (`items.0.qty`): text for strings,
+  compact JSON otherwise.
 
 ## 9. Unknowns
 
@@ -950,7 +939,7 @@ reply means:
 - Whether "half of the ingredients" (recipe visibility) counts units or distinct items.
 - Whether an exact name wins over partial matches in lookups.
 - The current `/titolo` reply of a player who owns title-giving items.
-- What triggers the "ti serve per passare" notice (6.9); it can follow `/dai` and
-  `/ricetta` replies.
-- Where a hidden recipe is left out (the `/ricetta` list, `/esamina`), and the current
-  replies of `/nascondi *` and of `/quest` while a quest is open.
+- What triggers the "ti serve per passare" notice (6.9); it can follow `/dai` and `/ricetta`
+  replies.
+- Where a hidden recipe is left out (the `/ricetta` list, `/esamina`), and the current replies of
+  `/nascondi *` and of `/quest` while a quest is open.
