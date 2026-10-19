@@ -2,7 +2,7 @@
  * String helpers shared by every phase. Pure functions, no Node APIs.
  *
  * "Whitespace" here is the Unicode whitespace set below, used consistently for
- * trimming and regex classes. It differs from JavaScript's `\s` and `trim()`: it
+ * trimming, word splitting and regex classes. It differs from JavaScript's `\s` and `trim()`: it
  * includes U+001C..U+001F and U+0085 and excludes U+FEFF. Ordering works on code points,
  * not UTF-16 code units, so that emoji and other astral characters sort after U+FFFF.
  */
@@ -31,6 +31,22 @@ export function stripWs(s: string): string {
   while (start < end && WS_SET.has(s[start] as string)) start++;
   while (end > start && WS_SET.has(s[end - 1] as string)) end--;
   return s.slice(start, end);
+}
+
+/** Splits on runs of whitespace; never returns empty strings. */
+export function splitWords(s: string): string[] {
+  const out: string[] = [];
+  let word = '';
+  for (const ch of s) {
+    if (WS_SET.has(ch)) {
+      if (word !== '') out.push(word);
+      word = '';
+    } else {
+      word += ch;
+    }
+  }
+  if (word !== '') out.push(word);
+  return out;
 }
 
 /**

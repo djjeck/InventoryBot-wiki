@@ -43,13 +43,23 @@ before proceeding. Do not chain changes without an explicit instruction to conti
 ## Architecture
 
 The pipeline is a chain of phases, each a function with typed input and output that a caller
-runs in order. So far there is phase 1:
+runs in order. So far there are phases 1 and 2:
 
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become
    `Message`s (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the
    pages as strings. Which files of an export folder are pages is decided by `export-listing.ts`,
    also pure; two adapters list and read them: `browser-files.ts` for the files of a browser
    folder picker, `export-files.ts` on disk (used by the tests).
+
+2. **Conversation** (`src/telegram/conversation/`, `readConversation`): the messages become the
+   bot's replies, each paired with the command it answers and the player it concerns. In the DM
+   a reply answers the latest command; in a group it is paired with the command it quotes, else
+   the addressed player's oldest unanswered command, else the only candidate, within the bot's
+   answer window. Display names are mapped to @usernames by voting over the whole chat (opaque
+   sender keys, when the export gives them, tell apart people with the same name). Everything
+   that depends on the bot's wording comes through a `BotDialect` (`dialect.ts`); the tests use
+   a synthetic one (`test/conversation.ts`). The web app does not run this phase yet: it needs
+   InventoryBot's dialect, which comes with the game layer.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`
