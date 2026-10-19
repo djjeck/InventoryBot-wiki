@@ -1,6 +1,6 @@
 /**
  * The web app (src/web/): `npm run web:dev` serves it locally, `npm run web:build` builds
- * it into web-dist/ (published on GitHub Pages by .github/workflows/pages.yml), and
+ * it into web-dist/ (published on GitHub Pages by .github/workflows/ci.yml), and
  * `npm run web:preview` serves the build. The tests run the TypeScript sources directly,
  * without Vite.
  */

@@ -52,7 +52,7 @@ runs in order. So far there is phase 1:
    folder picker, `export-files.ts` on disk (used by the tests).
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
-`.github/workflows/pages.yml` on every push to `main` that passes the checks (`npm run web:build`
+`.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`
 builds it into `web-dist/`). The built page carries a Content-Security-Policy that forbids any
 network connection, so the browser itself guarantees that the exports are never sent anywhere.
 The page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker

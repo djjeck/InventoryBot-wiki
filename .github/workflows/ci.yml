@@ -1,3 +1,6 @@
+# Checks every push and pull request; on a push to main that passes them, also builds the
+# web app (npm run web:build) and publishes it on GitHub Pages. Can also be run by hand
+# from the Actions tab (on main, it then publishes too).
 name: CI
 
 on:
@@ -5,6 +8,10 @@ on:
     branches: ['**']
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   check:
@@ -33,3 +40,47 @@ jobs:
 
       - name: Test with coverage
         run: npm run test:coverage
+
+  build:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the web app
+        run: npm run web:build
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web-dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # One publication at a time; a newer one waits for the running one instead of cancelling it.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
