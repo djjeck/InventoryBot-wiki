@@ -9,13 +9,14 @@ import { defineConfig, type Plugin } from 'vite';
 /**
  * The built page may load only its own files and may not connect anywhere: the exports
  * are read and processed in the browser, and this makes the browser enforce that nothing
- * is sent. Only in the build: the dev server needs inline scripts and a WebSocket.
+ * is sent. Styles allow inline `style` attributes, which the wiki view writes. Only in
+ * the build: the dev server needs inline scripts and a WebSocket.
  */
 const CSP = [
   "default-src 'none'",
   "script-src 'self'",
   "worker-src 'self'",
-  "style-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
   "connect-src 'none'",
   "form-action 'none'",

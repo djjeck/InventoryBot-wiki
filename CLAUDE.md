@@ -98,12 +98,15 @@ The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHu
 builds it into `web-dist/`). The built page carries a Content-Security-Policy that forbids any
 network connection, so the browser itself guarantees that the exports are never sent anywhere. The
 page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker
-(`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phases 1
-to 5 found; the wiki itself is not shown yet. The owner is the player the bot addresses most in the
-DM; without a DM the run stops and shows a username field, which the page offers nowhere else. The
-pseudonyms' salt is made once and kept in the browser's `localStorage`. `run.ts` uses no browser API
-and is tested in Node; `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
-(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
+(`worker.ts`, `run.ts`), so the page stays responsive, then shows the wiki and the player state with
+the wiki view (`view/wiki-view.js` and `.css`, plain JavaScript that defines `window.renderWiki`),
+and the report in a collapsed section. The owner is the player the bot addresses most in the DM;
+without a DM the run stops and shows a username field, which the page offers nowhere else. The
+results (never the chats) are kept in IndexedDB (`storage.ts`), so a returning player sees their
+wiki; the pseudonyms' salt is made once and kept in `localStorage`; "Cancella i miei dati" deletes
+both. `run.ts` and `storage.ts` use no browser API and are tested in Node; `main.ts` and `worker.ts`
+are browser-only wiring, checked in a browser (type-checked with the DOM types by
+`tsconfig.web.json`, and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,

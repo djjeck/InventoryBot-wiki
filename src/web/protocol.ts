@@ -36,7 +36,7 @@ export interface ProgressMessage {
   total?: number;
 }
 
-/** What a run produced. */
+/** What a run produced: all that the page shows and keeps (storage.ts). */
 export interface RunResult {
   /** The export owner the run was made for (given, or found in the DM). */
   owner: string | null;
@@ -44,6 +44,8 @@ export interface RunResult {
   wiki: Wiki;
   /** The owner's own state. */
   player: PlayerState;
+  /** The options of the run, without the salt (which stays in the browser's storage alone). */
+  options: Omit<RunOptions, 'salt'>;
   /** The report lines: warnings, then the summary. */
   report: string[];
   /** Names of the input folders. */

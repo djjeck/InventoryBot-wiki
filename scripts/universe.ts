@@ -14,7 +14,7 @@
  * - places: after `ti trovi`, `arrivi`, `non puoi andare: `, `passare ` and exit lines
  *   (` - `), up to the place's emoji;
  * - Telegram usernames: every `@name` (not an e-mail address, a package scope such as
- *   `@types/node`, or code such as `@${u}`), compared whole.
+ *   `@types/node`, code such as `@${u}`, or a JSDoc tag such as `@param`), compared whole.
  *
  * A name written anywhere else is not seen; review catches those. Names are compared
  * ignoring case and runs of spaces. No vitest imports here.
@@ -81,6 +81,9 @@ const LINE_START = String.raw`(?:^|\n|\\n)`;
 /** A Telegram username after `@`: not inside a word, an address or code, nor a package scope. */
 const USERNAME = /(?<![\p{L}\p{N}_.@/\\$])@([A-Za-z][A-Za-z0-9_]*)(?![\p{L}\p{N}_/-])/gu;
 
+/** JSDoc tags, which read like usernames in comments (`@param`). */
+const JSDOC_TAGS = new Set(['param', 'returns', 'return', 'type', 'typedef', 'see', 'throws']);
+
 /** Patterns whose first group is the whole name of an entity. */
 const NAMED: readonly [Kind, RegExp][] = [
   ['item', new RegExp(`Ottieni: (${SPAN})!`, 'gu')],
@@ -140,7 +143,7 @@ export function unknownEntities(text: string, universe: Universe): Finding[] {
   }
   for (const m of text.matchAll(USERNAME)) {
     const name = m[1] as string;
-    if (!universe.user.has(normalizeName(name)))
+    if (!JSDOC_TAGS.has(name) && !universe.user.has(normalizeName(name)))
       out.push({ kind: 'user', text: `@${name}`, line: lineOf(text, m.index) });
   }
   return out.sort((a, b) => a.line - b.line);

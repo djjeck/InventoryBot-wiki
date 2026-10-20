@@ -32,8 +32,8 @@
           </li>
           <li>Scegli qui sotto la cartella creata dall'esportazione.</li>
           <li>
-            Premi <b>Leggi le esportazioni</b>. Per ora viene mostrato solo un riepilogo di ciò che
-            è stato letto: la wiki arriverà in seguito.
+            Premi <b>Crea la wiki</b>. La wiki resta salvata in questo browser finché non la
+            cancelli.
           </li>
         </ol>
 
@@ -56,6 +56,10 @@
             <button type="button" class="btn ghost" id="clear-picks" hidden>Svuota l'elenco</button>
           </div>
           <ul id="picked" class="picked" aria-label="Cartelle scelte"></ul>
+          <p class="hint" id="pick-note" hidden>
+            Per creare di nuovo la wiki, con altre cartelle o altre opzioni, scegli di nuovo le
+            cartelle: il browser non le ricorda da una visita all'altra.
+          </p>
         </div>
 
         <form class="card" id="options" novalidate>
@@ -78,9 +82,8 @@
             </p>
           </div>
           <div class="row-actions">
-            <button type="submit" class="btn primary" id="run" disabled>
-              Leggi le esportazioni
-            </button>
+            <button type="submit" class="btn primary" id="run" disabled>Crea la wiki</button>
+            <button type="button" class="btn ghost" id="back" hidden>Torna alla wiki</button>
           </div>
           <div id="progress" class="progress" role="status" aria-live="polite" hidden>
             <progress id="progress-bar" max="100" value="0"></progress>
@@ -88,17 +91,23 @@
           </div>
           <div id="error" class="error" role="alert" tabindex="-1" hidden></div>
         </form>
+
+        <p class="hint" id="storage-note"></p>
       </section>
 
-      <section id="result" class="shell" aria-labelledby="result-title" hidden>
-        <div class="card">
-          <h2 id="result-title">Riepilogo</h2>
+      <section id="result" aria-label="La tua wiki" hidden>
+        <div class="toolbar">
           <p id="result-info"></p>
-          <pre id="report"></pre>
           <div class="row-actions">
             <button type="button" class="btn ghost" id="edit">Cartelle e opzioni</button>
+            <button type="button" class="btn danger" id="clear">Cancella i miei dati</button>
           </div>
         </div>
+        <div id="wiki"></div>
+        <details class="report">
+          <summary>Rapporto tecnico dell'elaborazione</summary>
+          <pre id="report"></pre>
+        </details>
       </section>
       <p id="announce" class="visually-hidden" role="status" aria-live="polite"></p>
     </main>

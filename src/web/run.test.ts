@@ -58,6 +58,8 @@ describe('handleRun', () => {
       messages: 4,
       fromBot: 1,
       replies: 1,
+      // The salt is never part of the result, which the page stores.
+      options: { timeZone: 'Europe/Rome', player: null },
     });
     // A drop's item is isolated by the names other replies give: here none does.
     expect(last.result.wiki.items).toStrictEqual({});

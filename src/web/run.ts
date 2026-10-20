@@ -67,6 +67,7 @@ export async function handleRun(
         owner: c.owner,
         wiki: built.wiki,
         player: built.player,
+        options: { timeZone: request.options.timeZone, player },
         report,
         folders: folders.map((f) => f.name),
         pages: total,

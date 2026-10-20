@@ -1,12 +1,13 @@
 /**
  * The web app's page: folder picking, the time zone (this browser's, proposed), the owner's
- * username when the run asks for it, progress and errors, then a summary of what the
- * pipeline found (the wiki itself is not shown yet). The secret salt of the pseudonyms is kept in this browser (pseudonymSalt).
- * The pipeline runs in a Web Worker (worker.ts), on the browser `File` objects of the
- * picked folders; nothing is sent over the network.
+ * username when the run asks for it, progress and errors, then the wiki, rendered by the
+ * view (view/wiki-view.js). The pipeline runs in a Web Worker (worker.ts), on the browser
+ * `File` objects of the picked folders; nothing is sent over the network (the built page's
+ * Content-Security-Policy forbids it). Only the results are kept, in IndexedDB
+ * (storage.ts), and the secret salt of the pseudonyms, in localStorage (pseudonymSalt).
  *
- * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, the
- * adapters) has its own tests.
+ * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, storage.ts,
+ * the adapters) has its own tests.
  */
 import { type FileLike } from '#src/telegram/export/browser-files.ts';
 import {
@@ -16,7 +17,17 @@ import {
   type StoppedMessage,
   type WorkerMessage,
 } from './protocol.ts';
+import { type DatabaseFactory, resultStore } from './storage.ts';
+import './view/wiki-view.css';
+import './view/wiki-view.js';
 import './app.css';
+
+declare global {
+  interface Window {
+    /** Defined by view/wiki-view.js. */
+    renderWiki(root: HTMLElement, wiki: unknown, player: unknown, missing?: string): void;
+  }
+}
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -27,23 +38,39 @@ const ui = {
   pickLabel: $<HTMLLabelElement>('pick-label'),
   clearPicks: $<HTMLButtonElement>('clear-picks'),
   picked: $<HTMLUListElement>('picked'),
+  pickNote: $('pick-note'),
   form: $<HTMLFormElement>('options'),
   playerField: $('player-field'),
   player: $<HTMLInputElement>('player'),
   timeZone: $<HTMLSelectElement>('time-zone'),
   run: $<HTMLButtonElement>('run'),
+  back: $<HTMLButtonElement>('back'),
   progress: $('progress'),
   progressBar: $<HTMLProgressElement>('progress-bar'),
   progressText: $('progress-text'),
   error: $('error'),
+  storageNote: $('storage-note'),
   resultInfo: $('result-info'),
   edit: $<HTMLButtonElement>('edit'),
+  clear: $<HTMLButtonElement>('clear'),
+  wiki: $('wiki'),
   report: $('report'),
   announce: $('announce'),
 };
 
+const store = resultStore(
+  (() => {
+    try {
+      return (globalThis as { indexedDB?: DatabaseFactory }).indexedDB;
+    } catch {
+      return undefined; // reading indexedDB itself can throw where storage is blocked
+    }
+  })()
+);
+
 /** The folders picked in this visit (kept in memory only, never saved). */
 const picks: FileLike[][] = [];
+let shown: RunResult | null = null;
 let running = false;
 
 const esc = (s: string): string =>
@@ -51,6 +78,9 @@ const esc = (s: string): string =>
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
   );
+
+const fmtDate = (d: string | Date): string =>
+  new Date(d).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' });
 
 function announce(text: string): void {
   ui.announce.textContent = '';
@@ -86,6 +116,7 @@ function renderPicks(): void {
     })
   );
   ui.clearPicks.hidden = picks.length === 0;
+  if (picks.length > 0) ui.pickNote.hidden = true;
   ui.pickLabel.textContent = picks.length ? 'Aggiungi un’altra cartella…' : 'Scegli una cartella…';
   ui.run.disabled = running || picks.length === 0;
 }
@@ -129,23 +160,22 @@ function showError(html: string, details: readonly string[] = [], focus?: HTMLEl
   (focus ?? ui.error).focus();
 }
 
+const PHASES: Record<ProgressMessage['phase'], [label: string, percent: number]> = {
+  read: ['Lettura delle pagine', 0],
+  parse: ['Lettura dei messaggi', 55],
+  conversation: ['Abbinamento delle risposte ai comandi', 70],
+  interpret: ['Interpretazione delle risposte del bot', 80],
+  build: ['Costruzione della wiki', 92],
+};
+
 function showProgress(m: ProgressMessage): void {
-  if (m.phase === 'read') {
-    const total = m.total ?? 0;
-    ui.progressBar.value = total ? Math.round((90 * (m.done ?? 0)) / total) : 0;
-    ui.progressText.textContent = `Lettura delle pagine: ${m.done ?? 0} di ${total}`;
-  } else if (m.phase === 'parse') {
-    ui.progressBar.value = 92;
-    ui.progressText.textContent = 'Lettura dei messaggi…';
-  } else if (m.phase === 'conversation') {
-    ui.progressBar.value = 94;
-    ui.progressText.textContent = 'Abbinamento delle risposte ai comandi…';
-  } else if (m.phase === 'interpret') {
-    ui.progressBar.value = 96;
-    ui.progressText.textContent = 'Interpretazione delle risposte del bot…';
+  const [label, percent] = PHASES[m.phase];
+  if (m.phase === 'read' && m.total) {
+    ui.progressBar.value = Math.round((50 * (m.done ?? 0)) / m.total);
+    ui.progressText.textContent = `${label}: ${m.done ?? 0} di ${m.total}`;
   } else {
-    ui.progressBar.value = 98;
-    ui.progressText.textContent = 'Costruzione della wiki…';
+    ui.progressBar.value = percent;
+    ui.progressText.textContent = `${label}…`;
   }
 }
 
@@ -165,7 +195,7 @@ function showStop(m: StoppedMessage): void {
     showError(
       '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
         'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi di nuovo ' +
-        '<b>Leggi le esportazioni</b>.</p>',
+        '<b>Crea la wiki</b>.</p>',
       warnings,
       ui.player
     );
@@ -208,9 +238,9 @@ function browserTimeZone(): string {
   }
 }
 
-/** Fills the picker with the world's time zones, the browser's selected. */
-function fillTimeZones(): void {
-  const proposed = browserTimeZone();
+/** Fills the picker with the world's time zones, `selected` (else the browser's) chosen. */
+function fillTimeZones(selected?: string): void {
+  const proposed = selected ?? browserTimeZone();
   let zones: string[] = [];
   try {
     zones = Intl.supportedValuesOf('timeZone');
@@ -270,7 +300,7 @@ ui.form.addEventListener('submit', (e) => {
     const m = ev.data;
     if (m.type === 'progress') return showProgress(m);
     finish();
-    if (m.type === 'done') return showResult(m.result);
+    if (m.type === 'done') return void onResult(m.result, true);
     if (m.type === 'stopped') return showStop(m);
     showError(
       `<p>Qualcosa è andato storto durante l’elaborazione: ${esc(m.message)}</p>` +
@@ -287,24 +317,87 @@ ui.form.addEventListener('submit', (e) => {
 
 // ---- results -------------------------------------------------------------------------
 
+async function onResult(result: RunResult, fresh: boolean): Promise<void> {
+  showResult(result);
+  if (!fresh) return;
+  const saved = await store.save(result);
+  updateStorageNote(saved);
+  announce(
+    `Wiki pronta: ${Object.keys(result.wiki.recipes).length} ricette, ${Object.keys(result.wiki.items).length} oggetti.`
+  );
+}
+
 function showResult(result: RunResult): void {
+  shown = result;
+  // A new element for each render: the view keeps its listeners on its root.
+  const root = document.createElement('div');
+  ui.wiki.replaceChildren(root);
+  window.renderWiki(root, result.wiki, result.player);
   const who = result.owner ? `@${result.owner}` : 'giocatore sconosciuto';
   ui.resultInfo.textContent =
-    `Esportazioni di ${who}, da ${result.folders.join(', ')}: ${result.pages} pagine, ` +
-    `${result.messages} messaggi, ${result.replies} risposte del bot, in ` +
-    `${(result.ms / 1000).toFixed(1)} s. Gli altri giocatori compaiono con nomi inventati.`;
+    `Wiki di ${who}, da ${result.folders.join(', ')} (${result.pages} pagine), ` +
+    `creata il ${fmtDate(result.wiki.generated)}; altri giocatori con pseudonimi.`;
   ui.report.textContent = result.report.join('\n');
+  // A username the player gave stays in its field for the next run; otherwise the field
+  // stays hidden and the DM decides again.
+  ui.playerField.hidden = result.options.player === null;
+  ui.player.value = result.options.player ?? '';
+  fillTimeZones(result.options.timeZone);
   ui.start.hidden = true;
   ui.result.hidden = false;
+  ui.back.hidden = false;
   $('main').focus();
-  announce(`Lettura completata: ${result.messages} messaggi.`);
 }
 
 ui.edit.addEventListener('click', () => {
   ui.result.hidden = true;
   ui.start.hidden = false;
+  ui.back.hidden = shown === null;
+  // After a new visit the folders are gone: the browser does not keep them.
+  ui.pickNote.hidden = picks.length > 0;
   ui.pickLabel.focus();
 });
+
+ui.back.addEventListener('click', () => {
+  if (shown) showResult(shown);
+});
+
+ui.clear.addEventListener('click', async () => {
+  if (
+    !confirm(
+      'Cancellare la wiki salvata in questo browser? Le esportazioni sul disco non vengono toccate.'
+    )
+  )
+    return;
+  await store.clear();
+  try {
+    localStorage.removeItem('ib-tab'); // the view's remembered tab
+    localStorage.removeItem(SALT_KEY); // new pseudonyms from the next run
+  } catch {
+    // storage unavailable: nothing was saved there
+  }
+  shown = null;
+  picks.length = 0;
+  renderPicks();
+  ui.wiki.replaceChildren();
+  ui.report.textContent = '';
+  ui.player.value = '';
+  ui.playerField.hidden = true;
+  fillTimeZones();
+  ui.result.hidden = true;
+  ui.start.hidden = false;
+  ui.back.hidden = true;
+  hideError();
+  announce('Dati cancellati da questo browser.');
+  ui.storageNote.textContent = 'I tuoi dati sono stati cancellati da questo browser.';
+  ui.pickLabel.focus();
+});
+
+function updateStorageNote(saved: boolean): void {
+  ui.storageNote.textContent = saved
+    ? 'La wiki è salvata solo in questo browser (non le chat): alla prossima visita la ritrovi. «Cancella i miei dati» la elimina.'
+    : 'Questo browser non permette di salvare dati: alla prossima visita la wiki andrà creata di nuovo.';
+}
 
 // ---- start ---------------------------------------------------------------------------
 
@@ -316,3 +409,11 @@ if (!('webkitdirectory' in ui.folders)) {
 }
 fillTimeZones();
 renderPicks();
+void store.load().then((saved) => {
+  if (saved) {
+    showResult(saved.result);
+    ui.storageNote.textContent = `Wiki salvata in questo browser il ${fmtDate(saved.savedAt)}.`;
+  } else if (!store.available) {
+    updateStorageNote(false);
+  }
+});

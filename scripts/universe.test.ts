@@ -103,6 +103,7 @@ describe('unknownEntities', () => {
       "import js from '@eslint/js';",
       'typescript-eslint and @typescript-eslint/parser',
       '`@${u}, nel bosco`',
+      ' * @param root the element',
     ])
       expect(unknownEntities(text, U), text).toStrictEqual([]);
   });

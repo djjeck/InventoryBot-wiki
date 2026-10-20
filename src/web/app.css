@@ -1,43 +1,6 @@
-/* The web app's screens (picking folders, options, progress, summary). No web fonts: the
-   app loads nothing from other sites, so the font stacks fall back to system fonts. */
-:root {
-  --bg: #eef1f5;
-  --surface: #ffffff;
-  --ink: #18202c;
-  --muted: #5a6577;
-  --line: #d6dce5;
-  --accent: #2b55c8;
-  --warn: #b45309;
-  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #11151b;
-    --surface: #181e27;
-    --ink: #e5e9ef;
-    --muted: #9aa4b4;
-    --line: #2a323e;
-    --accent: #8eaaff;
-    --warn: #f0a050;
-    color-scheme: dark;
-  }
-}
-* {
-  box-sizing: border-box;
-}
-html,
-body {
-  margin: 0;
-}
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font: 15px/1.5 var(--font-body);
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 20px 48px;
-}
+/* The web app's own screens (picking folders, options, progress). The wiki itself, and
+   the colour tokens used here, come from view/wiki-view.css. No web fonts: the page loads
+   nothing from other sites, so the view's font stacks fall back to system fonts. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -107,8 +70,8 @@ main:focus {
 .field label {
   font-weight: 600;
 }
-.field input,
-.field select {
+.field select,
+.field input {
   font: inherit;
   color: var(--ink);
   background: var(--bg);
@@ -145,6 +108,11 @@ main:focus {
   color: var(--surface);
 }
 .btn.ghost {
+  background: transparent;
+}
+.btn.danger {
+  border-color: var(--warn);
+  color: var(--warn);
   background: transparent;
 }
 .btn:disabled {
@@ -208,11 +176,35 @@ input[type='file']:focus-visible + .btn {
   color: var(--muted);
   font-size: 0.9rem;
 }
+#result {
+  display: grid;
+  gap: 12px;
+}
+#result[hidden],
 .shell[hidden],
 .field[hidden] {
   display: none;
 }
-#report {
+.toolbar {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 16px;
+}
+.toolbar p {
+  margin: 0;
+  color: var(--muted);
+}
+.report {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+}
+.report pre {
   overflow-x: auto;
   font: 12px/1.5 var(--font-mono);
   background: var(--surface);
