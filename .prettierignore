@@ -1,2 +1,4 @@
 # The built web app (npm run web:build).
 web-dist/
+# Byte-exact pipeline outputs pinned by src/pipeline.golden.test.ts: never reformat them.
+test/golden/

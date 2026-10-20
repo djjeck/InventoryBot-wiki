@@ -1,0 +1,99 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T19:03:00-05:00",
+  "recipes": {},
+  "items": {
+    "un cappello piumato": {
+      "first_seen": "2025-11-27T19:02:41-05:00"
+    },
+    "un drago": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un fiore": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un oro falso": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una L1 rara": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una cosa": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una mela": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una moneta d'Oro": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una trave": {
+      "first_seen": "2025-11-27T19:02:31-05:00"
+    },
+    "uno scudo": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": {
+    "date": "2025-11-27T19:02:51-05:00",
+    "truncated": false,
+    "recipes": {
+      "Torre": "pronta",
+      "Muro": "manca 3"
+    }
+  },
+  "inventory": {
+    "un cappello piumato": {
+      "qty": 3,
+      "exact": false,
+      "date": "2025-11-27T19:02:41-05:00",
+      "via": "mostra"
+    },
+    "un drago": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:01:51-05:00",
+      "via": "inventario"
+    },
+    "un oro falso": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:01:51-05:00",
+      "via": "inventario"
+    },
+    "un sasso": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:03:00-05:00",
+      "via": "inventario"
+    },
+    "una L1 rara": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:01:51-05:00",
+      "via": "inventario"
+    },
+    "una cosa": {
+      "qty": 3,
+      "exact": true,
+      "date": "2025-11-27T19:02:11-05:00",
+      "via": "inventario"
+    },
+    "una trave": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:02:31-05:00",
+      "via": "ricetta"
+    },
+    "uno scudo": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:01:51-05:00",
+      "via": "inventario"
+    }
+  }
+}

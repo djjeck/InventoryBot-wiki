@@ -1,0 +1,32 @@
+{
+  "player": "aldo",
+  "as_of": "2025-11-27T20:03:21-05:00",
+  "recipes": {},
+  "items": {
+    "un bottone": {
+      "first_seen": "2025-11-27T20:06:41-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un secchio di fango": {
+      "first_seen": "2025-11-27T20:00:01-05:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": null,
+  "inventory": {
+    "un bottone": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T20:06:41-05:00",
+      "via": "movimento"
+    },
+    "un sasso": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:53:21-05:00",
+      "via": "inventario"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 /**
- * The pipeline in memory: phases 2 to 5 on the messages of phase 1.
+ * The pipeline in memory: phases 1 to 5, from the pages of the exports to the wiki, the
+ * player state and the report lines (runPipeline), or from phase 2 on given messages
+ * (converse, then finishPipeline).
  * It joins the generic Telegram-bot layer and the InventoryBot layer, and uses no Node or
  * browser API: the web app's worker (src/web/run.ts) runs it, and the tests run it in Node.
  *
@@ -17,6 +19,7 @@ import {
   type PlayerState,
   type Wiki,
 } from './inventorybot/types.ts';
+import { compareCodePoints } from './lib/text.ts';
 import { anonymise } from './telegram/anonymise/anonymise.ts';
 import {
   type Conversation,
@@ -24,7 +27,8 @@ import {
   readConversation,
 } from './telegram/conversation/conversation.ts';
 import { hasDm, ownerFromDm } from './telegram/conversation/owner.ts';
-import { type Message } from './telegram/messages.ts';
+import { parsePages, summaryLine } from './telegram/export/parse-export.ts';
+import { type Message, type Page } from './telegram/messages.ts';
 
 /** What phases 2 and 3 return, with the player titles the dialect was built with. */
 export interface Conversed {
@@ -105,4 +109,73 @@ export function buildWiki(
   const wiki = toJson(kb);
   const player = playerState(copies, kb);
   return { wiki, player, report: reportLines(kb) };
+}
+
+/** A step of the pipeline, as the page's progress shows it. */
+export type Phase = 'parse' | 'conversation' | 'interpret' | 'build';
+
+/** What phases 4 and 5 give after the conversation: every result, and the report lines. */
+export interface Finished {
+  events: EventRecord[];
+  wiki: Wiki;
+  player: PlayerState;
+  report: string[];
+}
+
+/** Phases 4 and 5 after the conversation of phases 2 and 3. */
+export function finishPipeline(c: Conversed, onPhase: (p: Phase) => void = () => {}): Finished {
+  onPhase('interpret');
+  const interpreted = interpret(c);
+  onPhase('build');
+  const built = buildWiki(interpreted.events, c.owner);
+  return {
+    events: interpreted.events,
+    wiki: built.wiki,
+    player: built.player,
+    report: [...interpreted.report, ...built.report],
+  };
+}
+
+export interface PipelineOptions extends ConverseOptions {
+  /** The IANA time zone for the dates of macOS exports (ParseOptions.timeZone). */
+  timeZone: string;
+}
+
+/** A run of the whole pipeline: its results, or why it stopped, with the report lines so far. */
+export type PipelineOutcome =
+  | ({ status: 'done'; messages: readonly Message[]; conversed: Conversed } & Finished)
+  /** No DM with the bot and no username given: the owner is unknown. */
+  | { status: 'no-owner'; report: string[] };
+
+/**
+ * Phases 1 to 5 on the pages of each input folder. The report lines are the warnings of
+ * phase 1, its summary (with the chat titles of phase 3, so printed only once there is an
+ * owner), then the lines of each phase.
+ */
+export function runPipeline(
+  paths: Iterable<Iterable<Page>>,
+  options: PipelineOptions,
+  onPhase: (p: Phase) => void = () => {}
+): PipelineOutcome {
+  onPhase('parse');
+  const parsed = parsePages(paths, { bot: INVENTORY_BOT, timeZone: options.timeZone });
+  const report = [...parsed.warnings];
+  onPhase('conversation');
+  const c = converse(parsed.messages, options);
+  if (c.ownerMissing) return { status: 'no-owner', report };
+  const chats = [...new Set(parsed.chats.map((t) => (t === '?' ? t : c.chatTitle(t))))];
+  const fromBot = parsed.messages.filter((m) => m.from_bot).length;
+  report.push(
+    summaryLine({ ...parsed, chats: chats.sort(compareCodePoints) }),
+    `messaggi: ${parsed.messages.length} (dal bot: ${fromBot})`,
+    ...conversationReport(c)
+  );
+  const finished = finishPipeline(c, onPhase);
+  return {
+    status: 'done',
+    messages: parsed.messages,
+    conversed: c,
+    ...finished,
+    report: [...report, ...finished.report],
+  };
 }

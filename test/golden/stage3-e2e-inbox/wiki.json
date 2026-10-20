@@ -1,0 +1,245 @@
+{
+  "generated": "<generated>",
+  "rarities": {
+    "C": "comune",
+    "N": "non comune",
+    "R": "raro",
+    "S": "super raro",
+    "U": "unico (ne esiste uno solo)",
+    "Ln": "ottenibile da ricette",
+    "X": "oggetti speciali"
+  },
+  "rules": [
+    "Ogni ricetta di livello N richiede il livello N."
+  ],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:12-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una trave": {
+      "name": "una trave",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:11-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un nastro da pacchi": {
+      "name": "un nastro da pacchi",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Pratica cestina"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un paio di mollette": {
+      "name": "un paio di mollette",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Pratica cestina"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre": {
+      "name": "una torre",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre"
+      ],
+      "last_seen": "2025-11-27T19:01:31-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un bottone": {
+      "name": "un bottone",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un diamante": {
+      "name": "un diamante",
+      "rarity": "S",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:25-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una ghianda d'oro": {
+      "name": "una ghianda d'oro",
+      "rarity": "C+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:41-05:00",
+      "exclusive": true,
+      "locations": [
+        "nel bosco nebbioso di Valtorbo 🌲"
+      ]
+    },
+    "un fungo": {
+      "name": "un fungo",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:20-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un fiore di pianura": {
+      "name": "un fiore di pianura",
+      "rarity": "N+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:40-05:00",
+      "exclusive": true,
+      "locations": [
+        "nella valle ventosa 🏞"
+      ]
+    }
+  },
+  "recipes": {
+    "Torre": {
+      "name": "Torre",
+      "level": 1,
+      "ingredients": {
+        "un sasso": 2,
+        "una trave": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una torre",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:01:31-05:00"
+    },
+    "Pratica cestina": {
+      "name": "Pratica cestina",
+      "level": 2,
+      "ingredients": {
+        "un paio di mollette": 1,
+        "un nastro da pacchi": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:01:01-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "name": "nel bosco nebbioso di Valtorbo 🌲",
+      "label": "Bosco nebbioso di Valtorbo 🌲",
+      "exits": [
+        "nella valle ventosa 🏞"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [
+        "una ghianda d'oro"
+      ]
+    },
+    "nella valle ventosa 🏞": {
+      "name": "nella valle ventosa 🏞",
+      "label": "Valle ventosa 🏞",
+      "exits": [
+        "ai piedi del monte Grevolo ⛰",
+        "nel bosco nebbioso di Valtorbo 🌲"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [
+        "un fiore di pianura"
+      ]
+    },
+    "ai piedi del monte Grevolo ⛰": {
+      "name": "ai piedi del monte Grevolo ⛰",
+      "label": "Ai piedi del monte Grevolo ⛰",
+      "exits": [
+        "nella valle ventosa 🏞",
+        "sul banco corallino 🐠"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "sul banco corallino 🐠": {
+      "name": "sul banco corallino 🐠",
+      "label": "Banco corallino 🐠",
+      "exits": [],
+      "requires_item": true,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    }
+  }
+}

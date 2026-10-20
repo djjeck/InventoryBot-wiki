@@ -1,0 +1,29 @@
+cartelle di esportazione: 1; chat: InventoryBot
+messaggi: 34 (dal bot: 17)
+giocatore: @djjeck
+risposte del bot: 17
+  InventoryBot: risposte del bot abbinate a un comando: dm=17
+nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0
+eventi: item_info=7 drop=5 inventory=1 location=1 travel=1 recipe_list=1 recipe_detail=1
+oggetti: 6; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 0); luoghi: 2
+-- rarity_conflict: 8
+  rarity_conflict: item="l'ascia \"vera\"" old="C" new="N" date="2025-11-27T19:00:11-05:00"
+  rarity_conflict: item="un \\ rovescio" old="C" new="N" date="2025-11-27T19:00:21-05:00"
+  rarity_conflict: item="un nbsp qui" old="C" new="N" date="2025-11-27T19:00:31-05:00"
+  rarity_conflict: item="un astronauta 🧑‍🚀" old="C" new="N" date="2025-11-27T19:00:41-05:00"
+  rarity_conflict: item="__proto__" old="C" new="N" date="2025-11-27T19:00:51-05:00"
+  rarity_conflict: item="un \"dolce\"" old="C" new="N" date="2025-11-27T19:01:01-05:00"
+  rarity_conflict: item="un astronauta 🧑‍🚀" old="N" new="C" date="2025-11-27T19:03:01-05:00"
+  rarity_conflict: item="l'ascia \"vera\"" old="N" new="C+" date="2025-11-27T19:02:11-05:00"
+-- unresolved_drop: 3
+  unresolved_drop: text="un sasso"
+  unresolved_drop: text="nel fosso vedi una cosa strana"
+  unresolved_drop: text="sulla spiaggia raccogli una conchiglia  '"
+-- source_vs_rarity: 3
+  source_vs_rarity: item="un \\ rovescio" rarity="N" sources=["special"]
+  source_vs_rarity: item="un astronauta 🧑‍🚀" rarity="C" sources=["special"]
+  source_vs_rarity: item="un \"dolce\"" rarity="N" sources=["special"]
+-- partial_not_in_full: 1
+  partial_not_in_full: recipe="Ricetta 'strana'" missing=["__proto__"]
+-- exclusive_in_many_places: 1
+  exclusive_in_many_places: item="l'ascia \"vera\"" locations=["nel bosco nebbioso di Valtorbo 🌲","nella valle ventosa 🏞"]

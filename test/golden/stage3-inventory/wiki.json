@@ -1,0 +1,189 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "una mela": {
+      "name": "una mela",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:11-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un fiore": {
+      "name": "un fiore",
+      "rarity": "C+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:11-05:00",
+      "sources_inferred": true,
+      "exclusive": true,
+      "locations": []
+    },
+    "una cosa": {
+      "name": "una cosa",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:11-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un drago": {
+      "name": "un drago",
+      "rarity": "M",
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:51-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "uno scudo": {
+      "name": "uno scudo",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:51-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una L1 rara": {
+      "name": "una L1 rara",
+      "rarity": "L2",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:51-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:03:00-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una moneta d'Oro": {
+      "name": "una moneta d'Oro",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:51-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un oro falso": {
+      "name": "un oro falso",
+      "rarity": "U",
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:51-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una trave": {
+      "name": "una trave",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:31-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un cappello piumato": {
+      "name": "un cappello piumato",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:41-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Torre": {
+      "name": "Torre",
+      "level": 1,
+      "ingredients": {
+        "un sasso": 3,
+        "una trave": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:51-05:00"
+    },
+    "Muro": {
+      "name": "Muro",
+      "level": 2,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:51-05:00"
+    }
+  },
+  "locations": {}
+}

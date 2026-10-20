@@ -1,0 +1,35 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un bottone": {
+      "name": "un bottone",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:05-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una ruota della fortuna 🎡": {
+      "name": "una ruota della fortuna 🎡",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:02-05:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {},
+  "locations": {}
+}

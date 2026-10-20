@@ -1,0 +1,27 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "una mela": {
+      "name": "una mela",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:15:03-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {},
+  "locations": {}
+}

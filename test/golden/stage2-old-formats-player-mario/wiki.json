@@ -1,0 +1,162 @@
+{
+  "generated": "<generated>",
+  "rarities": {
+    "N": "non comune (davvero)",
+    "Ln": "ricette"
+  },
+  "rules": [
+    "regola"
+  ],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un dado": {
+      "name": "un dado",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2017-06-01T02:00:01+02:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure",
+        "recipe"
+      ],
+      "used_in": [
+        "Muro",
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2018-01-02T01:01:11+01:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un astrolabio da cartografo": {
+      "name": "un astrolabio da cartografo",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2017-06-01T02:00:41+02:00",
+      "gives_title": true,
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un fischietto": {
+      "name": "un fischietto",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2018-01-02T01:00:11+01:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una mela [C] x3": {
+      "name": "una mela [C] x3",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2018-01-02T01:00:31+01:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre": {
+      "name": "una torre",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre"
+      ],
+      "last_seen": "2018-01-02T01:01:11+01:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un assegno": {
+      "name": "un assegno",
+      "rarity": "U",
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2018-01-02T01:01:31+01:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Muro": {
+      "name": "Muro",
+      "level": null,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [
+        "un sasso"
+      ],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2018-01-02T01:00:41+01:00"
+    },
+    "Torre": {
+      "name": "Torre",
+      "level": 1,
+      "ingredients": {
+        "un sasso": 2
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [
+        "un sasso"
+      ],
+      "output": "una torre",
+      "craft_text": "e costruisci",
+      "last_seen": "2018-01-02T01:01:21+01:00"
+    },
+    "Gran Torre": {
+      "name": "Gran Torre",
+      "level": 11,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2018-01-02T01:01:21+01:00"
+    }
+  },
+  "locations": {
+    "in cima al monte Grevolo 🏔": {
+      "name": "in cima al monte Grevolo 🏔",
+      "label": "In cima al monte Grevolo 🏔",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T21:15:01-05:00",
+  "recipes": {
+    "Torre": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T21:13:21-05:00"
+    }
+  },
+  "items": {
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una torre alta": {
+      "first_seen": "2025-11-27T21:13:21-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 0
+    },
+    "nella valle ventosa 🏞": {
+      "visited": false,
+      "adventures": 0
+    },
+    "sul banco corallino 🐠": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
+  "recipe_list": null,
+  "inventory": {
+    "una torre alta": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T21:13:21-05:00",
+      "via": "movimento"
+    }
+  }
+}

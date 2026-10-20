@@ -1,0 +1,90 @@
+{
+  "player": "mario",
+  "as_of": "2025-11-27T22:18:21-05:00",
+  "recipes": {
+    "Torre": {
+      "crafted": 1,
+      "last_crafted": "2018-01-02T01:01:11+01:00"
+    }
+  },
+  "items": {
+    "un dado": {
+      "first_seen": "2017-06-01T02:00:01+02:00"
+    },
+    "un sasso": {
+      "first_seen": "2017-06-01T02:00:11+02:00"
+    },
+    "una lampada magica": {
+      "first_seen": "2025-11-27T22:16:41-05:00"
+    },
+    "una mela [C] x3": {
+      "first_seen": "2018-01-02T01:00:31+01:00"
+    },
+    "una torre": {
+      "first_seen": "2018-01-02T01:01:11+01:00"
+    },
+    "una vuvuzela 🎺": {
+      "first_seen": "2025-11-27T22:16:41-05:00"
+    }
+  },
+  "locations": {
+    "ai piedi del monte Grevolo ⛰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "in cima al monte Grevolo 🏔": {
+      "visited": true,
+      "adventures": 11
+    },
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nel magnifico Palazzo di Cristallo 🏰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nell'immenso deserto di Sabbiora 🏜": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nella palude sussurrante 🌾": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nella valle ventosa 🏞": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nelle cripte del monastero 👻": {
+      "visited": false,
+      "adventures": 0
+    },
+    "sul banco corallino 🐠": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
+  "recipe_list": {
+    "date": "2018-01-02T01:01:21+01:00",
+    "truncated": true,
+    "recipes": {
+      "Torre": "pronta",
+      "Gran Torre": "manca 3"
+    }
+  },
+  "inventory": {
+    "una lampada magica": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T22:16:41-05:00",
+      "via": "inventario"
+    },
+    "una vuvuzela 🎺": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T22:16:41-05:00",
+      "via": "inventario"
+    }
+  }
+}

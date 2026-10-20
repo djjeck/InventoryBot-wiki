@@ -1,0 +1,63 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T20:13:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un secchio di fango": {
+      "name": "un secchio di fango",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T20:03:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un bottone": {
+      "name": "un bottone",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T20:06:41-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una corona": {
+      "name": "una corona",
+      "rarity": "U",
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T20:16:41-05:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {},
+  "locations": {}
+}

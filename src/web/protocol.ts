@@ -7,6 +7,7 @@
  * the files on disk: only the export pages are read, in the worker) and plain data.
  */
 import { type PlayerState, type Wiki } from '#src/inventorybot/types.ts';
+import { type Phase } from '#src/pipeline.ts';
 import { type FileLike } from '#src/telegram/export/browser-files.ts';
 
 export interface RunOptions {
@@ -31,7 +32,7 @@ export interface RunRequest {
 /** Worker -> page: a step started. `read` counts the pages read so far. */
 export interface ProgressMessage {
   type: 'progress';
-  phase: 'read' | 'parse' | 'conversation' | 'interpret' | 'build';
+  phase: 'read' | Phase;
   done?: number;
   total?: number;
 }

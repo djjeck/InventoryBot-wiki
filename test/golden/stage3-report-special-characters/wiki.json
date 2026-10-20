@@ -1,0 +1,140 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "l'ascia \"vera\"": {
+      "name": "l'ascia \"vera\"",
+      "rarity": "C+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:31-05:00",
+      "exclusive": true,
+      "locations": [
+        "nel bosco nebbioso di Valtorbo 🌲",
+        "nella valle ventosa 🏞"
+      ]
+    },
+    "un \\ rovescio": {
+      "name": "un \\ rovescio",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:21-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un nbsp qui": {
+      "name": "un nbsp qui",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:31-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un astronauta 🧑‍🚀": {
+      "name": "un astronauta 🧑‍🚀",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [
+        "Ricetta 'strana'"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:03:01-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "__proto__": {
+      "name": "__proto__",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Ricetta 'strana'"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:03:11-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un \"dolce\"": {
+      "name": "un \"dolce\"",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Ricetta 'strana'": {
+      "name": "Ricetta 'strana'",
+      "level": 1,
+      "ingredients": {
+        "un astronauta 🧑‍🚀": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [
+        "__proto__"
+      ],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:03:11-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "name": "nel bosco nebbioso di Valtorbo 🌲",
+      "label": "Bosco nebbioso di Valtorbo 🌲",
+      "exits": [
+        "nella valle ventosa 🏞"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [
+        "l'ascia \"vera\""
+      ]
+    },
+    "nella valle ventosa 🏞": {
+      "name": "nella valle ventosa 🏞",
+      "label": "Valle ventosa 🏞",
+      "exits": [
+        "nel bosco nebbioso di Valtorbo 🌲"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [
+        "l'ascia \"vera\""
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+oggetti: 1; ricette: 0 (con tutti gli ingredienti: 0, con il risultato noto: 0); luoghi: 0
+-- rarity_conflict: 6
+  rarity_conflict: item="un sasso" old="C" new="N" date=""
+  rarity_conflict: item="un sasso" old="N" new="R" date="garbage"
+  rarity_conflict: item="un sasso" old="R" new="S" date="27.11.2025 19:00:20 UTC-05:00:30.5"
+  rarity_conflict: item="un sasso" old="S" new="U" date="2025-11-28T00:00:20+00:00"
+  rarity_conflict: item="un sasso" old="U" new="X" date="28.11.2025 00:00:20 Z"
+  rarity_conflict: item="un sasso" old="U" new="C" date="2025-11-27T19:00:20+00:00"

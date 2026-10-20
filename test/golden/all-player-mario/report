@@ -1,0 +1,89 @@
+salto discovery/json/ChatExport: esportazione in formato JSON, è supportato solo il formato HTML (Telegram Desktop -> Esporta cronologia chat -> Formato: HTML)
+salto discovery/json2: esportazione in formato JSON, è supportato solo il formato HTML (Telegram Desktop -> Esporta cronologia chat -> Formato: HTML)
+macos-export/ChatExport_Gruppo_Mac: date senza fuso orario, lette nel fuso orario Europe/Rome
+macos-export/ChatExport_InventoryBot: date senza fuso orario, lette nel fuso orario Europe/Rome
+macos-and-windows/ChatExport_Gruppo_Misto: date senza fuso orario, lette come UTC-05:00 come le altre esportazioni della stessa chat (4 messaggi in comune); in 1 di questi un'altra esportazione mostra un'altra data o un altro fuso orario
+cartelle di esportazione: 41; chat: Gruppo AlceGioviale, Gruppo ArmadilloSocievole, Gruppo BisontePotente, Gruppo CorvoCapace, Gruppo DonnolaRibelle, Gruppo ElefanteRaggiante, Gruppo GazzellaCortese, Gruppo GazzellaTenace, Gruppo GiraffaTenace, Gruppo LamaGentile, Gruppo MarmottaAgile, Gruppo NibbioEsuberante, Gruppo PettirossoLucente, Gruppo PumaAmabile, Gruppo SgombroBrillante, Gruppo SqualoImponente, Gruppo StruzzoEccellente, Gruppo TassoSorridente, InventoryBot
+messaggi: 572 (dal bot: 287)
+giocatore: @mario
+risposte del bot: 287
+  Gruppo StruzzoEccellente: risposte del bot abbinate a un comando: single=16, unmatched=4
+  Gruppo LamaGentile: risposte del bot abbinate a un comando: user=7
+  InventoryBot: risposte del bot abbinate a un comando: dm=76
+  Gruppo ArmadilloSocievole: risposte del bot abbinate a un comando: single=38, user=10, unmatched=9, reply=3
+  Gruppo SgombroBrillante: risposte del bot abbinate a un comando: single=8
+  Gruppo CorvoCapace: risposte del bot abbinate a un comando: user=21, single=4
+  Gruppo MarmottaAgile: risposte del bot abbinate a un comando: unmatched=1
+  Gruppo DonnolaRibelle: risposte del bot abbinate a un comando: single=2
+  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: single=52, unmatched=5
+  Gruppo BisontePotente: risposte del bot abbinate a un comando: single=1, unmatched=1
+  Gruppo SqualoImponente: risposte del bot abbinate a un comando: single=2, user=2
+  Gruppo PumaAmabile: risposte del bot abbinate a un comando: single=3
+  Gruppo GiraffaTenace: risposte del bot abbinate a un comando: unmatched=4, single=1
+  Gruppo GazzellaCortese: risposte del bot abbinate a un comando: unmatched=1
+  Gruppo GazzellaTenace: risposte del bot abbinate a un comando: user=2
+nomi visualizzati abbinati a un giocatore: 7; titoli dei giocatori riconosciuti: 11
+eventi: drop=65 inventory=41 use=31 miss=28 item_info=21 travel=13 give=11 craft=10 unknown=8 stats=8 gift=7 old_format=6 recipe_list=6 title=5 recipe_detail=5 item_cooldown=5 show=4 faq=4 location=4 cooldown=2 travel_blocked=2 travel_requirement=1
+  coppie nei gruppi verificate dalla risposta: confermate=168, sciolte=1
+  risposte del bot non riconosciute, per anno: 2018=1, 2025=7
+-- dissolved_pair: 1
+  dissolved_pair: reason="use_item" match="single" query="/usa vuvu" type="use" text="cosa desideri?"
+oggetti: 65; ricette: 20 (con tutti gli ingredienti: 9, con il risultato noto: 5); luoghi: 9
+-- unresolved_travel: 3
+  unresolved_travel: query="/viaggio baia" text="arrivi esausto nella baia di Scogliola 🦀"
+  unresolved_travel: query="/viaggio baia" text="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare"
+  unresolved_travel: query="/viaggio baia" text="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare"
+-- rarity_conflict: 13
+  rarity_conflict: item="l'ascia \"vera\"" old="C" new="N" date="2025-11-27T19:00:11-05:00"
+  rarity_conflict: item="un \\ rovescio" old="C" new="N" date="2025-11-27T19:00:21-05:00"
+  rarity_conflict: item="un nbsp qui" old="C" new="N" date="2025-11-27T19:00:31-05:00"
+  rarity_conflict: item="un astronauta 🧑‍🚀" old="C" new="N" date="2025-11-27T19:00:41-05:00"
+  rarity_conflict: item="__proto__" old="C" new="N" date="2025-11-27T19:00:51-05:00"
+  rarity_conflict: item="un \"dolce\"" old="C" new="N" date="2025-11-27T19:01:01-05:00"
+  rarity_conflict: item="un astronauta 🧑‍🚀" old="N" new="C" date="2025-11-27T19:03:01-05:00"
+  rarity_conflict: item="un sasso" old="C" new="N" date="2025-11-28T02:00:01+01:00"
+  rarity_conflict: item="un secchio di fango" old="L1" new="C" date="2025-11-27T20:00:01-05:00"
+  rarity_conflict: item="un sasso" old="N" new="C" date="2025-11-27T20:13:21-05:00"
+  rarity_conflict: item="un sasso" old="C" new="S" date="2025-11-28T10:23:21+09:00"
+  rarity_conflict: item="un sasso" old="S" new="C" date="2025-11-27T21:10:02-05:00"
+  rarity_conflict: item="l'ascia \"vera\"" old="N" new="C+" date="2025-11-27T19:02:11-05:00"
+-- unresolved_drop: 8
+  unresolved_drop: text="nel lago trovi una conchiglia"
+  unresolved_drop: text="nel lago trovi una conchiglia"
+  unresolved_drop: text="nel lago trovi una conchiglia"
+  unresolved_drop: text="nel lago trovi una conchiglia"
+  unresolved_drop: text="ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio"
+  unresolved_drop: text="al bazar della citta' inizi a mercanteggiare con un venditore, alla fine ottieni un baule di quercia 📦"
+  unresolved_drop: text="nel fosso vedi una cosa strana"
+  unresolved_drop: text="sulla spiaggia raccogli una conchiglia  '"
+-- ingredient_conflict: 5
+  ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":3} new={"un sasso":2} date="2018-01-02T01:01:11+01:00"
+  ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":3} new={"un sasso":2,"una trave":1} date="2025-11-27T19:01:11-05:00"
+  ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":2,"una trave":1} new={"un sasso":3} date="2025-11-27T19:02:00-05:00"
+  ingredient_conflict: recipe="Pratica cestina" source="craft" old={"un paio di mollette":1,"un nastro da pacchi":1} new={"un laccio":2} date="2025-11-27T19:02:21-05:00"
+  ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":3} new={"un sasso":4} date="2025-11-28T11:30:01+09:00"
+-- unnamed_recipe: 5
+  unnamed_recipe: query=null output="una cestina"
+  unnamed_recipe: query=null output="una cestina"
+  unnamed_recipe: query=null output=null
+  unnamed_recipe: query="/ricetta caffe rist" output="un caffè ristretto"
+  unnamed_recipe: query="/ricetta piselli" output="una manciata di linguette di latta"
+-- output_conflict: 2
+  output_conflict: recipe="Torre" old="una torre" new="un muro" date="2025-11-27T19:02:00-05:00"
+  output_conflict: recipe="Torre" old="un muro" new="una torre" date="2025-11-28T11:30:01+09:00"
+-- unresolved_use: 9
+  unresolved_use: query="/usa caps # palude" text="lanci il tappo nella palude"
+  unresolved_use: query="/usa caps" text="lanci il tappo lontano"
+  unresolved_use: query="/usa truccato" text="il dado rotola sotto il tavolo e sparisce, ' \" \\   🧑‍🚀 lungo lungo lungo lungo l"
+  unresolved_use: query="/usa d" text="un messaggio mai visto 🎲"
+  unresolved_use: query="/usa baule" text="apri il baule ma è vuoto"
+  unresolved_use: query="/usa baule" text="apri il baule ma è vuoto"
+  unresolved_use: query="/usa alberello" text="osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un p"
+  unresolved_use: query="/quest" text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
+  unresolved_use: query=null text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
+-- source_vs_rarity: 3
+  source_vs_rarity: item="un \\ rovescio" rarity="N" sources=["special"]
+  source_vs_rarity: item="un astronauta 🧑‍🚀" rarity="C" sources=["special"]
+  source_vs_rarity: item="un \"dolce\"" rarity="N" sources=["special"]
+-- partial_not_in_full: 1
+  partial_not_in_full: recipe="Ricetta 'strana'" missing=["__proto__"]

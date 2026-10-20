@@ -1,0 +1,29 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T19:01:01+01:00",
+  "recipes": {},
+  "items": {
+    "l'oro": {
+      "first_seen": "2025-11-27T19:00:01+01:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01+01:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": null,
+  "inventory": {
+    "l'oro": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:00:01+01:00",
+      "via": "inventario"
+    },
+    "un sasso": {
+      "qty": 3,
+      "exact": true,
+      "date": "2025-11-27T19:00:01+01:00",
+      "via": "inventario"
+    }
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → ?",
+        "Muro",
+        "Sale, pepe e olio",
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:10-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una trave": {
+      "name": "una trave",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:31-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre": {
+      "name": "una torre",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre"
+      ],
+      "last_seen": "2025-11-27T19:00:31-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un vortice": {
+      "name": "un vortice",
+      "rarity": "L3",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Fonduta cosmica"
+      ],
+      "last_seen": "2025-11-27T19:00:51-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un biscotto": {
+      "name": "un biscotto",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Fonduta cosmica"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:51-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un laccio": {
+      "name": "un laccio",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → una cestina",
+        "(ricetta senza nome) → una pizza",
+        "Pizza"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una pizza": {
+      "name": "una pizza",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "(ricetta senza nome) → una pizza",
+        "Pizza"
+      ],
+      "last_seen": "2025-11-27T19:01:11-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una pizza margherita": {
+      "name": "una pizza margherita",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Pizza"
+      ],
+      "last_seen": "2025-11-27T19:01:21-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un muro": {
+      "name": "un muro",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Muro"
+      ],
+      "last_seen": "2025-11-27T19:02:00-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una cestina": {
+      "name": "una cestina",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "(ricetta senza nome) → una cestina"
+      ],
+      "last_seen": "2025-11-27T19:02:21-05:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Pizza": {
+      "name": "Pizza",
+      "level": 1,
+      "ingredients": {
+        "un laccio": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una pizza margherita",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:01:21-05:00"
+    },
+    "Pizza della nonna": {
+      "name": "Pizza della nonna",
+      "level": 1,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "Sale, pepe e olio": {
+      "name": "Sale, pepe e olio",
+      "level": 1,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [
+        "un sasso"
+      ],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:00:11-05:00"
+    },
+    "Muro": {
+      "name": "Muro",
+      "level": 1,
+      "ingredients": {
+        "un sasso": 3
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [
+        "un sasso"
+      ],
+      "output": "un muro",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:02:00-05:00"
+    },
+    "Torre": {
+      "name": "Torre",
+      "level": null,
+      "ingredients": {
+        "un sasso": 2,
+        "una trave": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [
+        "un sasso"
+      ],
+      "output": "una torre",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:00:31-05:00"
+    },
+    "Fonduta cosmica": {
+      "name": "Fonduta cosmica",
+      "level": 3,
+      "ingredients": {
+        "un biscotto": 2
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "un vortice",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:00:51-05:00",
+      "level_inferred": true
+    },
+    "(ricetta senza nome) → una pizza": {
+      "name": "(ricetta senza nome) → una pizza",
+      "level": null,
+      "ingredients": {
+        "un laccio": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una pizza",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:01:01-05:00"
+    },
+    "(ricetta senza nome) → una cestina": {
+      "name": "(ricetta senza nome) → una cestina",
+      "level": null,
+      "ingredients": {
+        "un laccio": 2
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una cestina",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:02:21-05:00"
+    },
+    "(ricetta senza nome) → ?": {
+      "name": "(ricetta senza nome) → ?",
+      "level": null,
+      "ingredients": {
+        "un sasso": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:10-05:00"
+    }
+  },
+  "locations": {}
+}

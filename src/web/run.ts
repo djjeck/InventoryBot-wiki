@@ -1,16 +1,53 @@
 /**
  * What the worker does with a RunRequest: reads the export pages of the picked folders
- * (the browser adapter, src/telegram/export/browser-files.ts), runs phases 1 to 5 in
- * memory (phase 1 here, then src/pipeline.ts) and posts the progress and the outcome. No browser API: the tests run it in Node with
- * File-like objects.
+ * (the browser adapter, src/telegram/export/browser-files.ts; readPicks), runs phases 1 to
+ * 5 in memory (runPipeline, src/pipeline.ts) and posts the progress and the outcome. No
+ * browser API: the tests run it in Node with File-like objects.
  */
-import { INVENTORY_BOT } from '#src/inventorybot/bot.ts';
-import { compareCodePoints } from '#src/lib/text.ts';
-import { buildWiki, conversationReport, converse, interpret } from '#src/pipeline.ts';
-import { inputFolders, listFolder, readFolderPages } from '#src/telegram/export/browser-files.ts';
-import { parsePages, summaryLine } from '#src/telegram/export/parse-export.ts';
+import { runPipeline } from '#src/pipeline.ts';
+import {
+  type FileLike,
+  inputFolders,
+  listFolder,
+  readFolderPages,
+} from '#src/telegram/export/browser-files.ts';
 import { type Page } from '#src/telegram/messages.ts';
 import { type RunRequest, type WorkerMessage } from './protocol.ts';
+
+/** The pages of the picked folders, and what reading them found. */
+export interface ReadPicks {
+  /** Names of the input folders. */
+  folders: string[];
+  /** The pages of each input folder, in order. */
+  paths: Page[][];
+  /** Number of pages read. */
+  total: number;
+  /** The listing's warnings (JSON exports, zip files). */
+  warnings: string[];
+}
+
+/**
+ * Reads the pages of the picks: the listing first (the warnings of every folder, and the
+ * number of pages to read), then each page; `onRead` is called before the first page
+ * and after each one.
+ */
+export async function readPicks(
+  picks: readonly (readonly FileLike[])[],
+  onRead: (done: number, total: number) => void = () => {}
+): Promise<ReadPicks> {
+  const folders = inputFolders(picks);
+  const listed = folders.map((f) => ({ folder: f, ...listFolder(f) }));
+  const total = listed.reduce((n, l) => n + l.pages.length, 0);
+  let done = 0;
+  onRead(done, total);
+  const paths: Page[][] = [];
+  const warnings: string[] = [];
+  for (const { folder, pages, warnings: w } of listed) {
+    warnings.push(...w);
+    paths.push(await readFolderPages(folder, pages, () => onRead(++done, total)));
+  }
+  return { folders: folders.map((f) => f.name), paths, total, warnings };
+}
 
 /** Runs one request, posting progress, then one final message (also returned). */
 export async function handleRun(
@@ -24,56 +61,30 @@ export async function handleRun(
     return m;
   };
   try {
-    const folders = inputFolders(request.picks);
-    // Listing first: the warnings of every folder, and the number of pages to read.
-    const listed = folders.map((f) => ({ folder: f, ...listFolder(f) }));
-    const total = listed.reduce((n, l) => n + l.pages.length, 0);
-    let done = 0;
-    post({ type: 'progress', phase: 'read', done, total });
-    const paths: Page[][] = [];
-    for (const { folder, pages, warnings } of listed) {
-      report.push(...warnings);
-      paths.push(
-        await readFolderPages(folder, pages, () =>
-          post({ type: 'progress', phase: 'read', done: ++done, total })
-        )
-      );
-    }
-    if (total === 0) return end({ type: 'stopped', reason: 'no-pages', report });
-    post({ type: 'progress', phase: 'parse' });
-    const parsed = parsePages(paths, { bot: INVENTORY_BOT, timeZone: request.options.timeZone });
-    const fromBot = parsed.messages.filter((m) => m.from_bot).length;
-    report.push(...parsed.warnings);
-    post({ type: 'progress', phase: 'conversation' });
-    const { player, salt } = request.options;
-    const c = converse(parsed.messages, { player, salt });
-    // The summary names the chats: with the titles of phase 3, and only once there is an owner.
-    if (c.ownerMissing) return end({ type: 'stopped', reason: 'no-owner', report });
-    const chats = [...new Set(parsed.chats.map((t) => (t === '?' ? t : c.chatTitle(t))))];
-    report.push(
-      summaryLine({ ...parsed, chats: chats.sort(compareCodePoints) }),
-      `messaggi: ${parsed.messages.length} (dal bot: ${fromBot})`,
-      ...conversationReport(c)
+    const read = await readPicks(request.picks, (done, total) =>
+      post({ type: 'progress', phase: 'read', done, total })
     );
-    post({ type: 'progress', phase: 'interpret' });
-    const interpreted = interpret(c);
-    report.push(...interpreted.report);
-    post({ type: 'progress', phase: 'build' });
-    const built = buildWiki(interpreted.events, c.owner);
-    report.push(...built.report);
+    report.push(...read.warnings);
+    if (read.total === 0) return end({ type: 'stopped', reason: 'no-pages', report });
+    const { timeZone, player } = request.options;
+    const run = runPipeline(read.paths, request.options, (phase) =>
+      post({ type: 'progress', phase })
+    );
+    report.push(...run.report);
+    if (run.status === 'no-owner') return end({ type: 'stopped', reason: 'no-owner', report });
     return end({
       type: 'done',
       result: {
-        owner: c.owner,
-        wiki: built.wiki,
-        player: built.player,
-        options: { timeZone: request.options.timeZone, player },
+        owner: run.conversed.owner,
+        wiki: run.wiki,
+        player: run.player,
+        options: { timeZone, player },
         report,
-        folders: folders.map((f) => f.name),
-        pages: total,
-        messages: parsed.messages.length,
-        fromBot,
-        replies: c.conversation.replies.length,
+        folders: read.folders,
+        pages: read.total,
+        messages: run.messages.length,
+        fromBot: run.messages.filter((m) => m.from_bot).length,
+        replies: run.conversed.conversation.replies.length,
         ms: Date.now() - start,
       },
     });

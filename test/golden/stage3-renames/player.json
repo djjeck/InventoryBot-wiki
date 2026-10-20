@@ -1,0 +1,90 @@
+{
+  "player": "djjeck",
+  "as_of": "2026-02-15T19:00:41-05:00",
+  "recipes": {
+    "Premiazione": {
+      "crafted": 1,
+      "last_crafted": "2026-02-15T19:00:41-05:00"
+    }
+  },
+  "items": {
+    "un C": {
+      "first_seen": "2025-11-27T19:00:11-05:00"
+    },
+    "un Nuovo": {
+      "first_seen": "2026-02-15T19:00:11-05:00"
+    },
+    "un Papa Bergoglio": {
+      "first_seen": "2026-01-06T19:00:21-05:00"
+    },
+    "un Papa Ratzinger": {
+      "first_seen": "2025-11-27T19:01:01-05:00"
+    },
+    "un Premio Sgranocchio": {
+      "first_seen": "2025-11-27T19:00:11-05:00"
+    },
+    "un Vecchio": {
+      "first_seen": "2026-01-06T19:00:31-05:00"
+    },
+    "un nastro": {
+      "first_seen": "2025-11-27T19:00:11-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:31-05:00"
+    },
+    "una coppa": {
+      "first_seen": "2026-02-15T19:00:41-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 1
+    },
+    "nella valle ventosa 🏞": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
+  "recipe_list": {
+    "date": "2025-11-27T19:01:21-05:00",
+    "truncated": false,
+    "recipes": {
+      "Premiazione": "pronta",
+      "Catena": "manca 1",
+      "Altare": "manca 2"
+    }
+  },
+  "inventory": {
+    "un C": {
+      "qty": 1,
+      "exact": true,
+      "date": "2026-02-15T19:00:21-05:00",
+      "via": "inventario"
+    },
+    "un Nuovo": {
+      "qty": 1,
+      "exact": false,
+      "date": "2026-02-15T19:00:31-05:00",
+      "via": "ricetta"
+    },
+    "un Vecchio": {
+      "qty": 1,
+      "exact": true,
+      "date": "2026-02-15T19:00:21-05:00",
+      "via": "inventario"
+    },
+    "un sasso": {
+      "qty": 1,
+      "exact": false,
+      "date": "2026-02-15T19:00:31-05:00",
+      "via": "ricetta"
+    },
+    "una coppa": {
+      "qty": 1,
+      "exact": false,
+      "date": "2026-02-15T19:00:41-05:00",
+      "via": "movimento"
+    }
+  }
+}

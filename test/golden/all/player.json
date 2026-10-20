@@ -1,0 +1,147 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T22:00:11-05:00",
+  "recipes": {
+    "Torre": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:01:11-05:00"
+    }
+  },
+  "items": {
+    "__proto__": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "l'ascia \"vera\"": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "l'oro": {
+      "first_seen": "2025-11-27T19:00:01+01:00"
+    },
+    "un \"dolce\"": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un \\ rovescio": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un astronauta 🧑‍🚀": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un baule": {
+      "first_seen": "2025-11-27T19:05:51-05:00"
+    },
+    "un bottone": {
+      "first_seen": "2025-11-27T19:00:11-05:00"
+    },
+    "un elisir": {
+      "first_seen": "2025-11-27T19:03:01-05:00"
+    },
+    "un fiore di pianura": {
+      "first_seen": "2025-11-27T19:04:40-05:00"
+    },
+    "un nastro da pacchi": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    },
+    "un nbsp qui": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un paio di mollette": {
+      "first_seen": "2025-11-27T19:01:01-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01+01:00"
+    },
+    "una ghianda d'oro": {
+      "first_seen": "2025-11-27T19:00:41-05:00"
+    },
+    "una pozione": {
+      "first_seen": "2025-11-27T19:05:11-05:00"
+    },
+    "una ruota della fortuna 🎡": {
+      "first_seen": "2025-11-27T19:00:02-05:00"
+    },
+    "una torre": {
+      "first_seen": "2025-11-27T19:01:11-05:00"
+    },
+    "una trave": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    }
+  },
+  "locations": {
+    "ai piedi del monte Grevolo ⛰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "in cima al monte Grevolo 🏔": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 6
+    },
+    "nel magnifico Palazzo di Cristallo 🏰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nell'immenso deserto di Sabbiora 🏜": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nella palude sussurrante 🌾": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nella valle ventosa 🏞": {
+      "visited": true,
+      "adventures": 3
+    },
+    "nelle cripte del monastero 👻": {
+      "visited": false,
+      "adventures": 0
+    },
+    "sul banco corallino 🐠": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
+  "recipe_list": {
+    "date": "2025-11-27T19:02:51-05:00",
+    "truncated": false,
+    "recipes": {
+      "Torre": "pronta",
+      "Muro": "manca 3"
+    }
+  },
+  "inventory": {
+    "__proto__": {
+      "qty": 2,
+      "exact": true,
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esamina"
+    },
+    "un baule": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:05:51-05:00",
+      "via": "esamina"
+    },
+    "un elisir": {
+      "qty": 2,
+      "exact": true,
+      "date": "2025-11-27T19:03:01-05:00",
+      "via": "inventario"
+    },
+    "un fiore di pianura": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:04:40-05:00",
+      "via": "movimento"
+    },
+    "un sasso": {
+      "qty": 3,
+      "exact": true,
+      "date": "2025-11-27T19:03:01-05:00",
+      "via": "inventario"
+    }
+  }
+}

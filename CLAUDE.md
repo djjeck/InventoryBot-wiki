@@ -32,10 +32,10 @@ docs:
 source ~/.nvm/nvm.sh && nvm use && npm run validate
 ```
 
-`validate` applies formatting and lint autofixes, then runs every check. Address all errors before
-considering a change complete. It is for local use only: CI (`.github/workflows/ci.yml`, mirrored by
-`npm run ci`) runs the same checks without fixing anything, so unfixed problems that were never
-committed still fail.
+`validate` applies formatting and lint autofixes, regenerates the golden outputs, then runs every
+check. Address all errors before considering a change complete. It is for local use only: CI
+(`.github/workflows/ci.yml`, mirrored by `npm run ci`) runs the same checks without fixing anything,
+so unfixed problems that were never committed still fail.
 
 **Stop and wait for review:** After completing each change, stop and wait for author approval before
 proceeding. Do not chain changes without an explicit instruction to continue.
@@ -172,6 +172,14 @@ This project must stay on the right side of that.
   shared by several tests live in `test/` and are imported through the `#test/*` alias; production
   code never imports them (ESLint rejects it), so it can be shipped without them. Coverage of `src/`
   must stay at or above 90% on statements, branches, functions and lines.
+- **Golden outputs**: `src/pipeline.golden.test.ts` runs the whole pipeline on the synthetic
+  scenarios of `test/synthetic-exports.ts` (invented data, generated at test time) and compares
+  every output byte for byte with `test/golden/`: per scenario, the conversation and the events
+  (JSON Lines), the wiki and the player state, the report lines and the outcome. `validate`
+  regenerates them (`npm run golden:update`), so they never fail locally: review
+  `git diff test/golden/` like code before committing, as every changed line must be explained by
+  the change. `ci` and GitHub CI only compare. Never edit or reformat the golden files by hand
+  (Prettier ignores them).
 - **Dependencies**: as few as possible, pinned to exact versions in `package.json`, with
   `package-lock.json` committed. `package.json` is the only record of them.
 - **Held-back versions**: TypeScript stays on 6.x because typescript-eslint does not support

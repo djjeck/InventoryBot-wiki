@@ -1,0 +1,779 @@
+{
+  "generated": "<generated>",
+  "rarities": {
+    "C": "comune",
+    "N": "non comune",
+    "R": "raro",
+    "S": "super raro",
+    "U": "unico (esiste un solo oggetto di questo tipo)",
+    "Ln": "ottenibile da ricette",
+    "X": "oggetti speciali"
+  },
+  "rules": [
+    "Se un oggetto ha un + nel nome, significa che c'e' un solo luogo dove quell'oggetto esce. Scoprite quale!",
+    "Per raggiungere il nuovo livello devi fare una ricetta del livello corrispondente. Ad esempio se sei livello 2, per passare al 3 devi fare una ricetta di livello 3. Puoi vedere i livelli delle ricette col comando /ricetta. Ricchi premi e cotillons al passaggio di livello!"
+  ],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un ciuffo di morbide setole di tasso": {
+      "name": "un ciuffo di morbide setole di tasso",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Pennello rustico"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:03:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "lo stecco di legno di un ghiacciolo": {
+      "name": "lo stecco di legno di un ghiacciolo",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Pennello rustico"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:03:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una corda di canapa": {
+      "name": "una corda di canapa",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "L'ancora nel fango"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un secchio di fango": {
+      "name": "un secchio di fango",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [
+        "L'ancora nel fango"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un rampino di ferro": {
+      "name": "un rampino di ferro",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [
+        "L'ancora nel fango"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un chicco di caffè": {
+      "name": "un chicco di caffè",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → un caffè ristretto"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una tazzina vuota": {
+      "name": "una tazzina vuota",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → un caffè ristretto"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un caffè ristretto": {
+      "name": "un caffè ristretto",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "(ricetta senza nome) → un caffè ristretto"
+      ],
+      "last_seen": "2025-11-27T19:04:32-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un apriscatole storto": {
+      "name": "un apriscatole storto",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → una manciata di linguette di latta"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:05:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una latta di piselli": {
+      "name": "una latta di piselli",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → una manciata di linguette di latta"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:05:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una manciata di linguette di latta": {
+      "name": "una manciata di linguette di latta",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "(ricetta senza nome) → una manciata di linguette di latta"
+      ],
+      "last_seen": "2025-11-27T19:05:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una candela mezza consumata": {
+      "name": "una candela mezza consumata",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Cera riciclata"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:05:32-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un barattolo di vetro con qualche conchiglia dentro": {
+      "name": "un barattolo di vetro con qualche conchiglia dentro",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [
+        "Grande collezione"
+      ],
+      "made_by": [
+        "Piccola collezione"
+      ],
+      "last_seen": "2025-11-27T19:06:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "il cartografo un baule di ebano 📦": {
+      "name": "il cartografo un baule di ebano 📦",
+      "rarity": "S",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:06:32-05:00",
+      "use": {
+        "observations": 2,
+        "outcomes": [
+          "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
+        ],
+        "result": "fixed",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "exclusive": false,
+      "locations": []
+    },
+    "una chiave di quercia 🔑": {
+      "name": "una chiave di quercia 🔑",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:07:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un fiorino ƒ": {
+      "name": "un fiorino ƒ",
+      "rarity": "X",
+      "usable": true,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:07:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un Motocarro anni 70": {
+      "name": "un Motocarro anni 70",
+      "rarity": "L3",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:07:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un grembiule da cuoco": {
+      "name": "un grembiule da cuoco",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:07:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un candido fazzoletto": {
+      "name": "un candido fazzoletto",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:15:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una moneta d'oro": {
+      "name": "una moneta d'oro",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:17:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una splendida statuetta di Torosco di quelle con la coda a spirale 🐲": {
+      "name": "una splendida statuetta di Torosco di quelle con la coda a spirale 🐲",
+      "rarity": "S",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:07:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una lanterna cieca": {
+      "name": "una lanterna cieca",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:11:32-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un tappetino con scritto Benvenuti": {
+      "name": "un tappetino con scritto Benvenuti",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:12:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una ruota della fortuna 🎡": {
+      "name": "una ruota della fortuna 🎡",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:12:32-05:00",
+      "use": {
+        "observations": 2,
+        "outcomes": [
+          "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!"
+        ],
+        "result": "fixed",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "exclusive": false,
+      "locations": []
+    },
+    "una pigna secca": {
+      "name": "una pigna secca",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:13:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un fischietto di quelli da carnevale che fanno le trombette": {
+      "name": "un fischietto di quelli da carnevale che fanno le trombette",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:15:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un cartoccio di caldarroste🌰": {
+      "name": "un cartoccio di caldarroste🌰",
+      "rarity": "X",
+      "usable": true,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:17:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un seme di Zaffirella": {
+      "name": "un seme di Zaffirella",
+      "rarity": null,
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:17:31-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un gigantesco forziere da 3 tonnellate di monete d'oro 🏷": {
+      "name": "un gigantesco forziere da 3 tonnellate di monete d'oro 🏷",
+      "rarity": "U",
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:20:32-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "il Sigillo Antico": {
+      "name": "il Sigillo Antico",
+      "rarity": "U",
+      "usable": false,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:21:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un cannocchiale dorato": {
+      "name": "un cannocchiale dorato",
+      "rarity": "U",
+      "usable": true,
+      "sources": [],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:21:02-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un Pakkomon di nome Brumolo 👻": {
+      "name": "un Pakkomon di nome Brumolo 👻",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:28:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un astrolabio da cartografo": {
+      "name": "un astrolabio da cartografo",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:29:32-05:00",
+      "gives_title": true,
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una Sfera del Grillo da 1 stella ⭐️": {
+      "name": "una Sfera del Grillo da 1 stella ⭐️",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Orto in vaso": {
+      "name": "Orto in vaso",
+      "level": 1,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:32-05:00"
+    },
+    "Corso di vela": {
+      "name": "Corso di vela",
+      "level": 5,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:32-05:00"
+    },
+    "L'ombra dell'albero": {
+      "name": "L'ombra dell'albero",
+      "level": 11,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:32-05:00"
+    },
+    "Chiodi storti": {
+      "name": "Chiodi storti",
+      "level": 1,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:02:32-05:00"
+    },
+    "Merenda veloce": {
+      "name": "Merenda veloce",
+      "level": 1,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:03:02-05:00"
+    },
+    "Pizza della nonna": {
+      "name": "Pizza della nonna",
+      "level": 1,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:03:02-05:00"
+    },
+    "Pennello rustico": {
+      "name": "Pennello rustico",
+      "level": null,
+      "ingredients": {
+        "un ciuffo di morbide setole di tasso": 1,
+        "lo stecco di legno di un ghiacciolo": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:03:32-05:00"
+    },
+    "L'ancora nel fango": {
+      "name": "L'ancora nel fango",
+      "level": null,
+      "ingredients": {
+        "una corda di canapa": 2,
+        "un secchio di fango": 1,
+        "un rampino di ferro": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:04:02-05:00"
+    },
+    "Cera riciclata": {
+      "name": "Cera riciclata",
+      "level": null,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [
+        "una candela mezza consumata"
+      ],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:05:32-05:00"
+    },
+    "Piccola collezione": {
+      "name": "Piccola collezione",
+      "level": null,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:06:02-05:00"
+    },
+    "Grande collezione": {
+      "name": "Grande collezione",
+      "level": null,
+      "ingredients": null,
+      "ingredients_source": null,
+      "partial_ingredients": [
+        "un barattolo di vetro con qualche conchiglia dentro"
+      ],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:06:02-05:00"
+    },
+    "(ricetta senza nome) → un caffè ristretto": {
+      "name": "(ricetta senza nome) → un caffè ristretto",
+      "level": null,
+      "ingredients": {
+        "un chicco di caffè": 2,
+        "una tazzina vuota": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "un caffè ristretto",
+      "craft_text": "e macini i chicchi con pazienza, li versi nella moka e aspetti il borbottio che annuncia il momento piu' bello della mattina!",
+      "last_seen": "2025-11-27T19:04:32-05:00"
+    },
+    "(ricetta senza nome) → una manciata di linguette di latta": {
+      "name": "(ricetta senza nome) → una manciata di linguette di latta",
+      "level": null,
+      "ingredients": {
+        "un apriscatole storto": 1,
+        "una latta di piselli": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una manciata di linguette di latta",
+      "craft_text": "e hai trovato una latta di piselli in offerta al mercato e non vedi l’ora di assaggiarli! Appena arrivi a casa prendi il tuo apriscatole, apri la latta e te li mangi in un attimo!",
+      "last_seen": "2025-11-27T19:05:02-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "name": "nel bosco nebbioso di Valtorbo 🌲",
+      "label": "Bosco nebbioso di Valtorbo 🌲",
+      "exits": [
+        "nell'immenso deserto di Sabbiora 🏜",
+        "nella palude sussurrante 🌾",
+        "nella valle ventosa 🏞"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "nella valle ventosa 🏞": {
+      "name": "nella valle ventosa 🏞",
+      "label": "Valle ventosa 🏞",
+      "exits": [
+        "ai piedi del monte Grevolo ⛰",
+        "nel bosco nebbioso di Valtorbo 🌲",
+        "nella valle ventosa 🏞",
+        "sul banco corallino 🐠"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "nella palude sussurrante 🌾": {
+      "name": "nella palude sussurrante 🌾",
+      "label": "Palude sussurrante 🌾",
+      "exits": [
+        "nel bosco nebbioso di Valtorbo 🌲",
+        "nel magnifico Palazzo di Cristallo 🏰",
+        "nella palude sussurrante 🌾"
+      ],
+      "requires_item": true,
+      "unlock_texts": [
+        "guidato dalla tua bussola fatata … finalmente ti trovi"
+      ],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "nell'immenso deserto di Sabbiora 🏜": {
+      "name": "nell'immenso deserto di Sabbiora 🏜",
+      "label": "Immenso deserto di Sabbiora 🏜",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "ai piedi del monte Grevolo ⛰": {
+      "name": "ai piedi del monte Grevolo ⛰",
+      "label": "Ai piedi del monte Grevolo ⛰",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "sul banco corallino 🐠": {
+      "name": "sul banco corallino 🐠",
+      "label": "Banco corallino 🐠",
+      "exits": [
+        "in cima al monte Grevolo 🏔",
+        "nella palude sussurrante 🌾",
+        "nella valle ventosa 🏞"
+      ],
+      "requires_item": true,
+      "unlock_texts": [
+        "mastichi una foglia di Respirella dalla tua scorta e puf! per magia respiri sott'acqua come un pesce! Ti tuffi senza esitare e scendi sempre piu' giu', senza alcun problema.. Dopo una lunga discesa"
+      ],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "nel magnifico Palazzo di Cristallo 🏰": {
+      "name": "nel magnifico Palazzo di Cristallo 🏰",
+      "label": "Magnifico Palazzo di Cristallo 🏰",
+      "exits": [],
+      "requires_item": true,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "nelle cripte del monastero 👻": {
+      "name": "nelle cripte del monastero 👻",
+      "label": "Cripte del monastero 👻",
+      "exits": [],
+      "requires_item": true,
+      "unlock_texts": [],
+      "required_items": [
+        "una lanterna cieca"
+      ],
+      "exclusive_items": []
+    },
+    "in cima al monte Grevolo 🏔": {
+      "name": "in cima al monte Grevolo 🏔",
+      "label": "In cima al monte Grevolo 🏔",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    }
+  }
+}

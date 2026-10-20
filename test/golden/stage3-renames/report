@@ -1,0 +1,16 @@
+cartelle di esportazione: 1; chat: InventoryBot
+messaggi: 38 (dal bot: 19)
+giocatore: @djjeck
+risposte del bot: 19
+  InventoryBot: risposte del bot abbinate a un comando: dm=19
+nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0
+eventi: recipe_detail=11 inventory=3 location=1 drop=1 item_info=1 recipe_list=1 craft=1
+oggetti: 12; ricette: 5 (con tutti gli ingredienti: 5, con il risultato noto: 1); luoghi: 2
+-- ingredient_conflict: 3
+  ingredient_conflict: recipe="Torre" source="detail" old={"un sasso":1,"un Nuovo":1} new={"un sasso":2,"un Nuovo":1} date="2026-02-15T19:00:31-05:00"
+  ingredient_conflict: recipe="Muro" source="swap" old_item="un Papa Ratzinger" new_item="un Papa Bergoglio" date="2026-01-06T19:00:21-05:00"
+  ingredient_conflict: recipe="Torre" source="swap" old_item="un Vecchio" new_item="un Nuovo" date="2026-02-15T19:00:11-05:00"
+-- renamed_item: 3
+  renamed_item: old="un Gufetto d'Argento" new="un Premio Sgranocchio" recipe="Premiazione" date="2026-01-06T19:00:01-05:00"
+  renamed_item: old="un A" new="un B" recipe="Catena" date="2026-01-06T19:00:11-05:00"
+  renamed_item: old="un B" new="un C" recipe="Catena" date="2026-02-15T19:00:01-05:00"

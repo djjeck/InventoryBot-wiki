@@ -1,0 +1,10 @@
+giocatore: @nicolò
+risposte del bot: 9
+  InventoryBot: risposte del bot abbinate a un comando: dm=1
+  ?: risposte del bot abbinate a un comando: unmatched=2, user=1
+  Gruppo PettirossoLucente: risposte del bot abbinate a un comando: unmatched=2, user=2, reply=1
+nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 0
+eventi: drop=2 unknown=2 stats=2 inventory=1 recipe_detail=1 item_info=1
+  coppie nei gruppi verificate dalla risposta: confermate=3, sciolte=0
+  risposte del bot non riconosciute, per anno: =1, e=1
+oggetti: 2; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 0); luoghi: 0

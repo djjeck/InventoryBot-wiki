@@ -1,0 +1,64 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T19:06:01-05:00",
+  "recipes": {
+    "(ricetta senza nome) → un muro": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:02:01-05:00"
+    }
+  },
+  "items": {
+    "un baule": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un dado a dodici facce": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un dado truccato": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un elisir": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "un muro": {
+      "first_seen": "2025-11-27T19:02:01-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una caps rossa": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una chiave": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    },
+    "una moneta d'oro": {
+      "first_seen": "2025-11-27T19:02:41-05:00"
+    },
+    "una pozione": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": null,
+  "inventory": {
+    "un baule": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:05:51-05:00",
+      "via": "esamina"
+    },
+    "un elisir": {
+      "qty": 2,
+      "exact": true,
+      "date": "2025-11-27T19:03:01-05:00",
+      "via": "inventario"
+    },
+    "una moneta d'oro": {
+      "qty": 3,
+      "exact": false,
+      "date": "2025-11-27T19:02:41-05:00",
+      "via": "movimento"
+    }
+  }
+}

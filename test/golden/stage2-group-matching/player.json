@@ -1,0 +1,29 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T22:00:11-05:00",
+  "recipes": {},
+  "items": {
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:01-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 1
+    },
+    "nella valle ventosa 🏞": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
+  "recipe_list": null,
+  "inventory": {
+    "un sasso": {
+      "qty": 2,
+      "exact": true,
+      "date": "2025-11-27T19:00:01-05:00",
+      "via": "inventario"
+    }
+  }
+}

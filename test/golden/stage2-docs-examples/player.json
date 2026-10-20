@@ -1,0 +1,199 @@
+{
+  "player": "mario_r",
+  "as_of": "2025-11-27T19:29:32-05:00",
+  "recipes": {
+    "(ricetta senza nome) → un caffè ristretto": {
+      "crafted": 2,
+      "last_crafted": "2025-11-27T19:04:32-05:00"
+    },
+    "(ricetta senza nome) → una manciata di linguette di latta": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:05:01-05:00"
+    }
+  },
+  "items": {
+    "il cartografo un baule di ebano 📦": {
+      "first_seen": "2025-11-27T19:06:31-05:00"
+    },
+    "lo stecco di legno di un ghiacciolo": {
+      "first_seen": "2025-11-27T19:03:31-05:00"
+    },
+    "un Motocarro anni 70": {
+      "first_seen": "2025-11-27T19:07:01-05:00"
+    },
+    "un Pakkomon di nome Brumolo 👻": {
+      "first_seen": "2025-11-27T19:28:31-05:00"
+    },
+    "un apriscatole storto": {
+      "first_seen": "2025-11-27T19:05:01-05:00"
+    },
+    "un barattolo di vetro con qualche conchiglia dentro": {
+      "first_seen": "2025-11-27T19:06:01-05:00"
+    },
+    "un caffè ristretto": {
+      "first_seen": "2025-11-27T19:04:31-05:00"
+    },
+    "un candido fazzoletto": {
+      "first_seen": "2025-11-27T19:07:01-05:00"
+    },
+    "un cartoccio di caldarroste🌰": {
+      "first_seen": "2025-11-27T19:17:01-05:00"
+    },
+    "un chicco di caffè": {
+      "first_seen": "2025-11-27T19:04:31-05:00"
+    },
+    "un ciuffo di morbide setole di tasso": {
+      "first_seen": "2025-11-27T19:03:31-05:00"
+    },
+    "un fiorino ƒ": {
+      "first_seen": "2025-11-27T19:07:01-05:00"
+    },
+    "un fischietto di quelli da carnevale che fanno le trombette": {
+      "first_seen": "2025-11-27T19:15:31-05:00"
+    },
+    "un grembiule da cuoco": {
+      "first_seen": "2025-11-27T19:07:01-05:00"
+    },
+    "un rampino di ferro": {
+      "first_seen": "2025-11-27T19:04:01-05:00"
+    },
+    "un secchio di fango": {
+      "first_seen": "2025-11-27T19:04:01-05:00"
+    },
+    "un seme di Zaffirella": {
+      "first_seen": "2025-11-27T19:17:31-05:00"
+    },
+    "un tappetino con scritto Benvenuti": {
+      "first_seen": "2025-11-27T19:12:01-05:00"
+    },
+    "una Sfera del Grillo da 1 stella ⭐️": {
+      "first_seen": "2025-11-27T19:01:31-05:00"
+    },
+    "una candela mezza consumata": {
+      "first_seen": "2025-11-27T19:05:31-05:00"
+    },
+    "una chiave di quercia 🔑": {
+      "first_seen": "2025-11-27T19:07:01-05:00"
+    },
+    "una corda di canapa": {
+      "first_seen": "2025-11-27T19:04:01-05:00"
+    },
+    "una latta di piselli": {
+      "first_seen": "2025-11-27T19:05:01-05:00"
+    },
+    "una manciata di linguette di latta": {
+      "first_seen": "2025-11-27T19:05:01-05:00"
+    },
+    "una moneta d'oro": {
+      "first_seen": "2025-11-27T19:07:31-05:00"
+    },
+    "una pigna secca": {
+      "first_seen": "2025-11-27T19:13:01-05:00"
+    },
+    "una ruota della fortuna 🎡": {
+      "first_seen": "2025-11-27T19:12:31-05:00"
+    },
+    "una splendida statuetta di Torosco di quelle con la coda a spirale 🐲": {
+      "first_seen": "2025-11-27T19:07:31-05:00"
+    },
+    "una tazzina vuota": {
+      "first_seen": "2025-11-27T19:04:31-05:00"
+    }
+  },
+  "locations": {
+    "ai piedi del monte Grevolo ⛰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "in cima al monte Grevolo 🏔": {
+      "visited": true,
+      "adventures": 0
+    },
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 2
+    },
+    "nel magnifico Palazzo di Cristallo 🏰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nell'immenso deserto di Sabbiora 🏜": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nella palude sussurrante 🌾": {
+      "visited": true,
+      "adventures": 0
+    },
+    "nella valle ventosa 🏞": {
+      "visited": true,
+      "adventures": 0
+    },
+    "nelle cripte del monastero 👻": {
+      "visited": false,
+      "adventures": 0
+    },
+    "sul banco corallino 🐠": {
+      "visited": true,
+      "adventures": 0
+    }
+  },
+  "recipe_list": {
+    "date": "2025-11-27T19:03:01-05:00",
+    "truncated": true,
+    "recipes": {
+      "Merenda veloce": "pronta",
+      "Pizza della nonna": "manca 1"
+    }
+  },
+  "inventory": {
+    "un Pakkomon di nome Brumolo 👻": {
+      "qty": 2,
+      "exact": false,
+      "date": "2025-11-27T19:28:31-05:00",
+      "via": "movimento"
+    },
+    "un candido fazzoletto": {
+      "qty": 14,
+      "exact": false,
+      "date": "2025-11-27T19:15:01-05:00",
+      "via": "mostra"
+    },
+    "un cartoccio di caldarroste🌰": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:17:01-05:00",
+      "via": "movimento"
+    },
+    "un fischietto di quelli da carnevale che fanno le trombette": {
+      "qty": 241,
+      "exact": false,
+      "date": "2025-11-27T19:15:31-05:00",
+      "via": "mostra"
+    },
+    "un seme di Zaffirella": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:17:31-05:00",
+      "via": "movimento"
+    },
+    "un tappetino con scritto Benvenuti": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:12:01-05:00",
+      "via": "movimento"
+    },
+    "una moneta d'oro": {
+      "qty": 98,
+      "exact": true,
+      "date": "2025-11-27T19:14:31-05:00",
+      "via": "dai"
+    },
+    "una ruota della fortuna 🎡": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:12:31-05:00",
+      "via": "movimento"
+    }
+  }
+}

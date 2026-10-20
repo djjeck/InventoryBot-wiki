@@ -1,0 +1,270 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "una pozione": {
+      "name": "una pozione",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:05:11-05:00",
+      "use": {
+        "observations": 3,
+        "outcomes": [
+          "bevi la pozione e ti senti meglio"
+        ],
+        "result": "fixed",
+        "consumed": true,
+        "consumed_evidence": {
+          "yes": 2,
+          "no": 1
+        },
+        "requirements": []
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un elisir": {
+      "name": "un elisir",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:03:01-05:00",
+      "use": {
+        "observations": 5,
+        "outcomes": [
+          "l'elisir brilla e svanisce"
+        ],
+        "result": "fixed",
+        "consumed": true,
+        "consumed_evidence": {
+          "yes": 1,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "exclusive": false,
+      "locations": []
+    },
+    "un dado a dodici facce": {
+      "name": "un dado a dodici facce",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:01-05:00",
+      "use": {
+        "observations": 4,
+        "outcomes": [
+          "tiri il dado e fai 5!",
+          "tiri il dado e fai 2!",
+          "tiri il dado e fai 12!",
+          "tiri il dado e fai 3!"
+        ],
+        "result": "variable",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un dado truccato": {
+      "name": "un dado truccato",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:01-05:00",
+      "use": {
+        "observations": 1,
+        "outcomes": [
+          "il dado rotola sotto il tavolo e sparisce, ' \" \\   🧑‍🚀 lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo"
+        ],
+        "result": "single",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una caps rossa": {
+      "name": "una caps rossa",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:01-05:00",
+      "use": {
+        "observations": 2,
+        "outcomes": [
+          "lanci il tappo nella palude",
+          "lanci il tappo lontano"
+        ],
+        "result": "variable",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un baule": {
+      "name": "un baule",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:05:51-05:00",
+      "use": {
+        "observations": 3,
+        "outcomes": [
+          "apri il baule e trovi:\n- una moneta d'oro [X] x3\n- un elisir [C] x1",
+          "apri il baule ma è vuoto"
+        ],
+        "result": "variable",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": [],
+        "cooldown": {
+          "seconds": 300,
+          "min": 280,
+          "max": 372,
+          "observations": 2
+        }
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una chiave": {
+      "name": "una chiave",
+      "rarity": "C",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:01-05:00",
+      "use": {
+        "observations": 0,
+        "outcomes": [],
+        "result": null,
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": [
+          "non hai la chiave giusta per aprire questo baule.."
+        ]
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "(ricetta senza nome) → un muro"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:01-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un muro": {
+      "name": "un muro",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "(ricetta senza nome) → un muro"
+      ],
+      "last_seen": "2025-11-27T19:02:01-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una moneta d'oro": {
+      "name": "una moneta d'oro",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:02:41-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "(ricetta senza nome) → un muro": {
+      "name": "(ricetta senza nome) → un muro",
+      "level": null,
+      "ingredients": {
+        "un sasso": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "un muro",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:02:01-05:00"
+    }
+  },
+  "locations": {}
+}

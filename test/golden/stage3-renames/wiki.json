@@ -1,0 +1,275 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {
+    "un A": "un C",
+    "un B": "un C",
+    "un Gufetto d'Argento": "un Premio Sgranocchio"
+  },
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un nastro": {
+      "name": "un nastro",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Catena"
+      ],
+      "made_by": [],
+      "last_seen": "2026-02-15T19:00:01-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Muro",
+        "Premiazione",
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2026-02-15T19:00:41-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un Papa Ratzinger": {
+      "name": "un Papa Ratzinger",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Muro"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un Premio Sgranocchio": {
+      "name": "un Premio Sgranocchio",
+      "rarity": "R+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Altare",
+        "Premiazione"
+      ],
+      "made_by": [],
+      "last_seen": "2026-02-15T19:00:41-05:00",
+      "old_names": [
+        {
+          "name": "un Gufetto d'Argento",
+          "last_seen": "2025-11-27T19:01:11-05:00",
+          "evidence": "stessa ricetta (Premiazione) con un Gufetto d'Argento sostituito da un Premio Sgranocchio; stessa rarità R+; un Gufetto d'Argento non si vede più dal 2025-11-27, un Premio Sgranocchio compare dal 2026-01-06"
+        }
+      ],
+      "exclusive": true,
+      "locations": [
+        "nel bosco nebbioso di Valtorbo 🌲"
+      ]
+    },
+    "un Papa Bergoglio": {
+      "name": "un Papa Bergoglio",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Muro"
+      ],
+      "made_by": [],
+      "last_seen": "2026-01-06T19:00:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un Vecchio": {
+      "name": "un Vecchio",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2026-02-15T19:00:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un C": {
+      "name": "un C",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Catena"
+      ],
+      "made_by": [],
+      "last_seen": "2026-02-15T19:00:21-05:00",
+      "old_names": [
+        {
+          "name": "un B",
+          "last_seen": "2026-01-06T19:00:41-05:00",
+          "evidence": "stessa ricetta (Catena) con un B sostituito da un C; stessa rarità R; un B non si vede più dal 2026-01-06, un C compare dal 2026-02-15"
+        },
+        {
+          "name": "un A",
+          "last_seen": "2025-11-27T19:00:41-05:00",
+          "evidence": "stessa ricetta (Catena) con un A sostituito da un B; stessa rarità R; un A non si vede più dal 2025-11-27, un B compare dal 2026-01-06"
+        }
+      ],
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un Nuovo": {
+      "name": "un Nuovo",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2026-02-15T19:00:31-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una coppa": {
+      "name": "una coppa",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Premiazione"
+      ],
+      "last_seen": "2026-02-15T19:00:41-05:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Premiazione": {
+      "name": "Premiazione",
+      "level": 1,
+      "ingredients": {
+        "un sasso": 1,
+        "un Premio Sgranocchio": 1
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [
+        "un Premio Sgranocchio"
+      ],
+      "output": "una coppa",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2026-02-15T19:00:41-05:00"
+    },
+    "Catena": {
+      "name": "Catena",
+      "level": 2,
+      "ingredients": {
+        "un nastro": 1,
+        "un C": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2026-02-15T19:00:01-05:00"
+    },
+    "Altare": {
+      "name": "Altare",
+      "level": 3,
+      "ingredients": {
+        "un Premio Sgranocchio": 2
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [
+        "un Premio Sgranocchio"
+      ],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:01:21-05:00"
+    },
+    "Muro": {
+      "name": "Muro",
+      "level": null,
+      "ingredients": {
+        "un sasso": 2,
+        "un Papa Bergoglio": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2026-01-06T19:00:21-05:00"
+    },
+    "Torre": {
+      "name": "Torre",
+      "level": null,
+      "ingredients": {
+        "un sasso": 2,
+        "un Nuovo": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2026-02-15T19:00:31-05:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "name": "nel bosco nebbioso di Valtorbo 🌲",
+      "label": "Bosco nebbioso di Valtorbo 🌲",
+      "exits": [
+        "nella valle ventosa 🏞"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [
+        "un Premio Sgranocchio"
+      ]
+    },
+    "nella valle ventosa 🏞": {
+      "name": "nella valle ventosa 🏞",
+      "label": "Valle ventosa 🏞",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    }
+  }
+}

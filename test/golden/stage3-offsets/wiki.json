@@ -1,0 +1,104 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-28T11:30:01+09:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre alta": {
+      "name": "una torre alta",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre"
+      ],
+      "last_seen": "2025-11-27T21:13:21-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre": {
+      "name": "una torre",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre"
+      ],
+      "last_seen": "2025-11-28T11:30:01+09:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Torre": {
+      "name": "Torre",
+      "level": null,
+      "ingredients": {
+        "un sasso": 4
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una torre",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-28T11:30:01+09:00"
+    }
+  },
+  "locations": {
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "name": "nel bosco nebbioso di Valtorbo 🌲",
+      "label": "Bosco nebbioso di Valtorbo 🌲",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "nella valle ventosa 🏞": {
+      "name": "nella valle ventosa 🏞",
+      "label": "Valle ventosa 🏞",
+      "exits": [
+        "sul banco corallino 🐠"
+      ],
+      "requires_item": true,
+      "unlock_texts": [
+        "inghiotti l'Respirella e"
+      ],
+      "required_items": [],
+      "exclusive_items": []
+    },
+    "sul banco corallino 🐠": {
+      "name": "sul banco corallino 🐠",
+      "label": "Banco corallino 🐠",
+      "exits": [],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": []
+    }
+  }
+}

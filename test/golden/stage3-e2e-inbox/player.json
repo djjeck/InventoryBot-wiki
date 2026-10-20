@@ -1,0 +1,94 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T19:04:40-05:00",
+  "recipes": {
+    "Torre": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:01:11-05:00"
+    }
+  },
+  "items": {
+    "un bottone": {
+      "first_seen": "2025-11-27T19:01:32-05:00"
+    },
+    "un fiore di pianura": {
+      "first_seen": "2025-11-27T19:04:40-05:00"
+    },
+    "un nastro da pacchi": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    },
+    "un paio di mollette": {
+      "first_seen": "2025-11-27T19:01:01-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    },
+    "una ghianda d'oro": {
+      "first_seen": "2025-11-27T19:00:41-05:00"
+    },
+    "una torre": {
+      "first_seen": "2025-11-27T19:01:11-05:00"
+    },
+    "una trave": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    }
+  },
+  "locations": {
+    "ai piedi del monte Grevolo ⛰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "nel bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 2
+    },
+    "nella valle ventosa 🏞": {
+      "visited": true,
+      "adventures": 1
+    },
+    "sul banco corallino 🐠": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
+  "recipe_list": {
+    "date": "2025-11-27T19:00:51-05:00",
+    "truncated": false,
+    "recipes": {
+      "Torre": "pronta",
+      "Pratica cestina": "manca 1"
+    }
+  },
+  "inventory": {
+    "un fiore di pianura": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:04:40-05:00",
+      "via": "movimento"
+    },
+    "un nastro da pacchi": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:00:21-05:00",
+      "via": "inventario"
+    },
+    "un sasso": {
+      "qty": 2,
+      "exact": true,
+      "date": "2025-11-27T19:00:21-05:00",
+      "via": "inventario"
+    },
+    "una ghianda d'oro": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:00:41-05:00",
+      "via": "movimento"
+    },
+    "una torre": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:01:31-05:00",
+      "via": "esamina"
+    }
+  }
+}

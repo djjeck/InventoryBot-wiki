@@ -1,0 +1,98 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T19:01:31-05:00",
+  "recipes": {
+    "(ricetta senza nome) → una pizza": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:01:01-05:00"
+    },
+    "Fonduta cosmica": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:00:51-05:00"
+    },
+    "Muro": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:01:31-05:00"
+    },
+    "Pizza": {
+      "crafted": 2,
+      "last_crafted": "2025-11-27T19:01:21-05:00"
+    },
+    "Torre": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:00:31-05:00"
+    }
+  },
+  "items": {
+    "un biscotto": {
+      "first_seen": "2025-11-27T19:00:51-05:00"
+    },
+    "un laccio": {
+      "first_seen": "2025-11-27T19:01:01-05:00"
+    },
+    "un muro": {
+      "first_seen": "2025-11-27T19:01:31-05:00"
+    },
+    "un sasso": {
+      "first_seen": "2025-11-27T19:00:11-05:00"
+    },
+    "un vortice": {
+      "first_seen": "2025-11-27T19:00:41-05:00"
+    },
+    "una pizza": {
+      "first_seen": "2025-11-27T19:01:01-05:00"
+    },
+    "una pizza margherita": {
+      "first_seen": "2025-11-27T19:01:21-05:00"
+    },
+    "una torre": {
+      "first_seen": "2025-11-27T19:00:31-05:00"
+    },
+    "una trave": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": {
+    "date": "2025-11-27T19:00:01-05:00",
+    "truncated": false,
+    "recipes": {
+      "Pizza": "pronta",
+      "Pizza della nonna": "pronta",
+      "Sale, pepe e olio": "manca 1",
+      "Muro": "manca 2"
+    }
+  },
+  "inventory": {
+    "un muro": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:01:31-05:00",
+      "via": "movimento"
+    },
+    "un vortice": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:00:41-05:00",
+      "via": "esamina"
+    },
+    "una pizza": {
+      "qty": 2,
+      "exact": false,
+      "date": "2025-11-27T19:01:01-05:00",
+      "via": "movimento"
+    },
+    "una pizza margherita": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:01:21-05:00",
+      "via": "movimento"
+    },
+    "una torre": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:00:31-05:00",
+      "via": "movimento"
+    }
+  }
+}

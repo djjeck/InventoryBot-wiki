@@ -1,0 +1,22 @@
+cartelle di esportazione: 2; chat: Gruppo GiraffaTenace, InventoryBot
+messaggi: 25 (dal bot: 15)
+giocatore: @djjeck
+risposte del bot: 15
+  InventoryBot: risposte del bot abbinate a un comando: dm=10
+  Gruppo GiraffaTenace: risposte del bot abbinate a un comando: unmatched=4, single=1
+nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0
+eventi: craft=11 item_info=2 recipe_list=1 recipe_detail=1
+  coppie nei gruppi verificate dalla risposta: confermate=1, sciolte=0
+oggetti: 10; ricette: 9 (con tutti gli ingredienti: 7, con il risultato noto: 6); luoghi: 0
+-- unnamed_recipe: 5
+  unnamed_recipe: query="/ricetta izz" output="una pizza"
+  unnamed_recipe: query=null output="una cestina"
+  unnamed_recipe: query=null output="una cestina"
+  unnamed_recipe: query=null output=null
+  unnamed_recipe: query="/ricetta cest" output="una cestina"
+-- output_conflict: 1
+  output_conflict: recipe="Pizza" old="una pizza" new="una pizza margherita" date="2025-11-27T19:01:21-05:00"
+-- ingredient_conflict: 1
+  ingredient_conflict: recipe="(ricetta senza nome) → una cestina" source="craft" old={"un laccio":1} new={"un laccio":2} date="2025-11-27T19:02:21-05:00"
+-- source_vs_rarity: 1
+  source_vs_rarity: item="un sasso" rarity="C" sources=["special"]

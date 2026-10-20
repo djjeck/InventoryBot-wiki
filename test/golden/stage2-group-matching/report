@@ -1,0 +1,14 @@
+cartelle di esportazione: 3; chat: Gruppo ArmadilloSocievole, Gruppo DonnolaRibelle, InventoryBot
+messaggi: 111 (dal bot: 56)
+giocatore: @djjeck
+risposte del bot: 56
+  Gruppo ArmadilloSocievole: risposte del bot abbinate a un comando: user=25, single=16, unmatched=10, reply=1
+  InventoryBot: risposte del bot abbinate a un comando: dm=1
+  Gruppo DonnolaRibelle: risposte del bot abbinate a un comando: user=1, single=1
+nomi visualizzati abbinati a un giocatore: 4; titoli dei giocatori riconosciuti: 0
+eventi: drop=34 use=11 inventory=4 give=3 item_info=1 cooldown=1 location=1 unknown=1
+  coppie nei gruppi verificate dalla risposta: confermate=42, sciolte=1
+  risposte del bot non riconosciute, per anno: 2025=1
+-- dissolved_pair: 1
+  dissolved_pair: reason="use_item" match="user" query="/usa vuvu" type="use" text="cosa desideri?"
+oggetti: 4; ricette: 0 (con tutti gli ingredienti: 0, con il risultato noto: 0); luoghi: 2

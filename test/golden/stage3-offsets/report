@@ -1,0 +1,21 @@
+cartelle di esportazione: 3; chat: Gruppo GazzellaTenace, Gruppo PumaAmabile, InventoryBot
+messaggi: 20 (dal bot: 10)
+giocatore: @djjeck
+risposte del bot: 10
+  InventoryBot: risposte del bot abbinate a un comando: dm=5
+  Gruppo PumaAmabile: risposte del bot abbinate a un comando: user=3
+  Gruppo GazzellaTenace: risposte del bot abbinate a un comando: single=2
+nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 0
+eventi: item_info=4 recipe_detail=2 craft=2 location=1 travel=1
+  coppie nei gruppi verificate dalla risposta: confermate=5, sciolte=0
+oggetti: 3; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 1); luoghi: 3
+-- ingredient_conflict: 2
+  ingredient_conflict: recipe="Torre" source="detail" old={"un sasso":3} new={"un sasso":2} date="2025-11-27T19:01:41-05:00"
+  ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":2} new={"un sasso":4} date="2025-11-28T11:30:01+09:00"
+-- rarity_conflict: 4
+  rarity_conflict: item="un sasso" old="C" new="N" date="2025-11-28T02:00:01+01:00"
+  rarity_conflict: item="un sasso" old="N" new="S" date="2025-11-28T10:23:21+09:00"
+  rarity_conflict: item="un sasso" old="S" new="R" date="2025-11-27T21:00:01-05:00"
+  rarity_conflict: item="un sasso" old="R" new="C" date="2025-11-27T21:13:21-05:00"
+-- output_conflict: 1
+  output_conflict: recipe="Torre" old="una torre alta" new="una torre" date="2025-11-28T11:30:01+09:00"

@@ -1,0 +1,55 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "un sasso": {
+      "name": "un sasso",
+      "rarity": "C",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre alta"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:00-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "un 🍀": {
+      "name": "un 🍀",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:51-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Torre alta": {
+      "name": "Torre alta",
+      "level": null,
+      "ingredients": {
+        "un sasso": 1
+      },
+      "ingredients_source": "detail",
+      "partial_ingredients": [],
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T18:59:50-05:00"
+    }
+  },
+  "locations": {}
+}

@@ -1,0 +1,9 @@
+salto discovery/json/ChatExport: esportazione in formato JSON, è supportato solo il formato HTML (Telegram Desktop -> Esporta cronologia chat -> Formato: HTML)
+salto discovery/json2: esportazione in formato JSON, è supportato solo il formato HTML (Telegram Desktop -> Esporta cronologia chat -> Formato: HTML)
+cartelle di esportazione: 1; chat: Gruppo PettirossoLucente
+messaggi: 2 (dal bot: 0)
+giocatore: @mario
+risposte del bot: 0
+nomi visualizzati abbinati a un giocatore: 0; titoli dei giocatori riconosciuti: 0
+eventi: 
+oggetti: 0; ricette: 0 (con tutti gli ingredienti: 0, con il risultato noto: 0); luoghi: 0

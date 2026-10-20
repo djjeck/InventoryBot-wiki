@@ -1,0 +1,14 @@
+cartelle di esportazione: 1; chat: InventoryBot
+messaggi: 70 (dal bot: 37)
+giocatore: @djjeck
+risposte del bot: 37
+  InventoryBot: risposte del bot abbinate a un comando: dm=37
+nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0
+eventi: use=23 item_info=5 inventory=4 item_cooldown=2 drop=1 gift=1 craft=1
+oggetti: 10; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 1); luoghi: 0
+-- unnamed_recipe: 1
+  unnamed_recipe: query="/ricetta muro" output="un muro"
+-- unresolved_use: 1
+  unresolved_use: query="/usa d" text="un messaggio mai visto 🎲"
+-- use_consumption_conflict: 1
+  use_consumption_conflict: item="una pozione" yes=2 no=1

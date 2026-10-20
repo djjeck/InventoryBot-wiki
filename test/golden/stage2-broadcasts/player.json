@@ -1,0 +1,20 @@
+{
+  "player": null,
+  "as_of": "2025-11-27T19:00:02-05:00",
+  "recipes": {},
+  "items": {
+    "una ruota della fortuna 🎡": {
+      "first_seen": "2025-11-27T19:00:02-05:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": null,
+  "inventory": {
+    "una ruota della fortuna 🎡": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:00:02-05:00",
+      "via": "movimento"
+    }
+  }
+}

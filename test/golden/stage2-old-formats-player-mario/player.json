@@ -1,0 +1,58 @@
+{
+  "player": "mario",
+  "as_of": "2018-01-02T01:01:31+01:00",
+  "recipes": {
+    "Torre": {
+      "crafted": 1,
+      "last_crafted": "2018-01-02T01:01:11+01:00"
+    }
+  },
+  "items": {
+    "un dado": {
+      "first_seen": "2017-06-01T02:00:01+02:00"
+    },
+    "un sasso": {
+      "first_seen": "2017-06-01T02:00:11+02:00"
+    },
+    "una mela [C] x3": {
+      "first_seen": "2018-01-02T01:00:31+01:00"
+    },
+    "una torre": {
+      "first_seen": "2018-01-02T01:01:11+01:00"
+    }
+  },
+  "locations": {
+    "in cima al monte Grevolo 🏔": {
+      "visited": true,
+      "adventures": 1
+    }
+  },
+  "recipe_list": {
+    "date": "2018-01-02T01:01:21+01:00",
+    "truncated": true,
+    "recipes": {
+      "Torre": "pronta",
+      "Gran Torre": "manca 3"
+    }
+  },
+  "inventory": {
+    "un sasso": {
+      "qty": 2,
+      "exact": false,
+      "date": "2018-01-02T01:01:21+01:00",
+      "via": "ricetta"
+    },
+    "una mela [C] x3": {
+      "qty": 1,
+      "exact": true,
+      "date": "2018-01-02T01:00:31+01:00",
+      "via": "inventario"
+    },
+    "una torre": {
+      "qty": 1,
+      "exact": false,
+      "date": "2018-01-02T01:01:11+01:00",
+      "via": "movimento"
+    }
+  }
+}

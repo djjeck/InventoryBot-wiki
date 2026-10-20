@@ -20,6 +20,7 @@ player sees anyway, and says why it is allowed.
 
 - il primo numero di Topo Detective
 - il Sigillo Antico
+- l'oro
 - lo stecco di legno di un ghiacciolo
 - name <!-- a placeholder in grammars and comments (NAME, `- name [R]`) -->
 - rana
@@ -49,8 +50,10 @@ player sees anyway, and says why it is allowed.
 - un dado di legno
 - un dado magico
 - un dado truccato
+- un diamante
 - un drago
 - un elegante cappello piumato
+- un elisir
 - un fiore
 - un fiore di pianura
 - un fiorino ƒ
@@ -60,12 +63,18 @@ player sees anyway, and says why it is allowed.
 - un gigantesco forziere da 3 tonnellate di monete d'oro 🏷
 - un grembiule da cuoco
 - un Gufetto
+- un Gufetto d'Argento
 - un laccio
 - un mantello di velluto
 - un Motocarro anni 70
+- un nastro
 - un nastro da pacchi
+- un Nuovo
+- un oro falso
 - un paio di mollette
 - un Pakkomon di nome Brumolo 👻
+- un Papa Bergoglio
+- un Papa Ratzinger
 - un piccolo annaffiatoio
 - un piccolo bonsai
 - un pomodoro
@@ -83,6 +92,7 @@ player sees anyway, and says why it is allowed.
 - un trifoglio di latta
 - un tubetto di colla verde
 - un uovo di quaglia
+- un Vecchio
 - un vecchio alberello parlante 🌱
 - un vortice
 - un vortice croccante di energia biscottosa
@@ -91,9 +101,13 @@ player sees anyway, and says why it is allowed.
 - una caps rossa
 - una capsula
 - una chiave
+- una conchiglia
 - una corda di canapa
+- una cosa
 - una ghianda
 - una ghianda d'oro
+- una L1 rara
+- una lampada magica
 - una lanterna cieca
 - una latta di piselli
 - una manciata di linguette di latta
@@ -112,11 +126,15 @@ player sees anyway, and says why it is allowed.
 - una spada di legno
 - una splendida statuetta di Torosco di quelle con la coda a spirale 🐲
 - una tazzina vuota
+- una torre
 - una trave
+- uno scudo
 - x
 
 ## Recipes
 
+- Altare
+- Catena
 - Cera riciclata
 - Chiodi storti
 - Corso di vela
@@ -131,7 +149,9 @@ player sees anyway, and says why it is allowed.
 - Piccola collezione
 - Pizza della nonna
 - Pratica cestina
+- Premiazione
 - Torre
+- Torre alta
 
 ## Places
 
@@ -152,12 +172,17 @@ player sees anyway, and says why it is allowed.
 Without `@`. Placeholders used in prose and comments (`@u`, `@username`, `@BotName`) count as
 invented names.
 
+- aldo
+- andrea_bianchi
+- andrea_rossi
 - anna
+- bea
 - bea_b
 - bice
 - bot
 - BotName
 - carla_c
+- carlo
 - d
 - djjeck
 - gif <!-- public: Telegram's own GIF search bot, in "via @gif" -->
@@ -173,6 +198,7 @@ invented names.
 - msx80 <!-- public: the game's author and admin, in the bot's own texts -->
 - Name
 - nuovo
+- rita
 - somebot
 - u
 - user
