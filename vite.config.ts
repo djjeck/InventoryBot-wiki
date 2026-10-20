@@ -7,16 +7,18 @@
 import { defineConfig, type Plugin } from 'vite';
 
 /**
- * The built page may load only its own files and may not connect anywhere: the exports
- * are read and processed in the browser, and this makes the browser enforce that nothing
- * is sent. Styles allow inline `style` attributes, which the wiki view writes. Only in
- * the build: the dev server needs inline scripts and a WebSocket.
+ * The built page may load only its own files, and Google Fonts' stylesheet and font files,
+ * and may not connect anywhere: the exports are read and processed in the browser, and
+ * this makes the browser enforce that nothing is sent (the font requests carry no data of
+ * the player's). Styles allow inline `style` attributes, which the wiki view writes. Only
+ * in the build: the dev server needs inline scripts and a WebSocket.
  */
 const CSP = [
   "default-src 'none'",
   "script-src 'self'",
   "worker-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  'font-src https://fonts.gstatic.com',
   "img-src 'self' data:",
   "connect-src 'none'",
   "form-action 'none'",

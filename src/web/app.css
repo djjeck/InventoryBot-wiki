@@ -1,6 +1,6 @@
 /* The web app's own screens (picking folders, options, progress). The wiki itself, and
-   the colour tokens used here, come from view/wiki-view.css. No web fonts: the page loads
-   nothing from other sites, so the view's font stacks fall back to system fonts. */
+   the colour tokens used here, come from view/wiki-view.css. Fonts come from Google Fonts
+   (index.html); without them the view's font stacks fall back to system fonts. */
 .visually-hidden {
   position: absolute;
   width: 1px;
