@@ -59,7 +59,7 @@
         </div>
 
         <form class="card" id="options" novalidate>
-          <div class="field">
+          <div class="field" id="player-field" hidden>
             <label for="player">Il tuo nome utente Telegram</label>
             <input
               id="player"
@@ -67,14 +67,7 @@
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
-              placeholder="ricavato dalla chat privata con il bot"
-              aria-describedby="player-hint"
             />
-            <p class="hint" id="player-hint">
-              Senza @. Se lo lasci vuoto viene ricavato dalla chat privata con il bot; serve
-              indicarlo se hai esportato solo gruppi. Gli altri giocatori compaiono con nomi
-              inventati (per esempio VolpeVeloce); il tuo resta.
-            </p>
           </div>
           <div class="field">
             <label for="time-zone">Fuso orario delle esportazioni</label>

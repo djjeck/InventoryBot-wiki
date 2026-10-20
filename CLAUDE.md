@@ -84,10 +84,11 @@ builds it into `web-dist/`). The built page carries a Content-Security-Policy th
 network connection, so the browser itself guarantees that the exports are never sent anywhere. The
 page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker
 (`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phases 1
-to 3 found. The owner is the username the player gives, else the DM's; without either the run stops
-and asks. The pseudonyms' salt is made once and kept in the browser's `localStorage`. `run.ts` uses
-no browser API and is tested in Node; `main.ts` and `worker.ts` are browser-only wiring, checked in
-a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
+to 3 found. The owner is the player the bot addresses most in the DM; without a DM the run stops and
+shows a username field, which the page offers nowhere else. The pseudonyms' salt is made once and
+kept in the browser's `localStorage`. `run.ts` uses no browser API and is tested in Node; `main.ts`
+and `worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
+`tsconfig.web.json`, and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,

@@ -208,7 +208,8 @@ input[type='file']:focus-visible + .btn {
   color: var(--muted);
   font-size: 0.9rem;
 }
-.shell[hidden] {
+.shell[hidden],
+.field[hidden] {
   display: none;
 }
 #report {

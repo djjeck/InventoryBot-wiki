@@ -1,9 +1,9 @@
 /**
- * The web app's page: folder picking, the owner's username, the time zone (this browser's,
- * proposed), progress and errors, then a summary of what phases 1 to 3 read. The secret
- * salt of the pseudonyms is kept in this browser (pseudonymSalt). The pipeline runs in a Web
- * Worker (worker.ts), on the browser `File` objects of the picked folders; nothing is sent
- * over the network.
+ * The web app's page: folder picking, the time zone (this browser's, proposed), the owner's
+ * username when the run asks for it, progress and errors, then a summary of what phases 1
+ * to 3 read. The secret salt of the pseudonyms is kept in this browser (pseudonymSalt).
+ * The pipeline runs in a Web Worker (worker.ts), on the browser `File` objects of the
+ * picked folders; nothing is sent over the network.
  *
  * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, the
  * adapters) has its own tests.
@@ -28,6 +28,7 @@ const ui = {
   clearPicks: $<HTMLButtonElement>('clear-picks'),
   picked: $<HTMLUListElement>('picked'),
   form: $<HTMLFormElement>('options'),
+  playerField: $('player-field'),
   player: $<HTMLInputElement>('player'),
   timeZone: $<HTMLSelectElement>('time-zone'),
   run: $<HTMLButtonElement>('run'),
@@ -152,10 +153,13 @@ function showStop(m: StoppedMessage): void {
       warnings
     );
   } else {
+    // Asked only here: the owner is normally found in the private chat with the bot.
+    ui.playerField.hidden = false;
     ui.player.setAttribute('aria-invalid', 'true');
     showError(
       '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
-        'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi di nuovo <b>Leggi le esportazioni</b>.</p>',
+        'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi di nuovo ' +
+        '<b>Leggi le esportazioni</b>.</p>',
       warnings,
       ui.player
     );
@@ -235,7 +239,8 @@ ui.form.addEventListener('submit', (e) => {
   if (running || picks.length === 0) return;
   hideError();
   ui.player.removeAttribute('aria-invalid');
-  const player = ui.player.value.trim().replace(/^@/, '');
+  // The field is shown only when a run has asked for it.
+  const player = ui.playerField.hidden ? '' : ui.player.value.trim().replace(/^@/, '');
   const options: RunOptions = {
     timeZone: ui.timeZone.value,
     player: player === '' ? null : player,
@@ -282,8 +287,6 @@ function showResult(result: RunResult): void {
     `Esportazioni di ${who}, da ${result.folders.join(', ')}: ${result.pages} pagine, ` +
     `${result.messages} messaggi, ${result.replies} risposte del bot, in ` +
     `${(result.ms / 1000).toFixed(1)} s. Gli altri giocatori compaiono con nomi inventati.`;
-  // The detected owner, editable for the next run.
-  ui.player.value = result.owner ?? '';
   ui.report.textContent = result.report.join('\n');
   ui.start.hidden = true;
   ui.result.hidden = false;
