@@ -49,8 +49,8 @@ export const normalizeName = (s: string): string =>
 
 /**
  * The names of universe.md: the `- ` lines of its `## Items`, `## Recipes` and `## Places`
- * sections, without a trailing `<!-- … -->` comment (which marks a real name every player
- * sees, and says why it is allowed).
+ * sections, without a trailing `<!-- … -->` comment (a note on the entry, such as why a
+ * real name every player sees is allowed).
  */
 export function parseUniverse(markdown: string): Universe {
   const out: Record<Kind, Set<string>> = {

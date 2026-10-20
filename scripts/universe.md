@@ -12,9 +12,9 @@ compared ignoring case and runs of spaces; places include their preposition and 
 writes them.
 
 Before adding a name, make sure it is not a real one. Public facts the bot tells every player
-(command names, the `/faq`, fixed reply texts) are not entities and need no entry. The rare real
-name that every player sees anyway is listed with a trailing `<!-- public: … -->` comment saying why
-it is allowed.
+(command names, the `/faq`, fixed reply texts) are not entities and need no entry. A trailing
+`<!-- … -->` comment explains an entry where needed: `public: …` marks the rare real name that every
+player sees anyway, and says why it is allowed.
 
 ## Items
 
@@ -88,11 +88,13 @@ it is allowed.
 Without `@`. Placeholders used in prose and comments (`@u`, `@username`, `@BotName`) count as
 invented names.
 
+- anna
 - bot
 - BotName
 - djjeck
 - gif <!-- public: Telegram's own GIF search bot, in "via @gif" -->
 - gino_x
+- guardiano
 - InventoryBot <!-- public: the bot itself -->
 - lucia_b
 - luigi

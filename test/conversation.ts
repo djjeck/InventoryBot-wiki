@@ -2,8 +2,8 @@
  * Fixtures for the tests of the generic conversation phase (phase 2):
  *
  * - TEST_DIALECT: a synthetic BotDialect, a few fixed rules for a made-up bot whose
- *   replies look like InventoryBot's, so that the generic code is tested without the
- *   game's own dialect; DROP, INV… build replies it recognises.
+ *   replies look like InventoryBot's, so that the generic code (phases 2 and 3) is tested
+ *   without the game's own dialect; DROP, INV… build replies it recognises.
  * - votes(), keyedVotes(): commands answered by replies, which teach the display name
  *   -> @username map.
  *
@@ -34,11 +34,14 @@ const COMPATIBLE: readonly [RegExp, ReadonlySet<string>][] = [
 ];
 
 const ADDRESSEE = /^@(\w+)[, ]/u;
+/** The players a reply designates: whom it addresses (also in stats and gift notices) and a gift's receiver. */
+const DESIGNATED = [/^(?:\[N\] |Avventuriero )?@(\w+)/du, /, dai \d+x .+ a @(\w+)$/dmu];
 
 /**
  * The test bot's dialect. In groups, `[W] ` starts a broadcast and is removed from it;
  * `[N] ` starts one and is kept. `** ` around a username is a decoration, removed by
- * normalizeReply.
+ * normalizeReply. Its admin, `guardiano`, is a public name; `/dai` and `/stats` take a
+ * player as argument.
  */
 export const TEST_DIALECT: BotDialect = {
   normalizeReply: (text) => text.replace(/^\*\* (@\w+) \*\*/u, '$1'),
@@ -49,6 +52,13 @@ export const TEST_DIALECT: BotDialect = {
     text.startsWith('[W] ') ? text.slice(4) : text.startsWith('[N] ') ? text : null,
   unmappableNames: new Set(['Admin']),
   groupWindow: 120,
+  publicNames: new Set(['guardiano']),
+  userSpans: (text) =>
+    DESIGNATED.flatMap((re) => {
+      const span = re.exec(text)?.indices?.[1];
+      return span ? [span] : [];
+    }),
+  userCommands: new Set(['/dai', '/stats']),
 };
 
 /** `n` commands from `sender`, each answered with a reply addressed to `user`, 300 s apart. */

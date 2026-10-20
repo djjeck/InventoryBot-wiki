@@ -43,7 +43,7 @@ proceeding. Do not chain changes without an explicit instruction to continue.
 ## Architecture
 
 The pipeline is a chain of phases, each a function with typed input and output that a caller runs in
-order. So far there are phases 1 and 2:
+order. So far there are phases 1 to 3:
 
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become `Message`s
    (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the pages as
@@ -58,8 +58,22 @@ order. So far there are phases 1 and 2:
    window. Display names are mapped to @usernames by voting over the whole chat (opaque sender keys,
    when the export gives them, tell apart people with the same name). Everything that depends on the
    bot's wording comes through a `BotDialect` (`dialect.ts`); the tests use a synthetic one
-   (`test/conversation.ts`). The web app does not run this phase yet: it needs InventoryBot's
-   dialect, which comes with the game layer.
+   (`test/conversation.ts`).
+
+3. **Anonymisation** (`src/telegram/anonymise/`, `anonymise`): the conversation with every other
+   player's identity replaced by a pseudonym (`VolpeVeloce`, `GufoGentile`, …), one per person or
+   group, never equal to a real username of the run. A pseudonym comes from a hash of the name with
+   a secret salt that the caller keeps (the web app will keep one per browser): the same person
+   keeps the same pseudonym from run to run, and nobody without the salt can work back to the name,
+   as they could from a hash of the name alone. Replaced are the player of each reply, the usernames
+   the dialect designates in its text (`userSpans`), usernames in the arguments of commands that
+   take a player (`userCommands`), and group titles; every other name in a text is what the bot says
+   and stays. The owner, decided just before (`src/telegram/conversation/owner.ts`: the given
+   username, else the player the bot addresses most in the DM), the bot and the dialect's
+   `publicNames` are kept. Display names never leave this phase.
+
+The web app does not run phases 2 and 3 yet: they need InventoryBot's dialect, which comes with the
+game layer.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`

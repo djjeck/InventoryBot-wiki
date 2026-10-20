@@ -1,8 +1,8 @@
 /**
- * What the conversation phase needs to know about one particular bot's replies. The
- * generic code pairs replies with commands and maps senders to usernames; everything that
- * depends on the bot's wording comes through this interface, implemented by the bot's own
- * layer.
+ * What the conversation and anonymisation phases need to know about one particular bot's
+ * replies. The generic code pairs replies with commands, maps senders to usernames and
+ * replaces other players' names; everything that depends on the bot's wording comes
+ * through this interface, implemented by the bot's own layer.
  *
  * Every member is a pure function of the reply text, or a constant: the dialect holds no
  * state of the run. Anything a dialect learns from the input (such as player titles) is learned
@@ -48,4 +48,21 @@ export interface BotDialect {
    * in a group, at most.
    */
   groupWindow: number;
+  /**
+   * Usernames (without `@`, any case) phase 3 never replaces, besides the owner's and the
+   * bot's: names that are part of the bot's own texts, the same for every player.
+   */
+  publicNames: ReadonlySet<string>;
+  /**
+   * Spans `[start, end)` of a reply text (as normalizeReply returned it), each a username
+   * without `@`, of the players the reply designates: whom it addresses, and the other
+   * party of an action (a receiver, a giver). Phase 3 replaces these and nothing else of
+   * the text.
+   */
+  userSpans(text: string): readonly (readonly [number, number])[];
+  /**
+   * Command words (`/cmd`, lower case) whose arguments may name a player without `@`:
+   * phase 3 also replaces the known usernames written there as plain words.
+   */
+  userCommands: ReadonlySet<string>;
 }
