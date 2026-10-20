@@ -21,38 +21,59 @@ player sees anyway, and says why it is allowed.
 - il primo numero di Topo Detective
 - il Sigillo Antico
 - lo stecco di legno di un ghiacciolo
+- name <!-- a placeholder in grammars and comments (NAME, `- name [R]`) -->
 - un apriscatole storto
 - un astrolabio da cartografo
 - un attestato di buona azione
+- un barattolo di miele
 - un barattolo di vetro con qualche conchiglia dentro
+- un biscotto Lunetta
+- un biscotto Stellina
 - un caffè ristretto
 - un candido fazzoletto
 - un chicco di caffè
 - un ciuffo di morbide setole di tasso
+- un colino di plastica
+- un dado a dodici facce
+- un elegante cappello piumato
 - un fiorino ƒ
+- un fischietto di quelli da carnevale
 - un fischietto di quelli da carnevale che fanno le trombette
 - un gigantesco forziere da 3 tonnellate di monete d'oro 🏷
 - un grembiule da cuoco
+- un mantello di velluto
 - un Motocarro anni 70
+- un nastro da pacchi
+- un paio di mollette
 - un Pakkomon di nome Brumolo 👻
+- un piccolo annaffiatoio
 - un rampino di ferro
 - un sasso
-- un seme di Zaffirella
 - un secchio di fango
+- un seme di Zaffirella
 - un tappetino con scritto Benvenuti
 - un torroncino al pistacchio
+- un trifoglio di latta
+- un tubetto di colla verde
+- un uovo di quaglia
 - un vecchio alberello parlante 🌱
+- un vortice
+- un vortice croccante di energia biscottosa
 - un'ottima "moneta" d'oro
 - una candela mezza consumata
 - una corda di canapa
+- una ghianda
+- una ghianda d'oro
 - una lanterna cieca
 - una latta di piselli
 - una manciata di linguette di latta
 - una moneta d'oro <!-- public: the game's currency, named in the bot's fixed level-up text -->
 - una pigna secca
 - una ruota della fortuna 🎡
+- una sedia pieghevole
 - una Sfera del Grillo da 1 stella ⭐️
 - una spada di cartone
+- una spada di legno
 - una splendida statuetta di Torosco di quelle con la coda a spirale 🐲
 - una tazzina vuota
 
@@ -62,13 +83,17 @@ player sees anyway, and says why it is allowed.
 - Chiodi storti
 - Corso di vela
 - Gara di cucina
+- Gran Torre
 - L'ancora nel fango
 - L'ombra dell'albero
 - Merenda veloce
+- Muro
 - Orto in vaso
 - Pennello rustico
 - Piccola collezione
 - Pizza della nonna
+- Pratica cestina
+- Torre
 
 ## Places
 
@@ -82,6 +107,7 @@ player sees anyway, and says why it is allowed.
 - nella valle ventosa 🏞
 - nelle cripte del monastero 👻
 - sul banco corallino 🐠
+- sulla scogliera bianca 🏖
 
 ## Usernames
 
@@ -111,6 +137,7 @@ invented names.
 - user
 - username
 - usernames
+- utente
 - v
 - w
 - x

@@ -34,6 +34,13 @@ export function stripWs(s: string): string {
   return s.slice(start, end);
 }
 
+/** Removes leading whitespace. */
+export function stripStartWs(s: string): string {
+  let start = 0;
+  while (start < s.length && WS_SET.has(s[start] as string)) start++;
+  return s.slice(start);
+}
+
 /** Splits on runs of whitespace; never returns empty strings. */
 export function splitWords(s: string): string[] {
   const out: string[] = [];
@@ -48,6 +55,11 @@ export function splitWords(s: string): string[] {
   }
   if (word !== '') out.push(word);
   return out;
+}
+
+/** Slice by code points (non-negative bounds), not by UTF-16 units. */
+export function sliceCodePoints(s: string, start: number, end?: number): string {
+  return Array.from(s).slice(start, end).join('');
 }
 
 /** Length in code points. */

@@ -84,6 +84,9 @@ describe('unknownEntities', () => {
   it('source_string_escapes_and_patterns', () => {
     expect(unknownEntities("'@u, ecco una moneta d\\'oro [X]'", U)).toStrictEqual([]);
     expect(unknownEntities('/, per fare .* ti manca:/', U)).toStrictEqual([]);
+    expect(
+      unknownEntities('rx(`per fare (?:la ricetta )?(?<name>${DOT}+?) ti manca`)', U)
+    ).toStrictEqual([]);
   });
 
   it('usernames_are_compared_whole', () => {

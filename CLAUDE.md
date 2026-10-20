@@ -73,10 +73,12 @@ order. So far there are phases 1 to 3:
    `publicNames` are kept. Display names never leave this phase.
 
 Phases 2 and 3 run with InventoryBot's dialect (`src/inventorybot/dialect.ts`): addressing, player
-titles, broadcasts and what anonymisation designates. It does not tell reply types apart yet
-(`compatibleCommands` allows any command), so group replies are paired less surely until the
-classifier of phase 4 arrives. `src/pipeline.ts` runs phases 2 and 3 on the messages of phase 1
-(`converse`) and words their report lines.
+titles, broadcasts, what anonymisation designates, and which commands can produce each reply
+(`compatibleCommands`), from the reply type the classifier gives. The classifier
+(`src/inventorybot/classify.ts`, the start of phase 4) reads a bot reply as a typed event
+(`src/inventorybot/types.ts`), following the grammars of `docs/bot-protocol.md`, whose `bot-reply`
+examples are checked against it (`classify.docs-examples.test.ts`). `src/pipeline.ts` runs phases 2
+and 3 on the messages of phase 1 (`converse`) and words their report lines.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`

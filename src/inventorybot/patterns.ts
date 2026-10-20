@@ -1,6 +1,6 @@
 /**
- * The text conventions of InventoryBot's replies, shared by its dialect (and, later, its
- * classifiers): regular-expression building blocks, the addressee at the start of a reply,
+ * The text conventions of InventoryBot's replies, shared by its dialect and its
+ * classifiers: regular-expression building blocks, the addressee at the start of a reply,
  * and the reply grammars the dialect reads names from. Pure functions, no Node APIs.
  *
  * Regular expressions use the `u` flag and never JavaScript's own `\w`, `\s`, `\d`, `\b`
@@ -25,7 +25,15 @@ export const rx = (src: string, flags = ''): RegExp => new RegExp(src, 'u' + fla
 // without a visible username as "[.. una presenza indistinta..], ...".
 const ANONYMOUS = '\\[\\.\\. una presenza indistinta\\.\\.\\]';
 export const ADDR = `^(?:@${W}+|${ANONYMOUS}),?${S}+`;
+/** The addressee, unanchored. */
+export const A = ADDR.slice(1);
 export const ANONYMOUS_RE = rx(`^${ANONYMOUS}`);
+export const ADDR_RE = rx(ADDR);
+
+/** The reply without its addressee. */
+export function stripAddr(text: string): string {
+  return text.replace(ADDR_RE, '');
+}
 
 /** A `/dai` reply in a group (6.11): "@mario_r, dai 1x un bottone a @lucia_b". */
 export const GIVE = rx(`${ADDR}dai (?<qty>${D}+)x (?<name>${DOT}+?) a @(?<to>${W}+)${S}*${END}`);

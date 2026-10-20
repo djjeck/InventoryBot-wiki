@@ -4,7 +4,9 @@ import {
   compareCodePoints,
   escapeRegex,
   parseDecimalInt,
+  sliceCodePoints,
   splitWords,
+  stripStartWs,
   stripWs,
 } from './text.ts';
 
@@ -32,5 +34,11 @@ describe('text', () => {
     const literal = 'a.b*(c)[d]{e}|f/g\\h^$+?';
     expect(new RegExp(`^${escapeRegex(literal)}$`, 'u').test(literal)).toBe(true);
     expect(new RegExp(escapeRegex('a.b'), 'u').test('axb')).toBe(false);
+  });
+
+  it('stripStartWs_and_sliceCodePoints', () => {
+    expect(stripStartWs(' \x1c x ')).toBe('x ');
+    expect(sliceCodePoints('a\u{1F600}bc', 1, 3)).toBe('\u{1F600}b');
+    expect(sliceCodePoints('a\u{1F600}bc', 2)).toBe('bc');
   });
 });

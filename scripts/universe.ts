@@ -94,6 +94,9 @@ const NAMED: readonly [Kind, RegExp][] = [
   ],
 ];
 
+/** Regular-expression or template syntax: the "name" is code. */
+const CODE = /\$\{|\(\?/u;
+
 const lineOf = (text: string, index: number): number => text.slice(0, index).split('\n').length;
 
 /** Whether `before` ends with one of `names`, starting at a word boundary. */
@@ -125,8 +128,8 @@ export function unknownEntities(text: string, universe: Universe): Finding[] {
   for (const [kind, re] of NAMED) {
     for (const m of text.matchAll(re)) {
       const name = m[1] as string;
-      // Code (a pattern such as `.*`) has no letters; a name may follow other words.
-      if (/\p{L}/u.test(name) && !endsWithName(name, universe[kind]))
+      // Code (a pattern such as `.*`, `(?<name>${DOT}+?)`) is no name; a name may follow other words.
+      if (/\p{L}/u.test(name) && !CODE.test(name) && !endsWithName(name, universe[kind]))
         out.push({ kind, text: name, line: lineOf(text, m.index + m[0].indexOf(name)) });
     }
   }

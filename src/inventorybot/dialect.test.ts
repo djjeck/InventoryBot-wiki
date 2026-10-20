@@ -110,8 +110,9 @@ describe('anonymisation', () => {
   it('dialect_for_the_run', () => {
     const d = inventoryBotDialect(['il fornaio']);
     expect(d.normalizeReply('Sua Maestà @msx80 il fornaio, possiedi:')).toBe('@msx80, possiedi:');
-    // Until the classifier of phase 4, any command can have produced a reply.
-    expect(d.compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toBeNull();
+    expect(d.compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
+      new Set(['/inventario'])
+    );
     expect([...d.publicNames, ...d.userCommands]).toStrictEqual(['msx80', '/stats', '/dai']);
     expect(d.groupWindow).toBe(120);
   });
