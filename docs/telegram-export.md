@@ -419,7 +419,8 @@ block contains its own `div.body` and `div.title bold`.
 | Date title                                                             | [`parseWindowsDate`](../src/lib/dates.ts), [`sortMessages`](../src/telegram/export/parse-export.ts)                  | Output sorted by instant, then chat, then id; a date not in the exact form of [§5.1](#51-date) counts as missing, and an undated message takes its chat neighbour's instant (by id).                                                                                                    |
 
 Media, reactions, inline keyboards, avatars (except the macOS sender id), pagination links and
-service entries are ignored. A leading `/cmd@BotName` is kept as written. Output: one `Message`
+service entries are ignored. A leading `/cmd@BotName` is kept as written; phase 2, the conversation,
+resolves it ([`resolveCommand`](../src/telegram/conversation/commands.ts)). Output: one `Message`
 ([`src/telegram/messages.ts`](../src/telegram/messages.ts)) per message, kept in memory, with keys
 `chat`, `dm`, `id`, `date`, `from_bot`, `sender`, `forwarded_from`, `reply_to`, `text`, then
 `sender_key` when applicable.
@@ -691,7 +692,9 @@ senders far better (two people named `Andrea` are told apart).
 
 **Rule: the user id never leaves phase 1's memory.** No output may contain it: messages carry only
 an opaque `sender_key` (`u1`, `u2`, … numbered in output order), the same for one user within one
-run and meaningless outside it, which tells senders apart better than their display names.
+run and meaningless outside it, which tells senders apart better than their display names. Phase 2,
+the conversation, uses the key in place of the display name to map senders to @usernames and to pair
+group replies with commands; no output of phase 2 carries a sender.
 
 ## 12. Unknowns
 

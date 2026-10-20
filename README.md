@@ -12,6 +12,14 @@ Il gioco dimentica le ricette già eseguite e non dice cosa producono: qui ogni 
 passato resta, così si può vedere a colpo d'occhio cosa produce una ricetta, quali ricette si
 contendono lo stesso ingrediente e quali catene portano agli oggetti di livello alto.
 
+## Limiti
+
+- Si vede solo ciò che il bot ti ha mostrato: una ricetta compare solo quando possiedi metà degli
+  ingredienti, e cosa produce solo dopo averla eseguita.
+- L'inventario è una stima: il bot tronca gli inventari lunghi, e quello che fai fuori dalle chat
+  esportate non si vede.
+- Si leggono solo le esportazioni HTML di Telegram Desktop.
+
 ## No spoiler!!
 
 InventoryBot si scopre giocando:

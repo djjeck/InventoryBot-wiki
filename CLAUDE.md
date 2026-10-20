@@ -35,10 +35,23 @@ source ~/.nvm/nvm.sh && nvm use && npm run validate
 `validate` applies formatting and lint autofixes, regenerates the golden outputs, then runs every
 check. Address all errors before considering a change complete. It is for local use only: CI
 (`.github/workflows/ci.yml`, mirrored by `npm run ci`) runs the same checks without fixing anything,
-so unfixed problems that were never committed still fail.
+so unfixed problems that were never committed still fail. `validate` rewrites every file that
+`.gitignore` and `.prettierignore` do not exclude: real Telegram exports must stay outside the
+repository folder.
 
 **Stop and wait for review:** After completing each change, stop and wait for author approval before
 proceeding. Do not chain changes without an explicit instruction to continue.
+
+### Documentation
+
+- Docs state the result, not the investigation: they describe the format or rule for a reader who
+  does not know it, with no account of how it was found out, no references to the exports examined
+  and no counts. Each input doc says once at the top the date it describes ("documented as of");
+  whoever notices a change in the bot or in Telegram updates it. Genuinely unknown points go in a
+  short final section.
+- Docs are objective, not about us: they never mention the maintainers' own setup or activity
+  (computers, accounts, which exports they made, the commands they ran to check something). A fact
+  checked by running a command is written as the fact itself.
 
 ## Architecture
 
@@ -117,6 +130,19 @@ never touches it. Everything about InventoryBot belongs in its own layer, `src/i
 only `src/pipeline.ts` and the web app, `src/web/`, join the two. `src/layers.test.ts` fails on any
 import from the generic layer into either.
 
+## Data rules
+
+- **The wiki is objective.** It holds only facts about the game, the same for every player. Anything
+  about the owner's own play (crafts, dates, places visited, holdings) goes in the player state, and
+  the wiki view works without it.
+- **Telegram user ids never leave phase 1** (`docs/telegram-export.md` §11.4): no output, report
+  line or test fixture holds one.
+- **Other players teach the wiki, never the owner's state.** Their replies in group exports add
+  recipes, items and places, but only the owner's own events change the player state.
+- **Old data**: group exports span years, and the game and the bot's wording changed over them. An
+  attribute keeps the date of the observation that set it, and only a newer one replaces it; never
+  assume that an old message format or game state still holds.
+
 ## Respect for the game
 
 InventoryBot is meant to be discovered: its own `/faq` invites players to find things out ("Scoprite
@@ -171,7 +197,9 @@ This project must stay on the right side of that.
 - **Tests** sit next to the code they test (`foo.ts`, `foo.test.ts`) and run with Vitest. Helpers
   shared by several tests live in `test/` and are imported through the `#test/*` alias; production
   code never imports them (ESLint rejects it), so it can be shipped without them. Coverage of `src/`
-  must stay at or above 90% on statements, branches, functions and lines.
+  must stay at or above 90% on statements, branches, functions and lines. Test data is synthetic:
+  tests never read real exports. A known misbehaviour gets an `it.fails` test asserting the correct
+  behaviour, which becomes a plain `it` with the fix.
 - **Golden outputs**: `src/pipeline.golden.test.ts` runs the whole pipeline on the synthetic
   scenarios of `test/synthetic-exports.ts` (invented data, generated at test time) and compares
   every output byte for byte with `test/golden/`: per scenario, the conversation and the events
@@ -180,8 +208,9 @@ This project must stay on the right side of that.
   `git diff test/golden/` like code before committing, as every changed line must be explained by
   the change. `ci` and GitHub CI only compare. Never edit or reformat the golden files by hand
   (Prettier ignores them).
-- **Dependencies**: as few as possible, pinned to exact versions in `package.json`, with
-  `package-lock.json` committed. `package.json` is the only record of them.
+- **Dependencies**: as few as possible, each one justified in the commit that adds it, pinned to
+  exact versions at least two weeks old in `package.json`, with `package-lock.json` committed.
+  `package.json` is the only record of them.
 - **Held-back versions**: TypeScript stays on 6.x because typescript-eslint does not support
   TypeScript 7, and ESLint on 9.x because eslint-plugin-import does not support ESLint 10. Upgrade
   once they do.
