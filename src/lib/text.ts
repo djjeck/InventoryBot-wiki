@@ -3,8 +3,9 @@
  *
  * "Whitespace" here is the Unicode whitespace set below, used consistently for
  * trimming, word splitting and regex classes. It differs from JavaScript's `\s` and `trim()`: it
- * includes U+001C..U+001F and U+0085 and excludes U+FEFF. Ordering works on code points,
- * not UTF-16 code units, so that emoji and other astral characters sort after U+FFFF.
+ * includes U+001C..U+001F and U+0085 and excludes U+FEFF. Lengths and ordering work on code
+ * points, not UTF-16 code units, so that emoji and other astral characters count as one character
+ * and sort after U+FFFF.
  */
 
 /** The whitespace characters of the pipeline. */
@@ -47,6 +48,18 @@ export function splitWords(s: string): string[] {
   }
   if (word !== '') out.push(word);
   return out;
+}
+
+/** Length in code points. */
+export function codePointLength(s: string): number {
+  let n = 0;
+  for (const _ of s) n++;
+  return n;
+}
+
+/** Escapes a literal for a JS `u`-flag pattern (only syntax characters may be escaped there). */
+export function escapeRegex(s: string): string {
+  return s.replace(/[\\^$.*+?()[\]{}|/]/g, '\\$&');
 }
 
 /**

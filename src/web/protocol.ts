@@ -14,6 +14,10 @@ export interface RunOptions {
    * browser's), for the dates of macOS exports, which have no offset.
    */
   timeZone: string;
+  /** The owner's @username without `@`; null: the player the bot addresses most in the DM. */
+  player: string | null;
+  /** The secret salt of the pseudonyms, kept by the page in this browser. */
+  salt: string;
 }
 
 /** Page -> worker: run the pipeline on these picks (each the files of one folder pick). */
@@ -26,13 +30,15 @@ export interface RunRequest {
 /** Worker -> page: a step started. `read` counts the pages read so far. */
 export interface ProgressMessage {
   type: 'progress';
-  phase: 'read' | 'parse';
+  phase: 'read' | 'parse' | 'conversation';
   done?: number;
   total?: number;
 }
 
-/** What a run produced: for now, what phase 1 found. */
+/** What a run produced: for now, what phases 1 to 3 found. */
 export interface RunResult {
+  /** The export owner the run was made for (given, or found in the DM). */
+  owner: string | null;
   /** The report lines: warnings, then the summary. */
   report: string[];
   /** Names of the input folders. */
@@ -42,6 +48,8 @@ export interface RunResult {
   /** Number of messages after de-duplication, and how many of them are the bot's. */
   messages: number;
   fromBot: number;
+  /** Number of the bot's replies after phase 2. */
+  replies: number;
   /** Duration of the run in the worker, in milliseconds. */
   ms: number;
 }
@@ -51,10 +59,13 @@ export interface DoneMessage {
   result: RunResult;
 }
 
-/** The run stopped on something the user can fix: no export page in the picked folders. */
+/**
+ * The run stopped on something the user can fix: no export page in the picked folders
+ * (`no-pages`), or no DM with the bot and no username given (`no-owner`).
+ */
 export interface StoppedMessage {
   type: 'stopped';
-  reason: 'no-pages';
+  reason: 'no-pages' | 'no-owner';
   /** The lines logged until then. */
   report: string[];
 }

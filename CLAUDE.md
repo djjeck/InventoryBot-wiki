@@ -72,25 +72,29 @@ order. So far there are phases 1 to 3:
    username, else the player the bot addresses most in the DM), the bot and the dialect's
    `publicNames` are kept. Display names never leave this phase.
 
-The web app does not run phases 2 and 3 yet: they need InventoryBot's dialect, which comes with the
-game layer.
+Phases 2 and 3 run with InventoryBot's dialect (`src/inventorybot/dialect.ts`): addressing, player
+titles, broadcasts and what anonymisation designates. It does not tell reply types apart yet
+(`compatibleCommands` allows any command), so group replies are paired less surely until the
+classifier of phase 4 arrives. `src/pipeline.ts` runs phases 2 and 3 on the messages of phase 1
+(`converse`) and words their report lines.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`
 builds it into `web-dist/`). The built page carries a Content-Security-Policy that forbids any
 network connection, so the browser itself guarantees that the exports are never sent anywhere. The
 page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker
-(`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phase 1
-read. `run.ts` uses no browser API and is tested in Node; `main.ts` and `worker.ts` are browser-only
-wiring, checked in a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out
-of coverage).
+(`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phases 1
+to 3 found. The owner is the username the player gives, else the DM's; without either the run stops
+and asks. The pseudonyms' salt is made once and kept in the browser's `localStorage`. `run.ts` uses
+no browser API and is tested in Node; `main.ts` and `worker.ts` are browser-only wiring, checked in
+a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,
 `src/telegram/bot.ts`), so the layer could serve another bot, and a change in the game's wording
 never touches it. Everything about InventoryBot belongs in its own layer, `src/inventorybot/`, and
-only the web app, `src/web/`, joins the two. `src/layers.test.ts` fails on any import from the
-generic layer into either.
+only `src/pipeline.ts` and the web app, `src/web/`, join the two. `src/layers.test.ts` fails on any
+import from the generic layer into either.
 
 ## Respect for the game
 

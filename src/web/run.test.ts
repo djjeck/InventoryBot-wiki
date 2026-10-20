@@ -7,7 +7,7 @@ import { tempDir } from '#test/temp-dir.ts';
 import { type RunOptions, type WorkerMessage } from './protocol.ts';
 import { handleRun } from './run.ts';
 
-const OPTIONS: RunOptions = { timeZone: 'Europe/Rome' };
+const OPTIONS: RunOptions = { timeZone: 'Europe/Rome', player: null, salt: 'test-salt' };
 
 /** Runs a request on these picks, returning every message posted. */
 async function run(picks: ReturnType<typeof pickFolder>[], options: Partial<RunOptions> = {}) {
@@ -43,19 +43,32 @@ describe('handleRun', () => {
     const reads = posted.flatMap((m) => (m.type === 'progress' && m.phase === 'read' ? [m] : []));
     expect(reads.map((m) => m.done)).toStrictEqual([0, 1, 2, 3]);
     expect(reads.every((m) => m.total === 3)).toBe(true);
-    expect(posted.at(-2)).toStrictEqual({ type: 'progress', phase: 'parse' });
+    expect(posted.slice(-3, -1)).toStrictEqual([
+      { type: 'progress', phase: 'parse' },
+      { type: 'progress', phase: 'conversation' },
+    ]);
     expect(last.type).toBe('done');
     if (last.type !== 'done') return;
     expect(last.result).toMatchObject({
+      owner: 'mario_r',
       folders: ['ChatExport_dm', 'ChatExport_gruppo'],
       pages: 3,
       messages: 4,
       fromBot: 1,
-      report: [
-        'cartelle di esportazione: 2; chat: Gruppo Avventurieri, InventoryBot',
-        'messaggi: 4 (dal bot: 1)',
-      ],
+      replies: 1,
     });
+    // The group's title is printed only as phase 3 rewrote it.
+    const [summary, ...rest] = last.result.report;
+    expect(summary).toMatch(
+      /^cartelle di esportazione: 2; chat: (Gruppo [A-Z][a-z]+[A-Z][a-z]+, InventoryBot|InventoryBot, Gruppo [A-Z][a-z]+[A-Z][a-z]+)$/u
+    );
+    expect(rest).toStrictEqual([
+      'messaggi: 4 (dal bot: 1)',
+      'giocatore: @mario_r',
+      'risposte del bot: 1',
+      '  InventoryBot: risposte del bot abbinate a un comando: dm=1',
+      'nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0',
+    ]);
   });
 
   it('no_pages_stops_with_the_warnings', async () => {
@@ -76,13 +89,28 @@ describe('handleRun', () => {
   it('macos_dates_read_in_the_chosen_time_zone', async () => {
     const c = new Chat(BOT);
     c.user('Mario', '/avventura', 0);
+    c.bot('@mario_r, nel bosco trovi un sasso [C]!', 1);
     const mac = writeMacExport(path.join(tempDir(), 'Mac'), BOT, c.messages);
     const done = await run([pickFolder(mac)], { timeZone: 'Asia/Tokyo' });
     expect(done.last.type === 'done' && done.last.result.report).toStrictEqual([
       'Mac: date senza fuso orario, lette nel fuso orario Asia/Tokyo',
       'cartelle di esportazione: 1; chat: InventoryBot',
-      'messaggi: 1 (dal bot: 0)',
+      'messaggi: 2 (dal bot: 1)',
+      'giocatore: @mario_r',
+      'risposte del bot: 1',
+      '  InventoryBot: risposte del bot abbinate a un comando: dm=1',
+      'nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0',
     ]);
+  });
+
+  it('no_dm_and_no_username_stops_then_the_username_lets_it_through', async () => {
+    const group = writeInbox()[1] as string;
+    const stopped = await run([pickFolder(group)]);
+    expect(stopped.last).toMatchObject({ type: 'stopped', reason: 'no-owner' });
+    // The group's real title is not printed before the run can anonymise it.
+    expect(JSON.stringify(stopped.last)).not.toContain('Avventurieri');
+    const done = await run([pickFolder(group)], { player: 'luigi' });
+    expect(done.last.type === 'done' && done.last.result.owner).toBe('luigi');
   });
 
   it('a_page_that_is_not_utf8_is_an_error', async () => {

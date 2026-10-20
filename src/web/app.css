@@ -107,6 +107,7 @@ main:focus {
 .field label {
   font-weight: 600;
 }
+.field input,
 .field select {
   font: inherit;
   color: var(--ink);
@@ -116,6 +117,9 @@ main:focus {
   padding: 8px 10px;
   max-width: 24rem;
   width: 100%;
+}
+.field input[aria-invalid='true'] {
+  border-color: var(--warn);
 }
 .row-actions {
   display: flex;

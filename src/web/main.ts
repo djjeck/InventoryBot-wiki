@@ -1,6 +1,7 @@
 /**
- * The web app's page: folder picking, the time zone (this browser's, proposed), progress
- * and errors, then a summary of what phase 1 read. The pipeline runs in a Web
+ * The web app's page: folder picking, the owner's username, the time zone (this browser's,
+ * proposed), progress and errors, then a summary of what phases 1 to 3 read. The secret
+ * salt of the pseudonyms is kept in this browser (pseudonymSalt). The pipeline runs in a Web
  * Worker (worker.ts), on the browser `File` objects of the picked folders; nothing is sent
  * over the network.
  *
@@ -27,6 +28,7 @@ const ui = {
   clearPicks: $<HTMLButtonElement>('clear-picks'),
   picked: $<HTMLUListElement>('picked'),
   form: $<HTMLFormElement>('options'),
+  player: $<HTMLInputElement>('player'),
   timeZone: $<HTMLSelectElement>('time-zone'),
   run: $<HTMLButtonElement>('run'),
   progress: $('progress'),
@@ -131,19 +133,58 @@ function showProgress(m: ProgressMessage): void {
     const total = m.total ?? 0;
     ui.progressBar.value = total ? Math.round((90 * (m.done ?? 0)) / total) : 0;
     ui.progressText.textContent = `Lettura delle pagine: ${m.done ?? 0} di ${total}`;
-  } else {
-    ui.progressBar.value = 95;
+  } else if (m.phase === 'parse') {
+    ui.progressBar.value = 92;
     ui.progressText.textContent = 'Lettura dei messaggi…';
+  } else {
+    ui.progressBar.value = 96;
+    ui.progressText.textContent = 'Abbinamento delle risposte ai comandi…';
   }
 }
 
-/** The Italian explanation of a stop: no export page in the picked folders. */
+/** The Italian explanation of a stop, and the field to fill. */
 function showStop(m: StoppedMessage): void {
-  showError(
-    '<p>Nelle cartelle scelte non c’è nessuna pagina di chat esportata (<code>messages.html</code>). ' +
-      'Scegli la cartella creata da Telegram Desktop con <b>Esporta cronologia chat</b>, in formato <b>HTML</b>.</p>',
-    m.report.filter((l) => l.startsWith('salto '))
-  );
+  const warnings = m.report.filter((l) => l.startsWith('salto '));
+  if (m.reason === 'no-pages') {
+    showError(
+      '<p>Nelle cartelle scelte non c’è nessuna pagina di chat esportata (<code>messages.html</code>). ' +
+        'Scegli la cartella creata da Telegram Desktop con <b>Esporta cronologia chat</b>, in formato <b>HTML</b>.</p>',
+      warnings
+    );
+  } else {
+    ui.player.setAttribute('aria-invalid', 'true');
+    showError(
+      '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
+        'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi di nuovo <b>Leggi le esportazioni</b>.</p>',
+      warnings,
+      ui.player
+    );
+  }
+}
+
+// ---- pseudonyms ----------------------------------------------------------------------
+
+const SALT_KEY = 'ib-salt';
+
+/**
+ * The secret salt of the pseudonyms: random, made once and kept in this browser, so the
+ * same players keep the same pseudonyms from run to run. Where storage is blocked, a new
+ * one for this visit.
+ */
+function pseudonymSalt(): string {
+  const fresh = (): string =>
+    [...crypto.getRandomValues(new Uint8Array(16))]
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  try {
+    const kept = localStorage.getItem(SALT_KEY);
+    if (kept) return kept;
+    const salt = fresh();
+    localStorage.setItem(SALT_KEY, salt);
+    return salt;
+  } catch {
+    return fresh();
+  }
 }
 
 // ---- time zone -----------------------------------------------------------------------
@@ -193,7 +234,13 @@ ui.form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (running || picks.length === 0) return;
   hideError();
-  const options: RunOptions = { timeZone: ui.timeZone.value };
+  ui.player.removeAttribute('aria-invalid');
+  const player = ui.player.value.trim().replace(/^@/, '');
+  const options: RunOptions = {
+    timeZone: ui.timeZone.value,
+    player: player === '' ? null : player,
+    salt: pseudonymSalt(),
+  };
   let worker: Worker;
   try {
     worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
@@ -230,9 +277,13 @@ ui.form.addEventListener('submit', (e) => {
 // ---- results -------------------------------------------------------------------------
 
 function showResult(result: RunResult): void {
+  const who = result.owner ? `@${result.owner}` : 'giocatore sconosciuto';
   ui.resultInfo.textContent =
-    `Da ${result.folders.join(', ')}: ${result.pages} pagine, ${result.messages} messaggi ` +
-    `(${result.fromBot} dal bot), in ${(result.ms / 1000).toFixed(1)} s.`;
+    `Esportazioni di ${who}, da ${result.folders.join(', ')}: ${result.pages} pagine, ` +
+    `${result.messages} messaggi, ${result.replies} risposte del bot, in ` +
+    `${(result.ms / 1000).toFixed(1)} s. Gli altri giocatori compaiono con nomi inventati.`;
+  // The detected owner, editable for the next run.
+  ui.player.value = result.owner ?? '';
   ui.report.textContent = result.report.join('\n');
   ui.start.hidden = true;
   ui.result.hidden = false;

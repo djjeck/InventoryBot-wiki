@@ -1,7 +1,7 @@
 /**
  * The generic Telegram-bot layer (`src/telegram/`, `src/lib/`) must stay reusable for any
  * bot: none of its files may import from the InventoryBot layer (`src/inventorybot/`) or
- * from the web app that wires the two (`src/web/`). Its tests may also import the
+ * from the code that wires the two (`src/pipeline.ts`, `src/web/`). Its tests may also import the
  * test helpers (`test/`). Reads only `src/`.
  */
 import * as fs from 'node:fs';
