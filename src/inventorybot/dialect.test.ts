@@ -3,6 +3,7 @@ import { readConversation } from '#src/telegram/conversation/conversation.ts';
 import { BOT, Chat } from '#test/helpers.ts';
 import {
   broadcastText,
+  compatibleCommands,
   inventoryBotDialect,
   learnTitles,
   playerOf,
@@ -141,5 +142,22 @@ describe('phase 2 with this dialect', () => {
       ['u', '/inventario'],
       ['d', '/dai 1 bottone @u'],
     ]);
+  });
+});
+
+describe('pairing', () => {
+  it('compatible_commands_by_reply_type', () => {
+    expect(compatibleCommands('@mario_r, nel bosco trovi un sasso [C]!')).toStrictEqual(
+      new Set(['/avventura'])
+    );
+    expect(
+      compatibleCommands('@mario_r, per fare Torre ti manca:\n- un sasso [C] x1')
+    ).toStrictEqual(new Set(['/ricetta', '/esamina']));
+    expect(compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
+      new Set(['/inventario'])
+    );
+    // A successful /usa has no grammar (each item answers in its own words): read without its
+    // command it is unrecognised, so it may answer any command, and pairing finds its /usa.
+    expect(compatibleCommands('@mario_r, tiri il dado e fai 5!')).toBeNull();
   });
 });

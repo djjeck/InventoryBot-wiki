@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseMacDate } from '#src/lib/dates.ts';
-import { type Page } from '#src/telegram/messages.ts';
+import { type Message, type Page } from '#src/telegram/messages.ts';
 import {
   BOT,
   BOT_IDENTITY,
@@ -21,7 +21,7 @@ import {
 } from '#test/helpers.ts';
 import { tempDir } from '#test/temp-dir.ts';
 import { iterPages } from './export-files.ts';
-import { ExportParser, pageKey, parsePages, sortMessages } from './parse-export.ts';
+import { exportKey, ExportParser, pageKey, parsePages, sortMessages } from './parse-export.ts';
 
 /** The test exports' dates are in New York's winter time (UTC-05:00, test/helpers.ts). */
 const OPTS = { bot: BOT_IDENTITY, timeZone: 'America/New_York' };
@@ -784,5 +784,245 @@ describe('Windows and macOS copies of a message', () => {
     );
     expect(r.messages.map((m) => m.date)).toStrictEqual([win[0]?.date, c.messages[1]?.date]);
     expect(macDate(c.messages[1]?.date as string)).toBe('27 November 2025, 19:00:01');
+  });
+});
+
+const div = (cls: string, inner: string): string => `<div class="${cls}">${inner}</div>`;
+const date = (s: number): string =>
+  `<div class="pull_right date details" title="${tgDate(s)}">00:00</div>`;
+const from = (n: string): string => div('from_name', n);
+const text = (t: string): string => div('text', t);
+
+function msg(id: number, body: string, joined = false): string {
+  return `<div class="message default clearfix${joined ? ' joined' : ''}" id="message${id}">${div('body', body)}</div>`;
+}
+
+/** A page from hand-written message blocks, for markup the Chat builder cannot produce. */
+function rawPage(title: string, blocks: readonly string[]): string {
+  return pageHtml(title, []).replace(
+    '<div class="history">',
+    '<div class="history">\n' + blocks.join('\n')
+  );
+}
+
+function parseRaw(title: string, blocks: readonly string[]): Message[] {
+  const p = new ExportParser(BOT_IDENTITY);
+  p.feed(rawPage(title, blocks));
+  p.close();
+  return p.messages;
+}
+
+const fwd = (author: string | null, body: string): string =>
+  '<div class="pull_left forwarded userpic_wrap"></div>' +
+  div(
+    'forwarded body',
+    (author === null
+      ? ''
+      : from(`${author}<span class="date details" title="${tgDate(0)}"> x</span>`)) + text(body)
+  );
+
+describe('markup edge cases', () => {
+  it('negative_reply_id_is_kept', () => {
+    const [, reply] = parseRaw('G', [
+      msg(5, date(0) + from('Mario') + text('/avventura')),
+      msg(
+        6,
+        date(1) +
+          from('Luigi') +
+          div('reply_to details', 'In reply to <a href="#go_to_message-999">this message</a>') +
+          text('ok')
+      ),
+    ]);
+    expect(reply?.reply_to).toBe(-999);
+  });
+
+  it('negative_reply_id_in_a_link_to_another_page', () => {
+    const [, reply] = parseRaw('G', [
+      msg(-999700001, date(0) + from('Mario') + text('/avventura')),
+      msg(
+        7,
+        date(1) +
+          from('Luigi') +
+          div(
+            'reply_to details',
+            'In reply to <a href="messages3.html#go_to_message-999700001">this message</a>'
+          ) +
+          text('ok')
+      ),
+    ]);
+    expect(reply?.reply_to).toBe(-999700001);
+  });
+
+  it('joined_forward_keeps_original_author', () => {
+    const msgs = parseRaw('G', [
+      msg(5, date(0) + from('Luigi') + fwd(BOT, '@luigi, possiedi:<br>- un sasso [C] x2')),
+      // Same original author as the previous forward: Telegram omits the inner from_name.
+      msg(6, date(1) + fwd(null, '@luigi, possiedi:<br>- una mela [C] x1'), true),
+    ]);
+    expect(msgs.map((m) => [m.forwarded_from, m.from_bot])).toStrictEqual([
+      [BOT, true],
+      [BOT, true],
+    ]);
+  });
+
+  it('joined_forward_after_a_plain_message_has_no_implied_author', () => {
+    const msgs = parseRaw('G', [
+      msg(5, date(0) + from('Luigi') + fwd(BOT, '@luigi, possiedi:<br>- un sasso [C] x2')),
+      msg(6, date(1) + text('ciao'), true), // not a forward: breaks the chain
+      msg(7, date(2) + fwd(null, 'inoltrato'), true),
+      msg(8, date(3) + from('Anna') + fwd(null, 'senza autore')), // not joined: nothing implied
+    ]);
+    expect(msgs.map((m) => [m.sender, m.forwarded_from, m.from_bot])).toStrictEqual([
+      ['Luigi', BOT, true],
+      ['Luigi', null, false],
+      ['Luigi', null, false],
+      ['Anna', null, false],
+    ]);
+  });
+
+  it('via_bot_is_not_part_of_the_name', () => {
+    const [m] = parseRaw('G', [msg(5, date(0) + from('Mario Rossi via @gif') + text('ciao'))]);
+    expect(m?.sender).toBe('Mario Rossi');
+  });
+
+  it('via_bot_is_removed_from_forwarded_authors_only_as_a_suffix', () => {
+    const msgs = parseRaw('G', [
+      msg(5, date(0) + from('Luigi') + fwd('Anna Bianchi via @gif', 'ciao')),
+      msg(6, date(1) + from('Ottavia @anna') + text('ciao')), // not "via @": kept
+      msg(7, date(2) + from('via @gif Bea') + text('ciao')), // not at the end: kept
+    ]);
+    expect(msgs.map((m) => [m.sender, m.forwarded_from])).toStrictEqual([
+      ['Luigi', 'Anna Bianchi'],
+      ['Ottavia @anna', null],
+      ['via @gif Bea', null],
+    ]);
+  });
+
+  it('pages_in_the_working_folder_are_one_export', () => {
+    const dir = tempDir();
+    const c = new Chat('G');
+    c.user('Mario', 'fine pagina uno', 0);
+    c.user('Mario', 'inizio pagina due', 1); // joined: the sender comes from page 1
+    writeExport(dir, 'G', [c.messages.slice(0, 1), c.messages.slice(1)], new Set([2]));
+    const cwd = process.cwd();
+    process.chdir(dir);
+    let result: ReturnType<typeof runParse>;
+    try {
+      result = runParse(['.']);
+    } finally {
+      process.chdir(cwd);
+    }
+    expect(result.msgs.map((m) => m.sender)).toStrictEqual(['Mario', 'Mario']);
+    expect(result.err).toContain('cartelle di esportazione: 1;');
+  });
+
+  it('export_key_of_a_bare_page_name_is_the_current_folder', () => {
+    expect(
+      [
+        'messages.html',
+        'messages2.html',
+        './messages3.html',
+        'a/messages.html',
+        'a\\b\\messages.html',
+      ].map(exportKey)
+    ).toStrictEqual(['.', '.', '.', 'a', 'a/b']);
+  });
+
+  it('message_without_a_date_does_not_sort_first', () => {
+    const dir = tempDir();
+    const blocks = [
+      msg(1, date(0) + from('Anna') + text('first')),
+      msg(2, from('Anna') + text('no date')),
+      msg(3, date(2) + from('Anna') + text('third')),
+    ];
+    fs.writeFileSync(path.join(dir, 'messages.html'), rawPage('G', blocks), 'utf-8');
+    // Within a chat a message without a date keeps its place by id.
+    expect(runParse([dir]).msgs.map((m) => m.id)).toStrictEqual([1, 2, 3]);
+  });
+
+  it('undated_messages_take_the_nearest_dated_neighbour_of_their_chat', () => {
+    const m = (chat: string, id: number, date: string | null) => ({ chat, id, date });
+    const t = (s: number): string => tgDate(s);
+    const msgs = [
+      m('A', 1, null), // no earlier dated message in A: the next one's instant
+      m('A', 2, t(10)),
+      m('B', 1, t(5)),
+      m('A', 3, 'garbage'), // unparsable: the previous one's instant
+      m('B', 2, t(20)),
+      m('C', 1, null), // no dated message in C: instant 0
+      m('Z', 1, '31.12.1969 19:00:00 UTC-05:00'), // a real epoch-0 message
+    ];
+    expect(sortMessages(msgs).map((x) => `${x.chat}${x.id}`)).toStrictEqual([
+      'C1',
+      'Z1',
+      'B1',
+      'A1',
+      'A2',
+      'A3',
+      'B2',
+    ]);
+  });
+
+  it('page_name_telegram_does_not_write_is_not_read', () => {
+    // messages01.html would otherwise be read as a second page 1 next to messages.html.
+    const dir = tempDir();
+    fs.writeFileSync(
+      path.join(dir, 'messages.html'),
+      rawPage('G', [msg(1, date(0) + from('Anna') + text('page 1'))]),
+      'utf-8'
+    );
+    fs.writeFileSync(
+      path.join(dir, 'messages01.html'),
+      rawPage('G', [msg(2, date(1) + from('Anna') + text('page 01'))]),
+      'utf-8'
+    );
+    expect(runParse([dir]).msgs.map((m) => m.id)).toStrictEqual([1]);
+  });
+
+  it('only_telegram_page_names_are_pages', () => {
+    const dir = tempDir();
+    const names = [
+      'messages.html',
+      'messages1.html',
+      'messages2.html',
+      'messages02.html',
+      'messages10.html',
+      'messages٣.html',
+    ];
+    names.forEach((n, i) =>
+      fs.writeFileSync(
+        path.join(dir, n),
+        rawPage('G', [msg(i + 1, date(i) + from('Anna') + text(n))]),
+        'utf-8'
+      )
+    );
+    expect([...iterPages(dir, () => {})].map((p) => path.basename(p.label))).toStrictEqual([
+      'messages.html',
+      'messages2.html',
+      'messages10.html',
+    ]);
+    expect(() => pageKey('messages01.html')).toThrow();
+  });
+
+  it('service_entry_closes_the_current_message', () => {
+    const msgs = parseRaw('G', [
+      msg(1, date(0) + from('Anna') + text('ciao')),
+      // A service entry whose markup has a text div must not leak into message 1.
+      `<div class="message service" id="message-1"><div class="body details">${text('Anna joined the group')}</div></div>`,
+    ]);
+    expect(msgs.map((m) => m.text)).toStrictEqual(['ciao']);
+  });
+
+  it('service_entry_keeps_the_sender_and_the_next_message', () => {
+    const msgs = parseRaw('G', [
+      msg(1, date(0) + from('Anna') + text('ciao')),
+      `<div class="message service" id="message-1"><div class="body details">${from('Bea')}</div></div>`,
+      `<div class="message service" id="message2"><div class="body details">Anna pinned <a href="#go_to_message1" onclick="return GoToMessage(1)">this message</a></div></div>`,
+      msg(3, date(2) + text('di nuovo'), true),
+    ]);
+    expect(msgs.map((m) => [m.id, m.sender, m.text, m.reply_to])).toStrictEqual([
+      [1, 'Anna', 'ciao', null],
+      [3, 'Anna', 'di nuovo', null],
+    ]);
   });
 });
