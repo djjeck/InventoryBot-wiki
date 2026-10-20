@@ -1,7 +1,7 @@
 /** Phases 2 and 3 joined with InventoryBot's dialect (pipeline.ts). */
 import { describe, expect, it } from 'vitest';
 import { BOT, Chat } from '#test/helpers.ts';
-import { conversationReport, converse } from './pipeline.ts';
+import { buildWiki, conversationReport, converse, interpret } from './pipeline.ts';
 
 const SALT = 'test-salt';
 
@@ -57,5 +57,23 @@ describe('converse', () => {
       { player: null, salt: SALT }
     );
     expect(conversationReport(unknown)[0]).toBe('giocatore: sconosciuto');
+  });
+
+  it('phases_4_and_5_after_the_conversation', () => {
+    const c = converse(messages(), { player: null, salt: SALT });
+    const { events, report } = interpret(c);
+    expect(report).toStrictEqual([
+      'eventi: inventory=2',
+      '  coppie nei gruppi verificate dalla risposta: confermate=1, sciolte=0',
+    ]);
+    const before = JSON.stringify(events);
+    const built = buildWiki(events, c.owner);
+    // build() annotates its input: phase 4's events are left as they were.
+    expect(JSON.stringify(events)).toBe(before);
+    expect(Object.keys(built.wiki.items)).toStrictEqual(['un sasso']);
+    expect(built.player.inventory['un sasso']?.qty).toBe(1);
+    expect(built.report[0]).toBe(
+      'oggetti: 1; ricette: 0 (con tutti gli ingredienti: 0, con il risultato noto: 0); luoghi: 0'
+    );
   });
 });

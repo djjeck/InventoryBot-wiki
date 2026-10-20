@@ -106,4 +106,16 @@ describe('unknownEntities', () => {
     ])
       expect(unknownEntities(text, U), text).toStrictEqual([]);
   });
+
+  it('item_tuples_of_the_reply_builders', () => {
+    const text = "T.inventory([['un sasso', 'C', 1], [\"una mela\", null, 2, true]])";
+    expect(unknownEntities(text, U).map((x) => x.text)).toStrictEqual(['una mela']);
+    // Expected values shaped like a tuple, without a quantity, are not items.
+    expect(unknownEntities("[['cooldown', null, 'dissolved']]", U)).toStrictEqual([]);
+    expect(unknownEntities('Ottieni: un sasso [C] [usabile]!', U)).toStrictEqual([]);
+  });
+
+  it('a_rarity_filter_after_a_command_is_not_an_item', () => {
+    expect(unknownEntities("ev(text, '/inventario [C]')", U)).toStrictEqual([]);
+  });
 });

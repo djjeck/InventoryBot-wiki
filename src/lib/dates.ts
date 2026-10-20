@@ -1,8 +1,10 @@
 /**
- * Dates: the two Telegram date-title formats. Pure functions, no Node APIs.
+ * Dates: the two Telegram date-title formats, and the ISO 8601 form of the wiki and the
+ * player state. Pure functions, no Node APIs (localNowIso reads the clock).
  *
  * - Windows export: `27.11.2025 19:14:19 UTC-05:00` (docs/telegram-export.md §5.1).
  * - macOS export: `27 November 2025, 19:14:19`, without an offset (§11.3).
+ * - ISO: `2025-11-27T19:14:19-05:00`.
  *
  * A date is a wall clock plus a UTC offset in minutes; dates are compared as instants
  * (epoch seconds), so the same moment written with different offsets is equal. Any
@@ -44,6 +46,8 @@ const WINDOWS_DATE =
 const MAC_DATE = new RegExp(
   `^([0-9]{1,2}) (${MONTHS.join('|')}) ([0-9]{4}), ([0-9]{2}):([0-9]{2}):([0-9]{2})$`
 );
+const ISO_DATE =
+  /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})([+-])([0-9]{2}):([0-9]{2})$/;
 
 /** Epoch seconds of a wall clock read as UTC, or null if the date or time does not exist. */
 function utcSeconds(w: WallClock): number | null {
@@ -68,11 +72,10 @@ function offsetMinutes(sign: string, hh: string, mm: string): number | null {
   return (sign === '-' ? -1 : 1) * (h * 60 + m);
 }
 
-/** A Windows export date title (`27.11.2025 19:14:19 UTC-05:00`), or null. */
-export function parseWindowsDate(s: string | null | undefined): ZonedDate | null {
-  const m = typeof s === 'string' ? WINDOWS_DATE.exec(s) : null;
-  if (!m) return null;
-  const [day, month, year, h, mi, sec, sign, oh, om] = m.slice(1) as string[];
+/** A wall clock and an offset from regex groups (year, month, day, h, m, s, sign, oh, om). */
+function zoned(g: readonly string[], order: 'dmy' | 'ymd'): ZonedDate | null {
+  const [a, b, c, h, mi, sec, sign, oh, om] = g as [string, ...string[]];
+  const [year, month, day] = order === 'dmy' ? [c, b, a] : [a, b, c];
   const w = {
     year: Number(year),
     month: Number(month),
@@ -83,6 +86,18 @@ export function parseWindowsDate(s: string | null | undefined): ZonedDate | null
   };
   const off = offsetMinutes(sign as string, oh as string, om as string);
   return off === null || utcSeconds(w) === null ? null : { ...w, offsetMinutes: off };
+}
+
+/** A Windows export date title (`27.11.2025 19:14:19 UTC-05:00`), or null. */
+export function parseWindowsDate(s: string | null | undefined): ZonedDate | null {
+  const m = typeof s === 'string' ? WINDOWS_DATE.exec(s) : null;
+  return m ? zoned(m.slice(1), 'dmy') : null;
+}
+
+/** An ISO date with its offset (`2025-11-27T19:14:19-05:00`), or null. */
+export function parseIsoDate(s: string | null | undefined): ZonedDate | null {
+  const m = typeof s === 'string' ? ISO_DATE.exec(s) : null;
+  return m ? zoned(m.slice(1), 'ymd') : null;
 }
 
 /** A macOS export date title (`27 November 2025, 19:14:19`: English month, 24-hour clock), or null. */
@@ -119,6 +134,33 @@ export function formatWindowsDate(d: ZonedDate): string {
     `${pad(d.day)}.${pad(d.month)}.${pad(d.year, 4)} ` +
     `${pad(d.hour)}:${pad(d.minute)}:${pad(d.second)} UTC${formatOffset(d.offsetMinutes)}`
   );
+}
+
+/** A date in ISO 8601 with its offset: `2025-11-27T19:14:19-05:00`. */
+export function formatIso(d: ZonedDate): string {
+  return (
+    `${pad(d.year, 4)}-${pad(d.month)}-${pad(d.day)}` +
+    `T${pad(d.hour)}:${pad(d.minute)}:${pad(d.second)}${formatOffset(d.offsetMinutes)}`
+  );
+}
+
+/** Epoch seconds of an ISO date, or null if it is not one. */
+export function isoDateSeconds(s: string | null | undefined): number | null {
+  const d = parseIsoDate(s);
+  return d === null ? null : epochSeconds(d);
+}
+
+/** The current local time to the second with its UTC offset (`2025-11-27T19:14:19-05:00`). */
+export function localNowIso(now: Date = new Date()): string {
+  return formatIso({
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+    hour: now.getHours(),
+    minute: now.getMinutes(),
+    second: now.getSeconds(),
+    offsetMinutes: -now.getTimezoneOffset(),
+  });
 }
 
 /** Epoch seconds of a Windows date title, or null if it is not one. */

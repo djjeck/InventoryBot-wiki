@@ -62,6 +62,13 @@ export function sliceCodePoints(s: string, start: number, end?: number): string 
   return Array.from(s).slice(start, end).join('');
 }
 
+/** Removes the characters of `chars` from the end of `s`. */
+export function stripEndChars(s: string, chars: string): string {
+  let end = s.length;
+  while (end > 0 && chars.includes(s[end - 1] as string)) end--;
+  return s.slice(0, end);
+}
+
 /** Length in code points. */
 export function codePointLength(s: string): number {
   let n = 0;
@@ -126,4 +133,18 @@ export function parseDecimalInt(s: string): number {
   let value = 0;
   for (const ch of (m[2] as string).replaceAll('_', '')) value = value * 10 + digitValue(ch);
   return m[1] === '-' ? -value : value;
+}
+
+/**
+ * Whether a character of an NFKD-normalised string has a non-zero canonical combining
+ * class. JavaScript has no API for the class: a character with a class between 1 and
+ * 239 is moved before U+0345 (class 240) by canonical reordering, and U+0345 is the
+ * only character of class 240 or more.
+ */
+export function isCombiningMark(ch: string): boolean {
+  const cp = ch.codePointAt(0) as number;
+  if (cp < 0x300) return false;
+  if (ch === '\u0345') return true;
+  const s = '\u0345' + ch;
+  return s.normalize('NFD') !== s;
 }

@@ -1,6 +1,7 @@
 /**
  * The events of InventoryBot's replies: what the classifier (classify.ts) reads each bot
- * reply as, and the event records of phase 4 (extract.ts). Field names and key order are
+ * reply as, the event records of phase 4 (extract.ts), and the wiki and the player state of
+ * phase 5 (build.ts, player.ts). Field names and key order are
  * those of the JSON form (snake_case); each classifier builds its event with the keys in
  * the order listed here, so that serialising events gives byte-identical output from run
  * to run.
@@ -260,3 +261,140 @@ export type EventRecord =
   | (Exclude<Event, UnknownEvent | StatsEvent> & EventContext)
   | (StatsEvent & Partial<EventContext>)
   | (UnknownEvent & EventContext & { text: string });
+
+// ---- phase 5: the wiki and the player state (build.ts, player.ts) -----------------------
+
+/**
+ * An event while phase 5 runs: its date converted to ISO (`iso()`), and annotations
+ * added in place for player.ts: a drop gets the item name (`resolved`) and where the
+ * owner was (`location`), a craft its recipe name, a /usa reply the item used. An
+ * unrecognised reply with the shape of a known /usa reply is turned into a use.
+ */
+export type BuildEvent =
+  | (Extract<EventRecord, { type: 'drop' }> & { resolved?: string; location?: string | null })
+  | (Extract<EventRecord, { type: 'craft' }> & { recipe?: string })
+  | (Extract<EventRecord, { type: 'use' }> & { used_item?: string })
+  | Exclude<EventRecord, { type: 'drop' | 'craft' | 'use' }>;
+
+/** What `/usa` of an item does, from the replies seen (`use` in a wiki item). */
+export interface WikiItemUse {
+  /** Successful uses seen. */
+  observations: number;
+  /** Distinct replies of the successful uses, first seen first. */
+  outcomes: string[];
+  /** single: one use seen; fixed: every use gave the same reply; variable: they differ. */
+  result: 'single' | 'fixed' | 'variable' | null;
+  /** Whether a use consumes the item, from the owner's counts; null when unknown. */
+  consumed: boolean | null;
+  /** Uses backed by counts before and after them. */
+  consumed_evidence: { yes: number; no: number };
+  /** Replies of failed uses (a missing requirement). */
+  requirements: string[];
+  /**
+   * The cooldown, from refusals and /esamina times left after a use seen: `min` (the
+   * largest time left) and `max` (the smallest elapsed + time left + slack; null when the
+   * observations contradict each other), in seconds; `seconds` only when the value is
+   * fixed (a quick refusal after a use, or several observations agreeing on one round value).
+   */
+  cooldown?: { seconds?: number; min: number; max: number | null; observations: number };
+}
+
+/** A name the item had before the game renamed it. */
+export interface WikiOldName {
+  name: string;
+  last_seen: string;
+  /** Italian sentence with the evidence for the rename. */
+  evidence: string;
+}
+
+export interface WikiItem {
+  name: string;
+  rarity: string | null;
+  usable: boolean;
+  /** `adventure`, `recipe`, `special`, sorted. */
+  sources: string[];
+  /** Recipe names, sorted. */
+  used_in: string[];
+  made_by: string[];
+  last_seen: string | null;
+  use?: WikiItemUse;
+  old_names?: WikiOldName[];
+  /** Listed by /titolo among the items that give a title. */
+  gives_title?: true;
+  /** Present when `sources` was deduced from the rarity. */
+  sources_inferred?: true;
+  /** A "+" rarity: drops in a single location. */
+  exclusive: boolean;
+  /** Where the owner found it; only for exclusive items. */
+  locations: string[];
+}
+
+export interface WikiRecipe {
+  name: string;
+  level: number | null;
+  /** Item name -> quantity, from the latest /ricetta detail or craft. */
+  ingredients: Record<string, number> | null;
+  ingredients_source: 'detail' | 'craft' | null;
+  /** Items known to be ingredients ("ti serve nelle ricette"), sorted. */
+  partial_ingredients: string[];
+  output: string | null;
+  /** Craft text of the latest craft that set the output. */
+  craft_text: string | null;
+  last_seen: string | null;
+  /** Present when `level` was deduced from the output's `Ln` rarity. */
+  level_inferred?: true;
+}
+
+export interface WikiLocation {
+  name: string;
+  /** Name without the leading preposition, capitalised. */
+  label: string;
+  exits: string[];
+  requires_item: boolean;
+  unlock_texts: string[];
+  /** Items the place requires, from the bot's "ti serve per passare" notices, sorted. */
+  required_items: string[];
+  exclusive_items: string[];
+}
+
+/** The wiki: facts about the game, the same for every player. */
+export interface Wiki {
+  /** Local time of the run, `2026-10-17T12:00:00+02:00`. */
+  generated: string;
+  /** Rarity code -> meaning, from the latest /faq. */
+  rarities: Record<string, string>;
+  rules: string[];
+  /** Old item name -> current name. */
+  renames: Record<string, string>;
+  /** Rarity codes the /faq does not explain -> assumed meaning. */
+  rarity_hypotheses: Record<string, string>;
+  items: Record<string, WikiItem>;
+  recipes: Record<string, WikiRecipe>;
+  locations: Record<string, WikiLocation>;
+}
+
+/** How a holding was last set (Italian, shown on the page). */
+export type HoldingVia = 'inventario' | 'esamina' | 'ricetta' | 'mostra' | 'dai' | 'movimento';
+
+export interface Holding {
+  qty: number;
+  /** False when only a lower bound or a change is known. */
+  exact: boolean;
+  date: string | null;
+  via: HoldingVia;
+}
+
+/** The player state: the export owner's own state. */
+export interface PlayerState {
+  player: string | null;
+  /** Date of the owner's latest event. */
+  as_of: string | null;
+  recipes: Record<string, { crafted: number; last_crafted: string | null }>;
+  items: Record<string, { first_seen: string | null }>;
+  locations: Record<string, { visited: boolean; adventures: number }>;
+  /** The latest /ricetta list: recipe -> `pronta` or `manca N`. */
+  /** The latest /ricetta list; `truncated`: it was cut, so a recipe missing from it may still be visible. */
+  recipe_list: { date: string | null; truncated: boolean; recipes: Record<string, string> } | null;
+  /** Estimated holdings above zero. */
+  inventory: Record<string, Holding>;
+}

@@ -43,7 +43,7 @@ proceeding. Do not chain changes without an explicit instruction to continue.
 ## Architecture
 
 The pipeline is a chain of phases, each a function with typed input and output that a caller runs in
-order. So far there are phases 1 to 4:
+order:
 
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become `Message`s
    (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the pages as
@@ -77,13 +77,21 @@ order. So far there are phases 1 to 4:
    command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
    `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). The phase ends by
    verifying the group pairs (`verify.ts`): a reply that, read with its command, is not of that
-   command's family is read again without it. A second check, on group `/usa` replies, needs the
-   items of phase 5 and comes with it.
+   command's family is read again without it, and so is a group `/usa` reply that does not fit the
+   item its query names (which uses phase 5's item catalogue).
+
+5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
+   facts about the game the same for every player (items, recipes, places, the `/faq` rules), and
+   the owner's own state (recipes made, items seen, places visited, an estimate of the inventory),
+   kept apart so that the wiki can be shared. `build` merges the events into a knowledge base,
+   newest observation first; `toJson` writes the wiki, `playerState` the player state. Phase 5 reads
+   plain JSON copies of the events (`buildWiki` in `src/pipeline.ts`), since `build` annotates them
+   for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply
 (`compatibleCommands`, from the reply type the classifier gives). `src/pipeline.ts` runs phases 2 to
-4 on the messages of phase 1 (`converse`, `interpret`) and words their report lines.
+5 on the messages of phase 1 (`converse`, `interpret`, `buildWiki`) and words their report lines.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`
@@ -91,11 +99,11 @@ builds it into `web-dist/`). The built page carries a Content-Security-Policy th
 network connection, so the browser itself guarantees that the exports are never sent anywhere. The
 page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker
 (`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phases 1
-to 4 found. The owner is the player the bot addresses most in the DM; without a DM the run stops and
-shows a username field, which the page offers nowhere else. The pseudonyms' salt is made once and
-kept in the browser's `localStorage`. `run.ts` uses no browser API and is tested in Node; `main.ts`
-and `worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
-`tsconfig.web.json`, and left out of coverage).
+to 5 found; the wiki itself is not shown yet. The owner is the player the bot addresses most in the
+DM; without a DM the run stops and shows a username field, which the page offers nowhere else. The
+pseudonyms' salt is made once and kept in the browser's `localStorage`. `run.ts` uses no browser API
+and is tested in Node; `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
+(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,
@@ -126,8 +134,9 @@ This project must stay on the right side of that.
     than real items: they identify people.
   - This is enforced, not left to judgement: `npm run check:universe` (`scripts/check-universe.ts`,
     run by `validate`, `ci` and GitHub CI) fails on any entity, found where the bot's reply formats
-    put one, and on any `@username`, that is not in the universe. Do not try to decide by eye
-    whether a name is real; the author reviews additions to the universe.
+    put one or in the item tuples of the tests' reply builders, and on any `@username`, that is not
+    in the universe. Do not try to decide by eye whether a name is real; the author reviews
+    additions to the universe.
 - **Group history is other players' discoveries.** Using it for one's own page is what any member
   can do by scrolling the group; publishing it is not. Keep it out of anything shared.
 - **The published page is the tool, never data.** GitHub Pages serves the web app, published from

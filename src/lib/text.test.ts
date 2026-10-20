@@ -3,9 +3,11 @@ import {
   codePointLength,
   compareCodePoints,
   escapeRegex,
+  isCombiningMark,
   parseDecimalInt,
   sliceCodePoints,
   splitWords,
+  stripEndChars,
   stripStartWs,
   stripWs,
 } from './text.ts';
@@ -40,5 +42,21 @@ describe('text', () => {
     expect(stripStartWs(' \x1c x ')).toBe('x ');
     expect(sliceCodePoints('a\u{1F600}bc', 1, 3)).toBe('\u{1F600}b');
     expect(sliceCodePoints('a\u{1F600}bc', 2)).toBe('bc');
+  });
+
+  it('isCombiningMark is true for non-zero canonical combining classes', () => {
+    expect([...'\u0301\u0345\ufe0f\u20e3a\u05b0'].map(isCombiningMark)).toStrictEqual([
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+    ]);
+  });
+
+  it('stripEndChars removes only the given characters from the end', () => {
+    expect(stripEndChars('sasso!.!', '.!')).toBe('sasso');
+    expect(stripEndChars('!sasso', '!')).toBe('!sasso');
   });
 });

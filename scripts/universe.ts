@@ -7,7 +7,8 @@
  * the text there must end with a name of the universe (the bot may write words before it):
  *
  * - items: before a rarity tag (`un sasso [C]`: the text before the tag must end with an
- *   item of the universe), and after `Ottieni: ` up to `!`;
+ *   item of the universe), after `Ottieni: ` up to `!`, and first in the item tuples (name, rarity,
+ *   quantity) of the tests' reply builders (`['un sasso', 'C', 1]`);
  * - recipes: in recipe lists (`- NAME L3 [manca 1]`) and details (`per fare [la ricetta]
  *   NAME ti manca`);
  * - places: after `ti trovi`, `arrivi`, `non puoi andare: `, `passare ` and exit lines
@@ -83,6 +84,8 @@ const USERNAME = /(?<![\p{L}\p{N}_.@/\\$])@([A-Za-z][A-Za-z0-9_]*)(?![\p{L}\p{N}
 /** Patterns whose first group is the whole name of an entity. */
 const NAMED: readonly [Kind, RegExp][] = [
   ['item', new RegExp(`Ottieni: (${SPAN})!`, 'gu')],
+  // An item tuple: name, rarity (or null), quantity.
+  ['item', /\[\s*(['"])(?<name>[^'"\n]+)\1,\s*(?:(['"])[CNRSXMUL]\d*\+?\3|null)\s*,\s*\d+/gu],
   ['recipe', new RegExp(`${LINE_START}- (${SPAN}) L\\d+ \\[(?:\\*|manca)`, 'gu')],
   ['recipe', new RegExp(`per fare (?:la ricetta )?(${SPAN}) ti manca`, 'gu')],
   [
@@ -120,14 +123,16 @@ export function unknownEntities(text: string, universe: Universe): Finding[] {
       0
     );
     const before = text.slice(start, m.index).trimEnd();
-    // A tag alone (a legend, a pattern) or after code (`${name} [C]`, `'[N] '`) names no item.
-    if (!/[\p{L}\p{N}]$/u.test(before)) continue;
+    // A tag alone (a legend, a pattern), after code (`${name} [C]`, `'[N] '`) or after a
+    // command (`/inventario [C]`, a rarity filter) names no item.
+    if (!/[\p{L}\p{N}]$/u.test(before) || /(?:^|\s|['"`])\/[\p{L}]+$/u.test(before)) continue;
     if (!endsWithName(before, universe.item))
       out.push({ kind: 'item', text: before.slice(-60), line: lineOf(text, m.index) });
   }
   for (const [kind, re] of NAMED) {
     for (const m of text.matchAll(re)) {
-      const name = m[1] as string;
+      // A crafted item may carry its tags (`Ottieni: un baule [X] [usabile]!`).
+      const name = ((m.groups?.['name'] ?? m[1]) as string).replace(/(?:\s*\[[^\]]*\])+$/u, '');
       // Code (a pattern such as `.*`, `(?<name>${DOT}+?)`) is no name; a name may follow other words.
       if (/\p{L}/u.test(name) && !CODE.test(name) && !endsWithName(name, universe[kind]))
         out.push({ kind, text: name, line: lineOf(text, m.index + m[0].indexOf(name)) });

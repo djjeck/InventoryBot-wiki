@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatIso,
   formatWindowsDate,
+  isoDateSeconds,
   isTimeZone,
+  localNowIso,
   parseWindowsDate,
   wallClockOffset,
   windowsDateSeconds,
@@ -59,5 +62,26 @@ describe('dates', () => {
       true,
     ]);
     expect(['Mars/Base', 'Italia'].map(isTimeZone)).toStrictEqual([false, false]);
+  });
+
+  it('formatIso writes the parsed date in ISO 8601', () => {
+    const d = parseWindowsDate('07.03.2026 05:04:03 UTC-05:00');
+    expect(d && formatIso(d)).toBe('2026-03-07T05:04:03-05:00');
+    expect(
+      formatIso({ year: 2026, month: 1, day: 2, hour: 3, minute: 4, second: 5, offsetMinutes: 0 })
+    ).toBe('2026-01-02T03:04:05+00:00');
+  });
+
+  it('isoDateSeconds compares instants across offsets', () => {
+    expect(isoDateSeconds('2025-11-28T01:00:00+00:00')).toBe(Date.UTC(2025, 10, 28, 1) / 1000);
+    expect(isoDateSeconds('2025-11-27T20:00:00-05:00')).toBe(Date.UTC(2025, 10, 28, 1) / 1000);
+    expect(isoDateSeconds('2025-11-27T19:00:00Z')).toBeNull();
+    expect(isoDateSeconds('garbage')).toBeNull();
+    expect(isoDateSeconds(null)).toBeNull();
+  });
+
+  it('localNowIso is the local time with its offset', () => {
+    const now = new Date(Date.UTC(2026, 0, 2, 3, 4, 5));
+    expect(isoDateSeconds(localNowIso(now))).toBe(now.getTime() / 1000);
   });
 });

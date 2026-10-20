@@ -1,5 +1,5 @@
 /**
- * The pipeline in memory, as far as it goes: phases 2 to 4 on the messages of phase 1.
+ * The pipeline in memory: phases 2 to 5 on the messages of phase 1.
  * It joins the generic Telegram-bot layer and the InventoryBot layer, and uses no Node or
  * browser API: the web app's worker (src/web/run.ts) runs it, and the tests run it in Node.
  *
@@ -7,9 +7,16 @@
  * end words it for its own way of asking.
  */
 import { INVENTORY_BOT } from './inventorybot/bot.ts';
+import { build, reportLines, toJson } from './inventorybot/build.ts';
 import { inventoryBotDialect, learnTitles } from './inventorybot/dialect.ts';
 import { interpretationReport, interpretReplies } from './inventorybot/extract.ts';
-import { type EventRecord } from './inventorybot/types.ts';
+import { playerState } from './inventorybot/player.ts';
+import {
+  type BuildEvent,
+  type EventRecord,
+  type PlayerState,
+  type Wiki,
+} from './inventorybot/types.ts';
 import { anonymise } from './telegram/anonymise/anonymise.ts';
 import {
   type Conversation,
@@ -81,4 +88,21 @@ export function conversationReport(c: Conversed): string[] {
 export function interpret(c: Conversed): { events: EventRecord[]; report: string[] } {
   const interpretation = interpretReplies(c.conversation.replies);
   return { events: interpretation.events, report: interpretationReport(interpretation) };
+}
+
+/**
+ * Phase 5 on the events of phase 4: the wiki and the owner's player state, and the report
+ * lines. The events are read as plain JSON copies: build() annotates its input in place,
+ * and a copy keeps phase 4's events as they were.
+ */
+export function buildWiki(
+  events: readonly EventRecord[],
+  owner: string | null
+): { wiki: Wiki; player: PlayerState; report: string[] } {
+  const copies = JSON.parse(JSON.stringify(events)) as BuildEvent[];
+  const kb = build(copies, owner);
+  // toJson and playerState add to the report: the lines are read after both.
+  const wiki = toJson(kb);
+  const player = playerState(copies, kb);
+  return { wiki, player, report: reportLines(kb) };
 }

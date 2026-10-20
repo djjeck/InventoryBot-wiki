@@ -6,6 +6,7 @@
  * Everything sent is structured-cloneable: browser `File` objects (which stay handles to
  * the files on disk: only the export pages are read, in the worker) and plain data.
  */
+import { type PlayerState, type Wiki } from '#src/inventorybot/types.ts';
 import { type FileLike } from '#src/telegram/export/browser-files.ts';
 
 export interface RunOptions {
@@ -30,15 +31,19 @@ export interface RunRequest {
 /** Worker -> page: a step started. `read` counts the pages read so far. */
 export interface ProgressMessage {
   type: 'progress';
-  phase: 'read' | 'parse' | 'conversation' | 'interpret';
+  phase: 'read' | 'parse' | 'conversation' | 'interpret' | 'build';
   done?: number;
   total?: number;
 }
 
-/** What a run produced: for now, what phases 1 to 4 found. */
+/** What a run produced. */
 export interface RunResult {
   /** The export owner the run was made for (given, or found in the DM). */
   owner: string | null;
+  /** The wiki: facts about the game, the same for every player. */
+  wiki: Wiki;
+  /** The owner's own state. */
+  player: PlayerState;
   /** The report lines: warnings, then the summary. */
   report: string[];
   /** Names of the input folders. */

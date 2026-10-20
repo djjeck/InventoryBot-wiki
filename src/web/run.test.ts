@@ -43,10 +43,11 @@ describe('handleRun', () => {
     const reads = posted.flatMap((m) => (m.type === 'progress' && m.phase === 'read' ? [m] : []));
     expect(reads.map((m) => m.done)).toStrictEqual([0, 1, 2, 3]);
     expect(reads.every((m) => m.total === 3)).toBe(true);
-    expect(posted.slice(-4, -1)).toStrictEqual([
+    expect(posted.slice(-5, -1)).toStrictEqual([
       { type: 'progress', phase: 'parse' },
       { type: 'progress', phase: 'conversation' },
       { type: 'progress', phase: 'interpret' },
+      { type: 'progress', phase: 'build' },
     ]);
     expect(last.type).toBe('done');
     if (last.type !== 'done') return;
@@ -58,6 +59,12 @@ describe('handleRun', () => {
       fromBot: 1,
       replies: 1,
     });
+    // A drop's item is isolated by the names other replies give: here none does.
+    expect(last.result.wiki.items).toStrictEqual({});
+    expect(last.result.report.slice(-2)).toStrictEqual([
+      '-- unresolved_drop: 1',
+      '  unresolved_drop: text="ti tuffi nel lago e scorgi un sasso"',
+    ]);
     // The group's title is printed only as phase 3 rewrote it.
     const [summary, ...rest] = last.result.report;
     expect(summary).toMatch(
@@ -70,6 +77,9 @@ describe('handleRun', () => {
       '  InventoryBot: risposte del bot abbinate a un comando: dm=1',
       'nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0',
       'eventi: drop=1',
+      'oggetti: 0; ricette: 0 (con tutti gli ingredienti: 0, con il risultato noto: 0); luoghi: 0',
+      '-- unresolved_drop: 1',
+      '  unresolved_drop: text="ti tuffi nel lago e scorgi un sasso"',
     ]);
   });
 
@@ -103,6 +113,9 @@ describe('handleRun', () => {
       '  InventoryBot: risposte del bot abbinate a un comando: dm=1',
       'nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0',
       'eventi: drop=1',
+      'oggetti: 0; ricette: 0 (con tutti gli ingredienti: 0, con il risultato noto: 0); luoghi: 0',
+      '-- unresolved_drop: 1',
+      '  unresolved_drop: text="nel bosco trovi un sasso"',
     ]);
   });
 
