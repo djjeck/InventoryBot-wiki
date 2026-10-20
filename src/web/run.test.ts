@@ -43,9 +43,10 @@ describe('handleRun', () => {
     const reads = posted.flatMap((m) => (m.type === 'progress' && m.phase === 'read' ? [m] : []));
     expect(reads.map((m) => m.done)).toStrictEqual([0, 1, 2, 3]);
     expect(reads.every((m) => m.total === 3)).toBe(true);
-    expect(posted.slice(-3, -1)).toStrictEqual([
+    expect(posted.slice(-4, -1)).toStrictEqual([
       { type: 'progress', phase: 'parse' },
       { type: 'progress', phase: 'conversation' },
+      { type: 'progress', phase: 'interpret' },
     ]);
     expect(last.type).toBe('done');
     if (last.type !== 'done') return;
@@ -68,6 +69,7 @@ describe('handleRun', () => {
       'risposte del bot: 1',
       '  InventoryBot: risposte del bot abbinate a un comando: dm=1',
       'nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0',
+      'eventi: drop=1',
     ]);
   });
 
@@ -100,6 +102,7 @@ describe('handleRun', () => {
       'risposte del bot: 1',
       '  InventoryBot: risposte del bot abbinate a un comando: dm=1',
       'nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0',
+      'eventi: drop=1',
     ]);
   });
 

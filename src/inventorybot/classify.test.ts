@@ -1,5 +1,7 @@
 /** classify.ts: what each bot reply is read as (docs/bot-protocol.md). */
 import { describe, expect, it } from 'vitest';
+import { BOT, Chat, tgDate } from '#test/helpers.ts';
+import { byType, runExtract } from '#test/interpret.ts';
 import { classify, itemFromLine, itemLines } from './classify.ts';
 import { compatibleCommands, playerOf } from './dialect.ts';
 import { type ItemLine } from './types.ts';
@@ -973,5 +975,230 @@ describe('edge cases', () => {
       [3660, 60],
       [183600, 3600],
     ]);
+  });
+});
+
+describe('through phases 2 and 4', () => {
+  it('recipe_ambiguity_also_answers_esamina', () => {
+    const ambiguous = 'troppe ricette trovate con quel nome';
+    expect(classify(ambiguous, null)).toMatchObject({ type: 'miss', reply: 'recipe_ambiguous' });
+    expect(compatibleCommands(ambiguous)).toStrictEqual(new Set(['/esamina', '/ricetta']));
+    // In a group the reply takes the pending /esamina, and the final verification keeps the pair.
+    const g = new Chat('Gruppo');
+    g.user('Anna', '/inventario', 0);
+    g.user('Bea', '/esamina torta', 1);
+    g.bot('troppe ricette trovate con quel nome', 2);
+    const { events, err } = runExtract(g.messages);
+    expect(events.map((e) => [e.type, e.query])).toStrictEqual([['miss', '/esamina torta']]);
+    expect(err).toContain('coppie nei gruppi verificate dalla risposta: confermate=1, sciolte=0');
+  });
+
+  it('known_replies_constrain_group_pairing', () => {
+    const g = new Chat('Gruppo');
+    g.user('Anna', '/avventura', 0);
+    g.bot('RULLO DI TAMBURI!!!', 1); // answers no command: the adventure stays pending
+    g.user('Bea', '/inventario', 2);
+    g.user('Carla', '/stats zorro', 3);
+    g.bot('non esiste nessuno con quel nome..', 4); // a /stats reply: not the /inventario
+    const ev = runExtract(g.messages).events;
+    expect(ev.map((e) => [e.type, e.query])).toStrictEqual([
+      ['miss', null],
+      ['miss', '/stats zorro'],
+    ]);
+  });
+
+  it('a_preference_reply_takes_its_command_in_a_group', () => {
+    const g = new Chat('Gruppo');
+    g.user('Anna', '/avventura', 0);
+    g.user('Bea', '/preferito bonsai', 1);
+    g.bot(
+      "@bea_b, sei veramente affezionato a un piccolo bonsai, e' di gran lunga il tuo oggetto preferito!",
+      2
+    );
+    g.user('Carla', '/quest', 3);
+    g.bot('@carla_c non hai nessuna quest al momento.', 4);
+    const ev = runExtract(g.messages).events;
+    expect(ev.map((e) => [e.type, e.query])).toStrictEqual([
+      ['miss', '/preferito bonsai'],
+      ['miss', '/quest'],
+    ]);
+  });
+
+  it('sua_maesta_prefix', () => {
+    const g = new Chat('G');
+    g.user('Admin', '/inventario', 0);
+    g.bot('Sua Maestà @msx80, possiedi:\n- una corona [U] x1', 1);
+    const { events } = runExtract(g.clean());
+    expect(events).toHaveLength(1);
+    const e = events[0]!;
+    expect([e.type, e.player, e.query]).toStrictEqual(['inventory', 'msx80', '/inventario']);
+  });
+
+  it('broadcasts_in_group', () => {
+    const g = new Chat('G');
+    g.user('Luigi', '/avventura', 0); // a pending command that must not be taken
+    g.bot('[W] @x, nel bosco trovi un sasso [C]!', 1);
+    g.bot('[N] @y ti ha dato 1x un bottone', 2);
+    g.bot("[BAN] @z e' stato bannato", 3);
+    const { events } = runExtract(g.clean());
+    expect(events.map((e) => e.type)).toStrictEqual(['drop', 'gift', 'unknown']);
+    expect(events.every((e) => e.broadcast && e.match === null && e.query === null)).toBe(true);
+    expect((events[0] as Record<string, unknown>)['raw']).toBe('nel bosco trovi un sasso'); // [W] removed
+    expect(events[0]?.player).toBe('x');
+    expect((events[2] as Record<string, unknown>)['text']).toBe("[BAN] @z e' stato bannato");
+  });
+
+  it('not_a_broadcast_in_dm', () => {
+    const dm = new Chat(BOT);
+    dm.user('Daniele', '/avventura', 0);
+    dm.bot('@djjeck, nel bosco trovi un sasso [C]!', 1);
+    dm.bot('[N] @y ti ha dato 1x un bottone', 2);
+    const { events } = runExtract(dm.clean());
+    expect(events.map((e) => [e.type, e.broadcast, e.match])).toStrictEqual([
+      ['drop', false, 'dm'],
+      ['gift', false, 'dm'],
+    ]);
+  });
+
+  it('normal_group_reply_is_not_broadcast', () => {
+    const g = new Chat('G');
+    g.user('Luigi', '/avventura', 0);
+    g.bot('@luigi, nel bosco trovi un sasso [C]!', 1);
+    const { events } = runExtract(g.clean());
+    expect(events.map((e) => [e.broadcast, e.match, e.query])).toStrictEqual([
+      [false, 'single', '/avventura'],
+    ]);
+  });
+
+  it('typical_dm_session', () => {
+    const dm = new Chat(BOT);
+    const session: [string, string][] = [
+      ['/avventura', DROP],
+      ['/esamina sedia', ITEM_INFO],
+      ['/ricetta cestina', DETAIL],
+      ['/ricetta biscottosa', CRAFT],
+      ['/ricetta', RECIPE_LIST],
+      ['/inventario', INVENTORY],
+      ['/viaggio valle', TRAVEL],
+      ['/faq', FAQ],
+      ['/dai 1 bottone @gino_x', '@djjeck, dai 1x un bottone a @gino_x'],
+      [
+        '/mostra cappello',
+        '@djjeck, mostri orgogliosamente di possedere 3x un elegante cappello piumato [N]',
+      ],
+      ['/usa dado', '@djjeck, tiri il dado e fai 5!'],
+    ];
+    session.forEach(([cmd, reply], i) => {
+      dm.user('Daniele', cmd, i * 60);
+      dm.bot(reply, i * 60 + 2);
+    });
+    const { events, err } = runExtract(dm.clean());
+    expect(events.map((e) => e.type)).toStrictEqual([
+      'drop',
+      'item_info',
+      'recipe_detail',
+      'craft',
+      'recipe_list',
+      'inventory',
+      'travel',
+      'faq',
+      'give',
+      'show',
+      'use',
+    ]);
+    expect(events.every((e) => e.dm && e.match === 'dm' && e.chat === BOT)).toBe(true);
+    expect(events.slice(0, 3).map((e) => e.player)).toStrictEqual(['djjeck', 'djjeck', 'djjeck']);
+    // The /faq is not addressed: the player comes from the matched command's sender
+    // (the DM sender is seeded as the owner).
+    expect(playerOf(FAQ)).toBeNull();
+    expect(events[7]?.player).toBe('djjeck');
+    expect(events[3]?.query).toBe('/ricetta biscottosa');
+    const keys = new Set(Object.keys(byType(events, 'drop')[0] ?? {}));
+    for (const k of [
+      'chat',
+      'dm',
+      'msg',
+      'date',
+      'player',
+      'query',
+      'match',
+      'forwarded',
+      'broadcast',
+    ])
+      expect(keys.has(k), k).toBe(true);
+    expect(err).toContain('InventoryBot: risposte del bot abbinate a un comando: dm=11');
+  });
+
+  it('stats_field_does_not_overwrite_event_keys', () => {
+    const c = new Chat(BOT);
+    c.user('Daniele', '/stats', 0);
+    c.bot('Avventuriero @djjeck\n- Type: altro\n- Date: ieri\n- Livello: 4', 1);
+    const [e] = runExtract(c.messages).events;
+    expect(e?.type).toBe('stats');
+    expect(e?.date).toBe(tgDate(1));
+  });
+
+  it('stats_fields_named_like_event_keys_are_dropped', () => {
+    const c = new Chat(BOT);
+    c.user('Daniele', '/stats', 0);
+    c.bot(
+      'Avventuriero @djjeck\n- Livello: 4\n- Player: x\n- Chat: y\n- Msg: z\n- __proto__: w\n- Luogo: nel bosco',
+      1
+    );
+    const [e] = runExtract(c.messages).events;
+    const {
+      type,
+      chat,
+      dm,
+      msg: id,
+      date: d,
+      player,
+      query,
+      match,
+      forwarded,
+      broadcast,
+      ...fields
+    } = e as unknown as Record<string, unknown>;
+    expect([type, chat, id, d, player, query]).toStrictEqual([
+      'stats',
+      BOT,
+      c.messages[1]?.id,
+      tgDate(1),
+      'djjeck',
+      '/stats',
+    ]);
+    expect([dm, match, forwarded, broadcast]).toStrictEqual([true, 'dm', false, false]);
+    expect(Object.entries(fields)).toStrictEqual([
+      ['livello', '4'],
+      ['__proto__', 'w'],
+      ['luogo', 'nel bosco'],
+    ]);
+  });
+
+  it('anonymous_reply_matched_in_a_group_has_no_player', () => {
+    const g = new Chat('Gruppo');
+    for (let i = 0; i < 3; i++) {
+      g.user('Mario', '/avventura', i * 300);
+      g.bot('@mario, nel bosco trovi un sasso [C]!', i * 300 + 1); // maps Mario -> mario
+    }
+    g.user('Mario', '/mostra sasso', 1000);
+    g.bot(
+      '[.. una presenza indistinta..], mostri orgogliosamente di possedere 3x un sasso [C]',
+      1001
+    );
+    const e = runExtract(g.messages).events.at(-1);
+    expect([e?.type, e?.query, e?.player]).toStrictEqual(['show', '/mostra sasso', null]);
+  });
+
+  it('admin_stats_are_stats', () => {
+    const c = new Chat(BOT);
+    c.user('Daniele', '/stats msx80', 0);
+    c.bot('Avventuriero Sua Maestà @msx80\n- Livello: ∞', 1);
+    const [e] = runExtract(c.messages).events;
+    expect([
+      e?.type,
+      e?.player,
+      (e as unknown as Record<string, unknown> | undefined)?.['livello'],
+    ]).toStrictEqual(['stats', 'msx80', '∞']);
   });
 });

@@ -1,9 +1,12 @@
 /**
  * The events of InventoryBot's replies: what the classifier (classify.ts) reads each bot
- * reply as. Field names and key order are those of the JSON form (snake_case); each
- * classifier builds its event with the keys in the order listed here, so that serialising
- * events gives byte-identical output from run to run.
+ * reply as, and the event records of phase 4 (extract.ts). Field names and key order are
+ * those of the JSON form (snake_case); each classifier builds its event with the keys in
+ * the order listed here, so that serialising events gives byte-identical output from run
+ * to run.
  */
+import { type ReplyContext } from '#src/telegram/conversation/conversation.ts';
+import { type MatchKind } from '#src/telegram/conversation/matcher.ts';
 
 /** An item line: `- name [R] [usabile] xN`. */
 export interface ItemLine {
@@ -240,3 +243,20 @@ export type Event =
   | UnknownEvent;
 
 export type EventType = Event['type'];
+
+/**
+ * Fields added to every classified event, after its own (same key order): phase 2's
+ * ReplyContext, where `match` may also be `dissolved`: phase 2 paired the reply in a
+ * group, and phase 4 found the pair inconsistent with the reply (verify.ts), so the
+ * event has no `query`.
+ */
+export type EventContext = Omit<ReplyContext, 'match'> & { match: MatchKind | 'dissolved' | null };
+
+/**
+ * An event of phase 4: the event's own fields, then the context; an unknown event also
+ * carries the message `text` last.
+ */
+export type EventRecord =
+  | (Exclude<Event, UnknownEvent | StatsEvent> & EventContext)
+  | (StatsEvent & Partial<EventContext>)
+  | (UnknownEvent & EventContext & { text: string });

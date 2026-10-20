@@ -1,5 +1,5 @@
 /**
- * The pipeline in memory, as far as it goes: phases 2 and 3 on the messages of phase 1.
+ * The pipeline in memory, as far as it goes: phases 2 to 4 on the messages of phase 1.
  * It joins the generic Telegram-bot layer and the InventoryBot layer, and uses no Node or
  * browser API: the web app's worker (src/web/run.ts) runs it, and the tests run it in Node.
  *
@@ -8,6 +8,8 @@
  */
 import { INVENTORY_BOT } from './inventorybot/bot.ts';
 import { inventoryBotDialect, learnTitles } from './inventorybot/dialect.ts';
+import { interpretationReport, interpretReplies } from './inventorybot/extract.ts';
+import { type EventRecord } from './inventorybot/types.ts';
 import { anonymise } from './telegram/anonymise/anonymise.ts';
 import {
   type Conversation,
@@ -73,4 +75,10 @@ export function conversationReport(c: Conversed): string[] {
     `nomi visualizzati abbinati a un giocatore: ${c.conversation.senders.size}; ` +
       `titoli dei giocatori riconosciuti: ${c.titles.length}`,
   ];
+}
+
+/** Phase 4 on the conversation of phases 2 and 3: the events and the report lines. */
+export function interpret(c: Conversed): { events: EventRecord[]; report: string[] } {
+  const interpretation = interpretReplies(c.conversation.replies);
+  return { events: interpretation.events, report: interpretationReport(interpretation) };
 }

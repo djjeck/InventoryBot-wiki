@@ -1,12 +1,12 @@
 /**
  * What the worker does with a RunRequest: reads the export pages of the picked folders
- * (the browser adapter, src/telegram/export/browser-files.ts), runs phases 1 to 3 in
+ * (the browser adapter, src/telegram/export/browser-files.ts), runs phases 1 to 4 in
  * memory (phase 1 here, then src/pipeline.ts) and posts the progress and the outcome. No browser API: the tests run it in Node with
  * File-like objects.
  */
 import { INVENTORY_BOT } from '#src/inventorybot/bot.ts';
 import { compareCodePoints } from '#src/lib/text.ts';
-import { conversationReport, converse } from '#src/pipeline.ts';
+import { conversationReport, converse, interpret } from '#src/pipeline.ts';
 import { inputFolders, listFolder, readFolderPages } from '#src/telegram/export/browser-files.ts';
 import { parsePages, summaryLine } from '#src/telegram/export/parse-export.ts';
 import { type Page } from '#src/telegram/messages.ts';
@@ -55,6 +55,8 @@ export async function handleRun(
       `messaggi: ${parsed.messages.length} (dal bot: ${fromBot})`,
       ...conversationReport(c)
     );
+    post({ type: 'progress', phase: 'interpret' });
+    report.push(...interpret(c).report);
     return end({
       type: 'done',
       result: {

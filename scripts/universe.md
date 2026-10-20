@@ -115,9 +115,11 @@ Without `@`. Placeholders used in prose and comments (`@u`, `@username`, `@BotNa
 invented names.
 
 - anna
+- bea_b
 - bice
 - bot
 - BotName
+- carla_c
 - d
 - djjeck
 - gif <!-- public: Telegram's own GIF search bot, in "via @gif" -->
@@ -142,4 +144,5 @@ invented names.
 - w
 - x
 - y
+- z
 - zeta

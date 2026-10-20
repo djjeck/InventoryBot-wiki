@@ -43,7 +43,7 @@ proceeding. Do not chain changes without an explicit instruction to continue.
 ## Architecture
 
 The pipeline is a chain of phases, each a function with typed input and output that a caller runs in
-order. So far there are phases 1 to 3:
+order. So far there are phases 1 to 4:
 
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become `Message`s
    (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the pages as
@@ -63,22 +63,27 @@ order. So far there are phases 1 to 3:
 3. **Anonymisation** (`src/telegram/anonymise/`, `anonymise`): the conversation with every other
    player's identity replaced by a pseudonym (`VolpeVeloce`, `GufoGentile`, …), one per person or
    group, never equal to a real username of the run. A pseudonym comes from a hash of the name with
-   a secret salt that the caller keeps (the web app will keep one per browser): the same person
-   keeps the same pseudonym from run to run, and nobody without the salt can work back to the name,
-   as they could from a hash of the name alone. Replaced are the player of each reply, the usernames
+   a secret salt that the caller keeps (the web app keeps one per browser): the same person keeps
+   the same pseudonym from run to run, and nobody without the salt can work back to the name, as
+   they could from a hash of the name alone. Replaced are the player of each reply, the usernames
    the dialect designates in its text (`userSpans`), usernames in the arguments of commands that
    take a player (`userCommands`), and group titles; every other name in a text is what the bot says
    and stays. The owner, decided just before (`src/telegram/conversation/owner.ts`: the given
    username, else the player the bot addresses most in the DM), the bot and the dialect's
    `publicNames` are kept. Display names never leave this phase.
 
-Phases 2 and 3 run with InventoryBot's dialect (`src/inventorybot/dialect.ts`): addressing, player
-titles, broadcasts, what anonymisation designates, and which commands can produce each reply
-(`compatibleCommands`), from the reply type the classifier gives. The classifier
-(`src/inventorybot/classify.ts`, the start of phase 4) reads a bot reply as a typed event
-(`src/inventorybot/types.ts`), following the grammars of `docs/bot-protocol.md`, whose `bot-reply`
-examples are checked against it (`classify.docs-examples.test.ts`). `src/pipeline.ts` runs phases 2
-and 3 on the messages of phase 1 (`converse`) and words their report lines.
+4. **Interpretation** (`src/inventorybot/extract.ts`, `interpretReplies`): every reply becomes a
+   typed event (`src/inventorybot/types.ts`): the classifier (`classify.ts`) reads it with the
+   command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
+   `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). The phase ends by
+   verifying the group pairs (`verify.ts`): a reply that, read with its command, is not of that
+   command's family is read again without it. A second check, on group `/usa` replies, needs the
+   items of phase 5 and comes with it.
+
+Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
+player titles, broadcasts, what anonymisation designates, and which commands can produce each reply
+(`compatibleCommands`, from the reply type the classifier gives). `src/pipeline.ts` runs phases 2 to
+4 on the messages of phase 1 (`converse`, `interpret`) and words their report lines.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`
@@ -86,7 +91,7 @@ builds it into `web-dist/`). The built page carries a Content-Security-Policy th
 network connection, so the browser itself guarantees that the exports are never sent anywhere. The
 page (`main.ts`) lets the player pick export folders and runs the pipeline in a Web Worker
 (`worker.ts`, `run.ts`), so the page stays responsive; for now it shows a summary of what phases 1
-to 3 found. The owner is the player the bot addresses most in the DM; without a DM the run stops and
+to 4 found. The owner is the player the bot addresses most in the DM; without a DM the run stops and
 shows a username field, which the page offers nowhere else. The pseudonyms' salt is made once and
 kept in the browser's `localStorage`. `run.ts` uses no browser API and is tested in Node; `main.ts`
 and `worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by

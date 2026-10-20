@@ -30,12 +30,12 @@ export interface RunRequest {
 /** Worker -> page: a step started. `read` counts the pages read so far. */
 export interface ProgressMessage {
   type: 'progress';
-  phase: 'read' | 'parse' | 'conversation';
+  phase: 'read' | 'parse' | 'conversation' | 'interpret';
   done?: number;
   total?: number;
 }
 
-/** What a run produced: for now, what phases 1 to 3 found. */
+/** What a run produced: for now, what phases 1 to 4 found. */
 export interface RunResult {
   /** The export owner the run was made for (given, or found in the DM). */
   owner: string | null;

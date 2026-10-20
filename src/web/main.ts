@@ -1,7 +1,7 @@
 /**
  * The web app's page: folder picking, the time zone (this browser's, proposed), the owner's
  * username when the run asks for it, progress and errors, then a summary of what phases 1
- * to 3 read. The secret salt of the pseudonyms is kept in this browser (pseudonymSalt).
+ * to 4 read. The secret salt of the pseudonyms is kept in this browser (pseudonymSalt).
  * The pipeline runs in a Web Worker (worker.ts), on the browser `File` objects of the
  * picked folders; nothing is sent over the network.
  *
@@ -137,9 +137,12 @@ function showProgress(m: ProgressMessage): void {
   } else if (m.phase === 'parse') {
     ui.progressBar.value = 92;
     ui.progressText.textContent = 'Lettura dei messaggi…';
-  } else {
-    ui.progressBar.value = 96;
+  } else if (m.phase === 'conversation') {
+    ui.progressBar.value = 94;
     ui.progressText.textContent = 'Abbinamento delle risposte ai comandi…';
+  } else {
+    ui.progressBar.value = 97;
+    ui.progressText.textContent = 'Interpretazione delle risposte del bot…';
   }
 }
 
