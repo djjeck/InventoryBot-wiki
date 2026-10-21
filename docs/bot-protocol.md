@@ -587,6 +587,7 @@ Refusals (nothing is transferred):
 | `non ne hai abbastanza, ne possiedi solo N.`                                              | more than owned; `N` is the exact count owned |
 | `la quantità deve essere un intero positivo, non fare il furbo.`                          | quantity ≤ 0                                  |
 | `meglio non dare niente a @x, non ti sembra un tipo affidabile.`                          | receiver not allowed                          |
+| `sicuro che vuoi dare cose a @x? Meglio di no..`                                          | receiver not allowed                          |
 | `NAME deve raffreddarsi ancora per DURATION prima di poterlo dare in giro.`               | the item is still cooling down (6.13)         |
 | `troppi oggetti trovati con quel nome(<arg>)`, `@u, non hai niente del genere`            | ambiguous or not owned                        |
 

@@ -150,7 +150,9 @@ export const PUBLIC_NAMES: ReadonlySet<string> = new Set(['msx80']);
 export const USER_COMMANDS: ReadonlySet<string> = new Set(['/stats', '/dai']);
 
 /** The receiver a `/dai` is refused for (6.11). */
-const GIVE_REFUSED = rx(`^meglio non dare niente a @(?<to>${W}+), `);
+const GIVE_REFUSED = rx(
+  `^(?:meglio non dare niente|sicuro che vuoi dare cose) a @(?<to>${W}+)[,?] `
+);
 
 /** `re` with match indices (the `d` flag). */
 const withIndices = (re: RegExp): RegExp => new RegExp(re.source, re.flags.replace('g', '') + 'd');
@@ -166,7 +168,8 @@ const DESIGNATED: readonly [RegExp, string][] = [
 /**
  * The usernames a reply designates, as spans of the text (without `@`): the addressee at
  * the start ("@u, ...", "Complimenti @u", "Avventuriero @u", "ciao @u"), the receiver of a
- * `/dai` ("dai 1x ... a @y", "meglio non dare niente a @y") and the giver of a gift notice
+ * `/dai` ("dai 1x ... a @y", "meglio non dare niente a @y", "sicuro che vuoi dare cose a @y?")
+ * and the giver of a gift notice
  * ("[N] @x ti ha dato ..."). Every other username in the text is part of what the bot
  * says (leaderboards, item names, announcements) and stays.
  */

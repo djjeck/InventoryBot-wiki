@@ -104,6 +104,7 @@ describe('anonymisation', () => {
     expect(
       spanned('meglio non dare niente a @bice, non ti sembra un tipo affidabile.')
     ).toStrictEqual(['bice']);
+    expect(spanned('sicuro che vuoi dare cose a @bice? Meglio di no..')).toStrictEqual(['bice']);
     // Leaderboards and other texts that only mention players designate nobody.
     expect(spanned('Classifica avventure:\n@luigi (120)\n@anna (99)')).toStrictEqual([]);
   });

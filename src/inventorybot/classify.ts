@@ -871,6 +871,11 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
     commands: ['/dai'],
   },
   {
+    name: 'dai_doubtful',
+    match: rx(`^sicuro che vuoi dare cose a ${DOT}+\\? Meglio di no\\.\\.${S}*${END}`),
+    commands: ['/dai'],
+  },
+  {
     name: 'dai_bad_quantity',
     match: rx('^la quantità deve essere un intero positivo, non fare il furbo\\.'),
     commands: ['/dai'],
