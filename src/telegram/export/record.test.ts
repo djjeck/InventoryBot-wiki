@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { type Message, type Page } from '#src/telegram/messages.ts';
 import { BOT, BOT_IDENTITY, Chat, macPageHtml, pageHtml } from '#test/helpers.ts';
 import {
+  exportHash,
   mergeExports,
   parsePages,
   readExport,
@@ -99,6 +100,14 @@ describe('readExport', () => {
     expect(other.hash).not.toBe(a.hash);
     const renamed = await readExport([page('A/messages2.html', html)], READ);
     expect(renamed.hash).not.toBe(a.hash);
+  });
+
+  it('export_hash_is_the_record_hash_without_parsing', async () => {
+    const pages = [
+      page('A/messages.html', pageHtml('G', group().messages)),
+      page('A/messages2.html', pageHtml('G', [])),
+    ];
+    expect(await exportHash(pages)).toBe((await readExport(pages, READ)).hash);
   });
 
   it('one_export_per_record', async () => {

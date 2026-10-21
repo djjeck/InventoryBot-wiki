@@ -35,9 +35,9 @@ source ~/.nvm/nvm.sh && nvm use && npm run validate
 `validate` applies formatting and lint autofixes, regenerates the golden outputs, then runs every
 check. Address all errors before considering a change complete. It is for local use only: CI
 (`.github/workflows/ci.yml`, mirrored by `npm run ci`) runs the same checks without fixing anything,
-so unfixed problems that were never committed still fail. `validate` rewrites every file that
-`.gitignore` and `.prettierignore` do not exclude: real Telegram exports must stay outside the
-repository folder.
+so unfixed problems that were never committed still fail. Real Telegram exports and anything derived
+from them live only in git-ignored folders (`inbox/` for exports, `out/` for the output of
+`npm run inspect`) and never enter git history; every other file is rewritten by `validate`.
 
 **Stop and wait for review:** After completing each change, stop and wait for author approval before
 proceeding. Do not chain changes without an explicit instruction to continue.
@@ -161,6 +161,20 @@ options. `run.ts`, `storage.ts`, `labels.ts` and `debounce.ts` use no browser AP
 Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only
 wiring, checked in a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out
 of coverage).
+
+`npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
+(`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the
+product: it runs the web app's code path on exports on disk (`processExport` for each export, then
+`buildWiki` on every record), by default those in `inbox/`, so results can be checked without
+reading the chats. It prints an aggregate summary (per export its folder, DM or group, first and
+last day, messages, bot messages and whether its record was kept from an earlier run; the time of
+each phase; the report lines without the entries that quote texts; the counts of the wiki; how often
+the inventory estimate agreed with the bot) and writes to the output folder, by default `out/`:
+`wiki.json` and `player.json`, the wiki and player state the page draws; the record of each export,
+keyed by the hash of its pages, so a later run parses only exports it has not seen; and the salt of
+the pseudonyms and sender keys, made once, with which alone the kept records are valid. It refuses
+an output folder inside the repository that git does not ignore. Exit codes: 0 done, 1 stopped (no
+export, or no DM and no `--player`), 2 wrong arguments or a refused output folder.
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,

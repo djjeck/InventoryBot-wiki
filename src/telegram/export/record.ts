@@ -105,6 +105,22 @@ function concat(parts: readonly Uint8Array[]): Uint8Array<ArrayBuffer> {
   return out;
 }
 
+/** The bytes of a page that its export's hash covers: its file name, length and HTML. */
+function hashedBytes(page: Page): Uint8Array[] {
+  return [
+    encoder.encode(`${pathName(page.label)}\n${page.html.length}\n`),
+    encoder.encode(page.html),
+  ];
+}
+
+/**
+ * The hash of one export's pages (ExportRecord.hash), without parsing them: a caller that
+ * keeps records can tell whether it has an export's record already.
+ */
+export function exportHash(pages: Iterable<Page>): Promise<string> {
+  return sha256Hex(concat([...pages].flatMap(hashedBytes)));
+}
+
 /**
  * The opaque key of a Telegram user id: a salted SHA-256 of it, 16 hex digits. The same
  * user has the same key in every export read with the same salt, and nobody without the
@@ -172,8 +188,7 @@ export async function readExport(
     else if (exp !== folder)
       throw new Error(`pages of two exports in one record: ${folder}, ${exp}`);
     count++;
-    hashed.push(encoder.encode(`${pathName(page.label)}\n${page.html.length}\n`));
-    hashed.push(encoder.encode(page.html));
+    hashed.push(...hashedBytes(page));
     // Pages of one export are consecutive: carry the sender across page breaks.
     const p: ExportParser = new ExportParser(options.bot, lastSender, lastSenderId);
     p.feed(page.html);

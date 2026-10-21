@@ -11,8 +11,9 @@ const PARENT_IMPORTS = {
 };
 
 export default tseslint.config(
-  // The built web app (npm run web:build).
-  { ignores: ['web-dist/'] },
+  // The built web app (npm run web:build); real exports (which hold js/script.js) and the
+  // output of npm run inspect, git-ignored: the flat config does not read .gitignore.
+  { ignores: ['web-dist/', 'inbox/', 'out/'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   {

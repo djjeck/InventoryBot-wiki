@@ -4,3 +4,7 @@ coverage/
 web-dist/
 
 .DS_Store
+# Real Telegram exports, read by npm run inspect: they never enter git history.
+inbox/
+# The output of npm run inspect (wiki, player state, records, salt), derived from real exports.
+out/
