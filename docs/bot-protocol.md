@@ -225,7 +225,8 @@ section 8).
 
 ### 6.1 Adventure drop
 
-`/avventura`. One line; the narrative ends with the article and name of the item, with no delimiter.
+`/avventura`. One line, unless the item is a player-made one whose name spans lines; the narrative
+ends with the article and name of the item, with no delimiter.
 
 ```text
 DROP = ADDR NARRATIVE SP RARITY [ SP USABLE ] [ "!" ] EOT

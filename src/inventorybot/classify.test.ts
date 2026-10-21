@@ -533,6 +533,18 @@ describe('drop', () => {
     });
   });
 
+  it('a_player_made_item_s_name_may_span_lines', () => {
+    const e = fields(
+      '@mario_r, nel bosco trovi una cornice con dentro\n- un sasso [S]!',
+      '/avventura'
+    );
+    expect([e['type'], e['raw'], e['rarity']]).toStrictEqual([
+      'drop',
+      'nel bosco trovi una cornice con dentro\n- un sasso',
+      'S',
+    ]);
+  });
+
   it('drop_without_exclamation', () => {
     const e = fields(DROP.slice(0, -1), null);
     expect([e['type'], e['rarity']]).toStrictEqual(['drop', 'C']);

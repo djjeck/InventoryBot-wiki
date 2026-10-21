@@ -647,9 +647,9 @@ const DROP = rx(`(?<pre>[\\s\\S]*) \\[(?<r>${RARITY})\\](?<u> \\[usabile\\])?!?$
 
 const cDrop: Classifier = (t) => {
   // Adventure drops end with "<item> [R]!" or "<item> [R] [usabile]!" (the "!" is
-  // missing in some group messages). The newline test comes first only because it
-  // is cheaper; the result is the same.
-  if (stripWs(t).includes('\n')) return null;
+  // missing in some group messages); a player-made item's name may span lines, but a
+  // first line ending with ":" heads a list, not a drop.
+  if (stripWs(t.split('\n')[0] as string).endsWith(':') && stripWs(t).includes('\n')) return null;
   const m = DROP.exec(t);
   if (!m) return null;
   const g = groups(m);
