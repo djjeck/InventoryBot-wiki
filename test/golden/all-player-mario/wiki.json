@@ -13,6 +13,14 @@
     "Se un oggetto ha un + nel nome, significa che c'e' un solo luogo dove quell'oggetto esce. Scoprite quale!",
     "Per raggiungere il nuovo livello devi fare una ricetta del livello corrispondente. Ad esempio se sei livello 2, per passare al 3 devi fare una ricetta di livello 3. Puoi vedere i livelli delle ricette col comando /ricetta. Ricchi premi e cotillons al passaggio di livello!"
   ],
+  "trivia": [
+    {
+      "channel": "Il Grimorio del Golem",
+      "date": "2025-11-27T18:59:40-05:00",
+      "title": "La gara delle ghiande 🌰",
+      "text": "🎯 SCOPO:\nVinceva chi raccoglieva più ghiande."
+    }
+  ],
   "renames": {},
   "rarity_hypotheses": {
     "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
@@ -242,6 +250,51 @@
       "made_by": [],
       "last_seen": "2025-11-27T19:04:02-05:00",
       "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un baule di ebano 📦": {
+      "name": "un baule di ebano 📦",
+      "rarity": "S",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Cera riciclata"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:29:02-05:00",
+      "use": {
+        "observations": 1,
+        "outcomes": [
+          "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
+        ],
+        "result": "single",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "channel": {
+        "name": "Il Grimorio del Golem",
+        "date": "2025-11-27T18:59:30-05:00",
+        "notes": [],
+        "obtain": [
+          "avventurandosi"
+        ],
+        "usage": [
+          "si ottiene il seguente messaggio:",
+          "📝 @username, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦..",
+          "⚠️ serve la chiave giusta."
+        ],
+        "effect": "L'oggetto, una volta utilizzato, ha un tempo di raffreddamento di 24h e rimane in inventario.",
+        "consumed": false,
+        "cooldown": 86400,
+        "fields": []
+      },
       "exclusive": false,
       "locations": []
     },
@@ -669,34 +722,6 @@
         "Piccola collezione"
       ],
       "last_seen": "2025-11-27T19:06:02-05:00",
-      "exclusive": false,
-      "locations": []
-    },
-    "un baule di ebano 📦": {
-      "name": "un baule di ebano 📦",
-      "rarity": "S",
-      "usable": true,
-      "sources": [
-        "adventure"
-      ],
-      "used_in": [
-        "Cera riciclata"
-      ],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:29:02-05:00",
-      "use": {
-        "observations": 1,
-        "outcomes": [
-          "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
-        ],
-        "result": "single",
-        "consumed": null,
-        "consumed_evidence": {
-          "yes": 0,
-          "no": 0
-        },
-        "requirements": []
-      },
       "exclusive": false,
       "locations": []
     },

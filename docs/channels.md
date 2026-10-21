@@ -130,6 +130,51 @@ A card adds to the place its exclusive items, its route (as exits), the items to
 it, and whether it is secret. None of these has a date in the wiki: a card adds to what the bot
 showed, and the wiki keeps, per place, which card stands behind it and what it added.
 
-## 4. Unknowns
+## 4. Il Grimorio del Golem: items
+
+```text
+CARD   = [ EMOJI ] "OGGETTO:" NL
+         [ EMOJI ] ITEM [ SP "/" SP RARITY ] NL
+         "{id: " INT "}" NL
+         [ EMOJI ] "COME OTTENERLO:" { NL [ "🔹" ] LINE }
+         [ EMOJI ] ( "UTILIZZO:" | "FUNZIONE:" ) { NL [ MARK ] LINE }
+         [ NL "🔍" SP EFFECT ]
+MARK   = "🔸" | "▶️" | "📝" | "⚠️" | "➡️"
+```
+
+- How the item is obtained and what it is for are free text: places, chests and events where it
+  drops, the recipes it makes, the places it opens, the message a use gives (after `📝`), the
+  command (after `▶️`) and remarks (after `⚠️`).
+- Some cards name two rarities (`[X] / [C]`) for items whose rarity changed; such a card sets none.
+- `EFFECT` says what a use does to the item, in a few fixed phrases: it is consumed ("si consuma e
+  scompare dall'inventario"), or it stays ("rimane in inventario"), and its cooldown ("ha un tempo
+  di raffreddamento di 24h", "non ha tempo di raffreddamento").
+
+```text
+📣 OGGETTO:
+🗝 un baule di ebano 📦 [S] [usabile]
+{id: 12}
+
+📚 COME OTTENERLO:
+🔹 avventurandosi
+
+📌 UTILIZZO:
+🔸 si ottiene il seguente messaggio:
+
+📝 @username, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦..
+
+⚠️ serve la chiave giusta.
+
+🔍 L'oggetto, una volta utilizzato, ha un tempo di raffreddamento di 24h e rimane in inventario.
+```
+
+A card gives the item its rarity and `[usabile]` as an observation of the post's date, and the wiki
+keeps its texts as written, with whether a use consumes the item and its cooldown in seconds.
+
+The channel also posts events of the game's history and guides (`📣 EVENTO: TITLE`, `📣 GUIDA …`),
+free text that the wiki keeps as trivia.
+
+## 5. Unknowns
 
 - Whether a recipe with two cards was changed by the game, or its first card was wrong.
+- Which of two rarities (`[X] / [C]`) an item has now.

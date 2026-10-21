@@ -2,10 +2,10 @@
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
-import { card, CRIPTE_CARD, TORRE_CARD } from '#test/channels.ts';
+import { BAULE_CARD, card, CRIPTE_CARD, EVENT_CARD, TORRE_CARD } from '#test/channels.ts';
 import { tgDate } from '#test/helpers.ts';
 import * as T from '#test/texts.ts';
-import { ATLANTE, CITTADELLA } from './bot.ts';
+import { ATLANTE, CITTADELLA, GRIMORIO } from './bot.ts';
 import {
   build,
   isMine,
@@ -110,6 +110,7 @@ describe('common build', () => {
         'generated',
         'rarities',
         'rules',
+        'trivia',
         'renames',
         'rarity_hypotheses',
         'items',
@@ -2077,5 +2078,40 @@ describe('place cards', () => {
       card(CRIPTE_CARD.replace('LUOGO: nelle cripte', 'LUOGO: le Cripte'), 10, ATLANTE),
     ]);
     expect(Object.keys(wiki.locations).filter((n) => /cripte/iu.test(n))).toStrictEqual([CRIPTE]);
+  });
+});
+
+describe('item cards', () => {
+  const BAULE = 'un baule di ebano 📦';
+
+  it('a_card_gives_the_item_its_texts_and_a_dated_rarity', () => {
+    const { wiki } = runBuild([card(BAULE_CARD, 0, GRIMORIO)]);
+    expect(wiki.items[BAULE]).toMatchObject({
+      rarity: 'S',
+      usable: true,
+      channel: {
+        name: GRIMORIO,
+        fields: ['rarity'],
+        obtain: ['avventurandosi'],
+        consumed: false,
+        cooldown: 86400,
+      },
+    });
+  });
+
+  it('the_bot_s_later_rarity_prevails', () => {
+    const { wiki } = runBuild([
+      card(BAULE_CARD, 0, GRIMORIO),
+      ev(T.info(BAULE, 'R', { count: 1, usable: true }), '/esamina baule', { t: 10 }),
+    ]);
+    expect([wiki.items[BAULE]?.rarity, wiki.items[BAULE]?.channel?.fields]).toStrictEqual([
+      'R',
+      [],
+    ]);
+  });
+
+  it('event_cards_are_the_wiki_s_trivia', () => {
+    const { wiki } = runBuild([card(EVENT_CARD, 0, GRIMORIO)]);
+    expect(wiki.trivia).toMatchObject([{ channel: GRIMORIO, title: 'La gara delle ghiande 🌰' }]);
   });
 });

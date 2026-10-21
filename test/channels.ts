@@ -54,6 +54,34 @@ export const CRIPTE_CARD = [
   "🔎 Questo è un luogo segreto! Non è visibile nel pannello di viaggio se non si possiede l'oggetto per raggiungerlo!",
 ].join('\n');
 
+/** A Grimorio item card, with every part a card can have. */
+export const BAULE_CARD = [
+  '📣 OGGETTO:',
+  '🗝 un baule di ebano 📦 [S] [usabile]',
+  '{id: 12}',
+  '',
+  '📚 COME OTTENERLO:',
+  '🔹 avventurandosi',
+  '',
+  '📌 UTILIZZO:',
+  '🔸 si ottiene il seguente messaggio:',
+  '',
+  '📝 @username, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦..',
+  '',
+  '⚠️ serve la chiave giusta.',
+  '',
+  "🔍 L'oggetto, una volta utilizzato, ha un tempo di raffreddamento di 24h e rimane in inventario.",
+].join('\n');
+
+/** A Grimorio event card. */
+export const EVENT_CARD = [
+  '📣 EVENTO: La gara delle ghiande 🌰',
+  '{id: 3}',
+  '',
+  '🎯 SCOPO:',
+  'Vinceva chi raccoglieva più ghiande.',
+].join('\n');
+
 let msgCounter = 90000;
 
 /** A card posted on a channel (the Cittadella by default) at `t` seconds from BASE, as a phase 4 event. */

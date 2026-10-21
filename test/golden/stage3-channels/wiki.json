@@ -2,6 +2,14 @@
   "generated": "<generated>",
   "rarities": {},
   "rules": [],
+  "trivia": [
+    {
+      "channel": "Il Grimorio del Golem",
+      "date": "2025-11-27T18:59:40-05:00",
+      "title": "La gara delle ghiande 🌰",
+      "text": "🎯 SCOPO:\nVinceva chi raccoglieva più ghiande."
+    }
+  ],
   "renames": {},
   "rarity_hypotheses": {
     "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
@@ -110,6 +118,39 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T18:59:20-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un baule di ebano 📦": {
+      "name": "un baule di ebano 📦",
+      "rarity": "S",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T18:59:30-05:00",
+      "channel": {
+        "name": "Il Grimorio del Golem",
+        "date": "2025-11-27T18:59:30-05:00",
+        "notes": [],
+        "obtain": [
+          "avventurandosi"
+        ],
+        "usage": [
+          "si ottiene il seguente messaggio:",
+          "📝 @username, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦..",
+          "⚠️ serve la chiave giusta."
+        ],
+        "effect": "L'oggetto, una volta utilizzato, ha un tempo di raffreddamento di 24h e rimane in inventario.",
+        "consumed": false,
+        "cooldown": 86400,
+        "fields": [
+          "rarity"
+        ]
+      },
       "sources_inferred": true,
       "exclusive": false,
       "locations": []

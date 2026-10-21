@@ -3,8 +3,8 @@ salto discovery/json2: esportazione in formato JSON, è supportato solo il forma
 macos-export/ChatExport_Gruppo_Mac: date senza fuso orario, lette nel fuso orario Europe/Rome
 macos-export/ChatExport_InventoryBot: date senza fuso orario, lette nel fuso orario Europe/Rome
 macos-and-windows/ChatExport_Gruppo_Misto: date senza fuso orario, lette come UTC-05:00 come le altre esportazioni della stessa chat (4 messaggi in comune); in 1 di questi un'altra esportazione mostra un'altra data o un altro fuso orario
-cartelle di esportazione: 44; chat: Gruppo AlceGioviale, Gruppo ArmadilloSocievole, Gruppo BisontePotente, Gruppo CorvoCapace, Gruppo DonnolaRibelle, Gruppo ElefanteRaggiante, Gruppo GazzellaCortese, Gruppo GazzellaTenace, Gruppo GiraffaTenace, Gruppo LamaGentile, Gruppo MarmottaAgile, Gruppo NibbioEsuberante, Gruppo PettirossoLucente, Gruppo PumaAmabile, Gruppo SgombroBrillante, Gruppo SqualoImponente, Gruppo StruzzoEccellente, Gruppo TassoSorridente, InventoryBot, L'Atlante di Barbabeige, La Cittadella dei Demiurghi
-messaggi: 587 (dal bot: 293)
+cartelle di esportazione: 45; chat: Gruppo AlceGioviale, Gruppo ArmadilloSocievole, Gruppo BisontePotente, Gruppo CorvoCapace, Gruppo DonnolaRibelle, Gruppo ElefanteRaggiante, Gruppo GazzellaCortese, Gruppo GazzellaTenace, Gruppo GiraffaTenace, Gruppo LamaGentile, Gruppo MarmottaAgile, Gruppo NibbioEsuberante, Gruppo PettirossoLucente, Gruppo PumaAmabile, Gruppo SgombroBrillante, Gruppo SqualoImponente, Gruppo StruzzoEccellente, Gruppo TassoSorridente, Il Grimorio del Golem, InventoryBot, L'Atlante di Barbabeige, La Cittadella dei Demiurghi
+messaggi: 589 (dal bot: 293)
 giocatore: @djjeck
 risposte del bot: 293
   Gruppo StruzzoEccellente: risposte del bot abbinate a un comando: single=16, unmatched=4
@@ -28,7 +28,7 @@ eventi: drop=65 inventory=41 use=35 miss=27 item_info=23 travel=13 give=12 craft
   risposte del bot non riconosciute, per anno: 2018=1, 2025=6
 -- dissolved_pair: 1
   dissolved_pair: reason="use_item" match="single" query="/usa vuvu" type="use" text="cosa desideri?"
-schede dei canali: 2 (post: 3)
+schede dei canali: 4 (post: 5)
 oggetti: 65; ricette: 21 (con tutti gli ingredienti: 10, con il risultato noto: 6); luoghi: 10
 -- unresolved_travel: 3
   unresolved_travel: query="/viaggio baia" text="arrivi esausto nella baia di Scogliola 🦀"

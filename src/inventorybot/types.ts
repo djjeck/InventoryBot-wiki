@@ -261,9 +261,38 @@ export interface PlaceCardEvent {
   notes: string[];
 }
 
+/**
+ * An item card of Il Grimorio del Golem (channels.ts): the item, how it is obtained and
+ * what it is for (the curators' text), and what a use does to it.
+ */
+export interface ItemCardEvent {
+  type: 'item_card';
+  /** Its rarity is null when the card names two ("[X] / [C]", in `notes`). */
+  item: ItemLine;
+  obtain: string[];
+  /** The UTILIZZO or FUNZIONE section, a line each. */
+  usage: string[];
+  /** The 🔍 line, on what a use does to the item. */
+  effect: string | null;
+  /** From `effect`: a use consumes it (true) or leaves it (false). */
+  consumed: boolean | null;
+  /** From `effect`: the cooldown in seconds (0: none). */
+  cooldown: number | null;
+  notes: string[];
+}
+
+/** An event or guide card of Il Grimorio del Golem: game history and how-tos. */
+export interface LoreCardEvent {
+  type: 'lore_card';
+  title: string;
+  text: string;
+}
+
 export type Event =
   | RecipeCardEvent
   | PlaceCardEvent
+  | ItemCardEvent
+  | LoreCardEvent
   | CooldownEvent
   | ItemCooldownEvent
   | RecipeListEvent
@@ -368,6 +397,8 @@ export interface WikiItem {
   gives_title?: true;
   /** The title it gives ("il pastore"), when a channel names it. */
   title?: string;
+  /** Present when a channel's card describes the item (channels.ts). */
+  channel?: WikiItemCard;
   /** Present when `sources` was deduced from the rarity. */
   sources_inferred?: true;
   /** A "+" rarity: drops in a single location. */
@@ -392,6 +423,24 @@ export interface WikiRecipe {
   level_inferred?: true;
   /** Present when a channel's card describes the recipe (channels.ts). */
   channel?: WikiChannelCard<'level' | 'ingredients' | 'output'>;
+}
+
+/** An item card behind an item: what it says, besides the rarity it may still set. */
+export interface WikiItemCard extends WikiChannelCard<'rarity'> {
+  obtain: string[];
+  usage: string[];
+  effect: string | null;
+  consumed: boolean | null;
+  /** Seconds; 0: none. */
+  cooldown: number | null;
+}
+
+/** A story or guide of a channel (the Grimorio's events and guides). */
+export interface WikiTrivia {
+  channel: string;
+  date: string | null;
+  title: string;
+  text: string;
 }
 
 /**
@@ -431,6 +480,8 @@ export interface Wiki {
   /** Rarity code -> meaning, from the latest /faq. */
   rarities: Record<string, string>;
   rules: string[];
+  /** The channels' stories and guides, in post order. */
+  trivia: WikiTrivia[];
   /** Old item name -> current name. */
   renames: Record<string, string>;
   /** Rarity codes the /faq does not explain -> assumed meaning. */

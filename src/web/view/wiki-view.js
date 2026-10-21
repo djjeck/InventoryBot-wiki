@@ -28,6 +28,7 @@
 
   <div id="view"></div>
   <details id="rules" class="rules"></details>
+  <details id="trivia" class="rules"></details>
   <footer id="foot"></footer>
 </div>`;
 
@@ -462,7 +463,33 @@
     ${sec('Si ottiene con', i.made_by.length ? chips(i.made_by, recipeLink) : `<p class="empty">${i.sources.includes('recipe') ? 'Ricetta non ancora identificata.' : 'Non è un oggetto craftato.'}</p>`)}
     ${i.sources.includes('adventure') || i.exclusive ? sec('Dove si trova', where) : ''}
     ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
+    ${itemCardSec(i.channel)}
     ${personal}`;
+    }
+
+    /** What an item card says: how the item is obtained, what it is for, what a use does to it. */
+    function itemCardSec(card) {
+      if (!card || !card.obtain) return '';
+      const para = (xs) => xs.map((x) => `<p class="note">${esc(x)}</p>`).join('');
+      const cooldown =
+        card.cooldown === null
+          ? ''
+          : card.cooldown === 0
+            ? 'nessun raffreddamento'
+            : `raffreddamento ${duration(card.cooldown)}`;
+      const consumed =
+        card.consumed === null ? '' : card.consumed ? 'si consuma' : "resta nell'inventario";
+      const facts = [consumed, cooldown].filter(Boolean).join(', ');
+      return sec(
+        'Dai canali',
+        `<p class="note">Da una scheda di <b>${esc(card.name)}</b>${card.date ? ` del ${fmtDate(card.date)}` : ''}${card.fields.includes('rarity') ? '; anche la rarità, che il bot non ha mostrato più di recente' : ''}.</p>` +
+          (card.obtain.length ? `<h4>Come si ottiene</h4>${para(card.obtain)}` : '') +
+          (card.usage.length ? `<h4>A cosa serve</h4>${para(card.usage)}` : '') +
+          (card.effect
+            ? `<h4>Dopo l'uso</h4><p class="note">${esc(card.effect)}${facts ? ` (${facts})` : ''}</p>`
+            : '') +
+          para(card.notes)
+      );
     }
 
     // ---- locations ---------------------------------------------------------------
@@ -800,6 +827,16 @@
     if (W.rules?.length)
       $('#rules').innerHTML =
         `<summary>Regole del gioco (dalla /faq del bot)</summary>${W.rules.map((r) => `<p class="note">${esc(r)}</p>`).join('')}`;
+    if (W.trivia?.length)
+      $('#trivia').innerHTML = `<summary>Curiosità dai canali</summary>${W.trivia
+        .map(
+          (t) =>
+            `<h4>${esc(t.title)}</h4><p class="note">${esc(t.channel)}${t.date ? `, ${fmtDate(t.date)}` : ''}</p>${t.text
+              .split(/\n\s*\n/u)
+              .map((p) => `<p class="flavor">${esc(p)}</p>`)
+              .join('')}`
+        )
+        .join('')}`;
     const estimate = !P
       ? ''
       : " Le quantità possedute sono una stima ricostruita dallo storico: l'inventario reale può differire." +

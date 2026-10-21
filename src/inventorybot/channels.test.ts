@@ -3,14 +3,17 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { type Message } from '#src/telegram/messages.ts';
-import { CRIPTE_CARD, TORRE_CARD } from '#test/channels.ts';
+import { BAULE_CARD, CRIPTE_CARD, EVENT_CARD, TORRE_CARD } from '#test/channels.ts';
 import { ATLANTE, CITTADELLA, GRIMORIO } from './bot.ts';
 import {
   cardItem,
   isChannelPost,
   readChannelPosts,
+  readItemCard,
+  readLoreCard,
   readPlaceCard,
   readRecipeCard,
+  useEffect,
 } from './channels.ts';
 
 describe('readRecipeCard', () => {
@@ -119,6 +122,65 @@ describe('readPlaceCard', () => {
   });
 });
 
+describe('readItemCard', () => {
+  it('reads_every_part_of_a_card', () => {
+    expect(readItemCard(BAULE_CARD)).toStrictEqual({
+      item: { name: 'un baule di ebano 📦', rarity: 'S', usable: true, qty: 1 },
+      obtain: ['avventurandosi'],
+      usage: [
+        'si ottiene il seguente messaggio:',
+        '📝 @username, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦..',
+        '⚠️ serve la chiave giusta.',
+      ],
+      effect:
+        "L'oggetto, una volta utilizzato, ha un tempo di raffreddamento di 24h e rimane in inventario.",
+      consumed: false,
+      cooldown: 86400,
+      notes: [],
+    });
+  });
+
+  it('two_rarities_leave_the_rarity_to_the_bot', () => {
+    const c = readItemCard(BAULE_CARD.replace('[S] [usabile]', '[X] / [C] [usabile]'));
+    expect([c?.item.rarity, c?.item.usable, c?.notes]).toStrictEqual([
+      null,
+      true,
+      ['[X] / [C] [usabile]'],
+    ]);
+  });
+
+  it('what_a_use_does', () => {
+    expect(
+      [
+        "L'oggetto, una volta utilizzato, si consuma e scompare dall'inventario.",
+        "L'oggetto, una volta utilizzato, non ha un tempo di raffreddamento e rimane in inventario.",
+        "L'oggetto, una volta utilizzato, ha un tempo di raffreddamento di 30min.",
+        'Un oggetto unico.',
+      ].map(useEffect)
+    ).toStrictEqual([
+      { consumed: true, cooldown: null },
+      { consumed: false, cooldown: 0 },
+      { consumed: null, cooldown: 1800 },
+      { consumed: null, cooldown: null },
+    ]);
+  });
+
+  it('other_posts_are_no_card', () => {
+    expect(readItemCard(EVENT_CARD)).toBeNull();
+    expect(readItemCard('📣 OGGETTO:')).toBeNull();
+  });
+});
+
+describe('readLoreCard', () => {
+  it('an_event_card_is_a_story', () => {
+    expect(readLoreCard(EVENT_CARD)).toStrictEqual({
+      title: 'La gara delle ghiande 🌰',
+      text: '🎯 SCOPO:\nVinceva chi raccoglieva più ghiande.',
+    });
+    expect(readLoreCard(BAULE_CARD)).toBeNull();
+  });
+});
+
 describe('readChannelPosts', () => {
   const post = (chat: string, text: string, id = 1): Message => ({
     chat,
@@ -154,6 +216,9 @@ describe('readChannelPosts', () => {
       place: 'le cripte del monastero 👻',
     });
     expect(readChannelPosts([post(GRIMORIO, CRIPTE_CARD)])).toStrictEqual([]);
+    expect(
+      readChannelPosts([post(GRIMORIO, BAULE_CARD), post(GRIMORIO, EVENT_CARD)]).map((e) => e.type)
+    ).toStrictEqual(['item_card', 'lore_card']);
   });
 
   it('only_the_channels_posts_are_channel_posts', () => {
@@ -170,7 +235,8 @@ describe('docs/channels.md', () => {
       [...doc.matchAll(new RegExp(`\`\`\`text\n(${start}[\\s\\S]*?)\`\`\``, 'gu'))].map(
         (m) => m[1] as string
       );
-    expect(examples('📇').length + examples('🗺').length).toBe(2);
+    expect(examples('📇').length + examples('🗺').length + examples('📣').length).toBe(3);
+    for (const e of examples('📣')) expect(readItemCard(e), e).not.toBeNull();
     for (const e of examples('📇')) expect(readRecipeCard(e), e).not.toBeNull();
     for (const e of examples('🗺')) expect(readPlaceCard(e), e).not.toBeNull();
   });

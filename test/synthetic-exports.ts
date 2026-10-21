@@ -8,9 +8,9 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { ATLANTE, CITTADELLA } from '#src/inventorybot/bot.ts';
+import { ATLANTE, CITTADELLA, GRIMORIO } from '#src/inventorybot/bot.ts';
 import { type Message } from '#src/telegram/messages.ts';
-import { CRIPTE_CARD, TORRE_CARD } from './channels.ts';
+import { BAULE_CARD, CRIPTE_CARD, EVENT_CARD, TORRE_CARD } from './channels.ts';
 import { examples, readDoc } from './doc-examples.ts';
 import { writeInbox } from './e2e-fixtures.ts';
 import {
@@ -933,7 +933,8 @@ export function writeStage3Scenarios(root: string): Scenario[] {
   }
 
   // The channels' exports: a Cittadella card (in another spelling of a name, older than the
-  // bot's craft) and its other posts, which are no cards, and an Atlante card, next to the DM.
+  // bot's craft) and its other posts, which are no cards, an Atlante card and the Grimorio's
+  // item and event cards, next to the DM.
   {
     const dm = new Chat(BOT, 1000);
     say(dm, 0, '/ricetta', T.recipeList([['Torre alta', 2, 1]]));
@@ -957,7 +958,10 @@ export function writeStage3Scenarios(root: string): Scenario[] {
     );
     const atlas = new Chat(ATLANTE, 10);
     atlas.user(ATLANTE, CRIPTE_CARD, -40);
-    scenario('channels', [dm, ch, atlas]);
+    const grimoire = new Chat(GRIMORIO, 10);
+    grimoire.user(GRIMORIO, BAULE_CARD, -30);
+    grimoire.user(GRIMORIO, EVENT_CARD, -20);
+    scenario('channels', [dm, ch, atlas, grimoire]);
   }
 
   // Recipe names: by signature, query, output; unnamed group crafts (one entry per

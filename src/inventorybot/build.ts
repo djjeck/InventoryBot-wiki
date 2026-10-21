@@ -47,10 +47,12 @@ import {
   type TravelRequirementEvent,
   type Wiki,
   type WikiItem,
+  type WikiItemCard,
   type WikiItemUse,
   type WikiLocation,
   type WikiOldName,
   type WikiRecipe,
+  type WikiTrivia,
 } from './types.ts';
 
 /** Whether an optional string is present and non-empty. */
@@ -177,6 +179,8 @@ export interface KbItem {
   givesTitle?: true;
   /** The title it gives, as a channel names it. */
   title?: string;
+  /** The channel card behind the item. */
+  channel?: Omit<WikiItemCard, 'fields'>;
   sourcesInferred?: true;
 }
 
@@ -240,6 +244,7 @@ export class KB {
   /** Report entries by kind, in order of the first entry of each kind (shown in the report). */
   readonly report = new Map<ReportKind, ReportEntry[]>();
   faq: Extract<BuildEvent, { type: 'faq' }> | null = null;
+  readonly trivia: WikiTrivia[] = [];
   player: string | null = null;
   /** Ingredient swaps (old item, new item, recipe, date), see detectRenames(). */
   readonly renameHints: RenameHint[] = [];
@@ -713,6 +718,21 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       mergeRecipeCard(kb, e, itemCanon, recipeCanon);
     } else if (e.type === 'place_card') {
       mergePlaceCard(kb, e, itemCanon, placeCanon);
+    } else if (e.type === 'item_card') {
+      const it = kb.item(itemCanon(e.item.name), e.item.rarity, e.item.usable);
+      const { obtain, usage, effect, consumed, cooldown, notes } = e;
+      it.channel = {
+        name: e.chat ?? '',
+        date: e.date,
+        notes,
+        obtain,
+        usage,
+        effect,
+        consumed,
+        cooldown,
+      };
+    } else if (e.type === 'lore_card') {
+      kb.trivia.push({ channel: e.chat ?? '', date: e.date, title: e.title, text: e.text });
     } else if (e.type === 'title') {
       // A fact of the game: these items give a title (whoever owns them).
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable).givesTitle = true;
@@ -1676,6 +1696,14 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       ...(it.oldNames !== undefined && { old_names: it.oldNames }),
       ...(it.givesTitle !== undefined && { gives_title: it.givesTitle }),
       ...(it.title !== undefined && { title: it.title }),
+      ...(it.channel !== undefined && {
+        channel: {
+          ...it.channel,
+          // The card's rarity, when no observation of the bot's replaced it.
+          fields:
+            it.dates.rarity === it.channel.date && it.rarity !== null ? ['rarity' as const] : [],
+        },
+      }),
       ...(it.sourcesInferred !== undefined && { sources_inferred: it.sourcesInferred }),
       exclusive,
       locations: exclusive ? sortedStrings(it.dropLocations) : [],
@@ -1746,6 +1774,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
     // From the bot's /faq: rarity codes ("Ln" stands for L1, L2, ...) and game rules.
     rarities: faqRarities ?? {},
     rules: kb.faq ? kb.faq.rules : [],
+    trivia: [...kb.trivia],
     // Old item name -> current name, for links and searches by an old name.
     renames: record([...kb.renames].sort((a, b) => compareCodePoints(a[0], b[0]))),
     rarity_hypotheses: record(

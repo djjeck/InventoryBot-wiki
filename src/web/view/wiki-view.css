@@ -383,6 +383,12 @@ header.top {
 .rules p {
   max-width: 70ch;
 }
+/* A channel card's parts, and the titles of the channels' stories. */
+h4 {
+  margin: 12px 0 4px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
 .cand summary {
   cursor: pointer;
   color: var(--muted);

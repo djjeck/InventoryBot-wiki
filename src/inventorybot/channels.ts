@@ -8,12 +8,14 @@
  */
 import { stripWs } from '#src/lib/text.ts';
 import { type Message } from '#src/telegram/messages.ts';
-import { ATLANTE, CHANNEL_TITLES, CITTADELLA } from './bot.ts';
+import { ATLANTE, CHANNEL_TITLES, CITTADELLA, GRIMORIO } from './bot.ts';
 import { D, DOT, rx, S } from './patterns.ts';
 import { placeName } from './places.ts';
 import {
   type EventRecord,
+  type ItemCardEvent,
   type ItemLine,
+  type LoreCardEvent,
   type PlaceCardEvent,
   type RecipeCardEvent,
 } from './types.ts';
@@ -202,12 +204,113 @@ export function readPlaceCard(text: string): Omit<PlaceCardEvent, 'type'> | null
   };
 }
 
+const ITEM = header('OGGETTO');
+const OBTAIN = header('COME OTTENERLO');
+const USAGE = header('(?:UTILIZZO|FUNZIONE)');
+const LORE = header('(?:EVENTO|GUIDA)');
+/** The bullet of an item card's use section. */
+const BULLET_USE = '\u{1F538}';
+/** The 🔍 line of an item card: what a use does to the item. */
+const EFFECT = '\u{1F50D}';
+/** "[X] / [C]": a card names two rarities. */
+const TWO_RARITIES = rx(`\\[${RARITY}\\]${S}*/${S}*\\[?${RARITY}\\]?`);
+const COOLDOWN = rx(`raffreddamento di (?<n>${D}+)${S}*(?<unit>h|ore|min|minuti|s|secondi)`);
+const UNIT: Readonly<Record<string, number>> = {
+  h: 3600,
+  ore: 3600,
+  min: 60,
+  minuti: 60,
+  s: 1,
+  secondi: 1,
+};
+
+/** What a use does, as the 🔍 line of an item card says: consumed or kept, and the cooldown in seconds. */
+export function useEffect(line: string): { consumed: boolean | null; cooldown: number | null } {
+  const t = line.toLowerCase();
+  const consumed = /si consuma|scompare dall'inventario/u.test(t)
+    ? true
+    : /rimane in inventario/u.test(t)
+      ? false
+      : null;
+  const m = COOLDOWN.exec(t);
+  const cooldown = m?.groups
+    ? Number.parseInt(m.groups['n'] as string, 10) * (UNIT[m.groups['unit'] as string] ?? 1)
+    : /non ha (?:un )?tempo di raffreddamento/u.test(t)
+      ? 0
+      : null;
+  return { consumed, cooldown };
+}
+
+/**
+ * A Grimorio item card: `📣 OGGETTO:`, `🗝 ITEM`, `{id: N}`, `📚 COME OTTENERLO:` and its
+ * lines, `📌 UTILIZZO:` or `📌 FUNZIONE:` and its lines, and a `🔍` line on what a use does.
+ * The sections are text as the curators wrote it, their markers (🔹, 🔸) removed. Null for
+ * any other post.
+ */
+export function readItemCard(text: string): Omit<ItemCardEvent, 'type'> | null {
+  const lines = text.split('\n');
+  const head = lines.findIndex((l) => ITEM.test(l));
+  if (head < 0) return null;
+  const nameLine = lines.slice(head + 1).find((l) => stripWs(l) !== '');
+  const named = nameLine === undefined ? null : lead(nameLine);
+  if (named === null || !named.rest) return null;
+  const notes: string[] = [];
+  const two = TWO_RARITIES.test(named.rest);
+  const item = cardItem(two ? named.rest.replace(TWO_RARITIES, '') : named.rest);
+  if (item === null) return null;
+  if (two) notes.push(squash(named.rest.slice(item.name.length)));
+  const obtain: string[] = [];
+  const usage: string[] = [];
+  let effect: string | null = null;
+  let section: 'head' | 'obtain' | 'usage' = 'head';
+  for (const line of lines.slice(lines.indexOf(nameLine as string) + 1)) {
+    if (stripWs(line) === '' || CARD_ID.test(line)) continue;
+    if (OBTAIN.test(line)) section = 'obtain';
+    else if (USAGE.test(line)) section = 'usage';
+    else {
+      const l = lead(line);
+      const rest = l === null ? squash(line) : l.rest;
+      if (l?.emoji.startsWith(EFFECT)) effect = rest;
+      else if (section === 'obtain') obtain.push(rest);
+      // A use line keeps its marker (▶️ a command, 📝 a message, ⚠️ a remark), not the bullet 🔸.
+      else if (section === 'usage')
+        usage.push(l === null || l.emoji.startsWith(BULLET_USE) ? rest : `${l.emoji} ${rest}`);
+    }
+  }
+  const { consumed, cooldown } =
+    effect === null ? { consumed: null, cooldown: null } : useEffect(effect);
+  return {
+    item: { ...item, rarity: two ? null : item.rarity },
+    obtain,
+    usage,
+    effect,
+    consumed,
+    cooldown,
+    notes,
+  };
+}
+
+/** A Grimorio event or guide card: `📣 EVENTO: TITLE` or `📣 GUIDA …`, then its text. */
+export function readLoreCard(text: string): Omit<LoreCardEvent, 'type'> | null {
+  const lines = text.split('\n');
+  const head = lines.findIndex((l) => LORE.test(l));
+  if (head < 0) return null;
+  const title = squash((lines[head] as string).replace(/^\S*\s*(?:EVENTO\s*:)?\s*/u, ''));
+  const body = lines
+    .slice(head + 1)
+    .filter((l) => !CARD_ID.test(l))
+    .join('\n');
+  return { title, text: stripWs(body) };
+}
+
 /** Whether a message is a post of one of the channels. */
 export const isChannelPost = (m: Message): boolean =>
   !m.from_bot && m.chat !== null && m.chat !== undefined && CHANNEL_TITLES.includes(m.chat);
 
 /** A post's card, by its channel; null for a post that is no card. */
-function cardOf(m: Message): RecipeCardEvent | PlaceCardEvent | null {
+function cardOf(
+  m: Message
+): RecipeCardEvent | PlaceCardEvent | ItemCardEvent | LoreCardEvent | null {
   if (m.chat === CITTADELLA) {
     const c = readRecipeCard(m.text);
     return c && { type: 'recipe_card', ...c };
@@ -215,6 +318,12 @@ function cardOf(m: Message): RecipeCardEvent | PlaceCardEvent | null {
   if (m.chat === ATLANTE) {
     const c = readPlaceCard(m.text);
     return c && { type: 'place_card', ...c };
+  }
+  if (m.chat === GRIMORIO) {
+    const c = readItemCard(m.text);
+    if (c !== null) return { type: 'item_card', ...c };
+    const l = readLoreCard(m.text);
+    return l && { type: 'lore_card', ...l };
   }
   return null;
 }
