@@ -11,8 +11,8 @@
  *   quantity) of the tests' reply builders (`['un sasso', 'C', 1]`);
  * - recipes: in recipe lists (`- NAME L3 [manca 1]`) and details (`per fare [la ricetta]
  *   NAME ti manca`);
- * - places: after `ti trovi`, `arrivi`, `non puoi andare: `, `passare ` and exit lines
- *   (` - `), up to the place's emoji;
+ * - places: after `ti trovi`, `arrivi`, `non puoi andare: `, `passare ` up to the place's
+ *   emoji, and exit lines (` - `) that end with it;
  * - Telegram usernames: every `@name` (not an e-mail address, a package scope such as
  *   `@types/node`, code such as `@${u}`, or a JSDoc tag such as `@param`), compared whole.
  *
@@ -93,11 +93,10 @@ const NAMED: readonly [Kind, RegExp][] = [
   ['recipe', new RegExp(`per fare (?:la ricetta )?(${SPAN}) ti manca`, 'gu')],
   [
     'place',
-    new RegExp(
-      `(?:ti trovi:? |arrivi:? |non puoi andare: |passare |${LINE_START} - )(${SPAN}${PLACE_END})`,
-      'gu'
-    ),
+    new RegExp(`(?:ti trovi:? |arrivi:? |non puoi andare: |passare )(${SPAN}${PLACE_END})`, 'gu'),
   ],
+  // An exit line holds the place alone (" - Brumolo 👻: pronto" is a Pakkomon).
+  ['place', new RegExp(`${LINE_START} - (${SPAN}${PLACE_END})(?=[ \t]*(?:$|\n|\\n))`, 'gu')],
 ];
 
 /** Regular-expression or template syntax: the "name" is code. */

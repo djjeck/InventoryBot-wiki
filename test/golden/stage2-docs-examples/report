@@ -1,15 +1,16 @@
 cartelle di esportazione: 2; chat: Gruppo NibbioEsuberante, InventoryBot
-messaggi: 224 (dal bot: 120)
+messaggi: 228 (dal bot: 122)
 giocatore: @mario_r
-risposte del bot: 120
-  InventoryBot: risposte del bot abbinate a un comando: dm=60
-  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=32, user=21, single=4
+risposte del bot: 122
+  InventoryBot: risposte del bot abbinate a un comando: dm=61
+  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=32, user=22, single=4
 nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 3
-eventi: miss=24 travel=9 drop=8 inventory=8 use=8 unknown=7 item_info=6 stats=6 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 old_format=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2 give=2 faq=2
-  coppie nei gruppi verificate dalla risposta: confermate=25, sciolte=0
-  risposte del bot non riconosciute, per anno: 2025=7
+eventi: miss=23 use=12 travel=10 drop=8 inventory=8 item_info=6 stats=6 unknown=5 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 old_format=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2 give=2 faq=2
+  coppie nei gruppi verificate dalla risposta: confermate=26, sciolte=0
+  risposte del bot non riconosciute, per anno: 2025=5
 oggetti: 34; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2); luoghi: 9
--- unresolved_travel: 1
+-- unresolved_travel: 2
+  unresolved_travel: query="/viaggio baia" text="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare"
   unresolved_travel: query="/viaggio baia" text="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare"
 -- unresolved_drop: 6
   unresolved_drop: text="ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio"
@@ -23,9 +24,12 @@ oggetti: 34; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2
   unnamed_recipe: query=null output="un caffè ristretto"
   unnamed_recipe: query="/ricetta piselli" output="una manciata di linguette di latta"
   unnamed_recipe: query="/ricetta piselli" output="una manciata di linguette di latta"
--- unresolved_use: 5
+-- unresolved_use: 8
   unresolved_use: query="/usa dado" text="tiri il dado e fai 5!"
   unresolved_use: query="/usa dado" text="tiri il dado e fai 5!"
   unresolved_use: query="/usa alberello" text="osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un p"
+  unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "
+  unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "
+  unresolved_use: query="/usa scanner" text="tiri il dado e fai 5!"
   unresolved_use: query="/quest" text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
   unresolved_use: query=null text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"

@@ -1,6 +1,6 @@
 {
   "player": "mario_r",
-  "as_of": "2025-11-27T19:29:32-05:00",
+  "as_of": "2025-11-27T19:30:01-05:00",
   "recipes": {
     "(ricetta senza nome) → un caffè ristretto": {
       "crafted": 2,
@@ -22,7 +22,7 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un Pakkomon di nome Brumolo 👻": {
-      "first_seen": "2025-11-27T19:28:31-05:00"
+      "first_seen": "2025-11-27T19:29:01-05:00"
     },
     "un apriscatole storto": {
       "first_seen": "2025-11-27T19:05:01-05:00"
@@ -148,9 +148,9 @@
   },
   "inventory": {
     "un Pakkomon di nome Brumolo 👻": {
-      "qty": 2,
+      "qty": 1,
       "exact": false,
-      "date": "2025-11-27T19:28:31-05:00",
+      "date": "2025-11-27T19:29:01-05:00",
       "via": "movimento"
     },
     "un candido fazzoletto": {

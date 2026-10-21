@@ -607,10 +607,13 @@ const USE_OTTIENI = rx(
 const USE_COINS = rx(`ci trovi dentro (?<qty>${D}+) monet[ae] d'oro!?${S}*${END}`);
 const COIN = "una moneta d'oro";
 
+/** The Pakkomon scanner's reply: its `- ` lines are the player's Pakkomon and their readiness. */
+const PAKKOMON_SCAN = rx(`esamini i tuoi pakkomon con lo scanner:${S}*${END}`);
+
 /** Items received in a /usa reply: `- item` lines after the first line, then items named inline. */
 export function useItems(t: string): ItemLine[] {
   const lines = t.split('\n');
-  const items = itemLines(lines.slice(1));
+  const items = PAKKOMON_SCAN.test(lines[0] ?? '') ? [] : itemLines(lines.slice(1));
   for (const l of lines) {
     let m: RegExpExecArray | null;
     if ((m = USE_OTTIENI.exec(l))) {

@@ -72,12 +72,15 @@ describe('unknownEntities', () => {
       '@u, per fare la ricetta Pane nero ti manca:',
       '@u, ti trovi: nella valle ventosa 🏞',
       'esausto arrivi nella grotta 🦇',
+      ' - nella palude scura 🐸',
+      ' - Brumolo 👻: pronto', // a Pakkomon, not an exit
     ].join('\n');
     expect(unknownEntities(text, U).map((x) => [x.kind, x.text, x.line])).toStrictEqual([
       ['item', 'una torta', 1],
       ['recipe', 'Pane nero', 3],
       ['recipe', 'Pane nero', 4],
       ['place', 'nella grotta 🦇', 6],
+      ['place', 'nella palude scura 🐸', 7],
     ]);
   });
 

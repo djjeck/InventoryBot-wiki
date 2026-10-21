@@ -653,6 +653,15 @@ Hai fatto coppia, vinci 2 gettoni!
 una ruota della fortuna 🎡 deve raffreddarsi ancora per 12 secondi prima di poterlo dare in giro.
 ```
 
+The Pakkomon scanner's reply lists the player's Pakkomon, each with the time left before it can
+fight again or `pronto`; its lines are not items received:
+
+```bot-reply type=use query="/usa scanner" items=[]
+@mario_r, esamini i tuoi pakkomon con lo scanner:
+ - Zampirlo 🐯: 5 minuti e 38 secondi
+ - Brumolo 👻: pronto
+```
+
 The same texts without a known `/usa` command:
 
 ```bot-reply type=miss
