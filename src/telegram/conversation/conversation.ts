@@ -80,12 +80,28 @@ function dmSeed(input: readonly ChatMessage[], dialect: BotDialect): Map<string 
   return seed;
 }
 
+/** `f` with one call per distinct argument. */
+function memoise<T>(f: (text: string) => T): (text: string) => T {
+  const seen = new Map<string, T>();
+  return (text) => {
+    if (seen.has(text)) return seen.get(text) as T;
+    const r = f(text);
+    seen.set(text, r);
+    return r;
+  };
+}
+
 /** Phase 2 on the messages of phase 1; `botName` is the bot of the run (BotIdentity.name). */
 export function readConversation(
   messages: readonly Message[],
   botName: string,
-  dialect: BotDialect
+  botDialect: BotDialect
 ): Conversation {
+  // Each text read once: in a busy group many replies are the same text.
+  const dialect: BotDialect = {
+    ...botDialect,
+    compatibleCommands: memoise(botDialect.compatibleCommands),
+  };
   const commands = messages.map((m): ChatMessage => (m.from_bot ? m : resolveCommand(m, botName)));
   const input = shareSenderKeys(commands, unmappableNames(dialect));
   const seed = dmSeed(input, dialect);

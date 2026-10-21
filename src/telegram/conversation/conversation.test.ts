@@ -218,3 +218,24 @@ describe('senders', () => {
     expect(new Set(c.replies.map((r) => r.context.match))).toStrictEqual(new Set(['single']));
   });
 });
+
+describe('dialect', () => {
+  it('compatible_commands_asked_once_per_text', () => {
+    const g = new Chat('G');
+    g.user('Mario', '/avventura', 0);
+    g.bot(DROP('mario'), 1);
+    g.user('Mario', '/avventura', 2);
+    g.bot(DROP('mario'), 3);
+    g.bot(TOO_EARLY, 4);
+    const asked: string[] = [];
+    const c = readConversation(g.clean(), BOT, {
+      ...TEST_DIALECT,
+      compatibleCommands: (text) => {
+        asked.push(text);
+        return TEST_DIALECT.compatibleCommands(text);
+      },
+    });
+    expect(pairs(c)).toStrictEqual(pairs(converse(g.clean())));
+    expect(asked).toStrictEqual([DROP('mario'), TOO_EARLY]);
+  });
+});

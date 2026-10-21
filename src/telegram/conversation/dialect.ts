@@ -22,6 +22,7 @@ export interface BotDialect {
   /**
    * Which commands can have produced this reply: a set of first words (`/cmd`, lower
    * case); an empty set for a notice that answers no command; null when any command can.
+   * A function of the text alone: readConversation asks once per distinct text.
    */
   compatibleCommands: Compatible;
   /** The username (without `@`) a reply addresses, or null when it names nobody. */
