@@ -95,14 +95,17 @@
       "exclusive": false,
       "locations": []
     },
-    "una mela [C] x3": {
-      "name": "una mela [C] x3",
-      "rarity": null,
+    "una mela": {
+      "name": "una mela",
+      "rarity": "C",
       "usable": false,
-      "sources": [],
+      "sources": [
+        "adventure"
+      ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2018-01-02T01:00:31+01:00",
+      "last_seen": "2025-11-27T19:15:03-05:00",
+      "sources_inferred": true,
       "exclusive": false,
       "locations": []
     },
@@ -260,20 +263,6 @@
         },
         "requirements": []
       },
-      "exclusive": false,
-      "locations": []
-    },
-    "una mela": {
-      "name": "una mela",
-      "rarity": "C",
-      "usable": false,
-      "sources": [
-        "adventure"
-      ],
-      "used_in": [],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:15:03-05:00",
-      "sources_inferred": true,
       "exclusive": false,
       "locations": []
     },

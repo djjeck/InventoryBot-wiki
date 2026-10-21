@@ -292,6 +292,31 @@ describe('inventory', () => {
     expect(fields(INVENTORY, '/inventario oro')['filtered']).toBe(true);
   });
 
+  it('a_player_made_name_spans_lines_up_to_its_rarity', () => {
+    const e = fields(
+      '@djjeck, possiedi:\n' +
+        '- un sasso [C] x2\n' +
+        '- una cornice con dentro\n' +
+        '- 🖼\n' +
+        'un tappetino con scritto Benvenuti [S] x1\n' +
+        '- un grembiule da cuoco [L2]',
+      '/inventario'
+    );
+    expect(e['items']).toStrictEqual([
+      item('un sasso', 'C', false, 2),
+      item('una cornice con dentro\n- 🖼\nun tappetino con scritto Benvenuti', 'S'),
+      item('un grembiule da cuoco', 'L2'),
+    ]);
+  });
+
+  it('an_unfinished_name_at_the_end_is_dropped', () => {
+    const e = fields(
+      '@djjeck, possiedi:\n- un sasso [C] x2\n- una cornice con dentro',
+      '/inventario'
+    );
+    expect(e['items']).toStrictEqual([item('un sasso', 'C', false, 2)]);
+  });
+
   it('truncated', () => {
     const e = fields(INVENTORY + '\ne altre robe che non ci stanno..', '/inventario');
     expect(e['truncated']).toBe(true);
@@ -451,6 +476,28 @@ describe('stats unique items', () => {
         },
         { name: 'un cannocchiale dorato', rarity: 'U', usable: true, qty: 1 },
       ],
+    ]);
+  });
+
+  it('a_multi_line_favourite_item_reads_like_fields_up_to_the_ranked_ones', () => {
+    const t = [
+      'Avventuriero @lucia_b',
+      '- Livello: 3',
+      '- Luogo: sul banco corallino 🐠',
+      '- Oggetto preferito: 1x una cornice con dentro',
+      '- Luogo: nella valle ventosa 🏞',
+      '- Oggetti unici:',
+      '- Avventure: 12 (3° posto) Oggi: 1',
+      '- Monete: 0 (9° posto)',
+      '- Oggetti unici:',
+      '   - un cannocchiale dorato [U] [usabile]',
+    ].join('\n');
+    const e = classify(t, '/stats lucia_b') as unknown as Record<string, unknown>;
+    expect([e['luogo'], e['oggetto preferito'], e['avventure'], e['unique_items']]).toStrictEqual([
+      'sul banco corallino 🐠',
+      '1x una cornice con dentro\n- Luogo: nella valle ventosa 🏞\n- Oggetti unici:',
+      '12 (3° posto) Oggi: 1',
+      [{ name: 'un cannocchiale dorato', rarity: 'U', usable: true, qty: 1 }],
     ]);
   });
 

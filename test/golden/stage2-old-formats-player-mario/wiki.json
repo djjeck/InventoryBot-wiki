@@ -72,14 +72,17 @@
       "exclusive": false,
       "locations": []
     },
-    "una mela [C] x3": {
-      "name": "una mela [C] x3",
-      "rarity": null,
+    "una mela": {
+      "name": "una mela",
+      "rarity": "C",
       "usable": false,
-      "sources": [],
+      "sources": [
+        "adventure"
+      ],
       "used_in": [],
       "made_by": [],
       "last_seen": "2018-01-02T01:00:31+01:00",
+      "sources_inferred": true,
       "exclusive": false,
       "locations": []
     },

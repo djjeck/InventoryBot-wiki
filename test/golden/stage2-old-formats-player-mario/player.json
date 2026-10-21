@@ -14,7 +14,7 @@
     "un sasso": {
       "first_seen": "2017-06-01T02:00:11+02:00"
     },
-    "una mela [C] x3": {
+    "una mela": {
       "first_seen": "2018-01-02T01:00:31+01:00"
     },
     "una torre": {
@@ -42,8 +42,8 @@
       "date": "2018-01-02T01:01:21+01:00",
       "via": "ricetta"
     },
-    "una mela [C] x3": {
-      "qty": 1,
+    "una mela": {
+      "qty": 3,
       "exact": true,
       "date": "2018-01-02T01:00:31+01:00",
       "via": "inventario"

@@ -688,10 +688,14 @@ STATS = "Avventuriero " PLAYER { NL "- " FIELD ": " VALUE } NL "- Oggetti unici:
 | ------------------------------- | ----------------------------------------------------- |
 | `Livello`                       | level (`∞` for the admin)                             |
 | `Luogo`                         | current place                                         |
-| `Oggetto preferito`             | `INTx NAME`; absent if none is set                    |
+| `Oggetto preferito`             | `INTx NAME`; absent if none is set (see below)        |
 | `Avventure`, `Ricette`          | total, `(INT° posto)` rank, `Oggi: INT` today         |
 | `Oggetti`, `Distinti`, `Monete` | items, distinct items, gold coins, each with its rank |
 | `Oggetti unici`                 | the `U` items owned, one per indented line            |
+
+The favourite item's `NAME` may span lines, like any player-made item's, and those lines may read
+like fields (`- Luogo: …`, even `- Oggetti unici:`): it ends before the first field with its rank,
+`Avventure`.
 
 ```bot-reply type=stats query="/stats mario_r" luogo="sul banco corallino 🐠" livello=3 addressee=mario_r
 Avventuriero @mario_r

@@ -31,9 +31,10 @@ import {
 } from './types.ts';
 
 const RARITY = `[A-Z]${D}*\\+?`;
-// "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space)
+// "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space; any
+// whitespace may stand before the tags)
 const ITEM_LINE = rx(
-  `^${S}*-${S}?(?<name>${DOT}+?)(?: \\[(?<rarity>${RARITY})\\])?(?<usable> \\[usabile\\])?(?: x(?<qty>${D}+))?${S}*${END}`
+  `^${S}*-${S}?(?<name>${DOT}+?)(?:${S}+\\[(?<rarity>${RARITY})\\])?(?<usable>${S}+\\[usabile\\])?(?:${S}+x(?<qty>${D}+))?${S}*${END}`
 );
 
 /** Named groups of a match; groups that did not take part are undefined. */
@@ -409,6 +410,40 @@ const cTitle: Classifier = (t) => {
   return { type: 'title', items: itemLines(lines.slice(1)) };
 };
 
+/** The rarity tags that end an inventory line, after the name: " [N] [usabile] x3". */
+const LINE_TAGS = rx(`${S}\\[${RARITY}\\](?:${S}+\\[usabile\\])?(?:${S}+x${D}+)?${S}*${END}`);
+
+/**
+ * The items of an inventory, whose every line carries a rarity. A player-made item's
+ * name may span lines: a `- ` line without a rarity starts it, and the lines up to the
+ * one with the rarity (with or without their own `-`) continue it. An unfinished name
+ * at the end (a truncated list) is dropped.
+ */
+export function inventoryItems(lines: readonly string[]): ItemLine[] {
+  const out: ItemLine[] = [];
+  let pending: string[] | null = null;
+  for (const l of lines) {
+    if (pending === null) {
+      if (!stripStartWs(l).startsWith('-')) continue;
+      if (!LINE_TAGS.test(l)) {
+        pending = [l];
+        continue;
+      }
+      const it = itemFromLine(l);
+      if (it) out.push(it);
+      continue;
+    }
+    pending.push(l);
+    if (!LINE_TAGS.test(l)) continue;
+    // One line of the whole: the name keeps its line breaks.
+    const first = stripStartWs(pending[0] as string).slice(1);
+    const it = itemFromLine(`- ${[first, ...pending.slice(1)].join('\u0000')}`);
+    pending = null;
+    if (it) out.push({ ...it, name: stripWs(it.name.replaceAll('\u0000', '\n')) });
+  }
+  return out;
+}
+
 const cInventory: Classifier = (t, q) => {
   const lines = t.split('\n');
   if (!(lines[0] as string).includes('possiedi:')) return null;
@@ -417,7 +452,7 @@ const cInventory: Classifier = (t, q) => {
     type: 'inventory',
     filtered: q !== null && q !== '/inventario',
     truncated: t.includes('altre robe che non ci stanno'),
-    items: itemLines(lines.slice(1)),
+    items: inventoryItems(lines.slice(1)),
   };
 };
 
@@ -540,13 +575,24 @@ const STATS_RESERVED: ReadonlySet<string> = new Set([
 ]);
 const UNIQUE_ITEMS = '- Oggetti unici:';
 
+const RANKED = rx(`\\(${D}+° posto\\)`);
+
 const cStats: Classifier = (t) => {
   if (!t.startsWith('Avventuriero @')) return null;
   const ev: StatsEvent = { type: 'stats' };
+  // The favourite item's name may span lines (a player-made item), up to the first ranked
+  // field ("- Avventure: 12 (3° posto) …"): every field after it carries its rank.
+  let favourite = false;
   for (const l of t.split('\n')) {
+    if (favourite && !RANKED.test(l)) {
+      ev['oggetto preferito'] = `${String(ev['oggetto preferito'])}\n${l}`;
+      continue;
+    }
+    favourite = false;
     const m = STATS_LINE.exec(l);
     if (!m) continue;
     const key = (m[1] as string).toLowerCase();
+    if (key === 'oggetto preferito') favourite = true;
     // A field named like an event key is dropped: it would change the event's type or context.
     if (STATS_RESERVED.has(key)) continue;
     // defineProperty: a field named "__proto__" stays a plain key, not the prototype.
@@ -557,10 +603,11 @@ const cStats: Classifier = (t) => {
       configurable: true,
     });
   }
-  // "- Oggetti unici:" then one indented item line per unique item owned.
+  // "- Oggetti unici:" then one indented item line per unique item owned; the last one,
+  // as a favourite item's name may hold the words too.
   const lines = t.split('\n');
-  if (lines.some((l) => stripWs(l) === UNIQUE_ITEMS))
-    ev.unique_items = splitSection(lines, UNIQUE_ITEMS);
+  const at = lines.findLastIndex((l) => stripWs(l) === UNIQUE_ITEMS);
+  if (at >= 0) ev.unique_items = splitSection(lines.slice(at), UNIQUE_ITEMS);
   return ev;
 };
 
