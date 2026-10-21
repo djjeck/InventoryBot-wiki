@@ -99,10 +99,12 @@ order:
 4. **Interpretation** (`src/inventorybot/extract.ts`, `interpretReplies`): every reply becomes a
    typed event (`src/inventorybot/types.ts`): the classifier (`classify.ts`) reads it with the
    command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
-   `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). The phase ends by
-   verifying the group pairs (`verify.ts`): a reply that, read with its command, is not of that
-   command's family is read again without it, and so is a group `/usa` reply that does not fit the
-   item its query names (which uses phase 5's item catalogue).
+   `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). A place is named
+   in its article form (`places.ts`: "nella valle" is "la valle"), whatever preposition the reply
+   used, so that every source names it the same way. The phase ends by verifying the group pairs
+   (`verify.ts`): a reply that, read with its command, is not of that command's family is read again
+   without it, and so is a group `/usa` reply that does not fit the item its query names (which uses
+   phase 5's item catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, the `/faq` rules), and

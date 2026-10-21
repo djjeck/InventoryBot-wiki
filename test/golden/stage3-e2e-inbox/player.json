@@ -34,21 +34,21 @@
     }
   },
   "locations": {
-    "ai piedi del monte Grevolo ⛰": {
+    "i piedi del monte Grevolo ⛰": {
       "visited": false,
       "adventures": 0
     },
-    "nel bosco nebbioso di Valtorbo 🌲": {
+    "il banco corallino 🐠": {
+      "visited": false,
+      "adventures": 0
+    },
+    "il bosco nebbioso di Valtorbo 🌲": {
       "visited": true,
       "adventures": 2
     },
-    "nella valle ventosa 🏞": {
+    "la valle ventosa 🏞": {
       "visited": true,
       "adventures": 1
-    },
-    "sul banco corallino 🐠": {
-      "visited": false,
-      "adventures": 0
     }
   },
   "recipe_list": {

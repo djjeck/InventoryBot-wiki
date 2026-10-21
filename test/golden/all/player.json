@@ -67,7 +67,19 @@
     }
   },
   "locations": {
-    "ai piedi del monte Grevolo ⛰": {
+    "i piedi del monte Grevolo ⛰": {
+      "visited": false,
+      "adventures": 0
+    },
+    "il banco corallino 🐠": {
+      "visited": false,
+      "adventures": 0
+    },
+    "il bosco nebbioso di Valtorbo 🌲": {
+      "visited": true,
+      "adventures": 6
+    },
+    "il magnifico Palazzo di Cristallo 🏰": {
       "visited": false,
       "adventures": 0
     },
@@ -75,31 +87,19 @@
       "visited": false,
       "adventures": 0
     },
-    "nel bosco nebbioso di Valtorbo 🌲": {
-      "visited": true,
-      "adventures": 6
-    },
-    "nel magnifico Palazzo di Cristallo 🏰": {
+    "l'immenso deserto di Sabbiora 🏜": {
       "visited": false,
       "adventures": 0
     },
-    "nell'immenso deserto di Sabbiora 🏜": {
+    "la palude sussurrante 🌾": {
       "visited": false,
       "adventures": 0
     },
-    "nella palude sussurrante 🌾": {
-      "visited": false,
-      "adventures": 0
-    },
-    "nella valle ventosa 🏞": {
+    "la valle ventosa 🏞": {
       "visited": true,
       "adventures": 3
     },
-    "nelle cripte del monastero 👻": {
-      "visited": false,
-      "adventures": 0
-    },
-    "sul banco corallino 🐠": {
+    "le cripte del monastero 👻": {
       "visited": false,
       "adventures": 0
     }

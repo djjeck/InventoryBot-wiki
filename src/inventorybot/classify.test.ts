@@ -336,8 +336,8 @@ describe('travel', () => {
   it('standard_arrival', () => {
     expect(classify(TRAVEL, '/viaggio valle')).toStrictEqual({
       type: 'travel',
-      location: 'nella valle ventosa 🏞',
-      exits: ['nel bosco nebbioso di Valtorbo 🌲', 'ai piedi del monte Grevolo ⛰'],
+      location: 'la valle ventosa 🏞',
+      exits: ['il bosco nebbioso di Valtorbo 🌲', 'i piedi del monte Grevolo ⛰'],
       narrative: null,
     });
   });
@@ -350,7 +350,7 @@ describe('travel', () => {
     );
     expect([e['type'], e['location'], e['narrative']]).toStrictEqual([
       'travel',
-      'sul banco corallino 🐠',
+      'il banco corallino 🐠',
       "inghiotti l'Respirella e ti tuffi tra le onde...",
     ]);
   });
@@ -373,7 +373,7 @@ describe('travel', () => {
       classify('@djjeck non puoi andare: sul banco corallino 🐠.. Forse ti manca qualcosa!', null)
     ).toStrictEqual({
       type: 'travel_blocked',
-      location: 'sul banco corallino 🐠',
+      location: 'il banco corallino 🐠',
     });
   });
 
@@ -386,8 +386,8 @@ describe('travel', () => {
       )
     ).toStrictEqual({
       type: 'location',
-      location: 'nel bosco nebbioso di Valtorbo 🌲',
-      exits: ['nella valle ventosa 🏞'],
+      location: 'il bosco nebbioso di Valtorbo 🌲',
+      exits: ['la valle ventosa 🏞'],
     });
   });
 });
@@ -403,7 +403,7 @@ describe('travel arrivals without a parsable place', () => {
     expect(classify(RACCHETTA, '/viaggio palude')).toStrictEqual({
       type: 'travel',
       location: null,
-      exits: ['nel bosco nebbioso di Valtorbo 🌲'],
+      exits: ['il bosco nebbioso di Valtorbo 🌲'],
       narrative:
         'guidato dalla tua bussola fatata attraversi il canneto e finalmente ti trovi nella palude sussurrante 🌾',
     });
@@ -433,7 +433,7 @@ describe('travel arrivals without a parsable place', () => {
       )
     ).toStrictEqual({
       type: 'travel',
-      location: 'sul banco corallino 🐠',
+      location: 'il banco corallino 🐠',
       exits: [],
       narrative: 'inghiotti un boccone di Respirella e ti tuffi.. Dopo numerose bracciate',
     });
@@ -447,7 +447,7 @@ describe('travel arrivals without a parsable place', () => {
       )
     ).toStrictEqual({
       type: 'travel',
-      location: 'sulla scogliera bianca 🏖',
+      location: 'la scogliera bianca 🏖',
       exits: [],
       narrative: null,
     });
@@ -461,7 +461,7 @@ describe('travel requirement notice', () => {
     expect(classify(t, null)).toStrictEqual({
       type: 'travel_requirement',
       item: 'una lanterna cieca',
-      location: 'nelle cripte del monastero 👻',
+      location: 'le cripte del monastero 👻',
     });
     expect([...(compatibleCommands(t) ?? ['any'])]).toStrictEqual([]); // a side notice: it answers no command
   });
@@ -502,7 +502,7 @@ describe('stats unique items', () => {
     ].join('\n');
     const e = classify(t, '/stats lucia_b') as unknown as Record<string, unknown>;
     expect([e['luogo'], e['oggetto preferito'], e['avventure'], e['unique_items']]).toStrictEqual([
-      'sul banco corallino 🐠',
+      'il banco corallino 🐠',
       '1x una cornice con dentro\n- Luogo: nella valle ventosa 🏞\n- Oggetti unici:',
       '12 (3° posto) Oggi: 1',
       [{ name: 'un cannocchiale dorato', rarity: 'U', usable: true, qty: 1 }],
@@ -1269,7 +1269,7 @@ describe('through phases 2 and 4', () => {
     expect(Object.entries(fields)).toStrictEqual([
       ['livello', '4'],
       ['__proto__', 'w'],
-      ['luogo', 'nel bosco'],
+      ['luogo', 'il bosco'],
     ]);
   });
 

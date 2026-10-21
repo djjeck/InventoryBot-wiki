@@ -88,20 +88,20 @@
   },
   "recipes": {},
   "locations": {
-    "nel bosco nebbioso di Valtorbo 🌲": {
-      "name": "nel bosco nebbioso di Valtorbo 🌲",
-      "label": "Bosco nebbioso di Valtorbo 🌲",
+    "il bosco nebbioso di Valtorbo 🌲": {
+      "name": "il bosco nebbioso di Valtorbo 🌲",
+      "label": "Il bosco nebbioso di Valtorbo 🌲",
       "exits": [
-        "nella valle ventosa 🏞"
+        "la valle ventosa 🏞"
       ],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
       "exclusive_items": []
     },
-    "nella valle ventosa 🏞": {
-      "name": "nella valle ventosa 🏞",
-      "label": "Valle ventosa 🏞",
+    "la valle ventosa 🏞": {
+      "name": "la valle ventosa 🏞",
+      "label": "La valle ventosa 🏞",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

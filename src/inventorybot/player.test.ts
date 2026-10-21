@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ev, type EvOptions, runBuild } from '#test/build.ts';
 import * as T from '#test/texts.ts';
 import { iso } from './build.ts';
+import { placeName } from './places.ts';
 import { Holdings, renamed, sameTransfer } from './player.ts';
 import { type BuildEvent, type PlayerState } from './types.ts';
 
@@ -71,8 +72,8 @@ describe('common player', () => {
     expect(state.recipes).toStrictEqual({ Torre: { crafted: 2, last_crafted: last.date } });
     expect(Object.keys(state.items).sort()).toStrictEqual(['un sasso', 'una torre', 'una trave']);
     expect(state.items['un sasso']).toStrictEqual({ first_seen: events[1]?.date });
-    expect(state.locations[BOSCO]).toStrictEqual({ visited: true, adventures: 1 });
-    expect(state.locations[PIANURA]).toStrictEqual({ visited: false, adventures: 0 });
+    expect(state.locations[placeName(BOSCO)]).toStrictEqual({ visited: true, adventures: 1 });
+    expect(state.locations[placeName(PIANURA)]).toStrictEqual({ visited: false, adventures: 0 });
     expect(state.recipe_list?.recipes).toStrictEqual({ Torre: 'pronta', Muro: 'manca 3' });
     expect(
       Object.fromEntries(Object.entries(state.inventory).map(([n, v]) => [n, v.qty]))

@@ -34,10 +34,10 @@ import {
   stripEndChars,
   stripWs,
   WORD_BODY,
-  WS_CLASS,
 } from '#src/lib/text.ts';
 import { INVENTORY_COMMANDS, parseDuration, useItems } from './classify.ts';
 import { stripAddr } from './patterns.ts';
+import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
 import {
   type BuildEvent,
@@ -145,17 +145,6 @@ export function inventoryScope(
     const lower = n.toLowerCase();
     return words.every((w) => lower.includes(w));
   };
-}
-
-/** The leading articulated preposition of a place name: a whole word, or elided (`nell'antro`). */
-const LABEL_PREFIX = new RegExp(
-  `^(?:nell'|sull'|(?:nel|nello|nella|nei|negli|nelle|sul|sullo|sulla|sui|sugli|sulle)(?=${WS_CLASS}))${WS_CLASS}*`,
-  'u'
-);
-
-export function locationLabel(loc: string): string {
-  const s = loc.replace(LABEL_PREFIX, '');
-  return sliceCodePoints(s, 0, 1).toUpperCase() + sliceCodePoints(s, 1);
 }
 
 /** "+" rarity (C+, N+, R+): the item drops in a single location (per the bot's /faq). */
@@ -334,7 +323,7 @@ export class KB {
     if (l === undefined) {
       l = {
         name,
-        label: locationLabel(name),
+        label: placeLabel(name),
         exits: new Set(),
         requires_item: false,
         unlock_texts: [],
@@ -603,8 +592,8 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
   return uses;
 }
 
-/** The place the bot calls "il villaggio", where every way back ends. */
-const VILLAGE = /^nel villaggio\b/u;
+/** The place the bot calls "il villaggio" ("nel villaggio …"), where every way back ends. */
+const VILLAGE = /^il villaggio\b/u;
 
 /**
  * The places from `from` to `to` (both included) along the fewest known exits, or null.
@@ -696,8 +685,8 @@ function knownPlaces(events: readonly BuildEvent[]): Set<string> {
 
 /**
  * Arrivals whose reply does not delimit the place (narrated through an item): the
- * place is the longest known place that ends the narrative (a final full stop aside), on a
- * word boundary; the
+ * place is the longest ending of the narrative (a final full stop aside), on a word
+ * boundary, that is a known place in its article form (places.ts); the
  * narrative keeps the text before it (the unlock text). Places named anywhere in the
  * events count, also later ones. Otherwise the arrival is reported and its place stays null.
  */
@@ -706,21 +695,21 @@ function resolveArrivals(kb: KB, events: BuildEvent[]): void {
     (e): e is Extract<BuildEvent, { type: 'travel' }> => e.type === 'travel' && e.location === null
   );
   if (pending.length === 0) return;
-  // Longest first (code points); equal lengths keep insertion order (stable sort).
-  const names = [...knownPlaces(events)]
-    .map((n) => ({ n, len: codePointLength(n) }))
-    .sort((a, b) => b.len - a.len)
-    .map((x) => x.n);
+  const known = knownPlaces(events);
   for (const e of pending) {
     // A full stop may follow the place ("… arrivi nella baia di Scogliola 🦀.").
     const text = stripWs(e.narrative ?? '').replace(/\.$/u, '');
-    const name = names.find(
-      (n) =>
-        text.endsWith(n) && (text.length === n.length || text[text.length - n.length - 1] === ' ')
-    );
-    if (truthy(name)) {
-      e.location = name;
-      e.narrative = stripWs(text.slice(0, text.length - name.length)) || null;
+    // The text's endings after a space, longest first, in their article form.
+    let start: number | null = null;
+    for (let i = 0; i >= 0; i = text.indexOf(' ', i) + 1 || -1) {
+      if (known.has(placeName(text.slice(i)))) {
+        start = i;
+        break;
+      }
+    }
+    if (start !== null) {
+      e.location = placeName(text.slice(start));
+      e.narrative = stripWs(text.slice(0, start)) || null;
     } else {
       kb.addReport({
         kind: 'unresolved_travel',

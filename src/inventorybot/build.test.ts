@@ -8,7 +8,6 @@ import {
   build,
   isMine,
   iso as isoDate,
-  locationLabel,
   recipeMatch,
   reportLines,
   splitRecipes,
@@ -17,8 +16,11 @@ import {
   useTemplate,
 } from './build.ts';
 import { classify } from './classify.ts';
+import { placeName } from './places.ts';
 import { type BuildEvent } from './types.ts';
 
+/** A place's key in the wiki: its article form. */
+const P = placeName;
 const BOSCO = 'nel bosco nebbioso di Valtorbo 🌲';
 const PIANURA = 'nella valle ventosa 🏞';
 const MONTE = 'ai piedi del monte Grevolo ⛰';
@@ -98,8 +100,8 @@ describe('common build', () => {
     expect(wiki.items['una cestina']?.made_by).toStrictEqual(['Pratica cestina']);
     expect(wiki.items['un paio di mollette']?.used_in).toStrictEqual(['Pratica cestina']);
     expect(wiki.items['un nastro da pacchi']?.sources).toStrictEqual(['adventure']);
-    expect(wiki.locations[BOSCO]?.exits).toStrictEqual([PIANURA]);
-    expect(wiki.locations[BOSCO]?.label).toBe('Bosco nebbioso di Valtorbo 🌲');
+    expect(wiki.locations[P(BOSCO)]?.exits).toStrictEqual([P(PIANURA)]);
+    expect(wiki.locations[P(BOSCO)]?.label).toBe('Il bosco nebbioso di Valtorbo 🌲');
     expect(wiki.rarities['C']).toBe('comune');
     expect(Object.keys(wiki).sort()).toStrictEqual(
       [
@@ -602,13 +604,13 @@ describe('exclusive items', () => {
       ev(T.drop('nel bosco trovi un sasso', 'C'), '/avventura', { t: 3 }),
     ]);
     const gh = wiki.items["una ghianda d'oro"];
-    expect([gh?.exclusive, gh?.locations]).toStrictEqual([true, [BOSCO]]);
+    expect([gh?.exclusive, gh?.locations]).toStrictEqual([true, [P(BOSCO)]]);
     expect([wiki.items['un sasso']?.exclusive, wiki.items['un sasso']?.locations]).toStrictEqual([
       false,
       [],
     ]);
-    expect(wiki.locations[BOSCO]?.exclusive_items).toStrictEqual(["una ghianda d'oro"]);
-    expect(wiki.locations[PIANURA]?.exclusive_items).toStrictEqual([]);
+    expect(wiki.locations[P(BOSCO)]?.exclusive_items).toStrictEqual(["una ghianda d'oro"]);
+    expect(wiki.locations[P(PIANURA)]?.exclusive_items).toStrictEqual([]);
     expect(kb.report.has('exclusive_in_many_places')).toBe(false);
   });
 
@@ -629,7 +631,7 @@ describe('exclusive items', () => {
       ev(T.travel(PIANURA, [BOSCO]), '/viaggio valle', { t: 3 }),
       ev(T.drop("nel bosco trovi una ghianda d'oro", 'C+'), null, { t: 4 }),
     ]);
-    const both = [BOSCO, PIANURA].sort();
+    const both = [P(BOSCO), P(PIANURA)].sort();
     expect(wiki.items["una ghianda d'oro"]?.locations).toStrictEqual(both);
     expect(kb.report.get('exclusive_in_many_places')).toStrictEqual([
       { kind: 'exclusive_in_many_places', item: "una ghianda d'oro", locations: both },
@@ -656,10 +658,10 @@ describe('position', () => {
       )
     );
     const { wiki } = runBuild(events);
-    expect(f(events[1] as BuildEvent)['location']).toBe(BOSCO);
-    expect(f(events[4] as BuildEvent)['location']).toBe(PIANURA);
-    expect(wiki.locations[PIANURA]?.exits).toStrictEqual([BOSCO, MONTE].sort());
-    expect(wiki.locations).toHaveProperty([MONTE]);
+    expect(f(events[1] as BuildEvent)['location']).toBe(P(BOSCO));
+    expect(f(events[4] as BuildEvent)['location']).toBe(P(PIANURA));
+    expect(wiki.locations[P(PIANURA)]?.exits).toStrictEqual([P(BOSCO), P(MONTE)].sort());
+    expect(wiki.locations).toHaveProperty([P(MONTE)]);
   });
 
   it('first_location_ignored_if_a_move_came_first', () => {
@@ -678,8 +680,8 @@ describe('position', () => {
       ev(T.where(BOSCO, []), '/viaggio', { t: 0 }),
       ev(T.travel(MONTE, []), '/viaggio monte', { t: 10 }),
     ]);
-    expect(wiki.locations[BOSCO]?.exits).toStrictEqual([MONTE]);
-    expect(wiki.locations[MONTE]?.exits).toStrictEqual([]);
+    expect(wiki.locations[P(BOSCO)]?.exits).toStrictEqual([P(MONTE)]);
+    expect(wiki.locations[P(MONTE)]?.exits).toStrictEqual([]);
   });
 
   it('blocked_and_unlock', () => {
@@ -692,19 +694,19 @@ describe('position', () => {
         { t: 20 }
       ),
     ]);
-    const fd = wiki.locations[FONDALE];
+    const fd = wiki.locations[P(FONDALE)];
     expect(fd?.requires_item).toBe(true);
     expect(fd?.unlock_texts).toStrictEqual(["inghiotti l'Respirella e ti tuffi..."]);
-    expect(wiki.locations[PIANURA]?.requires_item).toBe(false);
-    expect(wiki.locations[PIANURA]?.exits).toStrictEqual([FONDALE]);
+    expect(wiki.locations[P(PIANURA)]?.requires_item).toBe(false);
+    expect(wiki.locations[P(PIANURA)]?.exits).toStrictEqual([P(FONDALE)]);
   });
 
   it('blocked_while_location_unknown', () => {
     const { wiki } = runBuild([ev(T.blocked(FONDALE), '/viaggio banco', { t: 0 })]);
     expect(wiki.locations).toStrictEqual({
-      [FONDALE]: {
-        name: FONDALE,
-        label: 'Banco corallino 🐠',
+      [P(FONDALE)]: {
+        name: P(FONDALE),
+        label: 'Il banco corallino 🐠',
         exits: [],
         requires_item: true,
         unlock_texts: [],
@@ -723,10 +725,10 @@ describe('position', () => {
       ev(T.drop("trovi una ghianda d'oro", 'C+'), null, { t: 20 }),
     ];
     const { wiki } = runBuild(events);
-    expect(f(events[4] as BuildEvent)['location']).toBe(BOSCO);
-    expect(wiki.locations[PIANURA]?.exits).toStrictEqual([MONTE]);
-    expect(wiki.locations[BOSCO]?.exits).toStrictEqual([]); // no link from the owner's place
-    expect(wiki.locations[FONDALE]?.requires_item).toBe(true);
+    expect(f(events[4] as BuildEvent)['location']).toBe(P(BOSCO));
+    expect(wiki.locations[P(PIANURA)]?.exits).toStrictEqual([P(MONTE)]);
+    expect(wiki.locations[P(BOSCO)]?.exits).toStrictEqual([]); // no link from the owner's place
+    expect(wiki.locations[P(FONDALE)]?.requires_item).toBe(true);
   });
 
   it('stats_place_sets_position', () => {
@@ -736,7 +738,7 @@ describe('position', () => {
       ev(T.drop("trovi una ghianda d'oro", 'C+'), null, { t: 10 }),
     ];
     runBuild(events);
-    expect(f(events[2] as BuildEvent)['location']).toBe(MONTE);
+    expect(f(events[2] as BuildEvent)['location']).toBe(P(MONTE));
   });
 });
 
@@ -990,16 +992,16 @@ describe('travel unlocks', () => {
       arrival,
     ]);
     expect([f(arrival)['location'], f(arrival)['narrative']]).toStrictEqual([
-      PALUDE,
+      P(PALUDE),
       'guidato dalla tua bussola fatata finalmente ti trovi',
     ]);
-    const l = wiki.locations[PALUDE];
+    const l = wiki.locations[P(PALUDE)];
     expect([l?.requires_item, l?.unlock_texts, l?.exits]).toStrictEqual([
       true,
       ['guidato dalla tua bussola fatata finalmente ti trovi'],
-      [BOSCO],
+      [P(BOSCO)],
     ]);
-    expect(state.locations[PALUDE]?.visited).toBe(true);
+    expect(state.locations[P(PALUDE)]?.visited).toBe(true);
   });
 
   it('longest_known_place_wins_and_later_events_count', () => {
@@ -1013,8 +1015,8 @@ describe('travel unlocks', () => {
       arrival,
       ev(T.where(BOSCO, ['deserto di Sabbiora 🏜', DESERTO]), '/viaggio', { t: 100 }),
     ]);
-    expect(f(arrival)['location']).toBe(DESERTO);
-    expect(wiki.locations[DESERTO]?.unlock_texts).toStrictEqual([
+    expect(f(arrival)['location']).toBe(P(DESERTO));
+    expect(wiki.locations[P(DESERTO)]?.unlock_texts).toStrictEqual([
       "con dieci borracce piene d'acqua e dopo un lungo viaggio arrivi (stremato)",
     ]);
   });
@@ -1029,17 +1031,17 @@ describe('travel unlocks', () => {
     );
     const { wiki } = runBuild([ev(T.where(BOSCO, [DESERTO]), '/viaggio', { t: 0 }), arrival]);
     expect([f(arrival)['location'], f(arrival)['narrative']]).toStrictEqual([
-      DESERTO,
+      P(DESERTO),
       "con dieci borracce piene d'acqua arrivi (stremato)",
     ]);
-    expect(Object.keys(wiki.locations).sort()).toStrictEqual([DESERTO, BOSCO].sort());
+    expect(Object.keys(wiki.locations).sort()).toStrictEqual([P(DESERTO), P(BOSCO)].sort());
   });
 
   it('arrival_at_an_unknown_place_is_reported', () => {
     const arrival = ev(racchetta, '/viaggio palude', { t: 10 });
     const { wiki, kb, state } = runBuild([arrival]);
     expect(f(arrival)['location']).toBeNull();
-    expect(Object.keys(wiki.locations)).toStrictEqual([BOSCO]); // only the exit
+    expect(Object.keys(wiki.locations)).toStrictEqual([P(BOSCO)]); // only the exit
     expect(kb.report.get('unresolved_travel')).toStrictEqual([
       {
         kind: 'unresolved_travel',
@@ -1047,7 +1049,7 @@ describe('travel unlocks', () => {
         text: 'guidato dalla tua bussola fatata finalmente ti trovi nella palude sussurrante 🌾',
       },
     ]);
-    expect(state.locations[BOSCO]?.visited).toBe(false);
+    expect(state.locations[P(BOSCO)]?.visited).toBe(false);
   });
 
   describe('travel requirement notices', () => {
@@ -1076,8 +1078,8 @@ describe('travel unlocks', () => {
 
     it('the_place_takes_the_item_when_nothing_on_the_way_back_needs_one', () => {
       const { wiki } = runBuild([...map, notice('una lanterna cieca', CATACOMBE, 10)]);
-      expect(required(wiki)).toStrictEqual({ [CATACOMBE]: ['una lanterna cieca'] });
-      expect(wiki.locations[CATACOMBE]?.requires_item).toBe(true);
+      expect(required(wiki)).toStrictEqual({ [P(CATACOMBE)]: ['una lanterna cieca'] });
+      expect(wiki.locations[P(CATACOMBE)]?.requires_item).toBe(true);
       expect(wiki.items['una lanterna cieca']?.rarity).toBeNull();
     });
 
@@ -1087,8 +1089,8 @@ describe('travel unlocks', () => {
         ev(T.blocked(CIMA), '/viaggio cima', { t: 6 }),
         notice('un rampino di ferro', PALUDE, 10),
       ]);
-      expect(required(wiki)).toStrictEqual({ [CIMA]: ['un rampino di ferro'] });
-      expect(wiki.locations[PALUDE]?.requires_item).toBe(false);
+      expect(required(wiki)).toStrictEqual({ [P(CIMA)]: ['un rampino di ferro'] });
+      expect(wiki.locations[P(PALUDE)]?.requires_item).toBe(false);
     });
 
     it('several_places_needing_an_item_are_reported', () => {
@@ -1103,7 +1105,7 @@ describe('travel unlocks', () => {
         {
           kind: 'unresolved_requirement',
           item: 'un rampino di ferro',
-          location: PALUDE,
+          location: P(PALUDE),
           reason: 'several',
         },
       ]);
@@ -1119,7 +1121,7 @@ describe('travel unlocks', () => {
         {
           kind: 'unresolved_requirement',
           item: 'una lanterna cieca',
-          location: CATACOMBE,
+          location: P(CATACOMBE),
           reason: 'no_way_back',
         },
       ]);
@@ -1551,48 +1553,6 @@ describe('report', () => {
 });
 
 describe('edge cases', () => {
-  it('location_label_drops_the_whole_preposition', () => {
-    expect(
-      [
-        'nella pianura',
-        "nell'antro",
-        'nello stagno',
-        'sulla vetta',
-        'sullo scoglio',
-        'sugli scogli',
-        'sui monti',
-      ].map(locationLabel)
-    ).toStrictEqual(['Pianura', 'Antro', 'Stagno', 'Vetta', 'Scoglio', 'Scogli', 'Monti']);
-  });
-
-  it('location_label_prefix_is_a_whole_word', () => {
-    expect(
-      [
-        'nel bosco oscuro',
-        'nei campi',
-        'negli abissi',
-        'nelle paludi',
-        'sul monte',
-        "sull'isola",
-        'sulle dune',
-        'nellapianura',
-        'sulfureo lago',
-        'in cima al monte',
-      ].map(locationLabel)
-    ).toStrictEqual([
-      'Bosco oscuro',
-      'Campi',
-      'Abissi',
-      'Paludi',
-      'Monte',
-      'Isola',
-      'Dune',
-      'Nellapianura',
-      'Sulfureo lago',
-      'In cima al monte',
-    ]);
-  });
-
   it('craft_by_output_sees_recipe_links_from_earlier_crafts', () => {
     const events: BuildEvent[] = [
       ev(T.recipeList([['Pizza', 1, 0]]), '/ricetta', { t: 0 }),

@@ -18,6 +18,7 @@ import {
   WORD_BODY,
 } from '#src/lib/text.ts';
 import { A, ADDR, ADDR_RE, D, DOT, END, GIFT, GIVE, rx, S, stripAddr, W } from './patterns.ts';
+import { placeName } from './places.ts';
 import {
   type CraftEvent,
   type Event,
@@ -465,7 +466,7 @@ function exits(t: string): string[] {
   return tail
     .split('\n')
     .filter((l) => stripWs(l).startsWith('- '))
-    .map((l) => stripWs(stripWs(l).slice(2)));
+    .map((l) => placeName(stripWs(stripWs(l).slice(2))));
 }
 
 const BLOCKED = rx(`non puoi andare: (?<loc>${DOT}+?)\\.\\. Forse ti manca qualcosa`);
@@ -484,17 +485,22 @@ const cTravel: Classifier = (t) => {
     return m
       ? {
           type: 'travel',
-          location: stripWs(groups(m)['loc'] as string),
+          location: placeName(stripWs(groups(m)['loc'] as string)),
           exits: [],
           narrative: null,
         }
       : null;
   }
   let m = BLOCKED.exec(t);
-  if (m) return { type: 'travel_blocked', location: stripWs(groups(m)['loc'] as string) };
+  if (m)
+    return { type: 'travel_blocked', location: placeName(stripWs(groups(m)['loc'] as string)) };
   m = WHERE.exec(t);
   if (m)
-    return { type: 'location', location: stripWs(groups(m)['loc'] as string), exits: exits(t) };
+    return {
+      type: 'location',
+      location: placeName(stripWs(groups(m)['loc'] as string)),
+      exits: exits(t),
+    };
   const head = stripWs(t.split('Puoi andare verso:')[0] as string);
   m = ARRIVAL.exec(head);
   if (m) {
@@ -511,7 +517,7 @@ const cTravel: Classifier = (t) => {
       };
     return {
       type: 'travel',
-      location: stripWs(groups(m)['loc'] as string),
+      location: placeName(stripWs(groups(m)['loc'] as string)),
       exits: exits(t),
       narrative: standard ? null : narrative,
     };
@@ -537,7 +543,7 @@ const cNarratedArrival: Classifier = (t, q) => {
   if (m)
     return {
       type: 'travel',
-      location: stripWs(groups(m)['loc'] as string),
+      location: placeName(stripWs(groups(m)['loc'] as string)),
       exits: [],
       narrative: stripWs(text.slice(0, m.index)),
     };
@@ -556,7 +562,7 @@ const cTravelRequirement: Classifier = (t) => {
   return {
     type: 'travel_requirement',
     item: stripWs(g['item'] as string),
-    location: stripWs(g['loc'] as string),
+    location: placeName(stripWs(g['loc'] as string)),
   };
 };
 
@@ -599,8 +605,9 @@ const cStats: Classifier = (t) => {
     // A field named like an event key is dropped: it would change the event's type or context.
     if (STATS_RESERVED.has(key)) continue;
     // defineProperty: a field named "__proto__" stays a plain key, not the prototype.
+    const value = stripWs(m[2] as string);
     Object.defineProperty(ev, key, {
-      value: stripWs(m[2] as string),
+      value: key === 'luogo' ? placeName(value) : value,
       enumerable: true,
       writable: true,
       configurable: true,

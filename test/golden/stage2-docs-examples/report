@@ -22,8 +22,8 @@ oggetti: 36; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2
   unnamed_recipe: query="/ricetta piselli" output="una manciata di linguette di latta"
   unnamed_recipe: query="/ricetta piselli" output="una manciata di linguette di latta"
 -- unresolved_requirement: 2
-  unresolved_requirement: item="una lanterna cieca" location="nelle cripte del monastero 👻" reason="no_way_back"
-  unresolved_requirement: item="una lanterna cieca" location="nelle cripte del monastero 👻" reason="no_way_back"
+  unresolved_requirement: item="una lanterna cieca" location="le cripte del monastero 👻" reason="no_way_back"
+  unresolved_requirement: item="una lanterna cieca" location="le cripte del monastero 👻" reason="no_way_back"
 -- unresolved_use: 5
   unresolved_use: query="/usa dado" text="tiri il dado e fai 5!"
   unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "

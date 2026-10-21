@@ -501,7 +501,7 @@ may be followed by more words or a full stop ("arrivi esausto nella baia di Scog
 of the item by a player at `LOCATION`, and names an item that `LOCATION` itself or another place on
 the way back from it to the village (`nel villaggio …`) requires, without saying which.
 
-```bot-reply type=location query="/viaggio" location="nel bosco nebbioso di Valtorbo 🌲" exits.0="nella valle ventosa 🏞" exits.2="nell'immenso deserto di Sabbiora 🏜"
+```bot-reply type=location query="/viaggio" location="il bosco nebbioso di Valtorbo 🌲" exits.0="la valle ventosa 🏞" exits.2="l'immenso deserto di Sabbiora 🏜"
 @mario_r, ti trovi: nel bosco nebbioso di Valtorbo 🌲
 Puoi andare verso:
  - nella valle ventosa 🏞
@@ -509,7 +509,7 @@ Puoi andare verso:
  - nell'immenso deserto di Sabbiora 🏜
 ```
 
-```bot-reply type=travel query="/viaggio valle" location="nella valle ventosa 🏞" narrative=null exits.1="ai piedi del monte Grevolo ⛰"
+```bot-reply type=travel query="/viaggio valle" location="la valle ventosa 🏞" narrative=null exits.1="i piedi del monte Grevolo ⛰"
 @mario_r, ti metti in cammino e dopo un lunghissimo viaggio arrivi nella valle ventosa 🏞
 
 Puoi andare verso:
@@ -517,25 +517,25 @@ Puoi andare verso:
  - ai piedi del monte Grevolo ⛰
 ```
 
-```bot-reply type=travel query="/viaggio banco" location="sul banco corallino 🐠" narrative="mastichi una foglia di Respirella dalla tua scorta e puf! per magia respiri sott'acqua come un pesce! Ti tuffi senza esitare e scendi sempre piu' giu', senza alcun problema.. Dopo una lunga discesa"
+```bot-reply type=travel query="/viaggio banco" location="il banco corallino 🐠" narrative="mastichi una foglia di Respirella dalla tua scorta e puf! per magia respiri sott'acqua come un pesce! Ti tuffi senza esitare e scendi sempre piu' giu', senza alcun problema.. Dopo una lunga discesa"
 @mario_r, mastichi una foglia di Respirella dalla tua scorta e puf! per magia respiri sott'acqua come un pesce! Ti tuffi senza esitare e scendi sempre piu' giu', senza alcun problema.. Dopo una lunga discesa arrivi: sul banco corallino 🐠
 
 Puoi andare verso:
  - nella valle ventosa 🏞
 ```
 
-```bot-reply type=travel query="/viaggio palude" location=null narrative="guidato dalla tua bussola fatata … finalmente ti trovi nella palude sussurrante 🌾" exits.0="nel bosco nebbioso di Valtorbo 🌲"
+```bot-reply type=travel query="/viaggio palude" location=null narrative="guidato dalla tua bussola fatata … finalmente ti trovi nella palude sussurrante 🌾" exits.0="il bosco nebbioso di Valtorbo 🌲"
 @mario_r, guidato dalla tua bussola fatata … finalmente ti trovi nella palude sussurrante 🌾
 
 Puoi andare verso:
  - nel bosco nebbioso di Valtorbo 🌲
 ```
 
-```bot-reply type=travel_blocked query="/viaggio palazzo" location="nel magnifico Palazzo di Cristallo 🏰" addressee=mario_r
+```bot-reply type=travel_blocked query="/viaggio palazzo" location="il magnifico Palazzo di Cristallo 🏰" addressee=mario_r
 @mario_r non puoi andare: nel magnifico Palazzo di Cristallo 🏰.. Forse ti manca qualcosa!
 ```
 
-```bot-reply type=travel_requirement item="una lanterna cieca" location="nelle cripte del monastero 👻" addressee=null
+```bot-reply type=travel_requirement item="una lanterna cieca" location="le cripte del monastero 👻" addressee=null
 una lanterna cieca ti serve per passare nelle cripte del monastero 👻 sulla via per tornare al villaggio.
 ```
 
@@ -705,7 +705,7 @@ The favourite item's `NAME` may span lines, like any player-made item's, and tho
 like fields (`- Luogo: …`, even `- Oggetti unici:`): it ends before the first field with its rank,
 `Avventure`.
 
-```bot-reply type=stats query="/stats mario_r" luogo="sul banco corallino 🐠" livello=3 addressee=mario_r
+```bot-reply type=stats query="/stats mario_r" luogo="il banco corallino 🐠" livello=3 addressee=mario_r
 Avventuriero @mario_r
 - Livello: 3
 - Luogo: sul banco corallino 🐠
@@ -961,7 +961,9 @@ Every reply example above is a block with the info string `bot-reply` and attrib
   after `Avventuriero `);
 - `addressee`: the player the reply names (`null` for none);
 - any other key: a value read from the reply, by dotted path (`items.0.qty`): text for strings,
-  compact JSON otherwise.
+  compact JSON otherwise. A place is read in its article form: an articulated preposition at the
+  start becomes its article (`nella valle ventosa 🏞` is `la valle ventosa 🏞`, `al porto…` is
+  `il porto…`), so that every source names a place the same way.
 
 ## 9. Unknowns
 

@@ -26,4 +26,4 @@ oggetti: 6; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 0);
 -- partial_not_in_full: 1
   partial_not_in_full: recipe="Ricetta 'strana'" missing=["__proto__"]
 -- exclusive_in_many_places: 1
-  exclusive_in_many_places: item="l'ascia \"vera\"" locations=["nel bosco nebbioso di Valtorbo 🌲","nella valle ventosa 🏞"]
+  exclusive_in_many_places: item="l'ascia \"vera\"" locations=["il bosco nebbioso di Valtorbo 🌲","la valle ventosa 🏞"]

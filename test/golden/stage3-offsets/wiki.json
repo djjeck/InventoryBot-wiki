@@ -69,20 +69,20 @@
     }
   },
   "locations": {
-    "nel bosco nebbioso di Valtorbo 🌲": {
-      "name": "nel bosco nebbioso di Valtorbo 🌲",
-      "label": "Bosco nebbioso di Valtorbo 🌲",
+    "il bosco nebbioso di Valtorbo 🌲": {
+      "name": "il bosco nebbioso di Valtorbo 🌲",
+      "label": "Il bosco nebbioso di Valtorbo 🌲",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
       "exclusive_items": []
     },
-    "nella valle ventosa 🏞": {
-      "name": "nella valle ventosa 🏞",
-      "label": "Valle ventosa 🏞",
+    "la valle ventosa 🏞": {
+      "name": "la valle ventosa 🏞",
+      "label": "La valle ventosa 🏞",
       "exits": [
-        "sul banco corallino 🐠"
+        "il banco corallino 🐠"
       ],
       "requires_item": true,
       "unlock_texts": [
@@ -91,9 +91,9 @@
       "required_items": [],
       "exclusive_items": []
     },
-    "sul banco corallino 🐠": {
-      "name": "sul banco corallino 🐠",
-      "label": "Banco corallino 🐠",
+    "il banco corallino 🐠": {
+      "name": "il banco corallino 🐠",
+      "label": "Il banco corallino 🐠",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

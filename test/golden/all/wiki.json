@@ -161,8 +161,8 @@
       "last_seen": "2025-11-27T19:02:31-05:00",
       "exclusive": true,
       "locations": [
-        "nel bosco nebbioso di Valtorbo 🌲",
-        "nella valle ventosa 🏞"
+        "il bosco nebbioso di Valtorbo 🌲",
+        "la valle ventosa 🏞"
       ]
     },
     "un \\ rovescio": {
@@ -976,7 +976,7 @@
       "last_seen": "2025-11-27T19:00:41-05:00",
       "exclusive": true,
       "locations": [
-        "nel bosco nebbioso di Valtorbo 🌲"
+        "il bosco nebbioso di Valtorbo 🌲"
       ]
     },
     "un fungo": {
@@ -1004,7 +1004,7 @@
       "last_seen": "2025-11-27T19:04:40-05:00",
       "exclusive": true,
       "locations": [
-        "nella valle ventosa 🏞"
+        "la valle ventosa 🏞"
       ]
     }
   },
@@ -1254,13 +1254,13 @@
       "required_items": [],
       "exclusive_items": []
     },
-    "nel bosco nebbioso di Valtorbo 🌲": {
-      "name": "nel bosco nebbioso di Valtorbo 🌲",
-      "label": "Bosco nebbioso di Valtorbo 🌲",
+    "il bosco nebbioso di Valtorbo 🌲": {
+      "name": "il bosco nebbioso di Valtorbo 🌲",
+      "label": "Il bosco nebbioso di Valtorbo 🌲",
       "exits": [
-        "nell'immenso deserto di Sabbiora 🏜",
-        "nella palude sussurrante 🌾",
-        "nella valle ventosa 🏞"
+        "l'immenso deserto di Sabbiora 🏜",
+        "la palude sussurrante 🌾",
+        "la valle ventosa 🏞"
       ],
       "requires_item": false,
       "unlock_texts": [],
@@ -1270,13 +1270,13 @@
         "una ghianda d'oro"
       ]
     },
-    "nella valle ventosa 🏞": {
-      "name": "nella valle ventosa 🏞",
-      "label": "Valle ventosa 🏞",
+    "la valle ventosa 🏞": {
+      "name": "la valle ventosa 🏞",
+      "label": "La valle ventosa 🏞",
       "exits": [
-        "ai piedi del monte Grevolo ⛰",
-        "nel bosco nebbioso di Valtorbo 🌲",
-        "sul banco corallino 🐠"
+        "i piedi del monte Grevolo ⛰",
+        "il banco corallino 🐠",
+        "il bosco nebbioso di Valtorbo 🌲"
       ],
       "requires_item": true,
       "unlock_texts": [
@@ -1288,23 +1288,23 @@
         "un fiore di pianura"
       ]
     },
-    "ai piedi del monte Grevolo ⛰": {
-      "name": "ai piedi del monte Grevolo ⛰",
-      "label": "Ai piedi del monte Grevolo ⛰",
+    "i piedi del monte Grevolo ⛰": {
+      "name": "i piedi del monte Grevolo ⛰",
+      "label": "I piedi del monte Grevolo ⛰",
       "exits": [
-        "nella valle ventosa 🏞",
-        "sul banco corallino 🐠"
+        "il banco corallino 🐠",
+        "la valle ventosa 🏞"
       ],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
       "exclusive_items": []
     },
-    "sul banco corallino 🐠": {
-      "name": "sul banco corallino 🐠",
-      "label": "Banco corallino 🐠",
+    "il banco corallino 🐠": {
+      "name": "il banco corallino 🐠",
+      "label": "Il banco corallino 🐠",
       "exits": [
-        "nella valle ventosa 🏞"
+        "la valle ventosa 🏞"
       ],
       "requires_item": true,
       "unlock_texts": [
@@ -1313,11 +1313,11 @@
       "required_items": [],
       "exclusive_items": []
     },
-    "nella palude sussurrante 🌾": {
-      "name": "nella palude sussurrante 🌾",
-      "label": "Palude sussurrante 🌾",
+    "la palude sussurrante 🌾": {
+      "name": "la palude sussurrante 🌾",
+      "label": "La palude sussurrante 🌾",
       "exits": [
-        "nel bosco nebbioso di Valtorbo 🌲"
+        "il bosco nebbioso di Valtorbo 🌲"
       ],
       "requires_item": true,
       "unlock_texts": [
@@ -1326,27 +1326,27 @@
       "required_items": [],
       "exclusive_items": []
     },
-    "nell'immenso deserto di Sabbiora 🏜": {
-      "name": "nell'immenso deserto di Sabbiora 🏜",
-      "label": "Immenso deserto di Sabbiora 🏜",
+    "l'immenso deserto di Sabbiora 🏜": {
+      "name": "l'immenso deserto di Sabbiora 🏜",
+      "label": "L'immenso deserto di Sabbiora 🏜",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
       "exclusive_items": []
     },
-    "nel magnifico Palazzo di Cristallo 🏰": {
-      "name": "nel magnifico Palazzo di Cristallo 🏰",
-      "label": "Magnifico Palazzo di Cristallo 🏰",
+    "il magnifico Palazzo di Cristallo 🏰": {
+      "name": "il magnifico Palazzo di Cristallo 🏰",
+      "label": "Il magnifico Palazzo di Cristallo 🏰",
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
       "required_items": [],
       "exclusive_items": []
     },
-    "nelle cripte del monastero 👻": {
-      "name": "nelle cripte del monastero 👻",
-      "label": "Cripte del monastero 👻",
+    "le cripte del monastero 👻": {
+      "name": "le cripte del monastero 👻",
+      "label": "Le cripte del monastero 👻",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
