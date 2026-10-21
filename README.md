@@ -11,6 +11,11 @@ dall'export della propria chat Telegram, e li mostra in una piccola webapp stati
    **Esporta cronologia chat**, formato **HTML**; foto e altri allegati non servono.
 2. Apri la pagina, premi **Aggiungi esportazione** in alto a destra e scegli la cartella creata
    dall'esportazione (o una cartella che ne contiene più d'una).
+3. Facoltativo: esporta allo stesso modo i tre canali enciclopedici che il bot indica in `/gruppi`
+   (**La Cittadella dei Demiurghi**, **Il Grimorio del Golem**, **L'Atlante di Barbabeige**) e
+   aggiungili: la wiki ne prende ricette, oggetti e luoghi. Le loro schede sono per lo più del 2017,
+   e ciò che il bot ti ha mostrato dopo ha la precedenza; la pagina dice da quale scheda viene ogni
+   dato.
 
 Tutto avviene nel tuo browser: le esportazioni non vengono inviate da nessuna parte. \
 Cosa resta salvato: le esportazioni già elaborate (i messaggi del bot e i comandi che gli hai dato,
@@ -26,8 +31,9 @@ contendono lo stesso ingrediente e quali catene portano agli oggetti di livello 
 
 ## Limiti
 
-- Si vede solo ciò che il bot ti ha mostrato: una ricetta compare solo quando possiedi metà degli
-  ingredienti, e cosa produce solo dopo averla eseguita.
+- Dalle tue chat si vede solo ciò che il bot ti ha mostrato: una ricetta compare solo quando
+  possiedi metà degli ingredienti, e cosa produce solo dopo averla eseguita. I canali colmano molti
+  vuoti, ma si fermano per lo più al 2017.
 - L'inventario è una stima: il bot tronca gli inventari lunghi, e quello che fai fuori dalle chat
   esportate non si vede. La pagina dice quante volte la stima ha dato gli stessi ingredienti
   mancanti che il bot indicava in `/ricetta`: se non è il 100%, qualcosa è successo fuori dalle chat
@@ -38,9 +44,9 @@ contendono lo stesso ingrediente e quali catene portano agli oggetti di livello 
 
 InventoryBot si scopre giocando:
 
-- **Solo le tue scoperte.** La pagina mostra soltanto ciò che hai già visto nelle tue chat: ognuno
-  si crea la propria wiki, che resta nel suo browser. Non esiste una wiki pubblica, e non ce ne sarà
-  una.
+- **Solo ciò che hai già davanti.** La pagina mostra soltanto ciò che c'è nelle chat che aggiungi:
+  le tue partite e, se vuoi, i canali che il bot stesso consiglia. Ognuno si crea la propria wiki,
+  che resta nel suo browser. Non esiste una wiki pubblica, e non ce ne sarà una.
 - **Solo lettura.** Il programma legge le esportazioni di Telegram e non parla mai con il bot: non
   invia messaggi e non automatizza il gioco. Le avventure si fanno a mano, come sempre.
 - **Niente spoiler nel codice.** Gli esempi della documentazione e dei test usano oggetti, ricette e

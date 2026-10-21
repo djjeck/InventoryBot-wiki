@@ -211,6 +211,12 @@ This project must stay on the right side of that.
 - **A personal tool, not a public wiki.** The pipeline turns a player's own exports into a page for
   that player. Nothing generated from an export is ever committed, published or shared; each player
   builds their own.
+- **The encyclopedia channels are the game's own help.** The bot's `/gruppi` points every player to
+  three channels that describe recipes, items and places (`docs/channels.md`). A player may add
+  their exports like any chat of theirs: the project reads what the player can already read there,
+  and changes how fast they find it, not what they may know. Their cards stay apart from the bot's
+  observations (each with its channel and date), and the same rules hold: nothing generated from
+  them is committed or published, and the repository holds none of their content.
 - **Read-only.** Nothing in this project sends messages to the bot or automates play. Do not add
   features that interact with Telegram or the bot.
 - **No spoilers in the repository.** Docs and tests describe the bot's message formats and the
