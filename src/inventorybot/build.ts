@@ -668,7 +668,16 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
       .map((n) => ({ n, len: codePointLength(n) }))
       .sort((a, b) => b.len - a.len)
       .map((x) => x.n);
-  const names = byLength(kb.items.keys());
+  const names = new Set(kb.items.keys());
+  // The longest known name that ends `raw` after a space, or is all of it.
+  const knownSuffix = (raw: string): string | undefined => {
+    for (let i = -1; ;) {
+      const n = raw.slice(i + 1);
+      if (names.has(n)) return n;
+      i = raw.indexOf(' ', i + 1);
+      if (i < 0) return undefined;
+    }
+  };
   const templates = new Set<string>(); // the use templates seen
   const pending: [Drop, string | null][] = [];
 
@@ -690,9 +699,7 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
       continue;
     }
     const raw = e.raw;
-    const name = names.find(
-      (n) => raw.endsWith(n) && (raw.length === n.length || raw[raw.length - n.length - 1] === ' ')
-    );
+    const name = knownSuffix(raw);
     // Below, an empty name or prefix counts as not found.
     if (truthy(name)) {
       templates.add(raw.slice(0, raw.length - name.length));
