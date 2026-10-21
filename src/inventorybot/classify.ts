@@ -30,6 +30,9 @@ import {
   type StatsEvent,
 } from './types.ts';
 
+/** /inventario and its short form /i. */
+export const INVENTORY_COMMANDS: readonly string[] = ['/inventario', '/i'];
+
 const RARITY = `[A-Z]${D}*\\+?`;
 // "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space; any
 // whitespace may stand before the tags)
@@ -450,7 +453,7 @@ const cInventory: Classifier = (t, q) => {
   // Long inventories are cut off by the bot with "e altre robe che non ci stanno.."
   return {
     type: 'inventory',
-    filtered: q !== null && q !== '/inventario',
+    filtered: q !== null && !INVENTORY_COMMANDS.includes(q.toLowerCase()),
     truncated: t.includes('altre robe che non ci stanno'),
     items: inventoryItems(lines.slice(1)),
   };

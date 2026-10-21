@@ -36,7 +36,7 @@ import {
   WORD_BODY,
   WS_CLASS,
 } from '#src/lib/text.ts';
-import { parseDuration, useItems } from './classify.ts';
+import { INVENTORY_COMMANDS, parseDuration, useItems } from './classify.ts';
 import { stripAddr } from './patterns.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
 import {
@@ -127,7 +127,7 @@ export function inventoryScope(
 ): ((name: string) => boolean) | null {
   if (e.type !== 'inventory' || e.truncated || e.query === null || e.query === undefined)
     return null;
-  const raw = stripWs(queryArg(e.query, '/inventario') || '');
+  const raw = stripWs(queryArg(e.query, ...INVENTORY_COMMANDS) || '');
   if (!raw) return () => true;
   if (raw === 'M' || raw === 'm') return null;
   if (RARITY_FILTER.test(raw)) {

@@ -222,6 +222,13 @@ describe('rarity letter arguments', () => {
     });
   });
 
+  it('the_short_form_i_filters_like_inventario', () => {
+    expect(after('/i C', [['un sasso', 'C', 4]])).toStrictEqual(
+      after('/inventario C', [['un sasso', 'C', 4]])
+    );
+    expect(after('/i', [['un sasso', 'C', 4]])).toStrictEqual({ 'un sasso': 4 });
+  });
+
   it('rarity_plus_zeroes_only_plus', () => {
     expect(after('/inventario C+', [])).toStrictEqual(without('un fiore'));
   });

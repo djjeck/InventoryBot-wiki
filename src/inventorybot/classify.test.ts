@@ -292,6 +292,14 @@ describe('inventory', () => {
     expect(fields(INVENTORY, '/inventario oro')['filtered']).toBe(true);
   });
 
+  it('short_form_i', () => {
+    expect([
+      fields(INVENTORY, '/i')['filtered'],
+      fields(INVENTORY, '/i oro')['filtered'],
+    ]).toStrictEqual([false, true]);
+    expect([...(compatibleCommands(INVENTORY) ?? [])]).toContain('/i');
+  });
+
   it('a_player_made_name_spans_lines_up_to_its_rarity', () => {
     const e = fields(
       '@djjeck, possiedi:\n' +
@@ -748,7 +756,7 @@ describe('known fixed-text replies', () => {
       ['use_wrong_key', '/usa', ['/usa']],
       ['item_ambiguous', undefined, ['/dai', '/mostra', '/usa']],
       ['place_ambiguous', '/viaggio', ['/viaggio']],
-      ['inventory_bad_filter', '/inventario', ['/inventario']],
+      ['inventory_bad_filter', '/inventario', ['/i', '/inventario']],
     ]);
   });
 
@@ -848,7 +856,7 @@ describe('old formats', () => {
       ['old_format', 'hide_not_found', ['/nascondi']],
       ['old_format', 'title_none', ['/titolo']],
       ['old_format', 'title_choice', ['/titolo']],
-      ['old_format', 'inventory_header', ['/inventario']],
+      ['old_format', 'inventory_header', ['/i', '/inventario']],
       ['old_format', 'pakkomon_fight', ['/usa']],
       ['old_format', 'pakkomon_fight', ['/usa']],
       ['old_format', 'pakkomon_record', ['/usa']],

@@ -418,7 +418,7 @@ Raffreddamento: pronto all'uso.
 
 ### 6.8 Inventory
 
-`/inventario [filter]`.
+`/inventario [filter]`, or its short form `/i [filter]`.
 
 ```text
 INVENTORY = ADDR "possiedi:" ( { NL ITEM_LINE } [ NL "e altre robe che non ci stanno.." ]
