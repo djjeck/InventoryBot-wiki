@@ -6,6 +6,11 @@ dall'export della propria chat Telegram, e li mostra in una piccola webapp stati
 **Usala qui: <https://djjeck.github.io/InventoryBot-wiki/>.** Tutto avviene nel tuo browser: le
 esportazioni non vengono inviate da nessuna parte.
 
+Cosa resta salvato: le esportazioni già elaborate (i messaggi del bot e i comandi che gli hai dato,
+non il resto delle chat) e la wiki, solo in questo browser, finché non togli un'esportazione o premi
+«Cancella i miei dati». Così, quando torni, ritrovi la tua wiki senza scegliere di nuovo le
+cartelle.
+
 ## A che serve
 
 Il gioco dimentica le ricette già eseguite e non dice cosa producono: qui ogni osservazione fatta in

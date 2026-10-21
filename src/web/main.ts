@@ -3,8 +3,8 @@
  * username when the run asks for it, progress and errors, then the wiki, rendered by the
  * view (view/wiki-view.js). The pipeline runs in a Web Worker (worker.ts), on the browser
  * `File` objects of the picked folders; nothing is sent over the network (the built page's
- * Content-Security-Policy forbids it). Only the results are kept, in IndexedDB
- * (storage.ts), and the secret salt of the pseudonyms, in localStorage (pseudonymSalt).
+ * Content-Security-Policy forbids it). The results and the secret salt of the pseudonyms
+ * are kept in IndexedDB (storage.ts; pseudonymSalt).
  *
  * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, storage.ts,
  * the adapters) has its own tests.
@@ -17,7 +17,7 @@ import {
   type StoppedMessage,
   type WorkerMessage,
 } from './protocol.ts';
-import { type DatabaseFactory, resultStore } from './storage.ts';
+import { type DatabaseFactory, openStore } from './storage.ts';
 import './view/wiki-view.css';
 import './view/wiki-view.js';
 import './app.css';
@@ -58,7 +58,7 @@ const ui = {
   announce: $('announce'),
 };
 
-const store = resultStore(
+const store = openStore(
   (() => {
     try {
       return (globalThis as { indexedDB?: DatabaseFactory }).indexedDB;
@@ -204,27 +204,30 @@ function showStop(m: StoppedMessage): void {
 
 // ---- pseudonyms ----------------------------------------------------------------------
 
-const SALT_KEY = 'ib-salt';
+/** Where earlier versions of the page kept the salt. */
+const LEGACY_SALT_KEY = 'ib-salt';
 
 /**
- * The secret salt of the pseudonyms: random, made once and kept in this browser, so the
- * same players keep the same pseudonyms from run to run. Where storage is blocked, a new
- * one for this visit.
+ * The secret salt of the pseudonyms: random, made once and kept in this browser by the
+ * store, so the same players keep the same pseudonyms from run to run. Where storage is
+ * blocked, one for this visit. A salt an earlier version kept in localStorage is adopted
+ * once, so the pseudonyms stay the same.
  */
-function pseudonymSalt(): string {
-  const fresh = (): string =>
-    [...crypto.getRandomValues(new Uint8Array(16))]
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+async function pseudonymSalt(): Promise<string> {
+  let legacy: string | null = null;
   try {
-    const kept = localStorage.getItem(SALT_KEY);
-    if (kept) return kept;
-    const salt = fresh();
-    localStorage.setItem(SALT_KEY, salt);
-    return salt;
+    legacy = localStorage.getItem(LEGACY_SALT_KEY);
   } catch {
-    return fresh();
+    // storage unavailable: nothing kept there
   }
+  const salt = await store.salt(legacy || undefined);
+  if (legacy && store.available)
+    try {
+      localStorage.removeItem(LEGACY_SALT_KEY);
+    } catch {
+      // kept there; adopted again, harmlessly, next time
+    }
+  return salt;
 }
 
 // ---- time zone -----------------------------------------------------------------------
@@ -270,9 +273,11 @@ function setRunning(on: boolean): void {
   ui.form.setAttribute('aria-busy', String(on));
 }
 
-ui.form.addEventListener('submit', (e) => {
+ui.form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (running || picks.length === 0) return;
+  const salt = await pseudonymSalt();
+  if (running) return; // a second submit while the salt was read
   hideError();
   ui.player.removeAttribute('aria-invalid');
   // The field is shown only when a run has asked for it.
@@ -280,7 +285,7 @@ ui.form.addEventListener('submit', (e) => {
   const options: RunOptions = {
     timeZone: ui.timeZone.value,
     player: player === '' ? null : player,
-    salt: pseudonymSalt(),
+    salt,
   };
   let worker: Worker;
   try {
@@ -300,7 +305,7 @@ ui.form.addEventListener('submit', (e) => {
     const m = ev.data;
     if (m.type === 'progress') return showProgress(m);
     finish();
-    if (m.type === 'done') return void onResult(m.result, true);
+    if (m.type === 'done') return void onResult(m.result, salt);
     if (m.type === 'stopped') return showStop(m);
     showError(
       `<p>Qualcosa è andato storto durante l’elaborazione: ${esc(m.message)}</p>` +
@@ -317,10 +322,10 @@ ui.form.addEventListener('submit', (e) => {
 
 // ---- results -------------------------------------------------------------------------
 
-async function onResult(result: RunResult, fresh: boolean): Promise<void> {
+async function onResult(result: RunResult, salt: string): Promise<void> {
   showResult(result);
-  if (!fresh) return;
-  const saved = await store.save(result);
+  // No records are kept yet: the results are saved as built from none.
+  const saved = await store.saveResults(result, { sources: [], salt });
   updateStorageNote(saved);
   announce(
     `Wiki pronta: ${Object.keys(result.wiki.recipes).length} ricette, ${Object.keys(result.wiki.items).length} oggetti.`
@@ -372,7 +377,7 @@ ui.clear.addEventListener('click', async () => {
   await store.clear();
   try {
     localStorage.removeItem('ib-tab'); // the view's remembered tab
-    localStorage.removeItem(SALT_KEY); // new pseudonyms from the next run
+    localStorage.removeItem(LEGACY_SALT_KEY); // an earlier version's salt, if still there
   } catch {
     // storage unavailable: nothing was saved there
   }
@@ -409,11 +414,15 @@ if (!('webkitdirectory' in ui.folders)) {
 }
 fillTimeZones();
 renderPicks();
-void store.load().then((saved) => {
-  if (saved) {
-    showResult(saved.result);
-    ui.storageNote.textContent = `Wiki salvata in questo browser il ${fmtDate(saved.savedAt)}.`;
-  } else if (!store.available) {
-    updateStorageNote(false);
-  }
-});
+// The salt first, so that one an earlier version kept is adopted before anything is stored.
+void pseudonymSalt()
+  .then(() => store.loadResults())
+  .then((loaded) => {
+    const saved = loaded?.saved;
+    if (saved) {
+      showResult(saved.result);
+      ui.storageNote.textContent = `Wiki salvata in questo browser il ${fmtDate(saved.savedAt)}.`;
+    } else if (!store.available) {
+      updateStorageNote(false);
+    }
+  });

@@ -130,12 +130,20 @@ requests that carry no data of the player's), and falls back to system fonts wit
 `run.ts`), so the page stays responsive, then shows the wiki and the player state with the wiki view
 (`view/wiki-view.js` and `.css`, plain JavaScript that defines `window.renderWiki`), and the report
 in a collapsed section. The owner is the player the bot addresses most in the DM; without a DM the
-run stops and shows a username field, which the page offers nowhere else. The results (never the
-chats) are kept in IndexedDB (`storage.ts`), so a returning player sees their wiki; the pseudonyms'
-salt is made once and kept in `localStorage`; "Cancella i miei dati" deletes both. `run.ts` and
-`storage.ts` use no browser API and are tested in Node; `main.ts` and `worker.ts` are browser-only
-wiring, checked in a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out
-of coverage).
+run stops and shows a username field, which the page offers nowhere else. What the page keeps is in
+IndexedDB, in this browser only (`storage.ts`, usable from the page and from the worker): the
+records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
+counts, in upload order, which is their merge order; the last results (wiki, player state, report,
+options) with the records they were built from, so a returning player sees their wiki at once and
+the page knows whether it is current; and the salt of the pseudonyms and sender keys, made once. A
+record is valid only with the salt that made it, so the three live in one database: without a salt
+the records and results are dropped, and a record or results made with another salt are refused. A
+record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can add the export
+again, but never used, and its payload is dropped. Opening the database of an older schema drops
+what it kept. "Cancella i miei dati" deletes the whole database. So far the page saves only the
+results, as built from no record. `run.ts` and `storage.ts` use no browser API and are tested in
+Node; `main.ts` and `worker.ts` are browser-only wiring, checked in a browser (type-checked with the
+DOM types by `tsconfig.web.json`, and left out of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,

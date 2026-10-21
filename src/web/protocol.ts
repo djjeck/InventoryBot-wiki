@@ -18,7 +18,7 @@ export interface RunOptions {
   timeZone: string;
   /** The owner's @username without `@`; null: the player the bot addresses most in the DM. */
   player: string | null;
-  /** The secret salt of the pseudonyms, kept by the page in this browser. */
+  /** The secret salt of the pseudonyms, kept in this browser (storage.ts). */
   salt: string;
 }
 
