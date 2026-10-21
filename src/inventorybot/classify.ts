@@ -44,8 +44,11 @@ export function itemFromLine(line: string): ItemLine | null {
   const m = ITEM_LINE.exec(line);
   if (!m) return null;
   const g = groups(m);
+  const name = stripWs(g['name'] as string);
+  // The bot sometimes lists "- " alone: nothing to name.
+  if (name === '') return null;
   return {
-    name: stripWs(g['name'] as string),
+    name,
     rarity: g['rarity'] ?? null,
     usable: Boolean(g['usable']),
     qty: g['qty'] ? parseDecimalInt(g['qty']) : 1,

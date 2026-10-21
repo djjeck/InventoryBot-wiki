@@ -57,6 +57,10 @@ describe('item line', () => {
     expect(itemFromLine('  - un sasso [C]')).toStrictEqual(item('un sasso', 'C'));
   });
 
+  it('line_without_a_name_is_no_item', () => {
+    expect(itemFromLine('- ')).toBeNull();
+  });
+
   it('quantity_missing_defaults_to_one', () => {
     expect(itemFromLine('- un sasso [C]')?.qty).toBe(1);
   });

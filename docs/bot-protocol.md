@@ -57,7 +57,8 @@ DURATION  = INT " giorni e " INT " ore" | INT " ore e " INT " minuti"
   "tre metri di spago colorato") and may contain digits, emoji, quotes, commas and `x` ("un tagliere
   30x40 di faggio"). Player-made items can contain line breaks.
 - In an `ITEM_LINE`, a missing quantity means 1. Some lists omit the space after `-`
-  (`-una moneta d'oro [X] x41`) or the rarity.
+  (`-una moneta d'oro [X] x41`) or the rarity. An inventory may hold a line with `- ` alone, which
+  names no item.
 - A **location** includes its preposition and emoji ("nella valle ventosa 🏞", "sul banco corallino
   🐠") and is always written the same way.
 
