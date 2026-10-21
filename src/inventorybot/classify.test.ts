@@ -614,6 +614,12 @@ describe('lucky, gift, give, show', () => {
     });
   });
 
+  it('give_to_the_admin_or_to_a_titled_receiver', () => {
+    const to = (t: string): unknown => fields(t, '/dai')['to'];
+    expect(to('@djjeck, dai 2x un bottone a Sua Maestà @msx80')).toBe('msx80');
+    expect(to("@djjeck, dai 1x un bottone a @gino_x l'apprendista")).toBe('gino_x');
+  });
+
   it('show', () => {
     expect(
       classify(

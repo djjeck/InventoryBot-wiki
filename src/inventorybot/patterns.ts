@@ -36,9 +36,10 @@ export function stripAddr(text: string): string {
 }
 
 /** A `/dai` reply in a group (6.11): "@mario_r, dai 1x un bottone a @lucia_b". */
-// The receiver may be a player without a visible username: no `to`.
+// The receiver may be the admin ("Sua Maestà @msx80"), have a title after the username, or
+// be a player without a visible username: no `to`.
 export const GIVE = rx(
-  `${ADDR}dai (?<qty>${D}+)x (?<name>${DOT}+?) a (?:@(?<to>${W}+)|${ANONYMOUS})${S}*${END}`
+  `${ADDR}dai (?<qty>${D}+)x (?<name>${DOT}+?) a (?:(?:Sua Maestà )?@(?<to>${W}+)(?: ${DOT}+?)?|${ANONYMOUS})${S}*${END}`
 );
 
 /** A gift notice (6.10): "[N] @lucia_b ti ha dato 1x un bottone". */

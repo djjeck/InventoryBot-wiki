@@ -561,7 +561,7 @@ GIFT = "[N] " [ "Sua Maestà" SP ] "@" USERNAME [ SP TITLE ] " ti ha dato " INT 
 `/dai`. The addressee is the giver; the receiver follows "a".
 
 ```text
-GIVE = ADDR "dai " INT "x " NAME " a " ( "@" USERNAME [ SP TITLE ] | "[.. una presenza indistinta..]" ) EOT
+GIVE = ADDR "dai " INT "x " NAME " a " ( [ "Sua Maestà " ] "@" USERNAME [ SP TITLE ] | "[.. una presenza indistinta..]" ) EOT
 ```
 
 ```bot-reply type=give query="/dai @lucia_b pigna" to=lucia_b qty=1 item="una pigna secca" addressee=mario_r
