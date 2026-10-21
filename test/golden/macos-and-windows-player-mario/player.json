@@ -5,5 +5,9 @@
   "items": {},
   "locations": {},
   "recipe_list": null,
-  "inventory": {}
+  "inventory": {},
+  "inventory_check": {
+    "compared": 0,
+    "agreed": 0
+  }
 }

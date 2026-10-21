@@ -10,6 +10,7 @@
  *   recipe_list the latest /ricetta list (visible recipes and their status; if it was
  *               truncated, the recipes after the cut are unknown)
  *   inventory   estimated holdings, see below
+ *   inventory_check  how often the estimate agreed with the bot, see below
  *
  * Inventory estimate. The bot never shows the full inventory reliably (long
  * /inventario replies are cut off), so holdings are rebuilt from every
@@ -35,6 +36,12 @@
  *
  * Each entry records whether it is exact, and the date and kind of the last
  * observation that set it. Only events addressed to the owner are used.
+ *
+ * Check of the estimate. Every recipe of a /ricetta list whose ingredients are known is
+ * compared with the estimate of that moment, before the list's own observations: the
+ * units it says are missing ("manca K", 0 for "*") against the units the estimate lacks.
+ * Disagreements come from what the exports do not show: items found, given, received or
+ * used in chats that were not added.
  *
  * Pure logic only (no Node APIs).
  */
@@ -189,6 +196,7 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
   const visited = new Set<string>();
   const adventures = new Map<string, number>();
   let lastList: PlayerState['recipe_list'] = null;
+  const check: PlayerState['inventory_check'] = { compared: 0, agreed: 0 };
   const rarityOf = (n: string): string | null | undefined => kb.items.get(n)?.rarity;
 
   const seen = (name: string | null | undefined, date: string | null): void => {
@@ -231,6 +239,15 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
         e.recipes.map((r) => [r.name, r.ready ? 'pronta' : `manca ${r.missing}`])
       );
       lastList = { date: d, truncated: e.truncated, recipes: Object.fromEntries(recipes) };
+      // The bot's count of missing units against the estimate's, before the list adds to it.
+      for (const r of e.recipes) {
+        const ingr = kb.recipes.get(r.name)?.ingredients;
+        if (!ingr || ingr.size === 0) continue;
+        let missing = 0;
+        for (const [n, q] of ingr) missing += Math.max(0, q - (hold.h.get(n)?.qty ?? 0));
+        check.compared++;
+        if (missing === (r.ready ? 0 : r.missing)) check.agreed++;
+      }
       for (const r of e.recipes) {
         const ingr = kb.recipes.get(r.name)?.ingredients;
         if (r.ready && ingr && ingr.size > 0)
@@ -304,5 +321,6 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     ),
     recipe_list: lastList,
     inventory: Object.fromEntries(byKey(hold.h).filter(([, v]) => v.qty > 0)),
+    inventory_check: check,
   };
 }

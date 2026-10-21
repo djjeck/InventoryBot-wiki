@@ -86,5 +86,9 @@
       "date": "2025-11-27T22:16:41-05:00",
       "via": "inventario"
     }
+  },
+  "inventory_check": {
+    "compared": 1,
+    "agreed": 0
   }
 }

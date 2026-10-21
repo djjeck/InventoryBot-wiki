@@ -29,7 +29,9 @@ contendono lo stesso ingrediente e quali catene portano agli oggetti di livello 
 - Si vede solo ciò che il bot ti ha mostrato: una ricetta compare solo quando possiedi metà degli
   ingredienti, e cosa produce solo dopo averla eseguita.
 - L'inventario è una stima: il bot tronca gli inventari lunghi, e quello che fai fuori dalle chat
-  esportate non si vede.
+  esportate non si vede. La pagina dice quante volte la stima ha dato gli stessi ingredienti
+  mancanti che il bot indicava in `/ricetta`: se non è il 100%, qualcosa è successo fuori dalle chat
+  aggiunte.
 - Si leggono solo le esportazioni HTML di Telegram Desktop.
 
 ## No spoiler!!

@@ -86,5 +86,9 @@
       "date": "2026-02-15T19:00:41-05:00",
       "via": "movimento"
     }
+  },
+  "inventory_check": {
+    "compared": 3,
+    "agreed": 1
   }
 }

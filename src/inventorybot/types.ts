@@ -397,4 +397,9 @@ export interface PlayerState {
   recipe_list: { date: string | null; truncated: boolean; recipes: Record<string, string> } | null;
   /** Estimated holdings above zero. */
   inventory: Record<string, Holding>;
+  /**
+   * The recipes of the owner's /ricetta lists (with known ingredients) compared with the
+   * estimate of that moment, and those whose missing units it got right.
+   */
+  inventory_check: { compared: number; agreed: number };
 }

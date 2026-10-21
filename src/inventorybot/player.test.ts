@@ -80,6 +80,38 @@ describe('common player', () => {
   });
 });
 
+describe('check of the estimate', () => {
+  it('ricetta_lists_compared_with_the_estimate_of_their_moment', () => {
+    const list = (missing: number, t: number): BuildEvent =>
+      ev(
+        T.recipeList([
+          ['Muro', 2, missing],
+          ['Torre', 1, 0], // ingredients unknown: not compared
+        ]),
+        '/ricetta',
+        { t }
+      );
+    const { state } = runBuild([
+      ev(T.detail('Muro', [['un sasso', 'C', 2]], [['una trave', 'N', 1]]), '/ricetta muro', {
+        t: 0,
+      }),
+      list(2, 1), // agrees: two stones missing
+      ev(T.drop('nel bosco trovi un sasso', 'C'), '/avventura', { t: 2 }),
+      list(1, 3), // agrees: one found since
+      list(2, 4), // disagrees: a stone went somewhere the exports do not show
+      g(T.recipeList([['Muro', 2, 0]], 'luigi'), '/ricetta', 5), // another player's
+    ]);
+    expect(state.inventory_check).toStrictEqual({ compared: 3, agreed: 2 });
+  });
+
+  it('nothing_compared_without_lists', () => {
+    expect(runBuild([info('un sasso', 2, 0)]).state.inventory_check).toStrictEqual({
+      compared: 0,
+      agreed: 0,
+    });
+  });
+});
+
 describe('full inventory', () => {
   it('unlisted_items_go_to_zero', () => {
     const [inv, state] = invOf([
