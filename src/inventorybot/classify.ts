@@ -941,7 +941,7 @@ const cGive: Classifier = (t) => {
   const g = groups(m);
   return {
     type: 'give',
-    to: g['to'] as string,
+    to: g['to'] ?? null,
     qty: parseDecimalInt(g['qty'] as string),
     item: g['name'] as string,
   };

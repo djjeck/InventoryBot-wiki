@@ -169,7 +169,8 @@ export interface GiftEvent {
 
 export interface GiveEvent {
   type: 'give';
-  to: string;
+  /** The receiver's username; null for a player without a visible one. */
+  to: string | null;
   qty: number;
   item: string;
 }

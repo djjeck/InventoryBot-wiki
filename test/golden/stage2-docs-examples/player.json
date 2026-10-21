@@ -1,6 +1,6 @@
 {
   "player": "mario_r",
-  "as_of": "2025-11-27T19:30:32-05:00",
+  "as_of": "2025-11-27T19:31:01-05:00",
   "recipes": {
     "(ricetta senza nome) → un caffè ristretto": {
       "crafted": 2,
@@ -22,7 +22,7 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un Pakkomon di nome Brumolo 👻": {
-      "first_seen": "2025-11-27T19:29:31-05:00"
+      "first_seen": "2025-11-27T19:30:01-05:00"
     },
     "un apriscatole storto": {
       "first_seen": "2025-11-27T19:05:01-05:00"
@@ -40,7 +40,7 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un cartoccio di caldarroste🌰": {
-      "first_seen": "2025-11-27T19:17:01-05:00"
+      "first_seen": "2025-11-27T19:17:31-05:00"
     },
     "un chicco di caffè": {
       "first_seen": "2025-11-27T19:04:31-05:00"
@@ -52,7 +52,7 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un fischietto di quelli da carnevale che fanno le trombette": {
-      "first_seen": "2025-11-27T19:15:31-05:00"
+      "first_seen": "2025-11-27T19:16:01-05:00"
     },
     "un grembiule da cuoco": {
       "first_seen": "2025-11-27T19:07:01-05:00"
@@ -64,7 +64,7 @@
       "first_seen": "2025-11-27T19:04:01-05:00"
     },
     "un seme di Zaffirella": {
-      "first_seen": "2025-11-27T19:17:31-05:00"
+      "first_seen": "2025-11-27T19:18:01-05:00"
     },
     "un tappetino con scritto Benvenuti": {
       "first_seen": "2025-11-27T19:12:01-05:00"
@@ -151,33 +151,33 @@
   },
   "inventory": {
     "un Pakkomon di nome Brumolo 👻": {
-      "qty": 2,
+      "qty": 1,
       "exact": false,
-      "date": "2025-11-27T19:29:31-05:00",
+      "date": "2025-11-27T19:30:01-05:00",
       "via": "movimento"
     },
     "un candido fazzoletto": {
       "qty": 14,
       "exact": false,
-      "date": "2025-11-27T19:15:01-05:00",
+      "date": "2025-11-27T19:15:31-05:00",
       "via": "mostra"
     },
     "un cartoccio di caldarroste🌰": {
-      "qty": 1,
+      "qty": 2,
       "exact": false,
-      "date": "2025-11-27T19:17:01-05:00",
+      "date": "2025-11-27T19:17:31-05:00",
       "via": "movimento"
     },
     "un fischietto di quelli da carnevale che fanno le trombette": {
       "qty": 241,
       "exact": false,
-      "date": "2025-11-27T19:15:31-05:00",
+      "date": "2025-11-27T19:16:01-05:00",
       "via": "mostra"
     },
     "un seme di Zaffirella": {
       "qty": 1,
       "exact": false,
-      "date": "2025-11-27T19:17:31-05:00",
+      "date": "2025-11-27T19:18:01-05:00",
       "via": "movimento"
     },
     "un tappetino con scritto Benvenuti": {
@@ -187,9 +187,9 @@
       "via": "movimento"
     },
     "una moneta d'oro": {
-      "qty": 98,
+      "qty": 139,
       "exact": true,
-      "date": "2025-11-27T19:14:31-05:00",
+      "date": "2025-11-27T19:15:01-05:00",
       "via": "dai"
     },
     "una ruota della fortuna 🎡": {

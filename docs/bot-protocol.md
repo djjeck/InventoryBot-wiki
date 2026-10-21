@@ -560,11 +560,17 @@ GIFT = "[N] " [ "Sua Maestà" SP ] "@" USERNAME [ SP TITLE ] " ti ha dato " INT 
 `/dai`. The addressee is the giver; the receiver follows "a".
 
 ```text
-GIVE = ADDR "dai " INT "x " NAME " a @" USERNAME [ SP TITLE ] EOT
+GIVE = ADDR "dai " INT "x " NAME " a " ( "@" USERNAME [ SP TITLE ] | "[.. una presenza indistinta..]" ) EOT
 ```
 
 ```bot-reply type=give query="/dai @lucia_b pigna" to=lucia_b qty=1 item="una pigna secca" addressee=mario_r
 @mario_r, dai 1x una pigna secca a @lucia_b
+```
+
+A receiver without a visible username is written as such:
+
+```bot-reply type=give query="/dai @lucia_b pigna" to=null qty=1 item="una pigna secca" addressee=mario_r
+@mario_r, dai 1x una pigna secca a [.. una presenza indistinta..]
 ```
 
 ```bot-reply type=give query="/dai @lucia_b 30 zucchin" titles="il Lucente|il Cartomante" to=lucia_b qty=30

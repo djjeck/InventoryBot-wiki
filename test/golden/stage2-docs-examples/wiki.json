@@ -302,7 +302,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:15:02-05:00",
+      "last_seen": "2025-11-27T19:15:32-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -316,7 +316,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:17:02-05:00",
+      "last_seen": "2025-11-27T19:17:32-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -366,11 +366,12 @@
       "made_by": [],
       "last_seen": "2025-11-27T19:12:32-05:00",
       "use": {
-        "observations": 2,
+        "observations": 4,
         "outcomes": [
-          "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!"
+          "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!",
+          "osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un piccolo seme. Senza indugio lo cogli con delicatezza. Ottieni: un seme di Zaffirella!"
         ],
-        "result": "fixed",
+        "result": "variable",
         "consumed": null,
         "consumed_evidence": {
           "yes": 0,
@@ -388,7 +389,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:13:02-05:00",
+      "last_seen": "2025-11-27T19:13:32-05:00",
       "exclusive": false,
       "locations": []
     },
@@ -401,7 +402,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:15:32-05:00",
+      "last_seen": "2025-11-27T19:16:02-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -415,7 +416,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:17:02-05:00",
+      "last_seen": "2025-11-27T19:17:32-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -427,7 +428,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:17:31-05:00",
+      "last_seen": "2025-11-27T19:18:02-05:00",
       "exclusive": false,
       "locations": []
     },
@@ -438,7 +439,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:02-05:00",
+      "last_seen": "2025-11-27T19:21:32-05:00",
       "exclusive": false,
       "locations": []
     },
@@ -449,7 +450,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:32-05:00",
+      "last_seen": "2025-11-27T19:22:02-05:00",
       "exclusive": false,
       "locations": []
     },
@@ -460,7 +461,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:32-05:00",
+      "last_seen": "2025-11-27T19:22:02-05:00",
       "exclusive": false,
       "locations": []
     },
@@ -475,7 +476,7 @@
         "Cera riciclata"
       ],
       "made_by": [],
-      "last_seen": "2025-11-27T19:28:32-05:00",
+      "last_seen": "2025-11-27T19:29:02-05:00",
       "use": {
         "observations": 2,
         "outcomes": [
@@ -501,7 +502,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:29:32-05:00",
+      "last_seen": "2025-11-27T19:30:02-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -515,7 +516,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:30:32-05:00",
+      "last_seen": "2025-11-27T19:31:02-05:00",
       "gives_title": true,
       "sources_inferred": true,
       "exclusive": false,
@@ -635,7 +636,7 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:28:32-05:00"
+      "last_seen": "2025-11-27T19:29:02-05:00"
     },
     "Piccola collezione": {
       "name": "Piccola collezione",
@@ -783,9 +784,7 @@
     "in cima al monte Grevolo 🏔": {
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
-      "exits": [
-        "in cima al monte Grevolo 🏔"
-      ],
+      "exits": [],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
