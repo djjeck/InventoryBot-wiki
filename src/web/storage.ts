@@ -65,6 +65,25 @@ export interface RecordInfo {
   counts: { messages: number; fromBot: number; kept: number };
 }
 
+/** What is listed of a record uploaded `seq`-th at `now` (its folder: `folder`, else its own). */
+export function recordInfo(
+  record: ExportRecord,
+  { seq, now, folder }: { seq: number; now: Date; folder?: string }
+): RecordInfo {
+  return {
+    hash: record.hash,
+    seq,
+    formatVersion: record.formatVersion,
+    folder: folder ?? record.folder,
+    addedAt: now.toISOString(),
+    pages: record.pages,
+    chats: record.chats,
+    firstDate: record.firstDate,
+    lastDate: record.lastDate,
+    counts: record.counts,
+  };
+}
+
 /** A listed record: stale ones must be added again before they count. */
 export interface ListedRecord extends RecordInfo {
   stale: boolean;
@@ -314,18 +333,11 @@ export function openStore(factory: DatabaseFactory | undefined): Store {
             seq = typeof next === 'number' ? next : 0;
             await settle(s.meta.put(seq + 1, 'seq'));
           }
-          const info: RecordInfo = {
-            hash: record.hash,
+          const info = recordInfo(record, {
             seq,
-            formatVersion: record.formatVersion,
-            folder: folder ?? record.folder,
-            addedAt: now.toISOString(),
-            pages: record.pages,
-            chats: record.chats,
-            firstDate: record.firstDate,
-            lastDate: record.lastDate,
-            counts: record.counts,
-          };
+            now,
+            ...(folder === undefined ? {} : { folder }),
+          });
           await Promise.all([
             settle(s.records.put(info, record.hash)),
             settle(s.payloads.put(record, record.hash)),

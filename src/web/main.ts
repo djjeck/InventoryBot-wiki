@@ -1,23 +1,23 @@
 /**
- * The web app's page: folder picking, the time zone (this browser's, proposed), the owner's
- * username when the run asks for it, progress and errors, then the wiki, rendered by the
- * view (view/wiki-view.js). The pipeline runs in a Web Worker (worker.ts), on the browser
- * `File` objects of the picked folders; nothing is sent over the network (the built page's
- * Content-Security-Policy forbids it). The results and the secret salt of the pseudonyms
- * are kept in IndexedDB (storage.ts; pseudonymSalt).
+ * The web app's page: the list of exports (each folder picked is sent at once to the
+ * worker, which reads it, keeps it and builds the wiki again), the time zone (this
+ * browser's, proposed), the owner's username when a build asks for it, progress and
+ * errors, then the wiki, rendered by the view (view/wiki-view.js). The worker (worker.ts,
+ * run.ts) owns the storage and runs the pipeline on the browser `File` objects of the
+ * picked folders; nothing is sent over the network (the built page's
+ * Content-Security-Policy forbids it).
  *
  * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, storage.ts,
  * the adapters) has its own tests.
  */
-import { type FileLike } from '#src/telegram/export/browser-files.ts';
+import { type Phase } from '#src/pipeline.ts';
 import {
-  type ProgressMessage,
-  type RunOptions,
+  type BuildOptions,
+  type ExportEntry,
+  type PageMessage,
   type RunResult,
-  type StoppedMessage,
   type WorkerMessage,
 } from './protocol.ts';
-import { type DatabaseFactory, openStore } from './storage.ts';
 import './view/wiki-view.css';
 import './view/wiki-view.js';
 import './app.css';
@@ -36,7 +36,6 @@ const ui = {
   result: $('result'),
   folders: $<HTMLInputElement>('folders'),
   pickLabel: $<HTMLLabelElement>('pick-label'),
-  clearPicks: $<HTMLButtonElement>('clear-picks'),
   picked: $<HTMLUListElement>('picked'),
   pickNote: $('pick-note'),
   form: $<HTMLFormElement>('options'),
@@ -58,20 +57,25 @@ const ui = {
   announce: $('announce'),
 };
 
-const store = openStore(
-  (() => {
-    try {
-      return (globalThis as { indexedDB?: DatabaseFactory }).indexedDB;
-    } catch {
-      return undefined; // reading indexedDB itself can throw where storage is blocked
-    }
-  })()
-);
-
-/** The folders picked in this visit (kept in memory only, never saved). */
-const picks: FileLike[][] = [];
+/** The exports, as the worker last listed them. */
+let exportList: ExportEntry[] = [];
 let shown: RunResult | null = null;
-let running = false;
+/** A build is running (a phase started, its results not yet in). */
+let building = false;
+/** Whether the worker can keep data beyond this visit. */
+let storage = true;
+
+let worker: Worker | null = null;
+try {
+  worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+} catch (err) {
+  // shown once the page is set up, below
+  console.error(err);
+}
+
+function send(m: PageMessage): void {
+  worker?.postMessage(m);
+}
 
 const esc = (s: string): string =>
   s.replace(
@@ -88,53 +92,83 @@ function announce(text: string): void {
   setTimeout(() => (ui.announce.textContent = text), 50);
 }
 
-// ---- folders -------------------------------------------------------------------------
+// ---- exports ------------------------------------------------------------------------
 
-function topName(files: readonly FileLike[]): string {
-  const names = new Set(files.map((f) => (f.webkitRelativePath || f.name).split('/')[0]));
-  return [...names].join(', ');
+/** What the list says of an export. */
+function entryText(e: ExportEntry): string {
+  if (e.status === 'queued') return 'in attesa di lettura';
+  if (e.status === 'reading') return `lettura: ${e.done ?? 0} di ${e.total ?? 0} pagine`;
+  if (e.status === 'stale')
+    return 'letta da una versione precedente: aggiungila di nuovo perché conti';
+  if (e.status === 'error') return e.message ?? 'non letta';
+  const i = e.info;
+  return i ? `${i.pages} pagine di chat, ${i.counts.messages} messaggi` : 'pronta';
 }
 
-function renderPicks(): void {
+function renderExports(): void {
   ui.picked.replaceChildren(
-    ...picks.map((files, i) => {
+    ...exportList.map((e) => {
       const li = document.createElement('li');
-      const pages = files.filter((f) => /^messages\d*\.html$/.test(f.name)).length;
       const span = document.createElement('span');
-      span.textContent = `${topName(files)} — ${files.length} file, ${pages} pagine di chat`;
+      span.textContent = `${e.folder} — ${entryText(e)}`;
+      if (e.status === 'error' && e.details?.length) {
+        const ul = document.createElement('ul');
+        ul.append(
+          ...e.details.map((d) => {
+            const item = document.createElement('li');
+            item.textContent = d;
+            return item;
+          })
+        );
+        span.append(ul);
+      }
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.textContent = 'Togli';
-      remove.setAttribute('aria-label', `Togli ${topName(files)}`);
+      remove.setAttribute('aria-label', `Togli ${e.folder}`);
       remove.addEventListener('click', () => {
-        picks.splice(i, 1);
-        renderPicks();
+        if (
+          (e.status === 'ready' || e.status === 'stale') &&
+          !confirm(`Togliere ${e.folder}? La wiki verrà ricreata senza.`)
+        )
+          return;
+        send({ type: 'remove', id: e.id });
         ui.pickLabel.focus();
       });
       li.append(span, remove);
       return li;
     })
   );
-  ui.clearPicks.hidden = picks.length === 0;
-  if (picks.length > 0) ui.pickNote.hidden = true;
-  ui.pickLabel.textContent = picks.length ? 'Aggiungi un’altra cartella…' : 'Scegli una cartella…';
-  ui.run.disabled = running || picks.length === 0;
+  ui.pickLabel.textContent = exportList.length
+    ? 'Aggiungi un’altra cartella…'
+    : 'Aggiungi una cartella…';
+  ui.run.disabled = !exportList.some((e) => e.status === 'ready');
+  updateProgress();
 }
 
 ui.folders.addEventListener('change', () => {
   const files = [...(ui.folders.files ?? [])];
   ui.folders.value = ''; // the same folder can be picked again
   if (files.length === 0) return;
-  picks.push(files);
-  renderPicks();
   hideError();
-  announce(`Aggiunta la cartella ${topName(files)}.`);
+  hideNotice();
+  send({ type: 'add', picks: [files] });
+  const top = new Set(files.map((f) => (f.webkitRelativePath || f.name).split('/')[0]));
+  announce(`Aggiunta la cartella ${[...top].join(', ')}: lettura in corso.`);
 });
 
-ui.clearPicks.addEventListener('click', () => {
-  picks.length = 0;
-  renderPicks();
-});
+function hideNotice(): void {
+  ui.pickNote.hidden = true;
+  ui.pickNote.replaceChildren();
+}
+
+function showNotice(text: string, details: readonly string[]): void {
+  ui.pickNote.innerHTML =
+    esc(text) +
+    (details.length ? `<ul>${details.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '');
+  ui.pickNote.hidden = false;
+  announce(text);
+}
 
 // The pick label works as a button from the keyboard too.
 ui.pickLabel.tabIndex = 0;
@@ -160,74 +194,72 @@ function showError(html: string, details: readonly string[] = [], focus?: HTMLEl
   (focus ?? ui.error).focus();
 }
 
-const PHASES: Record<ProgressMessage['phase'], [label: string, percent: number]> = {
-  read: ['Lettura delle pagine', 0],
-  parse: ['Lettura dei messaggi', 55],
-  conversation: ['Abbinamento delle risposte ai comandi', 70],
-  interpret: ['Interpretazione delle risposte del bot', 80],
-  build: ['Costruzione della wiki', 92],
+const PHASES: Record<Phase, [label: string, percent: number]> = {
+  parse: ['Lettura dei messaggi', 10],
+  conversation: ['Abbinamento delle risposte ai comandi', 40],
+  interpret: ['Interpretazione delle risposte del bot', 60],
+  build: ['Costruzione della wiki', 85],
 };
 
-function showProgress(m: ProgressMessage): void {
-  const [label, percent] = PHASES[m.phase];
-  if (m.phase === 'read' && m.total) {
-    ui.progressBar.value = Math.round((50 * (m.done ?? 0)) / m.total);
-    ui.progressText.textContent = `${label}: ${m.done ?? 0} di ${m.total}`;
-  } else {
+/** Shows the reading of the export being read, else the build's phase; hidden when idle. */
+function updateProgress(phase?: Phase): void {
+  const reading = exportList.find((e) => e.status === 'reading');
+  const queued = exportList.filter((e) => e.status === 'queued').length;
+  const busy = reading !== undefined || queued > 0 || building;
+  ui.progress.hidden = !busy;
+  ui.form.setAttribute('aria-busy', String(busy));
+  if (reading) {
+    const total = reading.total ?? 0;
+    ui.progressBar.value = total ? Math.round((100 * (reading.done ?? 0)) / total) : 0;
+    ui.progressText.textContent =
+      `Lettura di ${reading.folder}: ${reading.done ?? 0} di ${total} pagine` +
+      (queued ? ` (altre ${queued} in attesa)` : '');
+  } else if (phase !== undefined) {
+    const [label, percent] = PHASES[phase];
     ui.progressBar.value = percent;
     ui.progressText.textContent = `${label}…`;
+  } else if (queued > 0) {
+    ui.progressBar.value = 0;
+    ui.progressText.textContent = `${queued} cartelle in attesa di lettura`;
   }
 }
 
-/** The Italian explanation of a stop, and the field to fill. */
-function showStop(m: StoppedMessage): void {
-  const warnings = m.report.filter((l) => l.startsWith('salto '));
-  if (m.reason === 'no-pages') {
-    showError(
-      '<p>Nelle cartelle scelte non c’è nessuna pagina di chat esportata (<code>messages.html</code>). ' +
-        'Scegli la cartella creata da Telegram Desktop con <b>Esporta cronologia chat</b>, in formato <b>HTML</b>.</p>',
-      warnings
-    );
-  } else {
-    // Asked only here: the owner is normally found in the private chat with the bot.
-    ui.playerField.hidden = false;
-    ui.player.setAttribute('aria-invalid', 'true');
-    showError(
-      '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
-        'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi di nuovo ' +
-        '<b>Crea la wiki</b>.</p>',
-      warnings,
-      ui.player
-    );
-  }
+/** No DM with the bot and no username given: the field to fill. */
+function showNoOwner(): void {
+  // Asked only here: the owner is normally found in the private chat with the bot.
+  ui.playerField.hidden = false;
+  ui.player.setAttribute('aria-invalid', 'true');
+  showStart();
+  showError(
+    '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
+      'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi <b>Aggiorna la wiki</b>.</p>',
+    [],
+    ui.player
+  );
 }
 
 // ---- pseudonyms ----------------------------------------------------------------------
 
-/** Where earlier versions of the page kept the salt. */
+/**
+ * Where earlier versions of the page kept the secret salt of the pseudonyms: the worker,
+ * which keeps it now, adopts it once, so the pseudonyms stay the same.
+ */
 const LEGACY_SALT_KEY = 'ib-salt';
 
-/**
- * The secret salt of the pseudonyms: random, made once and kept in this browser by the
- * store, so the same players keep the same pseudonyms from run to run. Where storage is
- * blocked, one for this visit. A salt an earlier version kept in localStorage is adopted
- * once, so the pseudonyms stay the same.
- */
-async function pseudonymSalt(): Promise<string> {
-  let legacy: string | null = null;
+function legacySalt(): string | null {
   try {
-    legacy = localStorage.getItem(LEGACY_SALT_KEY);
+    return localStorage.getItem(LEGACY_SALT_KEY);
   } catch {
-    // storage unavailable: nothing kept there
+    return null; // storage unavailable: nothing kept there
   }
-  const salt = await store.salt(legacy || undefined);
-  if (legacy && store.available)
-    try {
-      localStorage.removeItem(LEGACY_SALT_KEY);
-    } catch {
-      // kept there; adopted again, harmlessly, next time
-    }
-  return salt;
+}
+
+function dropLegacySalt(): void {
+  try {
+    localStorage.removeItem(LEGACY_SALT_KEY);
+  } catch {
+    // kept there; adopted again, harmlessly, next time
+  }
 }
 
 // ---- time zone -----------------------------------------------------------------------
@@ -262,77 +294,85 @@ function fillTimeZones(selected?: string): void {
   ui.timeZone.value = proposed;
 }
 
-// ---- running -------------------------------------------------------------------------
+// ---- building -------------------------------------------------------------------------
 
-function setRunning(on: boolean): void {
-  running = on;
-  ui.run.disabled = on || picks.length === 0;
-  ui.folders.disabled = on;
-  ui.timeZone.disabled = on;
-  ui.progress.hidden = !on;
-  ui.form.setAttribute('aria-busy', String(on));
+/** The options of the form. */
+function formOptions(): BuildOptions {
+  // The field is shown only when a build has asked for it, or a username was given.
+  const player = ui.playerField.hidden ? '' : ui.player.value.trim().replace(/^@/, '');
+  return { timeZone: ui.timeZone.value, player: player === '' ? null : player };
 }
 
-ui.form.addEventListener('submit', async (e) => {
+ui.form.addEventListener('submit', (e) => {
   e.preventDefault();
-  if (running || picks.length === 0) return;
-  const salt = await pseudonymSalt();
-  if (running) return; // a second submit while the salt was read
   hideError();
   ui.player.removeAttribute('aria-invalid');
-  // The field is shown only when a run has asked for it.
-  const player = ui.playerField.hidden ? '' : ui.player.value.trim().replace(/^@/, '');
-  const options: RunOptions = {
-    timeZone: ui.timeZone.value,
-    player: player === '' ? null : player,
-    salt,
-  };
-  let worker: Worker;
-  try {
-    worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-  } catch (err) {
-    showError(`<p>Il browser non ha potuto avviare l’elaborazione: ${esc(String(err))}</p>`);
-    return;
-  }
-  setRunning(true);
-  showProgress({ type: 'progress', phase: 'read', done: 0, total: 0 });
-  announce('Elaborazione avviata.');
-  const finish = (): void => {
-    worker.terminate();
-    setRunning(false);
-  };
-  worker.onmessage = (ev: MessageEvent<WorkerMessage>) => {
-    const m = ev.data;
-    if (m.type === 'progress') return showProgress(m);
-    finish();
-    if (m.type === 'done') return void onResult(m.result, salt);
-    if (m.type === 'stopped') return showStop(m);
-    showError(
-      `<p>Qualcosa è andato storto durante l’elaborazione: ${esc(m.message)}</p>` +
-        '<p>Se le cartelle scelte sono esportazioni HTML di Telegram Desktop, è un difetto dello strumento.</p>',
-      m.report.slice(-5)
-    );
-  };
-  worker.onerror = (ev) => {
-    finish();
-    showError(`<p>L’elaborazione si è interrotta: ${esc(ev.message || 'errore sconosciuto')}</p>`);
-  };
-  worker.postMessage({ type: 'run', picks, options });
+  send({ type: 'rebuild', options: formOptions() });
+  announce('La wiki viene ricreata.');
 });
+
+function onMessage(m: WorkerMessage): void {
+  if (m.type === 'state' || m.type === 'exports') {
+    exportList = m.exports;
+    storage = m.storage;
+    if (m.type === 'state') {
+      if (storage) dropLegacySalt();
+      ui.playerField.hidden = m.options.player === null;
+      ui.player.value = m.options.player ?? '';
+      fillTimeZones(m.options.timeZone);
+    }
+    return renderExports();
+  }
+  if (m.type === 'read') {
+    const e = exportList.find((x) => x.id === m.id);
+    if (e) Object.assign(e, { status: 'reading', done: m.done, total: m.total });
+    return renderExports();
+  }
+  if (m.type === 'phase') {
+    building = true;
+    return updateProgress(m.phase);
+  }
+  if (m.type === 'notice') return showNotice(m.text, m.details);
+  building = false;
+  updateProgress();
+  const o = m.outcome;
+  if (o.status === 'done') {
+    // The wiki is updated whenever a build ends; the view moves to it once it is current,
+    // or at once for the wiki kept from an earlier visit.
+    showResult(o.result, m.current || o.savedAt !== undefined);
+    if (o.savedAt !== undefined)
+      ui.storageNote.textContent = `Wiki salvata in questo browser il ${fmtDate(o.savedAt)}.`;
+    else updateStorageNote();
+    if (m.current)
+      announce(
+        `Wiki pronta: ${Object.keys(o.result.wiki.recipes).length} ricette, ${Object.keys(o.result.wiki.items).length} oggetti.`
+      );
+  } else if (o.status === 'empty') {
+    shown = null;
+    ui.wiki.replaceChildren();
+    ui.report.textContent = '';
+    showStart();
+    if (!storage) updateStorageNote();
+  } else if (o.status === 'no-owner') {
+    showNoOwner();
+  } else {
+    showError(
+      `<p>Qualcosa è andato storto durante l’elaborazione: ${esc(o.message)}</p>` +
+        '<p>Se le cartelle scelte sono esportazioni HTML di Telegram Desktop, è un difetto dello strumento.</p>',
+      o.report.slice(-5)
+    );
+  }
+}
 
 // ---- results -------------------------------------------------------------------------
 
-async function onResult(result: RunResult, salt: string): Promise<void> {
-  showResult(result);
-  // No records are kept yet: the results are saved as built from none.
-  const saved = await store.saveResults(result, { sources: [], salt });
-  updateStorageNote(saved);
-  announce(
-    `Wiki pronta: ${Object.keys(result.wiki.recipes).length} ricette, ${Object.keys(result.wiki.items).length} oggetti.`
-  );
+function showStart(): void {
+  ui.result.hidden = true;
+  ui.start.hidden = false;
+  ui.back.hidden = shown === null;
 }
 
-function showResult(result: RunResult): void {
+function showResult(result: RunResult, focus: boolean): void {
   shown = result;
   // A new element for each render: the view keeps its listeners on its root.
   const root = document.createElement('div');
@@ -343,11 +383,7 @@ function showResult(result: RunResult): void {
     `Wiki di ${who}, da ${result.folders.join(', ')} (${result.pages} pagine), ` +
     `creata il ${fmtDate(result.wiki.generated)}; altri giocatori con pseudonimi.`;
   ui.report.textContent = result.report.join('\n');
-  // A username the player gave stays in its field for the next run; otherwise the field
-  // stays hidden and the DM decides again.
-  ui.playerField.hidden = result.options.player === null;
-  ui.player.value = result.options.player ?? '';
-  fillTimeZones(result.options.timeZone);
+  if (!focus) return;
   ui.start.hidden = true;
   ui.result.hidden = false;
   ui.back.hidden = false;
@@ -355,74 +391,69 @@ function showResult(result: RunResult): void {
 }
 
 ui.edit.addEventListener('click', () => {
-  ui.result.hidden = true;
-  ui.start.hidden = false;
-  ui.back.hidden = shown === null;
-  // After a new visit the folders are gone: the browser does not keep them.
-  ui.pickNote.hidden = picks.length > 0;
+  showStart();
   ui.pickLabel.focus();
 });
 
 ui.back.addEventListener('click', () => {
-  if (shown) showResult(shown);
+  if (shown) showResult(shown, true);
 });
 
-ui.clear.addEventListener('click', async () => {
+ui.clear.addEventListener('click', () => {
   if (
     !confirm(
-      'Cancellare la wiki salvata in questo browser? Le esportazioni sul disco non vengono toccate.'
+      'Cancellare le esportazioni e la wiki salvate in questo browser? Le esportazioni sul disco non vengono toccate.'
     )
   )
     return;
-  await store.clear();
+  send({ type: 'clear' });
   try {
     localStorage.removeItem('ib-tab'); // the view's remembered tab
-    localStorage.removeItem(LEGACY_SALT_KEY); // an earlier version's salt, if still there
   } catch {
     // storage unavailable: nothing was saved there
   }
+  dropLegacySalt();
   shown = null;
-  picks.length = 0;
-  renderPicks();
   ui.wiki.replaceChildren();
   ui.report.textContent = '';
   ui.player.value = '';
   ui.playerField.hidden = true;
   fillTimeZones();
-  ui.result.hidden = true;
-  ui.start.hidden = false;
-  ui.back.hidden = true;
+  showStart();
   hideError();
+  hideNotice();
   announce('Dati cancellati da questo browser.');
   ui.storageNote.textContent = 'I tuoi dati sono stati cancellati da questo browser.';
   ui.pickLabel.focus();
 });
 
-function updateStorageNote(saved: boolean): void {
-  ui.storageNote.textContent = saved
-    ? 'La wiki è salvata solo in questo browser (non le chat): alla prossima visita la ritrovi. «Cancella i miei dati» la elimina.'
-    : 'Questo browser non permette di salvare dati: alla prossima visita la wiki andrà creata di nuovo.';
+function updateStorageNote(): void {
+  ui.storageNote.textContent = storage
+    ? 'Le esportazioni lette (non le chat intere) e la wiki restano solo in questo browser: alla prossima visita le ritrovi. «Cancella i miei dati» le elimina.'
+    : 'Questo browser non permette di salvare dati: alla prossima visita le cartelle andranno aggiunte di nuovo.';
 }
 
 // ---- start ---------------------------------------------------------------------------
 
+fillTimeZones();
+renderExports();
 if (!('webkitdirectory' in ui.folders)) {
   showError(
     '<p>Questo browser non permette di scegliere una cartella. Usa una versione recente di Chrome, Edge, Firefox o Safari.</p>'
   );
   ui.pickLabel.hidden = true;
-}
-fillTimeZones();
-renderPicks();
-// The salt first, so that one an earlier version kept is adopted before anything is stored.
-void pseudonymSalt()
-  .then(() => store.loadResults())
-  .then((loaded) => {
-    const saved = loaded?.saved;
-    if (saved) {
-      showResult(saved.result);
-      ui.storageNote.textContent = `Wiki salvata in questo browser il ${fmtDate(saved.savedAt)}.`;
-    } else if (!store.available) {
-      updateStorageNote(false);
-    }
+} else if (worker === null) {
+  showError('<p>Il browser non ha potuto avviare l’elaborazione.</p>');
+  ui.pickLabel.hidden = true;
+} else {
+  worker.onmessage = (ev: MessageEvent<WorkerMessage>) => onMessage(ev.data);
+  worker.onerror = (ev) => {
+    showError(`<p>L’elaborazione si è interrotta: ${esc(ev.message || 'errore sconosciuto')}</p>`);
+  };
+  const salt = legacySalt();
+  send({
+    type: 'state',
+    options: { timeZone: browserTimeZone(), player: null },
+    ...(salt ? { salt } : {}),
   });
+}

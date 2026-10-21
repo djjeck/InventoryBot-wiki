@@ -22,12 +22,12 @@ import {
   converse,
   type Finished,
   finishPipeline,
+  type PipelineOptions,
   runPipeline,
 } from '#src/pipeline.ts';
 import { type BotReply } from '#src/telegram/conversation/conversation.ts';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { type Message } from '#src/telegram/messages.ts';
-import { type RunOptions } from '#src/web/protocol.ts';
 import { readPicks } from '#src/web/run.ts';
 import { pickFolder } from './browser-picks.ts';
 import {
@@ -61,7 +61,7 @@ export interface GoldenRun {
  * The time zone and the pseudonyms' salt of every run: fixed, so that the goldens depend
  * neither on the computer nor on a random salt.
  */
-export const GOLDEN_OPTIONS: Omit<RunOptions, 'player'> = {
+export const GOLDEN_OPTIONS: Omit<PipelineOptions, 'player'> = {
   timeZone: 'Europe/Rome',
   salt: 'golden',
 };

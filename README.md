@@ -3,9 +3,9 @@
 Ricostruisce ricette, oggetti e luoghi di [@InventoryBot](https://t.me/InventoryBot) a partire
 dall'export della propria chat Telegram, e li mostra in una piccola webapp statica.
 
-**Usala qui: <https://djjeck.github.io/InventoryBot-wiki/>.** Tutto avviene nel tuo browser: le
-esportazioni non vengono inviate da nessuna parte.
+**Usala qui: <https://djjeck.github.io/InventoryBot-wiki/>.**
 
+Tutto avviene nel tuo browser: le esportazioni non vengono inviate da nessuna parte. \
 Cosa resta salvato: le esportazioni già elaborate (i messaggi del bot e i comandi che gli hai dato,
 non il resto delle chat) e la wiki, solo in questo browser, finché non togli un'esportazione o premi
 «Cancella i miei dati». Così, quando torni, ritrovi la tua wiki senza scegliere di nuovo le

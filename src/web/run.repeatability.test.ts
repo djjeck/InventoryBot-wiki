@@ -7,27 +7,21 @@ import { pickFolder } from '#test/browser-picks.ts';
 import { dmChat, GROUP_EXPORT, writeInbox } from '#test/e2e-fixtures.ts';
 import { BOT, writeExport } from '#test/helpers.ts';
 import { tempDir } from '#test/temp-dir.ts';
-import { type RunOptions } from './protocol.ts';
-import { handleRun } from './run.ts';
-
-const OPTIONS: RunOptions = { timeZone: 'Europe/Rome', player: null, salt: 'repeatability' };
+import { startHarness } from '#test/web-worker.ts';
 
 type Result = [wikiText: string, playerText: string, report: string];
 
-/** The page's run on these folders, each one pick: the wiki (without its timestamp), the player state and the report. */
+/** The page's build of these folders, each one pick, on new storage: the wiki (without its timestamp), the player state and the report. */
 async function run(...folders: string[]): Promise<Result> {
-  const last = await handleRun(
-    { type: 'run', picks: folders.map(pickFolder), options: OPTIONS },
-    () => {}
-  );
-  expect(last.type).toBe('done');
-  if (last.type !== 'done') throw new Error('not done');
-  const { generated, ...wiki } = last.result.wiki;
+  const h = await startHarness(undefined, { salt: 'repeatability' });
+  await h.send({ type: 'add', picks: folders.map(pickFolder) });
+  const result = h.last();
+  const { generated, ...wiki } = result.wiki;
   expect(generated).toBeTruthy();
   return [
     JSON.stringify(wiki, null, 2),
-    JSON.stringify(last.result.player, null, 2),
-    last.result.report.filter((l) => !l.startsWith('cartelle di esportazione')).join('\n'),
+    JSON.stringify(result.player, null, 2),
+    result.report.filter((l) => !l.startsWith('cartelle di esportazione')).join('\n'),
   ];
 }
 

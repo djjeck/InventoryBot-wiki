@@ -36,15 +36,15 @@
             <b>Esporta cronologia chat</b>, formato <b>HTML</b>. Le foto e gli altri allegati non
             servono.
           </li>
-          <li>Scegli qui sotto la cartella creata dall'esportazione.</li>
           <li>
-            Premi <b>Crea la wiki</b>. La wiki resta salvata in questo browser finché non la
-            cancelli.
+            Aggiungi qui sotto la cartella creata dall'esportazione: viene letta subito, e la wiki
+            si aggiorna a ogni cartella che aggiungi o togli. Esportazioni e wiki restano salvate in
+            questo browser finché non le cancelli.
           </li>
         </ol>
 
         <div class="card">
-          <h2>Cartelle delle esportazioni</h2>
+          <h2>Esportazioni</h2>
           <p class="hint" id="pick-hint">
             Puoi aggiungere più cartelle, una alla volta, oppure scegliere una cartella che le
             contiene tutte.
@@ -59,13 +59,9 @@
               aria-describedby="pick-hint"
             />
             <label for="folders" class="btn" id="pick-label">Aggiungi una cartella…</label>
-            <button type="button" class="btn ghost" id="clear-picks" hidden>Svuota l'elenco</button>
           </div>
-          <ul id="picked" class="picked" aria-label="Cartelle scelte"></ul>
-          <p class="hint" id="pick-note" hidden>
-            Per creare di nuovo la wiki, con altre cartelle o altre opzioni, scegli di nuovo le
-            cartelle: il browser non le ricorda da una visita all'altra.
-          </p>
+          <ul id="picked" class="picked" aria-label="Esportazioni"></ul>
+          <div class="hint" id="pick-note" role="status" hidden></div>
         </div>
 
         <form class="card" id="options" novalidate>
@@ -88,7 +84,7 @@
             </p>
           </div>
           <div class="row-actions">
-            <button type="submit" class="btn primary" id="run" disabled>Crea la wiki</button>
+            <button type="submit" class="btn primary" id="run" disabled>Aggiorna la wiki</button>
             <button type="button" class="btn ghost" id="back" hidden>Torna alla wiki</button>
           </div>
           <div id="progress" class="progress" role="status" aria-live="polite" hidden>
