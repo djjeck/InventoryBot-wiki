@@ -726,6 +726,7 @@ describe('known fixed-text replies', () => {
     expect(
       [
         'Non puoi :)',
+        '@mario_r, in questo gruppo non sono consentite avventure, inventari e liste di ricette. Scrivimi in privato! :)',
         'Errore NumberFormatException For input string: "pippo"',
         'Errore NullPointerException null',
         'non esiste nessuno con quel nome..',
@@ -749,6 +750,11 @@ describe('known fixed-text replies', () => {
       ].map(known)
     ).toStrictEqual([
       ['restricted', undefined, null],
+      [
+        'group_restricted',
+        undefined,
+        ['/avventura', '/i', '/inventario', '/inventory', '/ricetta'],
+      ],
       ['error', undefined, null],
       ['error', undefined, null],
       ['stats_unknown_user', '/stats', ['/stats']],

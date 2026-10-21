@@ -823,6 +823,13 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
   },
   { name: 'restricted', match: rx(`^Non puoi :\\)${S}*${END}`), commands: 'any' },
   {
+    name: 'group_restricted',
+    match: rx(
+      `${ADDR}in questo gruppo non sono consentite avventure, inventari e liste di ricette\\.`
+    ),
+    commands: ['/avventura', '/inventario', '/ricetta'],
+  },
+  {
     name: 'error',
     match: rx(`^Errore ${W}+(?:Exception|Error)(?![${WORD_BODY}])`),
     commands: 'any',

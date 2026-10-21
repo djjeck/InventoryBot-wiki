@@ -766,23 +766,24 @@ Se un oggetto ha un + nel nome, significa che c'e' un solo luogo dove quell'ogge
 
 Help, listings and refusals:
 
-| Reply begins with or contains                                          | Produced by                                                      |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `I comandi:`                                                           | `/faqcomandi` (the list in section 3)                            |
-| `Eroi di Sempre:`                                                      | `/stats` without arguments: leaderboards of `@user TITLE (n)`    |
-| `Gruppi di InventoryBot`                                               | `/gruppi`                                                        |
-| `Benvenuto!`                                                           | `/start`, `/registrami`                                          |
-| `ciao @u, per giocare con me devi prima registrarti!`                  | any command from an unregistered user                            |
-| `cosa vuoi esaminare?`                                                 | `/esamina` without arguments                                     |
-| `@u, non hai ricette al momento.`                                      | `/ricetta` with no visible recipe                                |
-| ambiguity and not-found replies                                        | section 3                                                        |
-| `Errore <Java exception> …`                                            | a command with a malformed argument, or an internal error        |
-| `Non puoi :)`                                                          | a restricted command                                             |
-| `non esiste nessuno con quel nome..`                                   | `/stats` of an unknown user                                      |
-| `Non c'e' nessuna lotteria attiva`                                     | `/biglietto` with no lottery open                                |
-| `Mi spiace ma per evitare abusi non e' possibile cambiare username. …` | any command after the player changed their username              |
-| `⚠ Per favore risolvi il captcha per continuare. …`                    | any command, when the bot asks for a captcha                     |
-| `Ciao, il gioco si e' trasferito sul nuovo bot, @u! …`                 | any command sent to the previous bot after July 2021 (section 7) |
+| Reply begins with or contains                                          | Produced by                                                         |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `I comandi:`                                                           | `/faqcomandi` (the list in section 3)                               |
+| `Eroi di Sempre:`                                                      | `/stats` without arguments: leaderboards of `@user TITLE (n)`       |
+| `Gruppi di InventoryBot`                                               | `/gruppi`                                                           |
+| `Benvenuto!`                                                           | `/start`, `/registrami`                                             |
+| `ciao @u, per giocare con me devi prima registrarti!`                  | any command from an unregistered user                               |
+| `cosa vuoi esaminare?`                                                 | `/esamina` without arguments                                        |
+| `@u, non hai ricette al momento.`                                      | `/ricetta` with no visible recipe                                   |
+| ambiguity and not-found replies                                        | section 3                                                           |
+| `Errore <Java exception> …`                                            | a command with a malformed argument, or an internal error           |
+| `Non puoi :)`                                                          | a restricted command                                                |
+| `in questo gruppo non sono consentite avventure, inventari e liste …`  | `/avventura`, `/inventario` or `/ricetta` in a group that bans them |
+| `non esiste nessuno con quel nome..`                                   | `/stats` of an unknown user                                         |
+| `Non c'e' nessuna lotteria attiva`                                     | `/biglietto` with no lottery open                                   |
+| `Mi spiace ma per evitare abusi non e' possibile cambiare username. …` | any command after the player changed their username                 |
+| `⚠ Per favore risolvi il captcha per continuare. …`                    | any command, when the bot asks for a captcha                        |
+| `Ciao, il gioco si e' trasferito sul nuovo bot, @u! …`                 | any command sent to the previous bot after July 2021 (section 7)    |
 
 Lotteries are announced in groups; the announcements are not answers to a player's command. A
 lottery opens with `APRE LA BIGLIETTERIA! PRENDETE UN BIGLIETTO CON /biglietto!`, players take a
