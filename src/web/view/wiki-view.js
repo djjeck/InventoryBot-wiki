@@ -159,15 +159,20 @@
     /**
      * Where a channel's card stands behind what the page shows: the card's channel and
      * date, what of it the page still shows (`what`: field -> its name), and its notes.
+     * `dated`: the card's fields give way to what the bot showed later (a recipe's); else
+     * a card only adds (a place's).
      */
-    const channelSec = (card, what) => {
+    const channelSec = (card, what, dated = true) => {
       if (!card) return '';
       const from = `una scheda di <b>${esc(card.name)}</b>${card.date ? ` del ${fmtDate(card.date)}` : ''}`;
       const shown = card.fields.map((f) => what[f]).filter(Boolean);
       // "lo" for one masculine singular field ("il livello"), else "li".
       const one = shown.length === 1 && !/^(?:gli|le|i) /u.test(shown[0]);
+      const later = dated
+        ? `: il bot non ${one ? 'lo' : 'li'} ha ancora ${one ? 'mostrato' : 'mostrati'} più di recente`
+        : '';
       const lead = shown.length
-        ? `${listIt(shown).replace(/^./, (c) => c.toUpperCase())} ${shown.length === 1 ? 'viene' : 'vengono'} da ${from}: il bot non ${one ? 'lo' : 'li'} ha ancora ${one ? 'mostrato' : 'mostrati'} più di recente.`
+        ? `${listIt(shown).replace(/^./, (c) => c.toUpperCase())} ${shown.length === 1 ? 'viene' : 'vengono'} da ${from}${later}.`
         : `C'è anche ${from}; ciò che il bot ha mostrato dopo ha la precedenza.`;
       const notes = card.notes.map((n) => `<p class="note">${esc(n)}</p>`).join('');
       return sec('Dai canali', `<p class="note">${lead}</p>${notes}`);
@@ -487,9 +492,10 @@
             pl?.adventures ? `${pl.adventures} avventure fatte qui.` : '',
           ])
         : '';
-      return `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}</div>
+      return `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}${l.secret ? '<span>· segreto</span>' : ''}</div>
     <h2>${esc(l.label)}</h2></div>
     ${(l.required_items || []).length ? sec('Oggetti necessari', chips(l.required_items, itemLink)) : ''}
+    ${(l.sight_items || []).length ? sec('Per vederlo tra le destinazioni', `<p class="note">Senza questi oggetti il luogo non compare nel pannello di viaggio.</p>` + chips(l.sight_items, itemLink)) : ''}
     ${
       l.unlock_texts.length
         ? sec(
@@ -511,6 +517,7 @@
       )
     )}
     ${sec('Oggetti esclusivi', `<p class="note">Gli altri oggetti escono ovunque con la stessa probabilità.</p>` + chips(excl, itemLink))}
+    ${channelSec(l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" }, false)}
     ${personal}`;
     }
     function mapSvg() {

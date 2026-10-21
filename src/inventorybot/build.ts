@@ -166,7 +166,7 @@ export interface KbItem {
   used_in: Set<string>;
   made_by: Set<string>;
   last_seen: string | null;
-  /** Where the owner found it; only exported for exclusive items. */
+  /** Where it is found: the owner's drops and the channels' place cards; only exported for exclusive items. */
   dropLocations: Set<string>;
   firstSeen: string | null;
   dates: Dates;
@@ -207,9 +207,17 @@ export interface KbLocation {
   exits: Set<string>;
   requires_item: boolean;
   unlock_texts: string[];
-  /** Items named by "<item> ti serve per passare <place>" notices. */
+  /** Items named by "<item> ti serve per passare <place>" notices, and by place cards. */
   required_items: Set<string>;
+  /** Items without which the place is not listed in the travel panel (place cards). */
+  sight_items: Set<string>;
+  secret?: true;
+  /** The channel card behind the place, and what it adds. */
+  channel?: { name: string; date: string | null; fields: Set<PlaceCardField>; notes: string[] };
 }
+
+/** What a place card adds to a place. */
+type PlaceCardField = 'items' | 'route' | 'access' | 'sight' | 'secret';
 
 interface RenameHint {
   old: string;
@@ -338,6 +346,7 @@ export class KB {
         requires_item: false,
         unlock_texts: [],
         required_items: new Set(),
+        sight_items: new Set(),
       };
       this.locations.set(name, l);
     }
@@ -489,7 +498,7 @@ export function nameKey(name: string): string {
 
 /**
  * A name -> the first of `known` with its key, else the name itself (as nameKey spaces
- * it); `caseless` compares the keys in lower case (the bot looks recipes up so).
+ * it); `caseless` compares the keys in lower case (the bot looks names up so).
  */
 function canonicalNames(known: Iterable<string>, caseless = false): (name: string) => string {
   const key = (n: string): string => (caseless ? nameKey(n).toLowerCase() : nameKey(n));
@@ -574,6 +583,56 @@ function mergeRecipeCard(
 }
 
 /**
+ * A place card into the knowledge base: the items found there (exclusive ones, by their
+ * "+" rarity), the route from the village as exits, the items it takes to enter the place
+ * and to see it, whether it is secret. None of these has a date: a card adds to what the
+ * bot showed.
+ */
+function mergePlaceCard(
+  kb: KB,
+  e: Extract<BuildEvent, { type: 'place_card' }>,
+  item: (name: string) => string,
+  place: (name: string) => string
+): void {
+  const name = place(e.place);
+  const loc = kb.location(name);
+  const card =
+    loc.channel ??
+    (loc.channel = { name: e.chat ?? '', date: e.date, fields: new Set(), notes: [] });
+  card.date = e.date;
+  card.notes = [...(e.route_note === null ? [] : [e.route_note]), ...e.notes];
+  for (const x of e.items) {
+    const it = kb.item(item(x.name), x.rarity, x.usable);
+    it.sources.add('adventure');
+    it.dropLocations.add(name);
+    card.fields.add('items');
+  }
+  const route = e.route.map(place);
+  for (let i = 1; i < route.length; i++) {
+    kb.location(route[i - 1] as string).exits.add(route[i] as string);
+    kb.location(route[i] as string);
+    card.fields.add('route');
+  }
+  if (e.access !== null) {
+    const n = item(e.access.name);
+    kb.item(n, e.access.rarity, e.access.usable);
+    loc.requires_item = true;
+    loc.required_items.add(n);
+    card.fields.add('access');
+  }
+  if (e.sight !== null) {
+    const n = item(e.sight.name);
+    kb.item(n, e.sight.rarity, e.sight.usable);
+    loc.sight_items.add(n);
+    card.fields.add('sight');
+  }
+  if (e.secret) {
+    loc.secret = true;
+    card.fields.add('secret');
+  }
+}
+
+/**
  * Build's passes up to the uses: recipe names, arrivals, the chronological merge, drops
  * and crafts. Returns the /usa replies, for resolveUses.
  */
@@ -594,8 +653,9 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
   }
   // A channel card names an item or recipe as its curators typed it: the bot's own name,
   // when one matches it (nameKey), is the one kept.
-  const itemCanon = canonicalNames(events.flatMap(itemNamesOf));
+  const itemCanon = canonicalNames(events.flatMap(itemNamesOf), true);
   const recipeCanon = canonicalNames(recipeNames, true);
+  const placeCanon = canonicalNames(knownPlaces(events), true);
   for (const e of events) if (e.type === 'recipe_card') recipeNames.add(recipeCanon(e.recipe));
 
   resolveArrivals(kb, events);
@@ -651,6 +711,8 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable);
     } else if (e.type === 'recipe_card') {
       mergeRecipeCard(kb, e, itemCanon, recipeCanon);
+    } else if (e.type === 'place_card') {
+      mergePlaceCard(kb, e, itemCanon, placeCanon);
     } else if (e.type === 'title') {
       // A fact of the game: these items give a title (whoever owns them).
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable).givesTitle = true;
@@ -1664,6 +1726,18 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       unlock_texts: [...l.unlock_texts],
       required_items: sortedStrings(l.required_items),
       exclusive_items: sortedStrings(exclusiveItems.get(n) ?? []),
+      sight_items: sortedStrings(l.sight_items),
+      ...(l.secret !== undefined && { secret: l.secret }),
+      ...(l.channel !== undefined && {
+        channel: {
+          name: l.channel.name,
+          date: l.channel.date,
+          fields: (['items', 'route', 'access', 'sight', 'secret'] as const).filter((f) =>
+            l.channel?.fields.has(f)
+          ),
+          notes: [...l.channel.notes],
+        },
+      }),
     },
   ]);
   const faqRarities = kb.faq ? kb.faq.rarities : null;

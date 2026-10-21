@@ -121,7 +121,8 @@
       "required_items": [],
       "exclusive_items": [
         "l'ascia \"vera\""
-      ]
+      ],
+      "sight_items": []
     },
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
@@ -134,7 +135,8 @@
       "required_items": [],
       "exclusive_items": [
         "l'ascia \"vera\""
-      ]
+      ],
+      "sight_items": []
     }
   }
 }

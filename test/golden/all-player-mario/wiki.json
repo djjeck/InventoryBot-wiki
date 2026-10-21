@@ -185,6 +185,66 @@
       "exclusive": false,
       "locations": []
     },
+    "una ghianda d'oro": {
+      "name": "una ghianda d'oro",
+      "rarity": "C+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:41-05:00",
+      "exclusive": true,
+      "locations": [
+        "le cripte del monastero 👻"
+      ]
+    },
+    "un paio di mollette": {
+      "name": "un paio di mollette",
+      "rarity": "N",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Pratica cestina"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "exclusive": false,
+      "locations": []
+    },
+    "una lanterna cieca": {
+      "name": "una lanterna cieca",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:11:32-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un rampino di ferro": {
+      "name": "un rampino di ferro",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [
+        "L'ancora nel fango"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:04:02-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
     "l'ascia \"vera\"": {
       "name": "l'ascia \"vera\"",
       "rarity": "C+",
@@ -305,22 +365,6 @@
     "un nastro da pacchi": {
       "name": "un nastro da pacchi",
       "rarity": "C",
-      "usable": false,
-      "sources": [
-        "adventure"
-      ],
-      "used_in": [
-        "Pratica cestina"
-      ],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:01:01-05:00",
-      "sources_inferred": true,
-      "exclusive": false,
-      "locations": []
-    },
-    "un paio di mollette": {
-      "name": "un paio di mollette",
-      "rarity": "N",
       "usable": false,
       "sources": [
         "adventure"
@@ -456,22 +500,6 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T20:03:21-05:00",
-      "sources_inferred": true,
-      "exclusive": false,
-      "locations": []
-    },
-    "un rampino di ferro": {
-      "name": "un rampino di ferro",
-      "rarity": "L1",
-      "usable": false,
-      "sources": [
-        "recipe"
-      ],
-      "used_in": [
-        "L'ancora nel fango"
-      ],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:04:02-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -783,17 +811,6 @@
       "exclusive": false,
       "locations": []
     },
-    "una lanterna cieca": {
-      "name": "una lanterna cieca",
-      "rarity": null,
-      "usable": false,
-      "sources": [],
-      "used_in": [],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:11:32-05:00",
-      "exclusive": false,
-      "locations": []
-    },
     "un tappetino con scritto Benvenuti": {
       "name": "un tappetino con scritto Benvenuti",
       "rarity": null,
@@ -979,19 +996,6 @@
       "last_seen": "2025-11-27T19:01:32-05:00",
       "sources_inferred": true,
       "exclusive": false,
-      "locations": []
-    },
-    "una ghianda d'oro": {
-      "name": "una ghianda d'oro",
-      "rarity": "C+",
-      "usable": false,
-      "sources": [
-        "adventure"
-      ],
-      "used_in": [],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:00:41-05:00",
-      "exclusive": true,
       "locations": []
     },
     "un fungo": {
@@ -1290,7 +1294,52 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
+    },
+    "le cripte del monastero 👻": {
+      "name": "le cripte del monastero 👻",
+      "label": "Le cripte del monastero 👻",
+      "exits": [],
+      "requires_item": true,
+      "unlock_texts": [],
+      "required_items": [
+        "una lanterna cieca"
+      ],
+      "exclusive_items": [
+        "una ghianda d'oro"
+      ],
+      "sight_items": [
+        "un rampino di ferro"
+      ],
+      "secret": true,
+      "channel": {
+        "name": "L'Atlante di Barbabeige",
+        "date": "2025-11-27T18:59:20-05:00",
+        "fields": [
+          "items",
+          "route",
+          "access",
+          "sight",
+          "secret"
+        ],
+        "notes": [
+          "una lanterna cieca: trovabile nella valle ventosa 🏞",
+          "Questo è un luogo segreto! Non è visibile nel pannello di viaggio se non si possiede l'oggetto per raggiungerlo!"
+        ]
+      }
+    },
+    "il villaggio di Borgoverde 🏡": {
+      "name": "il villaggio di Borgoverde 🏡",
+      "label": "Il villaggio di Borgoverde 🏡",
+      "exits": [
+        "il bosco nebbioso di Valtorbo 🌲"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
@@ -1298,12 +1347,14 @@
       "exits": [
         "l'immenso deserto di Sabbiora 🏜",
         "la palude sussurrante 🌾",
-        "la valle ventosa 🏞"
+        "la valle ventosa 🏞",
+        "le cripte del monastero 👻"
       ],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
@@ -1318,7 +1369,8 @@
         "inghiotti l'Respirella e"
       ],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "i piedi del monte Grevolo ⛰": {
       "name": "i piedi del monte Grevolo ⛰",
@@ -1330,7 +1382,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
@@ -1343,7 +1396,8 @@
         "mastichi una foglia di Respirella dalla tua scorta e puf! per magia respiri sott'acqua come un pesce! Ti tuffi senza esitare e scendi sempre piu' giu', senza alcun problema.. Dopo una lunga discesa"
       ],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "la palude sussurrante 🌾": {
       "name": "la palude sussurrante 🌾",
@@ -1356,7 +1410,8 @@
         "guidato dalla tua bussola fatata … finalmente ti trovi"
       ],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "l'immenso deserto di Sabbiora 🏜": {
       "name": "l'immenso deserto di Sabbiora 🏜",
@@ -1365,7 +1420,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il magnifico Palazzo di Cristallo 🏰": {
       "name": "il magnifico Palazzo di Cristallo 🏰",
@@ -1374,16 +1430,8 @@
       "requires_item": true,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
-    },
-    "le cripte del monastero 👻": {
-      "name": "le cripte del monastero 👻",
-      "label": "Le cripte del monastero 👻",
-      "exits": [],
-      "requires_item": false,
-      "unlock_texts": [],
-      "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     }
   }
 }

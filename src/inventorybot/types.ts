@@ -240,8 +240,30 @@ export interface RecipeCardEvent {
   notes: string[];
 }
 
+/**
+ * A place card of L'Atlante di Barbabeige (channels.ts): the place, the items found there,
+ * the route from the village, the items it takes to enter it and to see it in the travel
+ * panel, and the curators' remarks; places in their article form.
+ */
+export interface PlaceCardEvent {
+  type: 'place_card';
+  place: string;
+  items: ItemLine[];
+  /** From the village to the place, both included; empty without a route. */
+  route: string[];
+  /** Instead of a route ("Utilizzando l'oggetto richiesto per l'accesso…"). */
+  route_note: string | null;
+  access: ItemLine | null;
+  /** The item without which the place is not listed in the travel panel. */
+  sight: ItemLine | null;
+  /** "Questo è un luogo segreto!": not listed in the travel panel without its items. */
+  secret: boolean;
+  notes: string[];
+}
+
 export type Event =
   | RecipeCardEvent
+  | PlaceCardEvent
   | CooldownEvent
   | ItemCooldownEvent
   | RecipeListEvent
@@ -350,7 +372,7 @@ export interface WikiItem {
   sources_inferred?: true;
   /** A "+" rarity: drops in a single location. */
   exclusive: boolean;
-  /** Where the owner found it; only for exclusive items. */
+  /** Where it is found (the owner's drops, place cards); only for exclusive items. */
   locations: string[];
 }
 
@@ -391,9 +413,15 @@ export interface WikiLocation {
   exits: string[];
   requires_item: boolean;
   unlock_texts: string[];
-  /** Items the place requires, from the bot's "ti serve per passare" notices, sorted. */
+  /** Items the place requires, from the bot's "ti serve per passare" notices and place cards, sorted. */
   required_items: string[];
   exclusive_items: string[];
+  /** Items without which the place is not listed in the travel panel, sorted (place cards). */
+  sight_items: string[];
+  /** Not listed in the travel panel without its items (place cards). */
+  secret?: true;
+  /** Present when a channel's card describes the place (channels.ts). */
+  channel?: WikiChannelCard<'items' | 'route' | 'access' | 'sight' | 'secret'>;
 }
 
 /** The wiki: facts about the game, the same for every player. */

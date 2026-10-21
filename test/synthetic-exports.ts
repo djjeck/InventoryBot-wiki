@@ -8,9 +8,9 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CITTADELLA } from '#src/inventorybot/bot.ts';
+import { ATLANTE, CITTADELLA } from '#src/inventorybot/bot.ts';
 import { type Message } from '#src/telegram/messages.ts';
-import { TORRE_CARD } from './channels.ts';
+import { CRIPTE_CARD, TORRE_CARD } from './channels.ts';
 import { examples, readDoc } from './doc-examples.ts';
 import { writeInbox } from './e2e-fixtures.ts';
 import {
@@ -932,8 +932,8 @@ export function writeStage3Scenarios(root: string): Scenario[] {
     scenario('uses', [dm]);
   }
 
-  // A channel's export: the Cittadella's cards (one in another spelling of a name, one
-  // older than the bot's craft) next to the DM; its other posts are not cards.
+  // The channels' exports: a Cittadella card (in another spelling of a name, older than the
+  // bot's craft) and its other posts, which are no cards, and an Atlante card, next to the DM.
   {
     const dm = new Chat(BOT, 1000);
     say(dm, 0, '/ricetta', T.recipeList([['Torre alta', 2, 1]]));
@@ -955,7 +955,9 @@ export function writeStage3Scenarios(root: string): Scenario[] {
         'una torre altissima'
       )
     );
-    scenario('channels', [dm, ch]);
+    const atlas = new Chat(ATLANTE, 10);
+    atlas.user(ATLANTE, CRIPTE_CARD, -40);
+    scenario('channels', [dm, ch, atlas]);
   }
 
   // Recipe names: by signature, query, output; unnamed group crafts (one entry per

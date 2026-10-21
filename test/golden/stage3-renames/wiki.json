@@ -260,7 +260,8 @@
       "required_items": [],
       "exclusive_items": [
         "un Premio Sgranocchio"
-      ]
+      ],
+      "sight_items": []
     },
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
@@ -269,7 +270,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     }
   }
 }

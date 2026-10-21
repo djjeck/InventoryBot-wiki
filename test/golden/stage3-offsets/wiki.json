@@ -76,7 +76,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
@@ -89,7 +90,8 @@
         "inghiotti l'Respirella e"
       ],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
@@ -98,7 +100,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     }
   }
 }

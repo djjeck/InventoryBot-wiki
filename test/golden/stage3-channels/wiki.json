@@ -56,6 +56,64 @@
       "exclusive": false,
       "locations": []
     },
+    "una ghianda d'oro": {
+      "name": "una ghianda d'oro",
+      "rarity": "C+",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T18:59:20-05:00",
+      "exclusive": true,
+      "locations": [
+        "le cripte del monastero 👻"
+      ]
+    },
+    "un paio di mollette": {
+      "name": "un paio di mollette",
+      "rarity": "R+",
+      "usable": true,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T18:59:20-05:00",
+      "exclusive": true,
+      "locations": [
+        "le cripte del monastero 👻"
+      ]
+    },
+    "una lanterna cieca": {
+      "name": "una lanterna cieca",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T18:59:20-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un rampino di ferro": {
+      "name": "un rampino di ferro",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T18:59:20-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
     "una torre altissima": {
       "name": "una torre altissima",
       "rarity": null,
@@ -95,5 +153,63 @@
       }
     }
   },
-  "locations": {}
+  "locations": {
+    "le cripte del monastero 👻": {
+      "name": "le cripte del monastero 👻",
+      "label": "Le cripte del monastero 👻",
+      "exits": [],
+      "requires_item": true,
+      "unlock_texts": [],
+      "required_items": [
+        "una lanterna cieca"
+      ],
+      "exclusive_items": [
+        "un paio di mollette",
+        "una ghianda d'oro"
+      ],
+      "sight_items": [
+        "un rampino di ferro"
+      ],
+      "secret": true,
+      "channel": {
+        "name": "L'Atlante di Barbabeige",
+        "date": "2025-11-27T18:59:20-05:00",
+        "fields": [
+          "items",
+          "route",
+          "access",
+          "sight",
+          "secret"
+        ],
+        "notes": [
+          "una lanterna cieca: trovabile nella valle ventosa 🏞",
+          "Questo è un luogo segreto! Non è visibile nel pannello di viaggio se non si possiede l'oggetto per raggiungerlo!"
+        ]
+      }
+    },
+    "il villaggio di Borgoverde 🏡": {
+      "name": "il villaggio di Borgoverde 🏡",
+      "label": "Il villaggio di Borgoverde 🏡",
+      "exits": [
+        "il bosco nebbioso di Valtorbo 🌲"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [],
+      "sight_items": []
+    },
+    "il bosco nebbioso di Valtorbo 🌲": {
+      "name": "il bosco nebbioso di Valtorbo 🌲",
+      "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "exits": [
+        "le cripte del monastero 👻"
+      ],
+      "requires_item": false,
+      "unlock_texts": [],
+      "required_items": [],
+      "exclusive_items": [],
+      "sight_items": []
+    }
+  }
 }

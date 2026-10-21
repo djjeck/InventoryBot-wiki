@@ -73,6 +73,63 @@ A card gives the recipe its level (when no recipe list has), its ingredients, it
 text, the title of the output, and the card's notes, each as an observation of the post's date. The
 wiki keeps, per recipe, which card stands behind it and which of these the card still sets.
 
-## 3. Unknowns
+## 3. L'Atlante di Barbabeige: places
+
+```text
+CARD   = [ EMOJI ] "LUOGO:" SP LOCATION NL
+         [ EMOJI ] "{id: " INT "}" NL
+         [ EMOJI ] "OGGETTI TROVABILI:" { NL BOOK ITEM }
+         [ EMOJI ] "COME ARRIVARCI:" ( { NL STAGE LOCATION } | NL "🚩🏁" SP REMARK )
+         [ NL [ EMOJI ] "OGGETTO RICHIESTO PER L'ACCESSO:" NL "📚" SP ITEM [ SP REMARK ] ]
+         [ NL [ EMOJI ] "OGGETTO RICHIESTO PER VISUALIZZARE:" NL "📚" SP ITEM [ SP REMARK ] ]
+         [ NL "📝" SP ARRIVAL ]
+         { NL ( "🔎" | "⚠️" | "📯" ) SP REMARK }
+BOOK   = "📒" | "📗" | "📘" | "📕" | "📙"        (* the colour of the rarity: C+, N+, R+, S+, M+ *)
+STAGE  = "🚩" | "🏃" | "🏃‍♂️" | "🏁"             (* the start, a stage, the place itself *)
+```
+
+- `LOCATION` is written with the article ("la Valle degli Eroi") or the preposition ("nella valle
+  ventosa") of the bot's replies; the pipeline reads both in their article form.
+- The items found are the place's exclusive ones, `+` rarities; `[nessun oggetto inserito]` stands
+  for none.
+- The route goes from the village to the place. Instead of a route, `🚩🏁` introduces a remark: the
+  place is reached by using its item from anywhere, or not at all.
+- The item for the access is the one the place requires; the item to view it, the one without which
+  the place is not listed in the travel panel. A `REMARK` after an item says where it is found.
+- `ARRIVAL` is the bot's arrival text, after `@username, `.
+- The `🔎` remark "Questo è un luogo segreto!" marks a place that the travel panel lists only to a
+  player who owns its items.
+
+Other posts of the channel (a welcome, the map of every place) are no cards and are skipped.
+
+```text
+🗺 LUOGO: nelle cripte del monastero 👻
+📌 {id: 3}
+
+📎 OGGETTI TROVABILI:
+📒 una ghianda d'oro [C+]
+📘 un paio di mollette [R+] [usabile]
+
+📫 COME ARRIVARCI:
+🚩 nel villaggio di Borgoverde 🏡
+🏃‍♂️ nel bosco nebbioso di Valtorbo 🌲
+🏁 nelle cripte del monastero 👻
+
+🗝 OGGETTO RICHIESTO PER L'ACCESSO:
+📚 una lanterna cieca [N] trovabile nella valle ventosa 🏞
+
+👁‍🗨 OGGETTO RICHIESTO PER VISUALIZZARE:
+📚 un rampino di ferro [R]
+
+📝 @username, accendi la lanterna e scendi nelle cripte del monastero 👻
+
+🔎 Questo è un luogo segreto! Non è visibile nel pannello di viaggio se non si possiede l'oggetto per raggiungerlo!
+```
+
+A card adds to the place its exclusive items, its route (as exits), the items to enter and to view
+it, and whether it is secret. None of these has a date in the wiki: a card adds to what the bot
+showed, and the wiki keeps, per place, which card stands behind it and what it added.
+
+## 4. Unknowns
 
 - Whether a recipe with two cards was changed by the game, or its first card was wrong.

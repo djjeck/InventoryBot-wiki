@@ -18,7 +18,20 @@
       "first_seen": "2025-11-27T19:00:11-05:00"
     }
   },
-  "locations": {},
+  "locations": {
+    "il bosco nebbioso di Valtorbo 🌲": {
+      "visited": false,
+      "adventures": 0
+    },
+    "il villaggio di Borgoverde 🏡": {
+      "visited": false,
+      "adventures": 0
+    },
+    "le cripte del monastero 👻": {
+      "visited": false,
+      "adventures": 0
+    }
+  },
   "recipe_list": {
     "date": "2025-11-27T19:00:01-05:00",
     "truncated": false,

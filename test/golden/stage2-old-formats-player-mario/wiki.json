@@ -159,7 +159,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     }
   }
 }

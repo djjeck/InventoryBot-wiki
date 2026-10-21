@@ -3,9 +3,15 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { type Message } from '#src/telegram/messages.ts';
-import { TORRE_CARD } from '#test/channels.ts';
-import { CITTADELLA, GRIMORIO } from './bot.ts';
-import { cardItem, isChannelPost, readChannelPosts, readRecipeCard } from './channels.ts';
+import { CRIPTE_CARD, TORRE_CARD } from '#test/channels.ts';
+import { ATLANTE, CITTADELLA, GRIMORIO } from './bot.ts';
+import {
+  cardItem,
+  isChannelPost,
+  readChannelPosts,
+  readPlaceCard,
+  readRecipeCard,
+} from './channels.ts';
 
 describe('readRecipeCard', () => {
   it('reads_every_part_of_a_card', () => {
@@ -64,6 +70,55 @@ describe('readRecipeCard', () => {
   });
 });
 
+describe('readPlaceCard', () => {
+  it('reads_every_part_of_a_card_with_places_in_their_article_form', () => {
+    expect(readPlaceCard(CRIPTE_CARD)).toStrictEqual({
+      place: 'le cripte del monastero 👻',
+      items: [
+        { name: "una ghianda d'oro", rarity: 'C+', usable: false, qty: 1 },
+        { name: 'un paio di mollette', rarity: 'R+', usable: true, qty: 1 },
+      ],
+      route: [
+        'il villaggio di Borgoverde 🏡',
+        'il bosco nebbioso di Valtorbo 🌲',
+        'le cripte del monastero 👻',
+      ],
+      route_note: null,
+      access: { name: 'una lanterna cieca', rarity: 'N', usable: false, qty: 1 },
+      sight: { name: 'un rampino di ferro', rarity: 'R', usable: false, qty: 1 },
+      secret: true,
+      notes: [
+        'una lanterna cieca: trovabile nella valle ventosa 🏞',
+        "Questo è un luogo segreto! Non è visibile nel pannello di viaggio se non si possiede l'oggetto per raggiungerlo!",
+      ],
+    });
+  });
+
+  it('a_place_without_items_or_route', () => {
+    const c = readPlaceCard(
+      [
+        '🗺 LUOGO: nella valle ventosa 🏞',
+        '📎 OGGETTI TROVABILI:',
+        '‼️ [nessun oggetto inserito]‼️',
+        '📫 COME ARRIVARCI:',
+        "🚩🏁 Utilizzando l'oggetto richiesto per l'accesso da un luogo qualsiasi.",
+      ].join('\n')
+    );
+    expect(c).toMatchObject({
+      place: 'la valle ventosa 🏞',
+      items: [],
+      route: [],
+      route_note: "Utilizzando l'oggetto richiesto per l'accesso da un luogo qualsiasi.",
+      access: null,
+      secret: false,
+    });
+  });
+
+  it('other_posts_are_no_card', () => {
+    expect(readPlaceCard('🗺 La Mappa Completa 🗺')).toBeNull();
+  });
+});
+
 describe('readChannelPosts', () => {
   const post = (chat: string, text: string, id = 1): Message => ({
     chat,
@@ -93,6 +148,14 @@ describe('readChannelPosts', () => {
     });
   });
 
+  it('cards_of_the_atlante_too', () => {
+    expect(readChannelPosts([post(ATLANTE, CRIPTE_CARD)])[0]).toMatchObject({
+      type: 'place_card',
+      place: 'le cripte del monastero 👻',
+    });
+    expect(readChannelPosts([post(GRIMORIO, CRIPTE_CARD)])).toStrictEqual([]);
+  });
+
   it('only_the_channels_posts_are_channel_posts', () => {
     expect(isChannelPost(post(GRIMORIO, 'x'))).toBe(true);
     expect(isChannelPost(post('Gruppo', 'x'))).toBe(false);
@@ -103,8 +166,12 @@ describe('readChannelPosts', () => {
 describe('docs/channels.md', () => {
   it('its_card_examples_are_cards', () => {
     const doc = fs.readFileSync(path.join(import.meta.dirname, '../../docs/channels.md'), 'utf-8');
-    const examples = [...doc.matchAll(/```text\n(📇[\s\S]*?)```/gu)].map((m) => m[1] as string);
-    expect(examples.length).toBeGreaterThan(0);
-    for (const e of examples) expect(readRecipeCard(e), e).not.toBeNull();
+    const examples = (start: string): string[] =>
+      [...doc.matchAll(new RegExp(`\`\`\`text\n(${start}[\\s\\S]*?)\`\`\``, 'gu'))].map(
+        (m) => m[1] as string
+      );
+    expect(examples('📇').length + examples('🗺').length).toBe(2);
+    for (const e of examples('📇')) expect(readRecipeCard(e), e).not.toBeNull();
+    for (const e of examples('🗺')) expect(readPlaceCard(e), e).not.toBeNull();
   });
 });

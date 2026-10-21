@@ -2,10 +2,10 @@
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
-import { card, TORRE_CARD } from '#test/channels.ts';
+import { card, CRIPTE_CARD, TORRE_CARD } from '#test/channels.ts';
 import { tgDate } from '#test/helpers.ts';
 import * as T from '#test/texts.ts';
-import { CITTADELLA } from './bot.ts';
+import { ATLANTE, CITTADELLA } from './bot.ts';
 import {
   build,
   isMine,
@@ -714,6 +714,7 @@ describe('position', () => {
         unlock_texts: [],
         required_items: [],
         exclusive_items: [],
+        sight_items: [],
       },
     });
   });
@@ -2038,5 +2039,43 @@ describe('channel cards', () => {
     ]);
     expect(Object.keys(wiki.recipes)).toStrictEqual(['Torre alta']);
     expect(Object.keys(wiki.items).filter((n) => n.includes('trave'))).toStrictEqual(['una trave']);
+  });
+});
+
+describe('place cards', () => {
+  const CRIPTE = 'le cripte del monastero 👻';
+
+  it('a_card_gives_the_place_its_items_route_and_requirements', () => {
+    const { wiki } = runBuild([card(CRIPTE_CARD, 0, ATLANTE)]);
+    expect(wiki.locations[CRIPTE]).toMatchObject({
+      requires_item: true,
+      required_items: ['una lanterna cieca'],
+      sight_items: ['un rampino di ferro'],
+      secret: true,
+      exclusive_items: ['un paio di mollette', "una ghianda d'oro"],
+      channel: { name: ATLANTE, fields: ['items', 'route', 'access', 'sight', 'secret'] },
+    });
+    expect(wiki.locations['il villaggio di Borgoverde 🏡']?.exits).toStrictEqual([
+      'il bosco nebbioso di Valtorbo 🌲',
+    ]);
+    expect(wiki.items["una ghianda d'oro"]).toMatchObject({
+      exclusive: true,
+      locations: [CRIPTE],
+      sources: ['adventure'],
+    });
+  });
+
+  it('a_card_names_a_place_as_the_bot_does', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.where('nel bosco nebbioso di Valtorbo 🌲', ['nelle cripte del monastero 👻']),
+        '/viaggio',
+        {
+          t: 0,
+        }
+      ),
+      card(CRIPTE_CARD.replace('LUOGO: nelle cripte', 'LUOGO: le Cripte'), 10, ATLANTE),
+    ]);
+    expect(Object.keys(wiki.locations).filter((n) => /cripte/iu.test(n))).toStrictEqual([CRIPTE]);
   });
 });

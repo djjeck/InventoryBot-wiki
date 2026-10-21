@@ -204,7 +204,8 @@
       "required_items": [],
       "exclusive_items": [
         "una ghianda d'oro"
-      ]
+      ],
+      "sight_items": []
     },
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
@@ -218,7 +219,8 @@
       "required_items": [],
       "exclusive_items": [
         "un fiore di pianura"
-      ]
+      ],
+      "sight_items": []
     },
     "i piedi del monte Grevolo ⛰": {
       "name": "i piedi del monte Grevolo ⛰",
@@ -230,7 +232,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
@@ -239,7 +242,8 @@
       "requires_item": true,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     }
   }
 }

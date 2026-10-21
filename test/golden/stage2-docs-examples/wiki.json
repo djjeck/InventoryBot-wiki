@@ -710,7 +710,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
@@ -724,7 +725,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "la palude sussurrante 🌾": {
       "name": "la palude sussurrante 🌾",
@@ -739,7 +741,8 @@
         "guidato dalla tua bussola fatata … finalmente ti trovi"
       ],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "l'immenso deserto di Sabbiora 🏜": {
       "name": "l'immenso deserto di Sabbiora 🏜",
@@ -748,7 +751,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "i piedi del monte Grevolo ⛰": {
       "name": "i piedi del monte Grevolo ⛰",
@@ -757,7 +761,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
@@ -772,7 +777,8 @@
         "mastichi una foglia di Respirella dalla tua scorta e puf! per magia respiri sott'acqua come un pesce! Ti tuffi senza esitare e scendi sempre piu' giu', senza alcun problema.. Dopo una lunga discesa"
       ],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "il magnifico Palazzo di Cristallo 🏰": {
       "name": "il magnifico Palazzo di Cristallo 🏰",
@@ -781,7 +787,8 @@
       "requires_item": true,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "le cripte del monastero 👻": {
       "name": "le cripte del monastero 👻",
@@ -790,7 +797,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     },
     "in cima al monte Grevolo 🏔": {
       "name": "in cima al monte Grevolo 🏔",
@@ -799,7 +807,8 @@
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
-      "exclusive_items": []
+      "exclusive_items": [],
+      "sight_items": []
     }
   }
 }
