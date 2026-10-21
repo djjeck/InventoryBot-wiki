@@ -113,7 +113,11 @@ describe('the record cache', () => {
     expect(cachedRecord(out, r.hash, 'two')).toBeNull();
     expect(cachedRecord(out, r.hash, salt)).toBeNull();
     // Another format version, or an unreadable file: dropped.
-    cacheRecord(out, { ...r, formatVersion: (RECORD_FORMAT_VERSION + 1) as 1 }, salt);
+    cacheRecord(
+      out,
+      { ...r, formatVersion: (RECORD_FORMAT_VERSION + 1) as typeof RECORD_FORMAT_VERSION },
+      salt
+    );
     expect(cachedRecord(out, r.hash, salt)).toBeNull();
     fs.writeFileSync(path.join(out, RECORDS_DIR, `${r.hash}.json`), '{');
     expect(cachedRecord(out, r.hash, salt)).toBeNull();

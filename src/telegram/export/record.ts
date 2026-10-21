@@ -32,8 +32,11 @@ import {
   sortMessages,
 } from './parse-export.ts';
 
-/** The shape of ExportRecord; a record of another version must be read again from its pages. */
-export const RECORD_FORMAT_VERSION = 1;
+/**
+ * The shape of ExportRecord, and what it keeps in full; a record of another version must be
+ * read again from its pages. 2: the posts of the bot's channels are kept in full.
+ */
+export const RECORD_FORMAT_VERSION = 2;
 
 /**
  * A message phase 2 reads no text of: `[chat, id, date, sender, sender_key]`, with `chat`
@@ -70,7 +73,8 @@ export interface ExportRecord {
   /** Messages read; of them, written by the bot; kept in full (as Message). */
   counts: { messages: number; fromBot: number; kept: number };
   /**
-   * Every message, in page order: in full when phase 2 reads its text, else a stub. A
+   * Every message, in page order: in full when phase 2 reads its text or it is a post of
+   * one of the bot's channels, else a stub. A
    * date is as written (a macOS date has no offset yet), and `sender_key` is the salted
    * one of senderKey().
    */
@@ -151,9 +155,16 @@ function roughSeconds(date: string | null): number | null {
   return mac === null ? null : epochSeconds({ ...mac, offsetMinutes: 0 });
 }
 
-/** Whether phase 2 reads the text of a message: the bot's, or a command for the bot. */
-function readByPhase2(m: Message, bot: BotIdentity): boolean {
-  return m.from_bot || (!m.forwarded_from && isBotCommand(resolveCommand(m, bot.name)));
+/**
+ * Whether a message is kept in full: the bot's, a command for the bot (both read by phase
+ * 2), or a post of one of the bot's channels (BotIdentity.channels).
+ */
+function keptInFull(m: Message, bot: BotIdentity): boolean {
+  return (
+    m.from_bot ||
+    (!m.forwarded_from && isBotCommand(resolveCommand(m, bot.name))) ||
+    (m.chat !== null && m.chat !== undefined && (bot.channels ?? []).includes(m.chat))
+  );
 }
 
 /**
@@ -206,7 +217,7 @@ export async function readExport(
       const id = p.authorIds.get(m);
       if (id !== undefined) ids.push([entries.length, id]);
       index(chats, m.chat);
-      if (options.keepAll || readByPhase2(m, options.bot)) {
+      if (options.keepAll || keptInFull(m, options.bot)) {
         counts.kept++;
         entries.push(m);
       } else {

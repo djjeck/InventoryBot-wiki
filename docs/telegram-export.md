@@ -430,11 +430,12 @@ Each export is parsed once, into an `ExportRecord`
 ([`readExport`](../src/telegram/export/record.ts)): plain JSON data that can be kept and merged
 again with other records without reading the pages again. A record holds the export's folder, a
 SHA-256 of its pages (file names and HTML), its page and message counts, its chat titles, its first
-and last date, and its messages in page order. The bot's messages and the commands for the bot (not
-forwarded) are kept in full; every other message (ordinary chat, commands for other bots, forwarded
-commands) only as a stub of chat, id, date, display name and `sender_key`, the parts of it that the
-conversation phase reads. Dates stay as written, since the offset of a macOS date depends on the
-other exports of the run ([§11.3](#113-dates-without-an-offset)). Merging the records of a run
+and last date, and its messages in page order. The bot's messages, the commands for the bot (not
+forwarded) and the posts of the channels that publish about the bot are kept in full; every other
+message (ordinary chat, commands for other bots, forwarded commands) only as a stub of chat, id,
+date, display name and `sender_key`, the parts of it that the conversation phase reads. Dates stay
+as written, since the offset of a macOS date depends on the other exports of the run
+([§11.3](#113-dates-without-an-offset)). Merging the records of a run
 ([`mergeExports`](../src/telegram/export/record.ts)) converts the dates, de-duplicates and sorts as
 above, and turns each stub into a message with an empty text; the result is the same as from the
 whole chat. A record's shape has a version (`formatVersion`): a record of another version is read

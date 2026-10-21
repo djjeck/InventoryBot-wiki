@@ -62,6 +62,17 @@ describe('readExport', () => {
     });
   });
 
+  it('keeps_the_posts_of_the_bot_s_channels_in_full', async () => {
+    const c = new Chat('Cronache di Valtorbo', 10);
+    c.user('Cronache di Valtorbo', 'RICETTA: Torre', 0);
+    const read = { bot: { ...BOT_IDENTITY, channels: ['Cronache di Valtorbo'] }, salt: SALT };
+    const pages = [page('C/messages.html', pageHtml('Cronache di Valtorbo', c.messages))];
+    const kept = (await readExport(pages, read)).entries.filter((e) => !Array.isArray(e));
+    expect(kept.map((m) => (m as Message).text)).toStrictEqual(['RICETTA: Torre']);
+    const stubbed = (await readExport(pages, READ)).entries.filter((e) => !Array.isArray(e));
+    expect(stubbed).toStrictEqual([]);
+  });
+
   it('keep_all_keeps_ordinary_chat', async () => {
     const r = await readExport([page('G/messages.html', pageHtml('G', group().messages))], {
       ...READ,

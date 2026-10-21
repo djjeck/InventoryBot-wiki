@@ -9,4 +9,9 @@ export interface BotIdentity {
   name: string;
   /** Title of the private chat with the bot: the chat with this title is the DM. */
   dmTitle: string;
+  /**
+   * Titles of channels that publish about the bot: phase 1 keeps their posts in full, for
+   * the bot's own layer to read; no phase of this layer reads them.
+   */
+  channels?: readonly string[];
 }
