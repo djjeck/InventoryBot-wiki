@@ -55,6 +55,29 @@ describe('dates', () => {
     expect(wallClockOffset(at(11, 28, 0), 'UTC')).toBe(0);
   });
 
+  it('wallClockOffset is the same at every minute around a change, read again', () => {
+    // Rome, 2025: forward at 02:00 on 30 March, back at 03:00 on 26 October.
+    const before = (day: number, hour: number, change: number): boolean =>
+      day < change || (day === change && hour < 3);
+    const expected = (month: number, day: number, hour: number): number =>
+      month === 3 ? (before(day, hour, 30) ? 60 : 120) : before(day, hour, 26) ? 120 : 60;
+    const read = (): [number, number][] => {
+      const out: [number, number][] = [];
+      for (const [month, first] of [
+        [3, 29],
+        [10, 25],
+      ] as const)
+        for (let day = first; day < first + 3; day++)
+          for (let hour = 0; hour < 24; hour++)
+            for (let minute = 0; minute < 60; minute += 10) {
+              const w = { year: 2025, month, day, hour, minute, second: 0 };
+              out.push([wallClockOffset(w, 'Europe/Rome'), expected(month, day, hour)]);
+            }
+      return out;
+    };
+    for (const pairs of [read(), read()]) for (const [got, want] of pairs) expect(got).toBe(want);
+  });
+
   it('isTimeZone knows IANA zones only', () => {
     expect(['Europe/Rome', 'UTC', 'America/New_York'].map(isTimeZone)).toStrictEqual([
       true,

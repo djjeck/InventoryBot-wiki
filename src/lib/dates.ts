@@ -191,8 +191,32 @@ export function isTimeZone(timeZone: string): boolean {
   }
 }
 
+/** Seconds in a block of zoneBlocks: a change of offset is never within 12 hours of another. */
+const BLOCK = 12 * 3600;
+
+/**
+ * Per time zone, block (epoch seconds / BLOCK) -> the offset throughout it, or null when
+ * it holds a change. Formatting a date is slow, and a run asks for every message's date.
+ */
+const zoneBlocks = new Map<string, Map<number, number | null>>();
+
 /** Minutes east of UTC that `timeZone` had at an instant (epoch seconds). */
 function zoneOffsetAt(timeZone: string, epoch: number): number {
+  let blocks = zoneBlocks.get(timeZone);
+  if (blocks === undefined) zoneBlocks.set(timeZone, (blocks = new Map()));
+  const b = Math.floor(epoch / BLOCK);
+  let o = blocks.get(b);
+  if (o === undefined) {
+    // At most one change within the block, so equal ends mean no change.
+    const start = formatOffsetAt(timeZone, b * BLOCK);
+    o = start === formatOffsetAt(timeZone, (b + 1) * BLOCK - 1) ? start : null;
+    blocks.set(b, o);
+  }
+  return o ?? formatOffsetAt(timeZone, epoch);
+}
+
+/** zoneOffsetAt, read from the formatted date. */
+function formatOffsetAt(timeZone: string, epoch: number): number {
   const name = zoneFormat(timeZone)
     .formatToParts(new Date(epoch * 1000))
     .find((p) => p.type === 'timeZoneName')?.value;
