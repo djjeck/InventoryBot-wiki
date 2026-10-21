@@ -37,7 +37,7 @@ import {
   WS_CLASS,
 } from '#src/lib/text.ts';
 import { INVENTORY_COMMANDS, parseDuration, useItems } from './classify.ts';
-import { stripAddr } from './patterns.ts';
+import { itemName, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
 import {
@@ -860,13 +860,14 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
       .sort((a, b) => b.len - a.len)
       .map((x) => x.n);
   const names = new Set(kb.items.keys());
-  // The longest known name that ends `raw` after a space, or is all of it.
+  // The longest known name that ends `raw` after a space or a line break, or is all of it.
   const knownSuffix = (raw: string): string | undefined => {
     for (let i = -1; ;) {
       const n = raw.slice(i + 1);
       if (names.has(n)) return n;
-      i = raw.indexOf(' ', i + 1);
+      i = raw.slice(i + 1).search(/[ \n]/u);
       if (i < 0) return undefined;
+      i += raw.length - n.length;
     }
   };
   const templates = new Set<string>(); // the use templates seen
@@ -905,7 +906,7 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
     kb.now = e.date;
     const raw = (e as Extract<Drop, { kind: 'adventure' }>).raw;
     const pre = tpl.find((p) => raw.startsWith(p) && raw.length > p.length);
-    if (truthy(pre)) record(e, loc, raw.slice(pre.length));
+    if (truthy(pre)) record(e, loc, itemName(raw.slice(pre.length)));
     else kb.addReport({ kind: 'unresolved_drop', text: raw });
   }
 }

@@ -46,3 +46,19 @@ export const GIVE = rx(
 export const GIFT = rx(
   `^\\[${W}+\\] (?:${DOT}*?)@(?<from>${W}+) ti ha dato (?<qty>${D}+)x (?<name>${DOT}+?)${S}*${END}`
 );
+
+/**
+ * An item name as the wiki keeps it: every run of whitespace within a line as one space,
+ * the line breaks of a player-made name kept, and trimmed. The bot writes some names with
+ * a no-break space, or after one more space than usual.
+ */
+export function itemName(s: string): string {
+  return s
+    .split('\n')
+    .map((l) => l.replace(WS_RUN, ' '))
+    .join('\n')
+    .replace(/ ?\n ?/gu, '\n')
+    .replace(TRIM, '');
+}
+const WS_RUN = new RegExp(`(?:(?!\\n)${S})+`, 'gu');
+const TRIM = new RegExp(`^${S}+|${S}+$`, 'gu');

@@ -17,7 +17,21 @@ import {
   stripWs,
   WORD_BODY,
 } from '#src/lib/text.ts';
-import { A, ADDR, ADDR_RE, D, DOT, END, GIFT, GIVE, rx, S, stripAddr, W } from './patterns.ts';
+import {
+  A,
+  ADDR,
+  ADDR_RE,
+  D,
+  DOT,
+  END,
+  GIFT,
+  GIVE,
+  itemName,
+  rx,
+  S,
+  stripAddr,
+  W,
+} from './patterns.ts';
 import { placeName } from './places.ts';
 import {
   type CraftEvent,
@@ -49,7 +63,7 @@ export function itemFromLine(line: string): ItemLine | null {
   const m = ITEM_LINE.exec(line);
   if (!m) return null;
   const g = groups(m);
-  const name = stripWs(g['name'] as string);
+  const name = itemName(g['name'] as string);
   // The bot sometimes lists "- " alone: nothing to name.
   if (name === '') return null;
   return {
@@ -145,7 +159,7 @@ const cItemCooldown: Classifier = (t) => {
   if (!d) return null;
   return {
     type: 'item_cooldown',
-    item: g['name'] as string,
+    item: itemName(g['name'] as string),
     action: g['act'] === 'usare' ? 'use' : 'give',
     remaining: d.seconds,
     precision: d.precision,
@@ -279,7 +293,7 @@ const cPakkomonSphere: Classifier = (t) => {
     text: stripAddr(t),
     items: [
       {
-        name: stripWs(g['name'] as string),
+        name: itemName(g['name'] as string),
         rarity: g['r'] as string,
         usable: Boolean(g['u']),
         qty: 1,
@@ -377,7 +391,7 @@ const cItemInfo: Classifier = (t) => {
   const g = groups(m);
   const ev: ItemInfoEvent = {
     type: 'item_info',
-    item: g['name'] as string,
+    item: itemName(g['name'] as string),
     rarity: g['rarity'] as string,
     usable: Boolean(g['usable']),
     // Comma-split is refined in phase 5 against known recipe names.
@@ -443,7 +457,7 @@ export function inventoryItems(lines: readonly string[]): ItemLine[] {
     const first = stripStartWs(pending[0] as string).slice(1);
     const it = itemFromLine(`- ${[first, ...pending.slice(1)].join('\u0000')}`);
     pending = null;
-    if (it) out.push({ ...it, name: stripWs(it.name.replaceAll('\u0000', '\n')) });
+    if (it) out.push({ ...it, name: itemName(it.name.replaceAll('\u0000', '\n')) });
   }
   return out;
 }
@@ -561,7 +575,7 @@ const cTravelRequirement: Classifier = (t) => {
   const g = groups(m);
   return {
     type: 'travel_requirement',
-    item: stripWs(g['item'] as string),
+    item: itemName(g['item'] as string),
     location: placeName(stripWs(g['loc'] as string)),
   };
 };
@@ -632,7 +646,7 @@ const cLucky: Classifier = (t) => {
   return {
     type: 'drop',
     kind: 'lucky',
-    item: g['name'] as string,
+    item: itemName(g['name'] as string),
     rarity: g['r'] as string,
     usable: false,
   };
@@ -646,7 +660,7 @@ const cGift: Classifier = (t) => {
     type: 'gift',
     from: g['from'] as string,
     qty: parseDecimalInt(g['qty'] as string),
-    item: g['name'] as string,
+    item: itemName(g['name'] as string),
   };
 };
 
@@ -663,7 +677,7 @@ const cDrop: Classifier = (t) => {
   return {
     type: 'drop',
     kind: 'adventure',
-    raw: stripAddr(g['pre'] as string),
+    raw: itemName(stripAddr(g['pre'] as string)),
     rarity: g['r'] as string,
     usable: Boolean(g['u']),
   };
@@ -689,7 +703,7 @@ export function useItems(t: string): ItemLine[] {
     if ((m = USE_OTTIENI.exec(l))) {
       const g = groups(m);
       items.push({
-        name: stripWs(g['name'] as string),
+        name: itemName(g['name'] as string),
         rarity: g['rarity'] ?? null,
         usable: Boolean(g['usable']),
         qty: 1,
@@ -962,7 +976,7 @@ const cGive: Classifier = (t) => {
     type: 'give',
     to: g['to'] ?? null,
     qty: parseDecimalInt(g['qty'] as string),
-    item: g['name'] as string,
+    item: itemName(g['name'] as string),
   };
 };
 
@@ -978,7 +992,7 @@ const cShow: Classifier = (t) => {
   return {
     type: 'show',
     qty: parseDecimalInt(g['qty'] as string),
-    item: g['name'] as string,
+    item: itemName(g['name'] as string),
     rarity: g['r'] as string,
     usable: Boolean(g['u']),
   };

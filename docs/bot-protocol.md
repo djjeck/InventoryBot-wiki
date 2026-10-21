@@ -55,7 +55,8 @@ DURATION  = INT " giorni e " INT " ore" | INT " ore e " INT " minuti"
 
 - An **item name** includes its article or quantifier ("un sasso", "l'orologio di un'antica torre",
   "tre metri di spago colorato") and may contain digits, emoji, quotes, commas and `x` ("un tagliere
-  30x40 di faggio"). Player-made items can contain line breaks.
+  30x40 di faggio"). Player-made items can contain line breaks. The bot writes some names with a
+  no-break space or a doubled space; the pipeline keeps every name with single spaces.
 - In an `ITEM_LINE`, a missing quantity means 1. Some lists omit the space after `-`
   (`-una moneta d'oro [X] x41`) or the rarity. An inventory may hold a line with `- ` alone, which
   names no item.

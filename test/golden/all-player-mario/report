@@ -37,7 +37,7 @@ oggetti: 65; ricette: 21 (con tutti gli ingredienti: 10, con il risultato noto: 
 -- rarity_conflict: 13
   rarity_conflict: item="l'ascia \"vera\"" old="C" new="N" date="2025-11-27T19:00:11-05:00"
   rarity_conflict: item="un \\ rovescio" old="C" new="N" date="2025-11-27T19:00:21-05:00"
-  rarity_conflict: item="un nbsp qui" old="C" new="N" date="2025-11-27T19:00:31-05:00"
+  rarity_conflict: item="un nbsp qui" old="C" new="N" date="2025-11-27T19:00:31-05:00"
   rarity_conflict: item="un astronauta 🧑‍🚀" old="C" new="N" date="2025-11-27T19:00:41-05:00"
   rarity_conflict: item="__proto__" old="C" new="N" date="2025-11-27T19:00:51-05:00"
   rarity_conflict: item="un \"dolce\"" old="C" new="N" date="2025-11-27T19:01:01-05:00"
@@ -56,7 +56,7 @@ oggetti: 65; ricette: 21 (con tutti gli ingredienti: 10, con il risultato noto: 
   unresolved_drop: text="ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio"
   unresolved_drop: text="al bazar della citta' inizi a mercanteggiare con un venditore, alla fine ottieni un baule di quercia 📦"
   unresolved_drop: text="nel fosso vedi una cosa strana"
-  unresolved_drop: text="sulla spiaggia raccogli una conchiglia  '"
+  unresolved_drop: text="sulla spiaggia raccogli una conchiglia '"
 -- ingredient_conflict: 5
   ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":3} new={"un sasso":2} date="2018-01-02T01:01:11+01:00"
   ingredient_conflict: recipe="Torre" source="craft" old={"un sasso":3} new={"un sasso":2,"una trave":1} date="2025-11-27T19:01:11-05:00"

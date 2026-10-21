@@ -9,7 +9,7 @@ oggetti: 6; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 0);
 -- rarity_conflict: 8
   rarity_conflict: item="l'ascia \"vera\"" old="C" new="N" date="2025-11-27T19:00:11-05:00"
   rarity_conflict: item="un \\ rovescio" old="C" new="N" date="2025-11-27T19:00:21-05:00"
-  rarity_conflict: item="un nbsp qui" old="C" new="N" date="2025-11-27T19:00:31-05:00"
+  rarity_conflict: item="un nbsp qui" old="C" new="N" date="2025-11-27T19:00:31-05:00"
   rarity_conflict: item="un astronauta 🧑‍🚀" old="C" new="N" date="2025-11-27T19:00:41-05:00"
   rarity_conflict: item="__proto__" old="C" new="N" date="2025-11-27T19:00:51-05:00"
   rarity_conflict: item="un \"dolce\"" old="C" new="N" date="2025-11-27T19:01:01-05:00"
@@ -18,7 +18,7 @@ oggetti: 6; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 0);
 -- unresolved_drop: 3
   unresolved_drop: text="un sasso"
   unresolved_drop: text="nel fosso vedi una cosa strana"
-  unresolved_drop: text="sulla spiaggia raccogli una conchiglia  '"
+  unresolved_drop: text="sulla spiaggia raccogli una conchiglia '"
 -- source_vs_rarity: 3
   source_vs_rarity: item="un \\ rovescio" rarity="N" sources=["special"]
   source_vs_rarity: item="un astronauta 🧑‍🚀" rarity="C" sources=["special"]
