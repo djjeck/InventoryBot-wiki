@@ -159,6 +159,7 @@ player sees anyway, and says why it is allowed.
 - in cima al monte Grevolo 🏔
 - nel bosco nebbioso di Valtorbo 🌲
 - nel magnifico Palazzo di Cristallo 🏰
+- nel villaggio di Borgoverde 🏡
 - nell'immenso deserto di Sabbiora 🏜
 - nella baia di Scogliola 🦀
 - nella palude sussurrante 🌾

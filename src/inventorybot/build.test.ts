@@ -1050,19 +1050,80 @@ describe('travel unlocks', () => {
     expect(state.locations[BOSCO]?.visited).toBe(false);
   });
 
-  it('travel_requirement_notice_names_the_required_item', () => {
-    const { wiki } = runBuild([
-      ev(T.where(BOSCO, [CATACOMBE]), '/viaggio', { t: 0 }),
-      ev(
-        'una lanterna cieca ti serve per passare nelle cripte del monastero 👻 sulla via per tornare al villaggio.',
-        null,
-        { t: 10 }
-      ),
-    ]);
-    const l = wiki.locations[CATACOMBE];
-    expect([l?.requires_item, l?.required_items]).toStrictEqual([true, ['una lanterna cieca']]);
-    expect(wiki.locations[BOSCO]?.required_items).toStrictEqual([]);
-    expect(wiki.items['una lanterna cieca']?.rarity).toBeNull();
+  describe('travel requirement notices', () => {
+    const VILLAGGIO = 'nel villaggio di Borgoverde 🏡';
+    const MONTE = 'ai piedi del monte Grevolo ⛰';
+    const CIMA = 'in cima al monte Grevolo 🏔';
+    const notice = (item: string, place: string, t: number): BuildEvent =>
+      ev(`${item} ti serve per passare ${place} sulla via per tornare al villaggio.`, null, { t });
+    /**
+     * Village -> bosco -> cripte, and village -> monte -> cima -> palude. The cripte's own
+     * exits are unknown: the bosco lists them, so they lead back to it.
+     */
+    const map = [
+      ev(T.where(VILLAGGIO, [BOSCO, MONTE]), '/viaggio', { t: 0 }),
+      ev(T.where(BOSCO, [VILLAGGIO, CATACOMBE]), '/viaggio', { t: 1 }),
+      ev(T.where(MONTE, [VILLAGGIO, CIMA]), '/viaggio', { t: 3 }),
+      ev(T.where(CIMA, [MONTE, PALUDE]), '/viaggio', { t: 4 }),
+      ev(T.where(PALUDE, [CIMA]), '/viaggio', { t: 5 }),
+    ];
+    const required = (wiki: ReturnType<typeof runBuild>['wiki']): Record<string, string[]> =>
+      Object.fromEntries(
+        Object.values(wiki.locations)
+          .filter((l) => l.required_items.length > 0)
+          .map((l) => [l.name, l.required_items])
+      );
+
+    it('the_place_takes_the_item_when_nothing_on_the_way_back_needs_one', () => {
+      const { wiki } = runBuild([...map, notice('una lanterna cieca', CATACOMBE, 10)]);
+      expect(required(wiki)).toStrictEqual({ [CATACOMBE]: ['una lanterna cieca'] });
+      expect(wiki.locations[CATACOMBE]?.requires_item).toBe(true);
+      expect(wiki.items['una lanterna cieca']?.rarity).toBeNull();
+    });
+
+    it('the_one_place_on_the_way_back_that_needs_an_item_takes_it', () => {
+      const { wiki } = runBuild([
+        ...map,
+        ev(T.blocked(CIMA), '/viaggio cima', { t: 6 }),
+        notice('un rampino di ferro', PALUDE, 10),
+      ]);
+      expect(required(wiki)).toStrictEqual({ [CIMA]: ['un rampino di ferro'] });
+      expect(wiki.locations[PALUDE]?.requires_item).toBe(false);
+    });
+
+    it('several_places_needing_an_item_are_reported', () => {
+      const { wiki, kb } = runBuild([
+        ...map,
+        ev(T.blocked(CIMA), '/viaggio cima', { t: 6 }),
+        ev(T.blocked(PALUDE), '/viaggio palude', { t: 7 }),
+        notice('un rampino di ferro', PALUDE, 10),
+      ]);
+      expect(required(wiki)).toStrictEqual({});
+      expect(kb.report.get('unresolved_requirement')).toStrictEqual([
+        {
+          kind: 'unresolved_requirement',
+          item: 'un rampino di ferro',
+          location: PALUDE,
+          reason: 'several',
+        },
+      ]);
+    });
+
+    it('without_a_known_way_back_it_is_reported', () => {
+      const { wiki, kb } = runBuild([
+        ev(T.where(BOSCO, [CATACOMBE]), '/viaggio', { t: 0 }),
+        notice('una lanterna cieca', CATACOMBE, 10),
+      ]);
+      expect(required(wiki)).toStrictEqual({});
+      expect(kb.report.get('unresolved_requirement')).toStrictEqual([
+        {
+          kind: 'unresolved_requirement',
+          item: 'una lanterna cieca',
+          location: CATACOMBE,
+          reason: 'no_way_back',
+        },
+      ]);
+    });
   });
 });
 

@@ -496,8 +496,9 @@ nothing but the known place names delimits the place. Neither does "arrivi" with
 may be followed by more words or a full stop ("arrivi esausto nella baia di Scogliola 🦀", "arrivi
 (stremato) nell'immenso deserto di Sabbiora 🏜.").
 
-`NEEDED` is a separate, unaddressed notice that is not the answer to a command: it names the item a
-place requires, on the player's way back to the village.
+`NEEDED` is a separate, unaddressed notice that is not the answer to a command: it follows a `/dai`
+of the item by a player at `LOCATION`, and names an item that `LOCATION` itself or another place on
+the way back from it to the village (`nel villaggio …`) requires, without saying which.
 
 ```bot-reply type=location query="/viaggio" location="nel bosco nebbioso di Valtorbo 🌲" exits.0="nella valle ventosa 🏞" exits.2="nell'immenso deserto di Sabbiora 🏜"
 @mario_r, ti trovi: nel bosco nebbioso di Valtorbo 🌲

@@ -121,7 +121,10 @@ export interface TravelEvent {
   narrative: string | null;
 }
 
-/** "<item> ti serve per passare <place> sulla via per tornare al villaggio.": the item a place requires. */
+/**
+ * "<item> ti serve per passare <place> sulla via per tornare al villaggio.": the item the
+ * place, or one on the way back from it to the village, requires (build.ts resolveRequirements).
+ */
 export interface TravelRequirementEvent {
   type: 'travel_requirement';
   item: string;

@@ -43,6 +43,7 @@ import {
   type BuildEvent,
   type EventRecord,
   type InventoryEvent,
+  type TravelRequirementEvent,
   type Wiki,
   type WikiItem,
   type WikiItemUse,
@@ -504,6 +505,7 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
   const drops: [Drop, string | null][] = [];
   const crafts: Craft[] = [];
   const uses: Use[] = [];
+  const requirements: TravelRequirementEvent[] = [];
   for (const e of events) {
     kb.now = e.date ?? null;
     const t = e.type;
@@ -545,10 +547,9 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       // An arrival whose place is not known (reported by resolveArrivals): only its exits are facts.
       for (const x of e.exits) kb.location(x);
     } else if (e.type === 'travel_requirement') {
-      const loc = kb.location(e.location);
-      loc.requires_item = true;
-      loc.required_items.add(e.item);
+      kb.location(e.location);
       kb.item(e.item);
+      requirements.push(e);
     } else if (
       (e.type === 'travel' || e.type === 'location' || e.type === 'travel_blocked') &&
       !mine(e)
@@ -598,7 +599,80 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
 
   resolveDrops(kb, drops);
   resolveCrafts(kb, crafts, recipeNames);
+  resolveRequirements(kb, requirements);
   return uses;
+}
+
+/** The place the bot calls "il villaggio", where every way back ends. */
+const VILLAGE = /^nel villaggio\b/u;
+
+/**
+ * The places from `from` to `to` (both included) along the fewest known exits, or null.
+ * An exit is walked both ways: a place listed as an exit of another leads back to it.
+ */
+function wayBetween(kb: KB, from: string, to: string): string[] | null {
+  const next = new Map<string, Set<string>>();
+  const link = (a: string, b: string): void => {
+    let s = next.get(a);
+    if (s === undefined) next.set(a, (s = new Set()));
+    s.add(b);
+  };
+  for (const [n, l] of kb.locations)
+    for (const x of l.exits) {
+      link(n, x);
+      link(x, n);
+    }
+  const prev = new Map<string, string | null>([[from, null]]);
+  const queue = [from];
+  for (let i = 0; i < queue.length; i++) {
+    const at = queue[i] as string;
+    if (at === to) {
+      const way: string[] = [];
+      for (let n: string | null = at; n !== null; n = prev.get(n) ?? null) way.unshift(n);
+      return way;
+    }
+    for (const x of next.get(at) ?? []) {
+      if (prev.has(x)) continue;
+      prev.set(x, at);
+      queue.push(x);
+    }
+  }
+  return null;
+}
+
+/**
+ * "X ti serve per passare P sulla via per tornare al villaggio": X is needed by P or by a
+ * place on the way back from P to the village, and the notice does not say which. X goes
+ * to the one place on that way (the village aside) known to need an item, or to P when
+ * none is; with several, or no known way back, it is reported and goes nowhere.
+ */
+function resolveRequirements(kb: KB, notices: readonly TravelRequirementEvent[]): void {
+  const village = [...kb.locations.keys()].find((n) => VILLAGE.test(n));
+  for (const e of notices) {
+    const way = village === undefined ? null : wayBetween(kb, e.location, village);
+    if (way === null) {
+      kb.addReport({
+        kind: 'unresolved_requirement',
+        item: e.item,
+        location: e.location,
+        reason: 'no_way_back',
+      });
+      continue;
+    }
+    const needing = way.filter((n) => n !== village && kb.location(n).requires_item);
+    if (needing.length > 1) {
+      kb.addReport({
+        kind: 'unresolved_requirement',
+        item: e.item,
+        location: e.location,
+        reason: 'several',
+      });
+      continue;
+    }
+    const loc = kb.location(needing[0] ?? e.location);
+    loc.requires_item = true;
+    loc.required_items.add(e.item);
+  }
 }
 
 /** Every place an event names: where the player is or goes, the exits, refusals, /stats, requirement notices. */

@@ -1359,11 +1359,9 @@
       "name": "nelle cripte del monastero 👻",
       "label": "Cripte del monastero 👻",
       "exits": [],
-      "requires_item": true,
+      "requires_item": false,
       "unlock_texts": [],
-      "required_items": [
-        "una lanterna cieca"
-      ],
+      "required_items": [],
       "exclusive_items": []
     }
   }

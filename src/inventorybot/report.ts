@@ -70,6 +70,17 @@ export type ReportEntry =
     }
   /** A travel whose destination is not a known place (text cut to 80 characters). */
   | { kind: 'unresolved_travel'; query: string | null; text: string }
+  /**
+   * A notice of the item needed on the way back from a place, which no single place on
+   * that way can take (see resolveRequirements); `reason`: no way back to the village is
+   * known, or several places on it need an item.
+   */
+  | {
+      kind: 'unresolved_requirement';
+      item: string;
+      location: string;
+      reason: 'no_way_back' | 'several';
+    }
   /** Counts that show the item both consumed and not consumed by a use. */
   | { kind: 'use_consumption_conflict'; item: string; yes: number; no: number }
   /** Cooldown observations whose bounds contradict each other (seconds). */
