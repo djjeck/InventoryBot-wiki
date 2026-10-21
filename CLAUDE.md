@@ -126,32 +126,41 @@ builds it into `web-dist/`). The built page carries a Content-Security-Policy th
 network connection, so the browser itself guarantees that the exports are never sent anywhere. Its
 one exception is Google Fonts: the page loads its typefaces from there (a stylesheet and font files,
 requests that carry no data of the player's), and falls back to system fonts without them. The page
-(`main.ts`) lists the exports and sends each folder the player picks at once to a Web Worker
-(`worker.ts`, `run.ts`; the messages are in `protocol.ts`), so the page stays responsive. The worker
-owns the storage and runs the pipeline: it reads each folder into records (`processExport`) and
-keeps them, then builds the wiki again from every kept record (`buildWiki`) and saves the results.
-Its queue runs one step at a time: the folders added, in order, then one build once none is left to
-read, however many were added. A build is never abandoned: a folder added or removed while it runs,
-or new options, make its results not current, and one more build follows. A folder whose exports are
-all kept already builds nothing, and one that cannot be read is listed with the error while the
-queue goes on. Removing an export rebuilds from the rest. The page shows the wiki and the player
-state with the wiki view (`view/wiki-view.js` and `.css`, plain JavaScript that defines
-`window.renderWiki`), and the report in a collapsed section. The owner is the player the bot
-addresses most in the DM; without a DM the build stops, the records stay kept, and the page shows a
-username field, which it offers nowhere else. What the worker keeps is in IndexedDB, in this browser
-only (`storage.ts`): the records of the exports (`ExportRecord`, never the export pages), each with
-its folder, dates and counts, in upload order, which is their merge order; the last results (wiki,
-player state, report, options) with the records they were built from, so a returning player sees
-their wiki at once and the worker rebuilds only if they are not current; and the salt of the
-pseudonyms and sender keys, made once. A record is valid only with the salt that made it, so the
+(`main.ts`) has one view, the wiki (empty, with how to export, until there is one), under a header
+whose "Aggiungi esportazione" button opens the folder picker and whose "Esportazioni" button toggles
+a panel with the list of exports (each with its chat, the days of its first and last message and its
+status, worded by `labels.ts`), the options and "Cancella i miei dati". It sends each folder picked
+at once to a Web Worker (`worker.ts`, `run.ts`; the messages are in `protocol.ts`), so the page
+stays responsive, and every change of the options (the time zone, the username once typing pauses,
+`debounce.ts`); there is no button to build. The worker owns the storage and runs the pipeline: it
+reads each folder into records (`processExport`) and keeps them, then builds the wiki again from
+every kept record (`buildWiki`) and saves the results. It loads the stored records once, at start,
+and keeps them in memory, so a build loads nothing again unless another tab stored one. Its queue
+runs one step at a time: the folders added, in order, then one build once none is left to read,
+however many were added. A build is never abandoned: a folder added or removed while it runs, or new
+options, make its results not current, and one more build follows. A folder whose exports are all
+kept already builds nothing, and one that cannot be read is listed with the error while the queue
+goes on. Removing an export rebuilds from the rest, and options equal to the current ones build
+nothing. The header shows the reading and the build's phase while the current wiki stays usable;
+each build's wiki replaces it in place, without moving the focus. The wiki and the player state are
+drawn by the wiki view (`view/wiki-view.js` and `.css`, plain JavaScript that defines
+`window.renderWiki`), and the report is in a collapsed section. The owner is the player the bot
+addresses most in the DM; without a DM the build stops, the records stay kept, and the panel shows a
+username field, which the page offers nowhere else. What the worker keeps is in IndexedDB, in this
+browser only (`storage.ts`): the records of the exports (`ExportRecord`, never the export pages),
+each with its folder, dates and counts, in upload order, which is their merge order; the last
+results (wiki, player state, report, options) with the records they were built from, so a returning
+player sees their wiki at once and the worker rebuilds only if they are not current; and the salt of
+the pseudonyms and sender keys, made once. A record is valid only with the salt that made it, so the
 three live in one database: without a salt the records and results are dropped, and a record or
 results made with another salt are refused. A record of an older `RECORD_FORMAT_VERSION` is stale:
 it is listed, so the player can add the export again, but never used, and its payload is dropped.
 Opening the database of an older schema drops what it kept. Without storage the worker keeps the
-records of the visit in memory. "Cancella i miei dati" deletes the whole database. `run.ts` and
-`storage.ts` use no browser API and are tested in Node (on a fake IndexedDB,
-`test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
-(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
+records of the visit in memory. "Cancella i miei dati" deletes the whole database and resets the
+options. `run.ts`, `storage.ts`, `labels.ts` and `debounce.ts` use no browser API and are tested in
+Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only
+wiring, checked in a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out
+of coverage).
 
 The code has two layers. The generic Telegram-bot layer, `src/telegram/` with the utilities of
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,

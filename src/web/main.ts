@@ -1,16 +1,21 @@
 /**
- * The web app's page: the list of exports (each folder picked is sent at once to the
- * worker, which reads it, keeps it and builds the wiki again), the time zone (this
- * browser's, proposed), the owner's username when a build asks for it, progress and
- * errors, then the wiki, rendered by the view (view/wiki-view.js). The worker (worker.ts,
- * run.ts) owns the storage and runs the pipeline on the browser `File` objects of the
- * picked folders; nothing is sent over the network (the built page's
+ * The web app's page: the wiki, the only view, under a header whose "Aggiungi
+ * esportazione" button opens the folder picker and whose "Esportazioni" button toggles a
+ * panel with the list of exports, the options and "Cancella i miei dati". Each folder
+ * picked is sent at once to the worker, which reads it, keeps it and builds the wiki
+ * again; a change of the options (the time zone, the username once a build asked for it)
+ * builds again too. The saved wiki shows at once, and each build's wiki replaces it in
+ * place, without moving the focus; reading and building show in the header. The worker
+ * (worker.ts, run.ts) owns the storage and runs the pipeline on the browser `File`
+ * objects of the picked folders; nothing is sent over the network (the built page's
  * Content-Security-Policy forbids it).
  *
  * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, storage.ts,
- * the adapters) has its own tests.
+ * labels.ts, debounce.ts, the adapters) has its own tests.
  */
 import { type Phase } from '#src/pipeline.ts';
+import { debounce } from './debounce.ts';
+import { activityText, entryLabel } from './labels.ts';
 import {
   type BuildOptions,
   type ExportEntry,
@@ -32,38 +37,45 @@ declare global {
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 const ui = {
-  start: $('start'),
-  result: $('result'),
+  main: $('main'),
+  activity: $('activity'),
+  activityText: $('activity-text'),
   folders: $<HTMLInputElement>('folders'),
-  pickLabel: $<HTMLLabelElement>('pick-label'),
-  picked: $<HTMLUListElement>('picked'),
-  pickNote: $('pick-note'),
+  add: $<HTMLButtonElement>('add'),
+  toggle: $<HTMLButtonElement>('panel-toggle'),
+  count: $('export-count'),
+  panel: $('panel'),
+  panelClose: $<HTMLButtonElement>('panel-close'),
+  exports: $<HTMLUListElement>('exports'),
+  exportsNone: $('exports-none'),
   form: $<HTMLFormElement>('options'),
   playerField: $('player-field'),
   player: $<HTMLInputElement>('player'),
   timeZone: $<HTMLSelectElement>('time-zone'),
-  run: $<HTMLButtonElement>('run'),
-  back: $<HTMLButtonElement>('back'),
-  progress: $('progress'),
-  progressBar: $<HTMLProgressElement>('progress-bar'),
-  progressText: $('progress-text'),
-  error: $('error'),
   storageNote: $('storage-note'),
-  resultInfo: $('result-info'),
-  edit: $<HTMLButtonElement>('edit'),
   clear: $<HTMLButtonElement>('clear'),
+  notice: $('notice'),
+  noticeText: $('notice-text'),
+  error: $('error'),
+  errorText: $('error-text'),
+  empty: $('empty'),
   wiki: $('wiki'),
+  resultInfo: $('result-info'),
+  reportBox: $('report-box'),
   report: $('report'),
   announce: $('announce'),
 };
 
 /** The exports, as the worker last listed them. */
 let exportList: ExportEntry[] = [];
-let shown: RunResult | null = null;
-/** A build is running (a phase started, its results not yet in). */
-let building = false;
+/** The ids of the exports whose error was shown already. */
+const errorsShown = new Set<string>();
+/** The build's phase while one runs, else null. */
+let phase: Phase | null = null;
 /** Whether the worker can keep data beyond this visit. */
 let storage = true;
+/** The options last sent to the worker (or received from it). */
+let sent: BuildOptions | null = null;
 
 let worker: Worker | null = null;
 try {
@@ -92,59 +104,140 @@ function announce(text: string): void {
   setTimeout(() => (ui.announce.textContent = text), 50);
 }
 
-// ---- exports ------------------------------------------------------------------------
+const listHtml = (details: readonly string[]): string =>
+  details.length ? `<ul>${details.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '';
 
-/** What the list says of an export. */
-function entryText(e: ExportEntry): string {
-  if (e.status === 'queued') return 'in attesa di lettura';
-  if (e.status === 'reading') return `lettura: ${e.done ?? 0} di ${e.total ?? 0} pagine`;
-  if (e.status === 'stale')
-    return 'letta da una versione precedente: aggiungila di nuovo perché conti';
-  if (e.status === 'error') return e.message ?? 'non letta';
-  const i = e.info;
-  return i ? `${i.pages} pagine di chat, ${i.counts.messages} messaggi` : 'pronta';
+// ---- notices and errors --------------------------------------------------------------
+
+function hideNotice(): void {
+  ui.notice.hidden = true;
+  ui.noticeText.replaceChildren();
 }
 
+function showNotice(text: string, details: readonly string[]): void {
+  ui.noticeText.innerHTML = `<p>${esc(text)}</p>${listHtml(details)}`;
+  ui.notice.hidden = false;
+}
+
+function hideError(): void {
+  ui.error.hidden = true;
+  ui.errorText.replaceChildren();
+}
+
+/** Shows an error (its role=alert announces it); the focus moves only to `focus`, if given. */
+function showError(html: string, details: readonly string[] = [], focus?: HTMLElement): void {
+  ui.errorText.innerHTML = html + listHtml(details);
+  ui.error.hidden = false;
+  focus?.focus();
+}
+
+$('notice-close').addEventListener('click', () => {
+  hideNotice();
+  ui.add.focus();
+});
+$('error-close').addEventListener('click', () => {
+  hideError();
+  ui.add.focus();
+});
+
+// ---- the panel -----------------------------------------------------------------------
+
+function openPanel(focus = true): void {
+  ui.panel.hidden = false;
+  ui.toggle.setAttribute('aria-expanded', 'true');
+  if (focus) ui.panel.focus();
+}
+
+function closePanel(): void {
+  if (ui.panel.hidden) return;
+  const inside = ui.panel.contains(document.activeElement);
+  ui.panel.hidden = true;
+  ui.toggle.setAttribute('aria-expanded', 'false');
+  if (inside) ui.toggle.focus();
+}
+
+ui.toggle.addEventListener('click', () => (ui.panel.hidden ? openPanel() : closePanel()));
+ui.panelClose.addEventListener('click', closePanel);
+ui.panel.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closePanel();
+  }
+});
+
+// ---- exports --------------------------------------------------------------------------
+
 function renderExports(): void {
-  ui.picked.replaceChildren(
+  ui.exports.replaceChildren(
     ...exportList.map((e) => {
+      const l = entryLabel(e);
       const li = document.createElement('li');
-      const span = document.createElement('span');
-      span.textContent = `${e.folder} — ${entryText(e)}`;
-      if (e.status === 'error' && e.details?.length) {
-        const ul = document.createElement('ul');
-        ul.append(
-          ...e.details.map((d) => {
-            const item = document.createElement('li');
-            item.textContent = d;
-            return item;
-          })
-        );
-        span.append(ul);
+      li.className = `export s-${e.status}`;
+      const text = document.createElement('div');
+      text.className = 'export-text';
+      const name = document.createElement('span');
+      name.className = 'export-name';
+      name.textContent = l.name;
+      if (l.name !== e.folder) name.title = e.folder;
+      const meta = document.createElement('span');
+      meta.className = 'export-meta';
+      const status = document.createElement('span');
+      status.className = 'export-status';
+      status.textContent = l.status;
+      if (l.days !== null) meta.append(`${l.days} · `);
+      meta.append(status);
+      text.append(name, meta);
+      if (l.detail !== null) {
+        const detail = document.createElement('span');
+        detail.className = 'export-detail';
+        detail.textContent = l.detail;
+        if (e.details?.length) {
+          const ul = document.createElement('ul');
+          ul.append(
+            ...e.details.map((d) => {
+              const item = document.createElement('li');
+              item.textContent = d;
+              return item;
+            })
+          );
+          detail.append(ul);
+        }
+        text.append(detail);
       }
       const remove = document.createElement('button');
       remove.type = 'button';
+      remove.className = 'export-remove';
       remove.textContent = 'Togli';
-      remove.setAttribute('aria-label', `Togli ${e.folder}`);
+      const what = l.days === null ? l.name : `${l.name} (${l.days})`;
+      remove.setAttribute('aria-label', `Togli ${what}`);
       remove.addEventListener('click', () => {
         if (
           (e.status === 'ready' || e.status === 'stale') &&
-          !confirm(`Togliere ${e.folder}? La wiki verrà ricreata senza.`)
+          !confirm(`Togliere l’esportazione ${what}? La wiki verrà ricreata senza.`)
         )
           return;
         send({ type: 'remove', id: e.id });
-        ui.pickLabel.focus();
+        ui.panel.focus();
       });
-      li.append(span, remove);
+      li.append(text, remove);
       return li;
     })
   );
-  ui.pickLabel.textContent = exportList.length
-    ? 'Aggiungi un’altra cartella…'
-    : 'Aggiungi una cartella…';
-  ui.run.disabled = !exportList.some((e) => e.status === 'ready');
-  updateProgress();
+  ui.exportsNone.hidden = exportList.length > 0;
+  ui.count.textContent = exportList.length ? ` (${exportList.length})` : '';
+  // An export that cannot be read is told once, also with the panel closed.
+  for (const e of exportList)
+    if (e.status === 'error' && !errorsShown.has(e.id)) {
+      errorsShown.add(e.id);
+      showError(
+        `<p>${esc(e.message ?? `Non è stato possibile leggere ${e.folder}.`)}</p>`,
+        e.details
+      );
+    }
+  updateActivity();
 }
+
+ui.add.addEventListener('click', () => ui.folders.click());
 
 ui.folders.addEventListener('change', () => {
   const files = [...(ui.folders.files ?? [])];
@@ -157,85 +250,12 @@ ui.folders.addEventListener('change', () => {
   announce(`Aggiunta la cartella ${[...top].join(', ')}: lettura in corso.`);
 });
 
-function hideNotice(): void {
-  ui.pickNote.hidden = true;
-  ui.pickNote.replaceChildren();
-}
-
-function showNotice(text: string, details: readonly string[]): void {
-  ui.pickNote.innerHTML =
-    esc(text) +
-    (details.length ? `<ul>${details.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '');
-  ui.pickNote.hidden = false;
-  announce(text);
-}
-
-// The pick label works as a button from the keyboard too.
-ui.pickLabel.tabIndex = 0;
-ui.pickLabel.setAttribute('role', 'button');
-ui.pickLabel.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    ui.folders.click();
-  }
-});
-
-// ---- errors and progress -------------------------------------------------------------
-
-function hideError(): void {
-  ui.error.hidden = true;
-  ui.error.replaceChildren();
-}
-
-function showError(html: string, details: readonly string[] = [], focus?: HTMLElement): void {
-  ui.error.innerHTML =
-    html + (details.length ? `<ul>${details.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>` : '');
-  ui.error.hidden = false;
-  (focus ?? ui.error).focus();
-}
-
-const PHASES: Record<Phase, [label: string, percent: number]> = {
-  parse: ['Lettura dei messaggi', 10],
-  conversation: ['Abbinamento delle risposte ai comandi', 40],
-  interpret: ['Interpretazione delle risposte del bot', 60],
-  build: ['Costruzione della wiki', 85],
-};
-
-/** Shows the reading of the export being read, else the build's phase; hidden when idle. */
-function updateProgress(phase?: Phase): void {
-  const reading = exportList.find((e) => e.status === 'reading');
-  const queued = exportList.filter((e) => e.status === 'queued').length;
-  const busy = reading !== undefined || queued > 0 || building;
-  ui.progress.hidden = !busy;
-  ui.form.setAttribute('aria-busy', String(busy));
-  if (reading) {
-    const total = reading.total ?? 0;
-    ui.progressBar.value = total ? Math.round((100 * (reading.done ?? 0)) / total) : 0;
-    ui.progressText.textContent =
-      `Lettura di ${reading.folder}: ${reading.done ?? 0} di ${total} pagine` +
-      (queued ? ` (altre ${queued} in attesa)` : '');
-  } else if (phase !== undefined) {
-    const [label, percent] = PHASES[phase];
-    ui.progressBar.value = percent;
-    ui.progressText.textContent = `${label}…`;
-  } else if (queued > 0) {
-    ui.progressBar.value = 0;
-    ui.progressText.textContent = `${queued} cartelle in attesa di lettura`;
-  }
-}
-
-/** No DM with the bot and no username given: the field to fill. */
-function showNoOwner(): void {
-  // Asked only here: the owner is normally found in the private chat with the bot.
-  ui.playerField.hidden = false;
-  ui.player.setAttribute('aria-invalid', 'true');
-  showStart();
-  showError(
-    '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
-      'Scrivilo nel campo <b>Il tuo nome utente Telegram</b> e premi <b>Aggiorna la wiki</b>.</p>',
-    [],
-    ui.player
-  );
+/** The header's progress line, hidden when idle. */
+function updateActivity(): void {
+  const text = activityText(exportList, phase);
+  ui.activity.hidden = text === null;
+  ui.activityText.textContent = text ?? '';
+  ui.main.setAttribute('aria-busy', String(text !== null));
 }
 
 // ---- pseudonyms ----------------------------------------------------------------------
@@ -262,7 +282,7 @@ function dropLegacySalt(): void {
   }
 }
 
-// ---- time zone -----------------------------------------------------------------------
+// ---- options -------------------------------------------------------------------------
 
 /** The time zone the picker proposes: this browser's, else Italy's. */
 function browserTimeZone(): string {
@@ -294,22 +314,95 @@ function fillTimeZones(selected?: string): void {
   ui.timeZone.value = proposed;
 }
 
-// ---- building -------------------------------------------------------------------------
-
-/** The options of the form. */
+/** The options of the panel. */
 function formOptions(): BuildOptions {
   // The field is shown only when a build has asked for it, or a username was given.
   const player = ui.playerField.hidden ? '' : ui.player.value.trim().replace(/^@/, '');
   return { timeZone: ui.timeZone.value, player: player === '' ? null : player };
 }
 
-ui.form.addEventListener('submit', (e) => {
-  e.preventDefault();
+/** Sends the panel's options, if they changed: the worker builds with them. */
+function sendOptions(): void {
+  const options = formOptions();
+  if (sent !== null && sent.timeZone === options.timeZone && sent.player === options.player) return;
+  sent = options;
   hideError();
   ui.player.removeAttribute('aria-invalid');
-  send({ type: 'rebuild', options: formOptions() });
-  announce('La wiki viene ricreata.');
+  send({ type: 'options', options });
+  announce('La wiki viene ricreata con le nuove opzioni.');
+}
+
+/** The username: built with once the player stops typing. */
+const typed = debounce(sendOptions, 600);
+ui.player.addEventListener('input', () => typed.call());
+ui.timeZone.addEventListener('change', () => {
+  typed.flush();
+  sendOptions();
 });
+ui.form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  typed.cancel();
+  sendOptions();
+});
+
+// ---- results -------------------------------------------------------------------------
+
+/** No DM with the bot and no username given: the field to fill. */
+function showNoOwner(): void {
+  // Asked only here: the owner is normally found in the private chat with the bot.
+  ui.playerField.hidden = false;
+  ui.player.setAttribute('aria-invalid', 'true');
+  openPanel(false);
+  showError(
+    '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
+      'Scrivilo nel campo <b>Il tuo nome utente Telegram</b>, nel pannello delle esportazioni: ' +
+      'la wiki si crea appena smetti di scrivere.</p>',
+    [],
+    ui.player
+  );
+}
+
+function showEmpty(): void {
+  ui.wiki.replaceChildren();
+  ui.empty.hidden = false;
+  ui.resultInfo.textContent = '';
+  ui.report.textContent = '';
+  ui.reportBox.hidden = true;
+}
+
+/** Renders a wiki in place of the one shown, keeping the search and its focus. */
+function showResult(result: RunResult): void {
+  const old = ui.wiki.querySelector<HTMLInputElement>('#q');
+  const query = old?.value ?? '';
+  const active = document.activeElement;
+  const hadFocus = active !== null && ui.wiki.contains(active);
+  const inSearch = active === old && old !== null;
+  // A new element for each render: the view keeps its listeners on its root.
+  const root = document.createElement('div');
+  ui.wiki.replaceChildren(root);
+  window.renderWiki(root, result.wiki, result.player);
+  const q = root.querySelector<HTMLInputElement>('#q');
+  if (q !== null && query !== '') {
+    q.value = query;
+    q.dispatchEvent(new Event('input'));
+  }
+  if (inSearch) q?.focus({ preventScroll: true });
+  else if (hadFocus) ui.main.focus({ preventScroll: true });
+  ui.empty.hidden = true;
+  const who = result.owner ? `@${result.owner}` : 'giocatore sconosciuto';
+  ui.resultInfo.textContent =
+    `Wiki di ${who}, da ${result.folders.length === 1 ? 'un’esportazione' : `${result.folders.length} esportazioni`} ` +
+    `(${result.pages} ${result.pages === 1 ? 'pagina' : 'pagine'}), creata il ${fmtDate(result.wiki.generated)}; gli altri giocatori hanno uno pseudonimo.`;
+  ui.report.textContent = result.report.join('\n');
+  ui.reportBox.hidden = false;
+}
+
+function updateStorageNote(savedAt?: string): void {
+  ui.storageNote.textContent = !storage
+    ? 'Questo browser non permette di salvare dati: alla prossima visita le cartelle andranno aggiunte di nuovo.'
+    : (savedAt === undefined ? '' : `Wiki salvata in questo browser il ${fmtDate(savedAt)}. `) +
+      'Le esportazioni lette (non le chat intere) e la wiki restano solo in questo browser: alla prossima visita le ritrovi. «Cancella i miei dati» le elimina.';
+}
 
 function onMessage(m: WorkerMessage): void {
   if (m.type === 'state' || m.type === 'exports') {
@@ -317,9 +410,12 @@ function onMessage(m: WorkerMessage): void {
     storage = m.storage;
     if (m.type === 'state') {
       if (storage) dropLegacySalt();
+      typed.cancel();
       ui.playerField.hidden = m.options.player === null;
       ui.player.value = m.options.player ?? '';
       fillTimeZones(m.options.timeZone);
+      sent = m.options;
+      updateStorageNote();
     }
     return renderExports();
   }
@@ -329,31 +425,29 @@ function onMessage(m: WorkerMessage): void {
     return renderExports();
   }
   if (m.type === 'phase') {
-    building = true;
-    return updateProgress(m.phase);
+    phase = m.phase;
+    return updateActivity();
   }
-  if (m.type === 'notice') return showNotice(m.text, m.details);
-  building = false;
-  updateProgress();
+  if (m.type === 'notice') {
+    showNotice(m.text, m.details);
+    return announce(m.text);
+  }
+  phase = null;
+  updateActivity();
   const o = m.outcome;
   if (o.status === 'done') {
-    // The wiki is updated whenever a build ends; the view moves to it once it is current,
-    // or at once for the wiki kept from an earlier visit.
-    showResult(o.result, m.current || o.savedAt !== undefined);
-    if (o.savedAt !== undefined)
-      ui.storageNote.textContent = `Wiki salvata in questo browser il ${fmtDate(o.savedAt)}.`;
-    else updateStorageNote();
-    if (m.current)
+    showResult(o.result);
+    updateStorageNote(o.savedAt);
+    if (m.current && o.savedAt === undefined)
       announce(
-        `Wiki pronta: ${Object.keys(o.result.wiki.recipes).length} ricette, ${Object.keys(o.result.wiki.items).length} oggetti.`
+        `Wiki aggiornata: ${Object.keys(o.result.wiki.recipes).length} ricette, ${Object.keys(o.result.wiki.items).length} oggetti.`
       );
   } else if (o.status === 'empty') {
-    shown = null;
-    ui.wiki.replaceChildren();
-    ui.report.textContent = '';
-    showStart();
-    if (!storage) updateStorageNote();
+    showEmpty();
+  } else if (!m.current) {
+    // a newer build follows
   } else if (o.status === 'no-owner') {
+    showEmpty();
     showNoOwner();
   } else {
     showError(
@@ -363,41 +457,6 @@ function onMessage(m: WorkerMessage): void {
     );
   }
 }
-
-// ---- results -------------------------------------------------------------------------
-
-function showStart(): void {
-  ui.result.hidden = true;
-  ui.start.hidden = false;
-  ui.back.hidden = shown === null;
-}
-
-function showResult(result: RunResult, focus: boolean): void {
-  shown = result;
-  // A new element for each render: the view keeps its listeners on its root.
-  const root = document.createElement('div');
-  ui.wiki.replaceChildren(root);
-  window.renderWiki(root, result.wiki, result.player);
-  const who = result.owner ? `@${result.owner}` : 'giocatore sconosciuto';
-  ui.resultInfo.textContent =
-    `Wiki di ${who}, da ${result.folders.join(', ')} (${result.pages} pagine), ` +
-    `creata il ${fmtDate(result.wiki.generated)}; altri giocatori con pseudonimi.`;
-  ui.report.textContent = result.report.join('\n');
-  if (!focus) return;
-  ui.start.hidden = true;
-  ui.result.hidden = false;
-  ui.back.hidden = false;
-  $('main').focus();
-}
-
-ui.edit.addEventListener('click', () => {
-  showStart();
-  ui.pickLabel.focus();
-});
-
-ui.back.addEventListener('click', () => {
-  if (shown) showResult(shown, true);
-});
 
 ui.clear.addEventListener('click', () => {
   if (
@@ -413,25 +472,15 @@ ui.clear.addEventListener('click', () => {
     // storage unavailable: nothing was saved there
   }
   dropLegacySalt();
-  shown = null;
-  ui.wiki.replaceChildren();
-  ui.report.textContent = '';
-  ui.player.value = '';
-  ui.playerField.hidden = true;
-  fillTimeZones();
-  showStart();
+  typed.cancel();
+  errorsShown.clear();
+  showEmpty();
   hideError();
   hideNotice();
+  closePanel();
   announce('Dati cancellati da questo browser.');
-  ui.storageNote.textContent = 'I tuoi dati sono stati cancellati da questo browser.';
-  ui.pickLabel.focus();
+  ui.add.focus();
 });
-
-function updateStorageNote(): void {
-  ui.storageNote.textContent = storage
-    ? 'Le esportazioni lette (non le chat intere) e la wiki restano solo in questo browser: alla prossima visita le ritrovi. «Cancella i miei dati» le elimina.'
-    : 'Questo browser non permette di salvare dati: alla prossima visita le cartelle andranno aggiunte di nuovo.';
-}
 
 // ---- start ---------------------------------------------------------------------------
 
@@ -441,10 +490,10 @@ if (!('webkitdirectory' in ui.folders)) {
   showError(
     '<p>Questo browser non permette di scegliere una cartella. Usa una versione recente di Chrome, Edge, Firefox o Safari.</p>'
   );
-  ui.pickLabel.hidden = true;
+  ui.add.disabled = true;
 } else if (worker === null) {
   showError('<p>Il browser non ha potuto avviare l’elaborazione.</p>');
-  ui.pickLabel.hidden = true;
+  ui.add.disabled = true;
 } else {
   worker.onmessage = (ev: MessageEvent<WorkerMessage>) => onMessage(ev.data);
   worker.onerror = (ev) => {

@@ -9,9 +9,10 @@ import { fakeIndexedDb } from '#test/fake-indexeddb.ts';
 import { GOLDEN_OPTIONS, goldenRuns, normaliseOutput, readGolden } from '#test/golden.ts';
 import { BOT, Chat, writeExport, writeMacExport } from '#test/helpers.ts';
 import { tempDir } from '#test/temp-dir.ts';
-import { startHarness, WORKER_SALT } from '#test/web-worker.ts';
-import { type RunResult, type WorkerMessage } from './protocol.ts';
+import { startHarness, WORKER_OPTIONS, WORKER_SALT } from '#test/web-worker.ts';
+import { type PageMessage, type RunResult, type WorkerMessage } from './protocol.ts';
 import { startWorker } from './run.ts';
+import { openStore, type Store } from './storage.ts';
 
 /** A DM with the bot over two pages, and a group, each exported in its own folder. */
 function writeInbox(): { dm: string; group: string } {
@@ -233,7 +234,7 @@ describe('queue', () => {
       if (m.type === 'phase' && !sent) {
         sent = true;
         void h.worker.handle({
-          type: 'rebuild',
+          type: 'options',
           options: { timeZone: 'Europe/Rome', player: 'luigi' },
         });
       }
@@ -322,6 +323,81 @@ describe('queue', () => {
   });
 });
 
+describe('records in memory', () => {
+  /** A worker on `factory` whose store counts its loadRecords calls. */
+  async function counted(factory = fakeIndexedDb().factory) {
+    const store = openStore(factory);
+    let loads = 0;
+    const counting: Store = Object.create(store as object, {
+      loadRecords: {
+        value: () => {
+          loads++;
+          return store.loadRecords();
+        },
+      },
+    });
+    const posted: WorkerMessage[] = [];
+    const worker = startWorker(counting, (m) => posted.push(m));
+    const send = async (m: PageMessage) => {
+      await worker.handle(m);
+      await worker.idle();
+    };
+    await send({ type: 'state', options: WORKER_OPTIONS, salt: WORKER_SALT });
+    return { store, send, posted, loads: () => loads };
+  }
+
+  it('builds_after_the_first_do_not_load_the_records_again', async () => {
+    const w = await counted();
+    const { dm, group } = writeInbox();
+    await w.send({ type: 'add', picks: [pickFolder(dm)] });
+    await w.send({ type: 'add', picks: [pickFolder(group)] });
+    await w.send({ type: 'options', options: { ...WORKER_OPTIONS, timeZone: 'UTC' } });
+    const builds = w.posted.filter((m) => m.type === 'results' && m.outcome.status === 'done');
+    expect(builds).toHaveLength(3);
+    expect(w.loads()).toBe(0);
+  });
+
+  it('stored_records_are_loaded_once_at_start', async () => {
+    const { factory } = fakeIndexedDb();
+    const first = await startHarness(factory);
+    await first.add(pickFolder(writeInbox().dm));
+    const again = await counted(factory);
+    expect(again.loads()).toBe(1);
+    await again.send({ type: 'add', picks: [pickFolder(writeInbox().group)] });
+    const last = again.posted.at(-1);
+    expect(
+      last?.type === 'results' && last.outcome.status === 'done' && last.outcome.result.folders
+    ).toStrictEqual(['ChatExport_dm', 'ChatExport_gruppo']);
+    expect(again.loads()).toBe(1);
+  });
+
+  it('a_record_another_tab_stored_is_loaded_at_the_next_build', async () => {
+    const { factory } = fakeIndexedDb();
+    const w = await counted(factory);
+    const { dm, group } = writeInbox();
+    await w.send({ type: 'add', picks: [pickFolder(dm)] });
+    const other = await startHarness(factory); // another tab, on the same database
+    await other.add(pickFolder(group));
+    await w.send({ type: 'options', options: { ...WORKER_OPTIONS, timeZone: 'UTC' } });
+    const last = w.posted.at(-1);
+    expect(
+      last?.type === 'results' && last.outcome.status === 'done' && last.outcome.result.folders
+    ).toStrictEqual(['ChatExport_dm', 'ChatExport_gruppo']);
+    expect(w.loads()).toBe(1);
+  });
+
+  it('unchanged_options_build_nothing', async () => {
+    const h = await startHarness();
+    await h.add(pickFolder(writeInbox().dm));
+    const builds = h.results().length;
+    await h.send({ type: 'options', options: { ...WORKER_OPTIONS } });
+    expect(h.results()).toHaveLength(builds);
+    await h.send({ type: 'options', options: { ...WORKER_OPTIONS, timeZone: 'UTC' } });
+    expect(h.results()).toHaveLength(builds + 1);
+    expect(h.last().options.timeZone).toBe('UTC');
+  });
+});
+
 describe('removal', () => {
   it('removing_an_export_rebuilds_from_the_rest', async () => {
     const h = await startHarness();
@@ -364,7 +440,7 @@ describe('stops and errors', () => {
     );
     expect(statuses(h)).toStrictEqual([['ChatExport_gruppo', 'ready']]);
     expect(await h.store.loadRecords()).toHaveLength(1);
-    await h.send({ type: 'rebuild', options: { timeZone: 'Europe/Rome', player: 'luigi' } });
+    await h.send({ type: 'options', options: { timeZone: 'Europe/Rome', player: 'luigi' } });
     expect(h.last().owner).toBe('luigi');
     expect(h.last().options).toStrictEqual({ timeZone: 'Europe/Rome', player: 'luigi' });
   });
@@ -386,7 +462,8 @@ describe('clear and missing storage', () => {
   it('clear_deletes_everything_and_makes_a_new_salt', async () => {
     const h = await startHarness();
     await h.add(pickFolder(writeInbox().dm));
-    await h.send({ type: 'clear' });
+    await h.send({ type: 'options', options: { ...WORKER_OPTIONS, player: 'luigi' } });
+    await h.send({ type: 'clear' }); // the username too: the page's defaults again
     expect(h.posted.slice(-2)).toStrictEqual([
       {
         type: 'state',
@@ -436,7 +513,7 @@ describe('clear and missing storage', () => {
     const store = h.store;
     const posted: string[] = [];
     const w = startWorker(store, (m) => posted.push(m.type));
-    await w.handle({ type: 'rebuild', options: { timeZone: 'UTC', player: null } });
+    await w.handle({ type: 'options', options: { timeZone: 'UTC', player: null } });
     await w.idle();
     expect(posted).toStrictEqual(['state', 'results', 'phase', 'results']);
     await w.handle({ type: 'state', options: { timeZone: 'UTC', player: null } });
@@ -471,7 +548,7 @@ describe('parity with one run', () => {
     await h.add(...all.slice(half).map(pickFolder));
     expect(files(h.last())).toStrictEqual(golden('all'));
     await h.send({
-      type: 'rebuild',
+      type: 'options',
       options: { timeZone: GOLDEN_OPTIONS.timeZone, player: 'mario' },
     });
     expect(files(h.last())).toStrictEqual(golden('all-player-mario'));

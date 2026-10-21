@@ -5,6 +5,13 @@ dall'export della propria chat Telegram, e li mostra in una piccola webapp stati
 
 **Usala qui: <https://djjeck.github.io/InventoryBot-wiki/>.**
 
+## Come si usa
+
+1. In **Telegram Desktop** apri la chat con il bot (o un gruppo in cui si gioca), menu **⋮** →
+   **Esporta cronologia chat**, formato **HTML**; foto e altri allegati non servono.
+2. Apri la pagina, premi **Aggiungi esportazione** in alto a destra e scegli la cartella creata
+   dall'esportazione (o una cartella che ne contiene più d'una).
+
 Tutto avviene nel tuo browser: le esportazioni non vengono inviate da nessuna parte. \
 Cosa resta salvato: le esportazioni già elaborate (i messaggi del bot e i comandi che gli hai dato,
 non il resto delle chat) e la wiki, solo in questo browser, finché non togli un'esportazione o premi

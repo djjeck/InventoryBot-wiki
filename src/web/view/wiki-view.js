@@ -1,19 +1,14 @@
 /* global window, localStorage, location, matchMedia */
 /**
  * The wiki view: renders a wiki and, optionally, the owner's player state into an
- * element. The web app's page (src/web/main.ts) imports it. It defines
+ * element, below the page's own header (title and actions). The web app's page
+ * (src/web/main.ts) imports it. It defines
  * `window.renderWiki(root, wiki, player, missing)`: `root` gets the whole view, its
  * listeners stay on `root`, so a new render goes in a new element.
  */
 (() => {
   const MARKUP = `<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <h1>Ricettario InventoryBot</h1>
-      <p>Ricette, oggetti e luoghi ricostruiti dalla cronologia della chat con il bot.</p>
-    </div>
-    <div class="tally" id="tally"></div>
-  </header>
+  <div class="tally" id="tally"></div>
 
   <div class="bar">
     <div class="tabs" role="tablist" id="tabs">

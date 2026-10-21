@@ -1,8 +1,7 @@
 /**
  * The messages between the web page (main.ts) and its worker (worker.ts, run.ts), which
  * owns the storage (storage.ts) and runs the pipeline. The page asks for the `state`
- * first; then it adds exports, removes them, asks for a rebuild with other options, or
- * clears everything. The worker answers with the list of exports, the progress of each
+ * first; then it adds exports, removes them, changes the options, or clears everything. The worker answers with the list of exports, the progress of each
  * export and of each build, and the results of every build that finishes.
  *
  * Everything sent is structured-cloneable: browser `File` objects (which stay handles to
@@ -47,9 +46,12 @@ export interface RemoveRequest {
   id: string;
 }
 
-/** Page -> worker: build again with these options, kept for the next builds. */
-export interface RebuildRequest {
-  type: 'rebuild';
+/**
+ * Page -> worker: the options changed: kept for the next builds, and built with at once
+ * unless they are the current ones already.
+ */
+export interface OptionsRequest {
+  type: 'options';
   options: BuildOptions;
 }
 
@@ -58,7 +60,7 @@ export interface ClearRequest {
   type: 'clear';
 }
 
-export type PageMessage = StateRequest | AddRequest | RemoveRequest | RebuildRequest | ClearRequest;
+export type PageMessage = StateRequest | AddRequest | RemoveRequest | OptionsRequest | ClearRequest;
 
 /**
  * An export of the list. `queued`, `reading` and `error` ones are not stored (yet): their
@@ -85,7 +87,7 @@ export interface ExportEntry {
 export interface StateMessage {
   type: 'state';
   exports: ExportEntry[];
-  /** The options the worker builds with: the saved results', else the page's defaults. */
+  /** The options the worker builds with: the saved results', else (and after `clear`) the page's defaults. */
   options: BuildOptions;
   /** Whether storage works: false, nothing is kept beyond this visit. */
   storage: boolean;

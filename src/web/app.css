@@ -1,5 +1,6 @@
-/* The web app's own screens (picking folders, options, progress). The wiki itself, and
-   the colour tokens used here, come from view/wiki-view.css. Fonts come from Google Fonts
+/* The web app's own parts: the header with its actions and the exports panel, the
+   messages, the empty state and the report. The wiki itself, and the colour tokens used
+   here, come from view/wiki-view.css. Fonts come from Google Fonts
    (index.html); without them the view's font stacks fall back to system fonts. */
 .visually-hidden {
   position: absolute;
@@ -28,35 +29,6 @@
 }
 main:focus {
   outline: none;
-}
-.shell {
-  max-width: 760px;
-  margin: 0 auto;
-  display: grid;
-  gap: 18px;
-}
-.shell-head .lead {
-  margin: 8px 0 0;
-  color: var(--muted);
-  max-width: 62ch;
-}
-.steps {
-  margin: 0;
-  padding-left: 1.4em;
-  display: grid;
-  gap: 6px;
-}
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 16px;
-  display: grid;
-  gap: 12px;
-  margin: 0;
-}
-.card h2 {
-  font-size: 1.1rem;
 }
 .hint {
   margin: 0;
@@ -119,86 +91,6 @@ main:focus {
   opacity: 0.5;
   cursor: not-allowed;
 }
-input[type='file']:focus-visible + .btn {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.picked {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-.picked:empty {
-  display: none;
-}
-.picked li {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow-wrap: anywhere;
-}
-.picked button {
-  background: none;
-  border: 0;
-  color: var(--accent);
-  cursor: pointer;
-  padding: 4px;
-  text-decoration: underline;
-}
-.progress {
-  display: grid;
-  gap: 4px;
-}
-.progress progress {
-  width: 100%;
-  height: 10px;
-  accent-color: var(--accent);
-}
-.error {
-  border: 1px solid var(--warn);
-  border-left-width: 4px;
-  border-radius: 8px;
-  padding: 10px 12px;
-  color: var(--ink);
-}
-.error p {
-  margin: 0 0 6px;
-}
-.error ul {
-  margin: 6px 0 0;
-  padding-left: 1.2em;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-#result {
-  display: grid;
-  gap: 12px;
-}
-#result[hidden],
-.shell[hidden],
-.field[hidden] {
-  display: none;
-}
-.toolbar {
-  max-width: 1240px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px 16px;
-}
-.toolbar p {
-  margin: 0;
-  color: var(--muted);
-}
 .report {
   max-width: 1240px;
   width: 100%;
@@ -211,4 +103,216 @@ input[type='file']:focus-visible + .btn {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
+}
+.app {
+  gap: 14px;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ---- header ---------------------------------------------------------------------- */
+.app-top {
+  position: relative;
+  align-items: center;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.activity {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  max-width: 44ch;
+}
+.spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spinner {
+    animation: spin 0.9s linear infinite;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+#panel-toggle {
+  gap: 0.3em;
+}
+#panel-toggle[aria-expanded='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* ---- exports panel --------------------------------------------------------------- */
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  width: min(440px, 100%);
+  max-height: min(78vh, 720px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.panel:focus {
+  outline: none;
+}
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.panel-head h2 {
+  font-size: 1.15rem;
+}
+.exports {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.exports:empty {
+  display: none;
+}
+.export {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.export-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.export-name {
+  font-weight: 600;
+}
+.export-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.s-ready .export-status {
+  color: var(--r-N);
+}
+.s-stale .export-status,
+.s-error .export-status {
+  color: var(--warn);
+  font-weight: 600;
+}
+.s-error,
+.s-stale {
+  border-left: 4px solid var(--warn);
+}
+.export-detail {
+  font-size: 0.85rem;
+}
+.export-detail ul {
+  margin: 4px 0 0;
+  padding-left: 1.2em;
+  color: var(--muted);
+}
+.export-remove {
+  flex: none;
+  background: none;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+}
+.options {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+/* ---- messages -------------------------------------------------------------------- */
+.messages {
+  display: grid;
+  gap: 8px;
+}
+.messages:not(:has(> :not([hidden]))) {
+  display: none;
+}
+.msg {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.msg.error {
+  border-color: var(--warn);
+}
+.msg p {
+  margin: 0;
+}
+.msg ul {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.msg-close {
+  flex: none;
+  background: none;
+  border: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+/* ---- the empty wiki and below the wiki ------------------------------------------- */
+.empty-state {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 68ch;
+  display: grid;
+  gap: 10px;
+}
+.empty-state p {
+  margin: 0;
+}
+.result-info {
+  margin: 8px 0 0;
+}
+.result-info:empty {
+  display: none;
 }

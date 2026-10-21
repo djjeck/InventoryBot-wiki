@@ -2,7 +2,8 @@
  * The worker's logic (worker.ts is its wiring): it owns the storage (storage.ts) and
  * answers the page's messages (protocol.ts). Each export the page adds is read once into
  * a record (processExport, src/pipeline.ts) and stored; the wiki is built again from every
- * stored record (buildWiki) whenever one is added or removed, and the results are saved.
+ * stored record (buildWiki) whenever one is added or removed, or the options change, and
+ * the results are saved.
  *
  * One queue, run one step at a time: the exports added, in order (one input folder each:
  * the browser adapter, src/telegram/export/browser-files.ts), then one build once no
@@ -11,8 +12,11 @@
  * follows. An export whose records are all stored already changes nothing and builds
  * nothing. An export that cannot be read is listed with the error, and the queue goes on.
  *
- * Where storage is missing or fails, the records of this visit are kept in memory
- * instead, so the page works the same, without memory beyond the visit.
+ * The records are loaded from storage once, at start, and kept in memory: a build reads
+ * the list of stored records (small) and loads the payloads again only when storage holds
+ * one that memory lacks (another tab added it). Where storage is missing or fails, the
+ * records of this visit are kept in memory alone, so the page works the same, without
+ * memory beyond the visit.
  *
  * No browser API: the tests run it in Node, with File-like objects and a fake IndexedDB.
  */
@@ -93,18 +97,26 @@ export interface WorkerCore {
 /** Until the page says otherwise: Italy's time zone, and the owner from the DM. */
 const DEFAULT_OPTIONS: BuildOptions = { timeZone: 'Europe/Rome', player: null };
 
+/** Whether two sets of options build the same wiki. */
+const sameOptions = (a: BuildOptions, b: BuildOptions): boolean =>
+  a.timeZone === b.timeZone && a.player === b.player;
+
 const errorText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
 /** The worker's logic on `store`, posting its messages with `post`. */
 export function startWorker(store: Store, post: (m: WorkerMessage) => void): WorkerCore {
   let salt = '';
   let options = DEFAULT_OPTIONS;
+  /** The page's defaults, given at start: the options again after `clear`. */
+  let defaults = DEFAULT_OPTIONS;
   /** Initialisation (salt, saved results): once, by the first message. */
   let started: Promise<void> | null = null;
   /** The stored entries, as last listed. */
   let listed: ListedRecord[] = [];
   /** Records of this visit that storage could not take. */
   const memory = new Map<string, { info: ListedRecord; record: ExportRecord }>();
+  /** The stored records, by hash, as loaded at start and kept up to date since. */
+  let loaded = new Map<string, ExportRecord>();
   const jobs: Job[] = [];
   let nextJob = 0;
   /** A build is due once no export is left to read. */
@@ -141,26 +153,49 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     post({ type: 'exports', exports: entries(), storage: store.available });
   }
 
-  async function start(defaults: BuildOptions, candidate?: string): Promise<void> {
+  async function start(given: BuildOptions, candidate?: string): Promise<void> {
+    defaults = given;
     salt = await store.salt(candidate);
     listed = await store.listRecords();
-    const loaded = await store.loadResults();
-    options = loaded?.saved.result.options ?? defaults;
+    const results = await store.loadResults();
+    options = results?.saved.result.options ?? defaults;
     post({ type: 'state', exports: entries(), options, storage: store.available });
-    if (loaded !== null) {
-      const { saved } = loaded;
+    if (results !== null) {
+      const { saved } = results;
       post({
         type: 'results',
-        current: loaded.current && !pending(),
+        current: results.current && !pending(),
         outcome: { status: 'done', result: saved.result, savedAt: saved.savedAt },
       });
-      if (!loaded.current) buildWanted = true;
+      if (!results.current) buildWanted = true;
     } else if (listed.some((i) => !i.stale)) {
       buildWanted = true;
     } else {
       post({ type: 'results', current: !pending(), outcome: { status: 'empty' } });
     }
+    // After the saved results are shown: the next build needs no loading.
+    if (listed.some((i) => !i.stale)) await reload();
     kick();
+  }
+
+  /** Loads every usable record from storage into memory. */
+  async function reload(): Promise<void> {
+    loaded = new Map((await store.loadRecords()).map((r) => [r.hash, r]));
+  }
+
+  /**
+   * The usable records, in upload order: the stored ones (listed again, in case another
+   * tab changed them; loaded again only if memory lacks one), then those of memory alone.
+   */
+  async function usableRecords(): Promise<ExportRecord[]> {
+    listed = await store.listRecords();
+    const usable = listed.filter((i) => !i.stale);
+    if (usable.some((i) => !loaded.has(i.hash))) await reload();
+    const stored = usable.flatMap((i) => {
+      const r = loaded.get(i.hash);
+      return r === undefined ? [] : [r];
+    });
+    return [...stored, ...[...memory.values()].map((m) => m.record)];
   }
 
   const ensureStarted = (defaults = DEFAULT_OPTIONS, candidate?: string): Promise<void> =>
@@ -197,7 +232,10 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     const r = await store.addRecord(record, { salt });
     if (r.status === 'refused')
       throw new Error('i dati di questo browser sono cambiati nel frattempo, aggiungila di nuovo');
-    if (r.status !== 'unavailable') return r.status;
+    if (r.status !== 'unavailable') {
+      loaded.set(record.hash, record);
+      return r.status;
+    }
     const seq = Math.max(
       -1,
       ...listed.map((i) => i.seq),
@@ -257,7 +295,7 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     const begun = Date.now();
     const built = options;
     post({ type: 'phase', phase: 'parse' });
-    const records = [...(await store.loadRecords()), ...[...memory.values()].map((m) => m.record)];
+    const records = await usableRecords();
     if (gen !== generation) return;
     let outcome: BuildOutcome;
     if (records.length === 0) outcome = { status: 'empty' };
@@ -321,6 +359,7 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
       jobs.splice(jobs.indexOf(job), 1);
       return postExports();
     }
+    loaded.delete(id);
     if (memory.delete(id) || (await store.removeRecord(id))) buildWanted = true;
     await postExports();
     kick();
@@ -330,10 +369,12 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     generation++;
     jobs.length = 0;
     memory.clear();
+    loaded = new Map();
     buildWanted = false;
     await store.clear();
     salt = await store.salt();
     listed = [];
+    options = defaults;
     post({ type: 'state', exports: entries(), options, storage: store.available });
     post({ type: 'results', current: true, outcome: { status: 'empty' } });
   }
@@ -352,6 +393,7 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     if (m.type === 'add') return add(m.picks);
     if (m.type === 'remove') return remove(m.id);
     if (m.type === 'clear') return clear();
+    if (sameOptions(m.options, options)) return;
     options = m.options;
     buildWanted = true;
     kick();
