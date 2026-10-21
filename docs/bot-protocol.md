@@ -853,8 +853,8 @@ nessuna
 
 Group histories reach back to 2017. These formats belong to earlier periods:
 
-- **Until September 2017**, item info had only its first line (no count, no source); usable items
-  had an empty line, then the `Raffreddamento` line.
+- **Until September 2017**, item info had only its first line (no count, no source), whose recipe
+  list had no final full stop; usable items had an empty line, then the `Raffreddamento` line.
 - **Until 2018**, travel replies had no `Puoi andare verso:` block, and arrival texts of places
   needing an item ended in other ways ("arrivi esausto nella baia di Scogliola 🦀", "arrivi
   (stremato) nell'immenso deserto di Sabbiora 🏜", "… riesci ad accedere al molo dei barcaioli 🎣"):
@@ -904,6 +904,12 @@ Group histories reach back to 2017. These formats belong to earlier periods:
 
 ```bot-reply type=travel query="/viaggio baia" location=null exits=[] narrative="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare la scogliera che blocca il passaggio. Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀"
 @mario_r, ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare la scogliera che blocca il passaggio. Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀
+```
+
+```bot-reply type=item_info query="/esamina baule" item="un baule di ebano 📦" usable=true used_in_raw="Cera riciclata" count=null cooldown="23 ore"
+@mario_r un baule di ebano 📦 [S] [usabile] al momento ti serve nelle ricette: Cera riciclata
+
+Raffreddamento: 23 ore
 ```
 
 ```bot-reply type=old_format query="/quest" format=quest_completed addressee=null

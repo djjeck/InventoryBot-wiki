@@ -1,6 +1,6 @@
 {
   "player": "mario_r",
-  "as_of": "2025-11-27T19:30:01-05:00",
+  "as_of": "2025-11-27T19:30:32-05:00",
   "recipes": {
     "(ricetta senza nome) → un caffè ristretto": {
       "crafted": 2,
@@ -22,13 +22,16 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un Pakkomon di nome Brumolo 👻": {
-      "first_seen": "2025-11-27T19:29:01-05:00"
+      "first_seen": "2025-11-27T19:29:31-05:00"
     },
     "un apriscatole storto": {
       "first_seen": "2025-11-27T19:05:01-05:00"
     },
     "un barattolo di vetro con qualche conchiglia dentro": {
       "first_seen": "2025-11-27T19:06:01-05:00"
+    },
+    "un baule di ebano 📦": {
+      "first_seen": "2025-11-27T19:01:01-05:00"
     },
     "un caffè ristretto": {
       "first_seen": "2025-11-27T19:04:31-05:00"
@@ -111,7 +114,7 @@
     },
     "nel bosco nebbioso di Valtorbo 🌲": {
       "visited": true,
-      "adventures": 2
+      "adventures": 3
     },
     "nel magnifico Palazzo di Cristallo 🏰": {
       "visited": false,
@@ -148,9 +151,9 @@
   },
   "inventory": {
     "un Pakkomon di nome Brumolo 👻": {
-      "qty": 1,
+      "qty": 2,
       "exact": false,
-      "date": "2025-11-27T19:29:01-05:00",
+      "date": "2025-11-27T19:29:31-05:00",
       "via": "movimento"
     },
     "un candido fazzoletto": {

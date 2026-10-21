@@ -353,9 +353,10 @@ const cCraft: Classifier = (t) => {
   return ev;
 };
 
+// Until September 2017 the recipe list had no final full stop.
 const ITEM_INFO = rx(
   `${ADDR}(?<name>${DOT}+?) \\[(?<rarity>${RARITY})\\](?<usable> \\[usabile\\])? al momento ` +
-    `(?:ti serve nelle ricette: (?<recipes>${DOT}+?)\\.|non ti serve in nessuna ricetta\\.)${S}*${END}`
+    `(?:ti serve nelle ricette: (?<recipes>${DOT}+?)\\.?|non ti serve in nessuna ricetta\\.)${S}*${END}`
 );
 const NE_HAI = rx(`^Ne hai (${D}+)\\.`);
 const FROM_RECIPE = rx(`si ottiene con la ricetta "(${DOT}+)"`);

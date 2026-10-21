@@ -75,7 +75,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:30:02-05:00",
+      "last_seen": "2025-11-27T19:30:32-05:00",
       "gives_title": true,
       "sources_inferred": true,
       "exclusive": false,
@@ -645,9 +645,11 @@
       "sources": [
         "adventure"
       ],
-      "used_in": [],
+      "used_in": [
+        "Cera riciclata"
+      ],
       "made_by": [],
-      "last_seen": "2025-11-27T19:06:32-05:00",
+      "last_seen": "2025-11-27T19:28:32-05:00",
       "use": {
         "observations": 1,
         "outcomes": [
@@ -889,7 +891,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:29:02-05:00",
+      "last_seen": "2025-11-27T19:29:32-05:00",
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -1173,11 +1175,12 @@
       "ingredients": null,
       "ingredients_source": null,
       "partial_ingredients": [
+        "un baule di ebano 📦",
         "una candela mezza consumata"
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:05:32-05:00"
+      "last_seen": "2025-11-27T19:28:32-05:00"
     },
     "Piccola collezione": {
       "name": "Piccola collezione",
