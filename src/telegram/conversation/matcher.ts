@@ -13,6 +13,14 @@ export type MatchKind = 'dm' | 'reply' | 'user' | 'single';
 /** A command message as the matcher keeps it. */
 export type Command = ChatMessage & { ts: number | null; answered: boolean };
 
+/**
+ * A chat's group commands, in message order. Those before `start` can no longer answer a
+ * reply that is not earlier than `latest`, the latest reply date seen: answered, undated,
+ * or older than the window. Messages come sorted by date, so a reply is almost never
+ * earlier than `latest`; when one is, the whole list is searched.
+ */
+type Pending = { commands: Command[]; start: number; latest: number };
+
 const idKey = (chat: string | null | undefined, id: number | null | undefined): string =>
   JSON.stringify([chat ?? null, id ?? null]);
 
@@ -37,23 +45,26 @@ export class CommandMatcher {
   readonly senderUser: Map<string | null, string>;
   /** chat -> latest command message in a DM */
   readonly lastDm = new Map<string | null, Command>();
-  /** chat -> unanswered group commands */
-  readonly pending = new Map<string | null, Command[]>();
+  /** chat -> its group commands */
+  private readonly pending = new Map<string | null, Pending>();
   /** (chat, id) -> command message */
   readonly byId = new Map<string, Command>();
   /** Seconds, BotDialect.groupWindow. */
   readonly groupWindow: number;
+  /** The @usernames of senderUser. */
+  private readonly mapped: ReadonlySet<string>;
 
   constructor(senderUser: ReadonlyMap<string | null, string>, groupWindow: number) {
     this.senderUser = new Map(senderUser);
     this.groupWindow = groupWindow;
+    this.mapped = new Set(senderUser.values());
   }
 
   command(msg: ChatMessage): void {
     const m: Command = { ...msg, ts: windowsDateSeconds(msg.date), answered: false };
     this.byId.set(idKey(m.chat, m.id), m);
     if (m.dm) this.lastDm.set(m.chat, m);
-    else this.pendingOf(m.chat).push(m);
+    else this.pendingOf(m.chat).commands.push(m);
   }
 
   match(
@@ -65,29 +76,51 @@ export class CommandMatcher {
     const quoted = this.byId.get(idKey(m.chat, m.reply_to));
     if (quoted !== undefined) return [this.take(quoted), 'reply'];
     const ts = windowsDateSeconds(m.date);
-    let live = this.pendingOf(m.chat).filter(
-      (c) =>
+    if (ts === null) return this.choose([], player);
+    const live: Command[] = [];
+    const p = this.pendingOf(m.chat);
+    for (let i = ts < p.latest ? 0 : this.advance(p, ts); i < p.commands.length; i++) {
+      const c = p.commands[i] as Command;
+      if (
         !c.answered &&
-        ts !== null &&
         c.ts !== null &&
         0 <= ts - c.ts &&
         ts - c.ts <= this.groupWindow &&
         (allowed === null || allowed.has(firstWord(c.text)))
-    );
+      )
+        live.push(c);
+    }
+    return this.choose(live, player);
+  }
+
+  /** The match among the live commands of a group reply to `player`. */
+  private choose(candidates: Command[], player: string | null): [Command | null, MatchKind | null] {
+    let live = candidates;
     if (player) {
       const mine = live.find((c) => this.senderUser.get(senderIdentity(c)) === player);
       if (mine) return [this.take(mine), 'user'];
       // The player's own commands are known, and none fits.
-      if ([...this.senderUser.values()].includes(player)) return [null, null];
+      if (this.mapped.has(player)) return [null, null];
       live = live.filter((c) => !this.senderUser.has(senderIdentity(c)));
     }
     if (live.length === 1) return [this.take(live[0] as Command), 'single'];
     return [null, null];
   }
 
-  private pendingOf(chat: string | null): Command[] {
+  /** Moves `start` past the commands that cannot answer a reply at `ts` or later. */
+  private advance(p: Pending, ts: number): number {
+    p.latest = ts;
+    for (; p.start < p.commands.length; p.start++) {
+      const c = p.commands[p.start] as Command;
+      if (!c.answered && c.ts !== null && ts - c.ts <= this.groupWindow) break;
+    }
+    return p.start;
+  }
+
+  private pendingOf(chat: string | null): Pending {
     let p = this.pending.get(chat);
-    if (p === undefined) this.pending.set(chat, (p = []));
+    if (p === undefined)
+      this.pending.set(chat, (p = { commands: [], start: 0, latest: -Infinity }));
     return p;
   }
 

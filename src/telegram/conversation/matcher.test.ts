@@ -75,9 +75,8 @@ describe('command of the addressed player', () => {
       [first.id, 'user'],
       [second.id, 'user'],
     ]);
-    expect((cm.pending.get('G') ?? []).filter((c) => c.answered).map((c) => c.id)).not.toContain(
-      luigi.id
-    );
+    // Luigi's command is still unanswered.
+    expect(idHow(match(cm, g.bot(DROP('luigi'), 22)))).toStrictEqual([luigi.id, 'single']);
   });
 });
 
@@ -167,5 +166,46 @@ describe('group window', () => {
 
   it('command_after_reply', () => {
     expect(one(-1)).toBeNull();
+  });
+});
+
+describe('commands left behind', () => {
+  const W = TEST_DIALECT.groupWindow;
+
+  it('commands_older_than_a_later_reply_stay_out', () => {
+    const g = new Chat('G');
+    const cm = matcher();
+    cm.command(g.user('Luigi', '/avventura', 0));
+    expect(match(cm, g.bot(DROP('luigi'), W + 1))).toStrictEqual([null, null]);
+    const anna = g.user('Anna', '/avventura', W + 2);
+    cm.command(anna);
+    expect(idHow(match(cm, g.bot(DROP('anna'), W + 3)))).toStrictEqual([anna.id, 'single']);
+  });
+
+  it('answered_and_undated_commands_stay_out', () => {
+    const g = new Chat('G');
+    const cm = matcher();
+    const luigi = g.user('Luigi', '/avventura', 0);
+    cm.command(luigi);
+    cm.command({ ...g.user('Anna', '/avventura', 1), date: '' });
+    expect(idHow(match(cm, g.bot(DROP('luigi'), 2)))).toStrictEqual([luigi.id, 'single']);
+    expect(match(cm, g.bot(DROP('luigi'), 3))).toStrictEqual([null, null]);
+  });
+
+  it('reply_earlier_than_one_seen_still_finds_its_command', () => {
+    const g = new Chat('G');
+    const cm = matcher();
+    const luigi = g.user('Luigi', '/avventura', 0);
+    cm.command(luigi);
+    cm.command(g.user('Anna', '/avventura', 2 * W));
+    expect(match(cm, g.bot(DROP('anna'), 2 * W + 1))[1]).toBe('single');
+    expect(idHow(match(cm, g.bot(DROP('luigi'), 1)))).toStrictEqual([luigi.id, 'single']);
+  });
+
+  it('undated_reply_matches_nothing', () => {
+    const g = new Chat('G');
+    const cm = matcher();
+    cm.command(g.user('Luigi', '/avventura', 0));
+    expect(match(cm, { ...g.bot(DROP('luigi'), 1), date: '' })).toStrictEqual([null, null]);
   });
 });
