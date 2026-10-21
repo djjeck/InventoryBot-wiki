@@ -222,7 +222,26 @@ export interface UnknownEvent {
 }
 
 /** What `classify()` returns: one member per event type (`drop` has two kinds). */
+/**
+ * A recipe card of La Cittadella dei Demiurghi (channels.ts): the recipe, its level, its
+ * ingredients, its craft text and output as the channel's curators wrote them, the title
+ * the recipe gives, and their notes.
+ */
+export interface RecipeCardEvent {
+  type: 'recipe_card';
+  recipe: string;
+  level: number;
+  ingredients: ItemLine[];
+  text: string | null;
+  /** The item made; its qty is 1. */
+  output: ItemLine | null;
+  /** "🎖 TITOLO: @username, il pastore": `il pastore`. */
+  title: string | null;
+  notes: string[];
+}
+
 export type Event =
+  | RecipeCardEvent
   | CooldownEvent
   | ItemCooldownEvent
   | RecipeListEvent
@@ -325,6 +344,8 @@ export interface WikiItem {
   old_names?: WikiOldName[];
   /** Listed by /titolo among the items that give a title. */
   gives_title?: true;
+  /** The title it gives ("il pastore"), when a channel names it. */
+  title?: string;
   /** Present when `sources` was deduced from the rarity. */
   sources_inferred?: true;
   /** A "+" rarity: drops in a single location. */
@@ -338,7 +359,7 @@ export interface WikiRecipe {
   level: number | null;
   /** Item name -> quantity, from the latest /ricetta detail or craft. */
   ingredients: Record<string, number> | null;
-  ingredients_source: 'detail' | 'craft' | null;
+  ingredients_source: 'detail' | 'craft' | 'channel' | null;
   /** Items known to be ingredients ("ti serve nelle ricette"), sorted. */
   partial_ingredients: string[];
   output: string | null;
@@ -347,6 +368,20 @@ export interface WikiRecipe {
   last_seen: string | null;
   /** Present when `level` was deduced from the output's `Ln` rarity. */
   level_inferred?: true;
+  /** Present when a channel's card describes the recipe (channels.ts). */
+  channel?: WikiChannelCard<'level' | 'ingredients' | 'output'>;
+}
+
+/**
+ * A channel card behind an entity: the channel, the card's date, the attributes it still
+ * sets (an observation of the bot's newer than the card replaces it), and the curators'
+ * notes.
+ */
+export interface WikiChannelCard<F extends string> {
+  name: string;
+  date: string | null;
+  fields: F[];
+  notes: string[];
 }
 
 export interface WikiLocation {

@@ -9,8 +9,8 @@
  * - items: before a rarity tag (`un sasso [C]`: the text before the tag must end with an
  *   item of the universe), after `Ottieni: ` up to `!`, and first in the item tuples (name, rarity,
  *   quantity) of the tests' reply builders (`['un sasso', 'C', 1]`);
- * - recipes: in recipe lists (`- NAME L3 [manca 1]`) and details (`per fare [la ricetta]
- *   NAME ti manca`);
+ * - recipes: in recipe lists (`- NAME L3 [manca 1]`), details (`per fare [la ricetta]
+ *   NAME ti manca`) and channel cards (`RICETTA: NAME [L1]`);
  * - places: after `ti trovi`, `arrivi`, `non puoi andare: `, `passare ` up to the place's
  *   emoji, and exit lines (` - `) that end with it;
  * - Telegram usernames: every `@name` (not an e-mail address, a package scope such as
@@ -91,6 +91,8 @@ const NAMED: readonly [Kind, RegExp][] = [
   ['item', /\[\s*(['"])(?<name>[^'"\n]+)\1,\s*(?:(['"])[CNRSXMUL]\d*\+?\3|null)\s*,\s*\d+/gu],
   ['recipe', new RegExp(`${LINE_START}- (${SPAN}) L\\d+ \\[(?:\\*|manca)`, 'gu')],
   ['recipe', new RegExp(`per fare (?:la ricetta )?(${SPAN}) ti manca`, 'gu')],
+  // A channel's recipe card (src/inventorybot/channels.ts): `📇 RICETTA: Torre [L1]`.
+  ['recipe', new RegExp(`RICETTA:\\s*(${SPAN})\\s*\\[L\\d+\\]`, 'gu')],
   [
     'place',
     new RegExp(`(?:ti trovi:? |arrivi:? |non puoi andare: |passare )(${SPAN}${PLACE_END})`, 'gu'),
@@ -126,8 +128,10 @@ export function unknownEntities(text: string, universe: Universe): Finding[] {
     );
     const before = text.slice(start, m.index).trimEnd();
     // A tag alone (a legend, a pattern), after code (`${name} [C]`, `'[N] '`) or after a
-    // command (`/inventario [C]`, a rarity filter) names no item.
+    // command (`/inventario [C]`, a rarity filter) names no item; a channel's recipe card
+    // names its recipe with its level (`RICETTA: Torre [L1]`: a recipe, below).
     if (!/[\p{L}\p{N}]$/u.test(before) || /(?:^|\s|['"`])\/[\p{L}]+$/u.test(before)) continue;
+    if (/RICETTA:/u.test(before)) continue;
     if (!endsWithName(before, universe.item))
       out.push({ kind: 'item', text: before.slice(-60), line: lineOf(text, m.index) });
   }

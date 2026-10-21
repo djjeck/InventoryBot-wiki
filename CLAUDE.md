@@ -25,6 +25,8 @@ docs:
   pipeline's input.
 - [docs/bot-protocol.md](docs/bot-protocol.md): the commands and messages of @InventoryBot, as they
   appear in the export.
+- [docs/channels.md](docs/channels.md): the cards of the encyclopedia channels the bot's `/gruppi`
+  lists, as they appear in their exports.
 
 **Validate after every edit:**
 
@@ -101,10 +103,12 @@ order:
    command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
    `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). A place is named
    in its article form (`places.ts`: "nella valle" is "la valle"), whatever preposition the reply
-   used, so that every source names it the same way. The phase ends by verifying the group pairs
-   (`verify.ts`): a reply that, read with its command, is not of that command's family is read again
-   without it, and so is a group `/usa` reply that does not fit the item its query names (which uses
-   phase 5's item catalogue).
+   used, so that every source names it the same way. The posts of the bot's channels become events
+   too (`channels.ts`, `docs/channels.md`): each card, with the date of its post, merged with the
+   replies' events in date order. The phase ends by verifying the group pairs (`verify.ts`): a reply
+   that, read with its command, is not of that command's family is read again without it, and so is
+   a group `/usa` reply that does not fit the item its query names (which uses phase 5's item
+   catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, the `/faq` rules), and

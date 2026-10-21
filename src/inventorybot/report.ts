@@ -20,7 +20,7 @@ export type ReportEntry =
   | {
       kind: 'ingredient_conflict';
       recipe: string;
-      source: 'detail' | 'craft';
+      source: 'detail' | 'craft' | 'channel';
       old: Ingredients;
       new: Ingredients;
       date: string | null;

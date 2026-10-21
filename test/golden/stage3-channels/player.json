@@ -1,0 +1,41 @@
+{
+  "player": "djjeck",
+  "as_of": "2025-11-27T19:00:21-05:00",
+  "recipes": {
+    "Torre alta": {
+      "crafted": 1,
+      "last_crafted": "2025-11-27T19:00:21-05:00"
+    }
+  },
+  "items": {
+    "una torre": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    },
+    "una torre altissima": {
+      "first_seen": "2025-11-27T19:00:21-05:00"
+    },
+    "una trave": {
+      "first_seen": "2025-11-27T19:00:11-05:00"
+    }
+  },
+  "locations": {},
+  "recipe_list": {
+    "date": "2025-11-27T19:00:01-05:00",
+    "truncated": false,
+    "recipes": {
+      "Torre alta": "manca 1"
+    }
+  },
+  "inventory": {
+    "una torre altissima": {
+      "qty": 1,
+      "exact": false,
+      "date": "2025-11-27T19:00:21-05:00",
+      "via": "movimento"
+    }
+  },
+  "inventory_check": {
+    "compared": 1,
+    "agreed": 0
+  }
+}

@@ -116,7 +116,9 @@
       "sources": [
         "recipe"
       ],
-      "used_in": [],
+      "used_in": [
+        "Torre alta"
+      ],
       "made_by": [
         "Torre"
       ],
@@ -146,6 +148,40 @@
       "made_by": [],
       "last_seen": "2025-11-27T19:00:01+01:00",
       "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una trave": {
+      "name": "una trave",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre",
+        "Torre alta"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:01:11-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre alta": {
+      "name": "una torre alta",
+      "rarity": "L2",
+      "usable": true,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre alta"
+      ],
+      "last_seen": "2025-11-27T18:59:10-05:00",
+      "gives_title": true,
+      "title": "il costruttore",
       "exclusive": false,
       "locations": []
     },
@@ -266,22 +302,6 @@
         },
         "requirements": []
       },
-      "exclusive": false,
-      "locations": []
-    },
-    "una trave": {
-      "name": "una trave",
-      "rarity": "N",
-      "usable": false,
-      "sources": [
-        "adventure"
-      ],
-      "used_in": [
-        "Torre"
-      ],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:01:11-05:00",
-      "sources_inferred": true,
       "exclusive": false,
       "locations": []
     },
@@ -1044,6 +1064,31 @@
       "output": null,
       "craft_text": null,
       "last_seen": "2018-01-02T01:01:21+01:00"
+    },
+    "Torre alta": {
+      "name": "Torre alta",
+      "level": 2,
+      "ingredients": {
+        "una torre": 1,
+        "una trave": 2
+      },
+      "ingredients_source": "channel",
+      "partial_ingredients": [],
+      "output": "una torre alta",
+      "craft_text": "e sovrapponi le travi alla torre,\nche si allunga verso il cielo.",
+      "last_seen": "2025-11-27T18:59:10-05:00",
+      "channel": {
+        "name": "La Cittadella dei Demiurghi",
+        "date": "2025-11-27T18:59:10-05:00",
+        "fields": [
+          "level",
+          "ingredients",
+          "output"
+        ],
+        "notes": [
+          "Torre alta è una ricetta di prova."
+        ]
+      }
     },
     "Pratica cestina": {
       "name": "Pratica cestina",

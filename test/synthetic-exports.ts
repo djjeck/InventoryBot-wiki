@@ -8,7 +8,9 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { CITTADELLA } from '#src/inventorybot/bot.ts';
 import { type Message } from '#src/telegram/messages.ts';
+import { TORRE_CARD } from './channels.ts';
 import { examples, readDoc } from './doc-examples.ts';
 import { writeInbox } from './e2e-fixtures.ts';
 import {
@@ -928,6 +930,32 @@ export function writeStage3Scenarios(root: string): Scenario[] {
       'un baule deve raffreddarsi ancora per 3 ore e 2 minuti prima di poterlo dare in giro.'
     );
     scenario('uses', [dm]);
+  }
+
+  // A channel's export: the Cittadella's cards (one in another spelling of a name, one
+  // older than the bot's craft) next to the DM; its other posts are not cards.
+  {
+    const dm = new Chat(BOT, 1000);
+    say(dm, 0, '/ricetta', T.recipeList([['Torre alta', 2, 1]]));
+    say(dm, 10, '/inventario', T.inventory([['una trave', 'N', 1]]));
+    const ch = new Chat(CITTADELLA, 10);
+    ch.user(CITTADELLA, '‼️ Benvenuti nella Cittadella! ‼️', -100);
+    // A no-break space in a name, and no space before the quantity.
+    const typed = TORRE_CARD.replace('una trave [N] x2', 'una\u00a0trave ' + '[N]x2');
+    ch.user(CITTADELLA, typed, -50);
+    say(
+      dm,
+      20,
+      '/ricetta torre alta',
+      T.craft(
+        [
+          ['una torre', 'L1', 1],
+          ['una trave', 'N', 3],
+        ],
+        'una torre altissima'
+      )
+    );
+    scenario('channels', [dm, ch]);
   }
 
   // Recipe names: by signature, query, output; unnamed group crafts (one entry per

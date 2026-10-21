@@ -74,6 +74,7 @@ describe('unknownEntities', () => {
       'esausto arrivi nella grotta 🦇',
       ' - nella palude scura 🐸',
       ' - Brumolo 👻: pronto', // a Pakkomon, not an exit
+      '📇 RICETTA: Pane nero [L2]', // a channel's card: a recipe, not an item
     ].join('\n');
     expect(unknownEntities(text, U).map((x) => [x.kind, x.text, x.line])).toStrictEqual([
       ['item', 'una torta', 1],
@@ -81,6 +82,7 @@ describe('unknownEntities', () => {
       ['recipe', 'Pane nero', 4],
       ['place', 'nella grotta 🦇', 6],
       ['place', 'nella palude scura 🐸', 7],
+      ['recipe', 'Pane nero', 9],
     ]);
   });
 

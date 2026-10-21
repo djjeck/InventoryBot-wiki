@@ -2,8 +2,10 @@
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
+import { card, TORRE_CARD } from '#test/channels.ts';
 import { tgDate } from '#test/helpers.ts';
 import * as T from '#test/texts.ts';
+import { CITTADELLA } from './bot.ts';
 import {
   build,
   isMine,
@@ -1953,5 +1955,88 @@ describe('edge cases', () => {
         [10, '34 secondi'],
       ])
     ).toStrictEqual({ seconds: 45, min: 34, max: 135, observations: 2 }); // under a minute: seconds
+  });
+});
+
+describe('channel cards', () => {
+  it('a_card_alone_makes_the_recipe_and_its_items', () => {
+    const { wiki } = runBuild([card(TORRE_CARD, 0)]);
+    const r = wiki.recipes['Torre alta'];
+    expect(r).toMatchObject({
+      level: 2,
+      ingredients: { 'una torre': 1, 'una trave': 2 },
+      ingredients_source: 'channel',
+      output: 'una torre alta',
+      craft_text: 'e sovrapponi le travi alla torre,\nche si allunga verso il cielo.',
+      channel: {
+        name: CITTADELLA,
+        fields: ['level', 'ingredients', 'output'],
+        notes: ['Torre alta è una ricetta di prova.'],
+      },
+    });
+    expect(wiki.items['una torre alta']).toMatchObject({
+      rarity: 'L2',
+      usable: true,
+      made_by: ['Torre alta'],
+      sources: ['recipe'],
+      gives_title: true,
+      title: 'il costruttore',
+    });
+    expect(wiki.items['una trave']?.used_in).toStrictEqual(['Torre alta']);
+  });
+
+  it('what_the_bot_said_later_wins_and_leaves_the_card_s_fields', () => {
+    const { wiki } = runBuild([
+      card(TORRE_CARD, 0),
+      ev(T.recipeList([['Torre alta', 3, 1]]), '/ricetta', { t: 10 }),
+      ev(
+        T.craft(
+          [
+            ['una torre', 'L1', 1],
+            ['una trave', 'N', 3],
+          ],
+          'una torre altissima'
+        ),
+        '/ricetta torre alta',
+        { t: 20 }
+      ),
+    ]);
+    const r = wiki.recipes['Torre alta'];
+    expect([r?.level, r?.ingredients, r?.output, r?.channel?.fields]).toStrictEqual([
+      3,
+      { 'una torre': 1, 'una trave': 3 },
+      'una torre altissima',
+      [],
+    ]);
+  });
+
+  it('what_the_bot_said_before_gives_way_to_the_card', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.detail('Torre alta', [['una trave', 'N', 1]], [['una torre', 'L1', 1]]),
+        '/ricetta torre alta',
+        {
+          t: 0,
+        }
+      ),
+      card(TORRE_CARD, 10),
+    ]);
+    expect(wiki.recipes['Torre alta']?.ingredients_source).toBe('channel');
+  });
+
+  it('a_card_takes_the_bot_s_spelling_of_a_name', () => {
+    const { wiki } = runBuild([
+      ev(T.recipeList([['Torre alta', 2, 1]]), '/ricetta', { t: 0 }),
+      ev(T.inventory([['una trave', 'N', 1]]), '/inventario', { t: 1 }),
+      card(
+        TORRE_CARD.replace('RICETTA: Torre alta', 'RICETTA: Torre Alta').replace(
+          '📌 una trave [N] x2',
+          '📌 una trave [N] x2'
+        ),
+        10
+      ),
+    ]);
+    expect(Object.keys(wiki.recipes)).toStrictEqual(['Torre alta']);
+    expect(Object.keys(wiki.items).filter((n) => n.includes('trave'))).toStrictEqual(['una trave']);
   });
 });

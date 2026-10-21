@@ -153,6 +153,25 @@
     const locLink = (n) =>
       `<button class="link" data-go="loc" data-name="${esc(n)}">${esc(L[n]?.label || n)}</button>`;
     const sec = (title, body) => `<div class="section"><h3>${title}</h3>${body}</div>`;
+    /** "a, b e c". */
+    const listIt = (xs) =>
+      xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} e ${xs.at(-1)}`;
+    /**
+     * Where a channel's card stands behind what the page shows: the card's channel and
+     * date, what of it the page still shows (`what`: field -> its name), and its notes.
+     */
+    const channelSec = (card, what) => {
+      if (!card) return '';
+      const from = `una scheda di <b>${esc(card.name)}</b>${card.date ? ` del ${fmtDate(card.date)}` : ''}`;
+      const shown = card.fields.map((f) => what[f]).filter(Boolean);
+      // "lo" for one masculine singular field ("il livello"), else "li".
+      const one = shown.length === 1 && !/^(?:gli|le|i) /u.test(shown[0]);
+      const lead = shown.length
+        ? `${listIt(shown).replace(/^./, (c) => c.toUpperCase())} ${shown.length === 1 ? 'viene' : 'vengono'} da ${from}: il bot non ${one ? 'lo' : 'li'} ha ancora ${one ? 'mostrato' : 'mostrati'} più di recente.`
+        : `C'è anche ${from}; ciò che il bot ha mostrato dopo ha la precedenza.`;
+      const notes = card.notes.map((n) => `<p class="note">${esc(n)}</p>`).join('');
+      return sec('Dai canali', `<p class="note">${lead}</p>${notes}`);
+    };
     const chips = (xs, f) =>
       xs.length
         ? `<div class="chips">${xs.map(f).join('')}</div>`
@@ -281,6 +300,7 @@
     ${sec('Ottieni', out)}
     ${flow}
     ${r.craft_text ? sec('Descrizione', `<p class="flavor">${esc(r.craft_text)}</p>`) : ''}
+    ${channelSec(r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}
     ${personal}`;
     }
 
@@ -416,7 +436,7 @@
           ])
         : '';
       const usedIn = [...i.used_in].sort((a, b) => lvl(b) - lvl(a));
-      return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? '<span>· dà un titolo</span>' : ''}${i.sources.map((s) => `<span>· ${SOURCE[s] || s}${i.sources_inferred ? ' (dedotto dalla rarità)' : ''}</span>`).join('')}${freshness(i.last_seen)}</div>
+      return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${i.sources.map((s) => `<span>· ${SOURCE[s] || s}${i.sources_inferred ? ' (dedotto dalla rarità)' : ''}</span>`).join('')}${freshness(i.last_seen)}</div>
     <h2>${esc(name)}</h2>
     ${i.exclusive ? `<p class="note">Il + nella rarità indica un oggetto che esce in un solo luogo.</p>` : ''}
     ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>

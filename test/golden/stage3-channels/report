@@ -1,0 +1,13 @@
+cartelle di esportazione: 2; chat: InventoryBot, La Cittadella dei Demiurghi
+messaggi: 8 (dal bot: 3)
+giocatore: @djjeck
+risposte del bot: 3
+  InventoryBot: risposte del bot abbinate a un comando: dm=3
+nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0
+eventi: recipe_list=1 inventory=1 craft=1
+schede dei canali: 1 (post: 2)
+oggetti: 4; ricette: 1 (con tutti gli ingredienti: 1, con il risultato noto: 1); luoghi: 0
+-- ingredient_conflict: 1
+  ingredient_conflict: recipe="Torre alta" source="craft" old={"una torre":1,"una trave":2} new={"una torre":1,"una trave":3} date="2025-11-27T19:00:21-05:00"
+-- output_conflict: 1
+  output_conflict: recipe="Torre alta" old="una torre alta" new="una torre altissima" date="2025-11-27T19:00:21-05:00"

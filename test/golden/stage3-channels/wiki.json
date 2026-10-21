@@ -1,0 +1,99 @@
+{
+  "generated": "<generated>",
+  "rarities": {},
+  "rules": [],
+  "renames": {},
+  "rarity_hypotheses": {
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+  },
+  "items": {
+    "una torre": {
+      "name": "una torre",
+      "rarity": "L1",
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [
+        "Torre alta"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una trave": {
+      "name": "una trave",
+      "rarity": "N",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [
+        "Torre alta"
+      ],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:00:21-05:00",
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre alta": {
+      "name": "una torre alta",
+      "rarity": "L2",
+      "usable": true,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre alta"
+      ],
+      "last_seen": "2025-11-27T18:59:10-05:00",
+      "gives_title": true,
+      "title": "il costruttore",
+      "exclusive": false,
+      "locations": []
+    },
+    "una torre altissima": {
+      "name": "una torre altissima",
+      "rarity": null,
+      "usable": false,
+      "sources": [
+        "recipe"
+      ],
+      "used_in": [],
+      "made_by": [
+        "Torre alta"
+      ],
+      "last_seen": "2025-11-27T19:00:21-05:00",
+      "exclusive": false,
+      "locations": []
+    }
+  },
+  "recipes": {
+    "Torre alta": {
+      "name": "Torre alta",
+      "level": 2,
+      "ingredients": {
+        "una torre": 1,
+        "una trave": 3
+      },
+      "ingredients_source": "craft",
+      "partial_ingredients": [],
+      "output": "una torre altissima",
+      "craft_text": "e mescoli tutto con cura...",
+      "last_seen": "2025-11-27T19:00:21-05:00",
+      "channel": {
+        "name": "La Cittadella dei Demiurghi",
+        "date": "2025-11-27T18:59:10-05:00",
+        "fields": [],
+        "notes": [
+          "Torre alta è una ricetta di prova."
+        ]
+      }
+    }
+  },
+  "locations": {}
+}

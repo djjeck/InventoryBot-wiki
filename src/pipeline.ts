@@ -12,6 +12,7 @@
  */
 import { INVENTORY_BOT } from './inventorybot/bot.ts';
 import { build, reportLines, toJson } from './inventorybot/build.ts';
+import { isChannelPost, readChannelPosts } from './inventorybot/channels.ts';
 import { inventoryBotDialect, learnTitles } from './inventorybot/dialect.ts';
 import { interpretationReport, interpretReplies } from './inventorybot/extract.ts';
 import { playerState } from './inventorybot/player.ts';
@@ -21,6 +22,7 @@ import {
   type PlayerState,
   type Wiki,
 } from './inventorybot/types.ts';
+import { windowsDateSeconds } from './lib/dates.ts';
 import { compareCodePoints } from './lib/text.ts';
 import { anonymise } from './telegram/anonymise/anonymise.ts';
 import {
@@ -49,6 +51,8 @@ export interface Conversed {
   ownerMissing: boolean;
   /** A chat title as phase 3 writes it (Anonymised.chatTitle). */
   chatTitle(title: string): string;
+  /** The posts of InventoryBot's channels, in message order: read by phase 4 (channels.ts). */
+  posts: readonly Message[];
 }
 
 export interface ConverseOptions {
@@ -68,7 +72,8 @@ export function converse(messages: readonly Message[], options: ConverseOptions)
   const paired = readConversation(messages, INVENTORY_BOT.name, dialect);
   const contexts = paired.replies.map((r) => r.context);
   const owner = options.player || ownerFromDm(contexts);
-  const groupChats = messages.filter((m) => !m.dm).map((m) => m.chat);
+  // A channel's title is public (the bot's /gruppi lists them): it is no group to hide.
+  const groupChats = messages.filter((m) => !m.dm && !isChannelPost(m)).map((m) => m.chat);
   const { conversation, chatTitle } = anonymise(paired, {
     owner,
     botName: INVENTORY_BOT.name,
@@ -82,6 +87,7 @@ export function converse(messages: readonly Message[], options: ConverseOptions)
     owner,
     ownerMissing: !options.player && !hasDm(contexts),
     chatTitle,
+    posts: messages.filter(isChannelPost),
   };
 }
 
@@ -99,7 +105,27 @@ export function conversationReport(c: Conversed): string[] {
 /** Phase 4 on the conversation of phases 2 and 3: the events and the report lines. */
 export function interpret(c: Conversed): { events: EventRecord[]; report: string[] } {
   const interpretation = interpretReplies(c.conversation.replies);
-  return { events: interpretation.events, report: interpretationReport(interpretation) };
+  const cards = readChannelPosts(c.posts);
+  const report = interpretationReport(interpretation);
+  if (c.posts.length > 0)
+    report.push(`schede dei canali: ${cards.length} (post: ${c.posts.length})`);
+  return { events: byDate(interpretation.events, cards), report };
+}
+
+/**
+ * Two lists of events in date order merged into one, the first list's first on equal
+ * dates: phase 5 reads the events in the order they happened.
+ */
+function byDate(a: readonly EventRecord[], b: readonly EventRecord[]): EventRecord[] {
+  if (b.length === 0) return [...a];
+  const at = (e: EventRecord): number => windowsDateSeconds(e.date ?? null) ?? -Infinity;
+  const out: EventRecord[] = [];
+  let j = 0;
+  for (const e of a) {
+    while (j < b.length && at(b[j] as EventRecord) < at(e)) out.push(b[j++] as EventRecord);
+    out.push(e);
+  }
+  return [...out, ...b.slice(j)];
 }
 
 /**

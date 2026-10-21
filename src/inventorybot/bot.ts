@@ -1,12 +1,11 @@
 /** InventoryBot as Telegram shows it: the BotIdentity the generic layer is run with. */
 import { type BotIdentity } from '#src/telegram/bot.ts';
 
-/** The channels' titles, as their exports name them. */
-export const CHANNEL_TITLES: readonly string[] = [
-  'La Cittadella dei Demiurghi',
-  'Il Grimorio del Golem',
-  "L'Atlante di Barbabeige",
-];
+/** The encyclopedia channels, by title as their exports name them: recipes, items, places. */
+export const CITTADELLA = 'La Cittadella dei Demiurghi';
+export const GRIMORIO = 'Il Grimorio del Golem';
+export const ATLANTE = "L'Atlante di Barbabeige";
+export const CHANNEL_TITLES: readonly string[] = [CITTADELLA, GRIMORIO, ATLANTE];
 
 export const INVENTORY_BOT: BotIdentity = {
   name: 'InventoryBot',

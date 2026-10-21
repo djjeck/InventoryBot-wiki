@@ -127,6 +127,8 @@ player sees anyway, and says why it is allowed.
 - una splendida statuetta di Torosco di quelle con la coda a spirale 🐲
 - una tazzina vuota
 - una torre
+- una torre alta
+- una torre altissima
 - una trave
 - uno scudo
 - x

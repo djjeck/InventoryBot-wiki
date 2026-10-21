@@ -34,6 +34,7 @@ import {
   stripEndChars,
   stripWs,
   WORD_BODY,
+  WS_CLASS,
 } from '#src/lib/text.ts';
 import { INVENTORY_COMMANDS, parseDuration, useItems } from './classify.ts';
 import { stripAddr } from './patterns.ts';
@@ -174,6 +175,8 @@ export interface KbItem {
   oldNames?: WikiOldName[];
   /** Listed by a /titolo reply. */
   givesTitle?: true;
+  /** The title it gives, as a channel names it. */
+  title?: string;
   sourcesInferred?: true;
 }
 
@@ -181,7 +184,7 @@ export interface KbRecipe {
   name: string;
   level: number | null;
   ingredients: Map<string, number> | null;
-  ingredients_source: 'detail' | 'craft' | null;
+  ingredients_source: 'detail' | 'craft' | 'channel' | null;
   partial_ingredients: Set<string>;
   output: string | null;
   craft_text: string | null;
@@ -189,6 +192,13 @@ export interface KbRecipe {
   firstSeen: string | null;
   dates: Dates;
   levelInferred?: true;
+  /** The channel card behind the recipe, and the attributes it still sets. */
+  channel?: {
+    name: string;
+    date: string | null;
+    fields: Set<'level' | 'ingredients' | 'output'>;
+    notes: string[];
+  };
 }
 
 export interface KbLocation {
@@ -335,7 +345,11 @@ export class KB {
   }
 
   /** ingr: item -> qty. The most recent observation wins (recipes can change). */
-  setIngredients(r: KbRecipe, ingr: Map<string, number>, source: 'detail' | 'craft'): void {
+  setIngredients(
+    r: KbRecipe,
+    ingr: Map<string, number>,
+    source: 'detail' | 'craft' | 'channel'
+  ): void {
     const cur = r.ingredients;
     if (cur !== null && !sameIngredients(cur, ingr)) {
       const old = [...cur.keys()].filter((k) => !ingr.has(k));
@@ -367,6 +381,7 @@ export class KB {
     if (this.newer(r, 'ingredients')) {
       r.ingredients = ingr;
       r.ingredients_source = source;
+      if (source !== 'channel') r.channel?.fields.delete('ingredients');
     }
   }
 }
@@ -459,6 +474,106 @@ export function itemCatalogue(events: readonly EventRecord[]): ReadonlyMap<strin
 }
 
 /**
+ * A name's key for matching names typed by hand with the bot's: whitespace as single
+ * spaces, without the emoji variation selector, zero-width joiners, gender signs and skin
+ * tones that a hand-typed emoji may add.
+ */
+export function nameKey(name: string): string {
+  return stripWs(
+    name
+      .normalize('NFC')
+      .replace(/\u{FE0F}|\u{200D}|\u{2640}|\u{2642}|[\u{1F3FB}-\u{1F3FF}]/gu, '')
+      .replace(new RegExp(`${WS_CLASS}+`, 'gu'), ' ')
+  );
+}
+
+/**
+ * A name -> the first of `known` with its key, else the name itself (as nameKey spaces
+ * it); `caseless` compares the keys in lower case (the bot looks recipes up so).
+ */
+function canonicalNames(known: Iterable<string>, caseless = false): (name: string) => string {
+  const key = (n: string): string => (caseless ? nameKey(n).toLowerCase() : nameKey(n));
+  const byKey = new Map<string, string>();
+  for (const n of known) if (!byKey.has(key(n))) byKey.set(key(n), n);
+  return (name) =>
+    byKey.get(key(name)) ?? stripWs(name.replace(new RegExp(`${WS_CLASS}+`, 'gu'), ' '));
+}
+
+/** The item names an event of the bot names (channel cards aside). */
+function itemNamesOf(e: BuildEvent): string[] {
+  const lines = (xs: readonly { name: string }[] | undefined): string[] =>
+    (xs ?? []).map((x) => x.name);
+  switch (e.type) {
+    case 'inventory':
+    case 'title':
+    case 'use':
+      return lines(e.items);
+    case 'recipe_detail':
+      return [...lines(e.missing), ...lines(e.have)];
+    case 'craft':
+      return [...lines(e.ingredients), ...(truthy(e.output) ? [e.output] : [])];
+    case 'item_info':
+    case 'gift':
+    case 'give':
+    case 'show':
+    case 'item_cooldown':
+      return [e.item];
+    case 'stats':
+      return lines(e.unique_items);
+    default:
+      return [];
+  }
+}
+
+/**
+ * A recipe card into the knowledge base, with the date of its post: like any other
+ * observation, it sets what is unknown or older (KB.newer), never what the bot said later.
+ */
+function mergeRecipeCard(
+  kb: KB,
+  e: Extract<BuildEvent, { type: 'recipe_card' }>,
+  item: (name: string) => string,
+  recipe: (name: string) => string
+): void {
+  const name = recipe(e.recipe);
+  const r = kb.recipe(name);
+  const card =
+    r.channel ?? (r.channel = { name: e.chat ?? '', date: e.date, fields: new Set(), notes: [] });
+  card.date = e.date;
+  card.notes = [...e.notes];
+  if (r.level === null) {
+    r.level = e.level;
+    card.fields.add('level');
+  }
+  const ingr = new Map<string, number>();
+  for (const x of e.ingredients) {
+    const n = item(x.name);
+    ingr.set(n, (ingr.get(n) ?? 0) + x.qty);
+    kb.item(n, x.rarity, x.usable).used_in.add(name);
+  }
+  if (ingr.size > 0) {
+    const before = r.ingredients;
+    kb.setIngredients(r, ingr, 'channel');
+    if (r.ingredients !== before) card.fields.add('ingredients');
+  }
+  if (e.output !== null) {
+    const out = item(e.output.name);
+    const it = kb.item(out, e.output.rarity, e.output.usable);
+    it.sources.add('recipe');
+    it.made_by.add(name);
+    if (truthy(e.title)) {
+      it.givesTitle = true;
+      it.title = e.title;
+    }
+    if (kb.newer(r, 'output')) {
+      r.output = out;
+      r.craft_text = e.text;
+      card.fields.add('output');
+    }
+  }
+}
+
+/**
  * Build's passes up to the uses: recipe names, arrivals, the chronological merge, drops
  * and crafts. Returns the /usa replies, for resolveUses.
  */
@@ -477,6 +592,11 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
     if (e.type === 'item_info' && truthy(e.used_in_raw))
       for (const n of splitRecipes(e.used_in_raw, recipeNames)) recipeNames.add(n);
   }
+  // A channel card names an item or recipe as its curators typed it: the bot's own name,
+  // when one matches it (nameKey), is the one kept.
+  const itemCanon = canonicalNames(events.flatMap(itemNamesOf));
+  const recipeCanon = canonicalNames(recipeNames, true);
+  for (const e of events) if (e.type === 'recipe_card') recipeNames.add(recipeCanon(e.recipe));
 
   resolveArrivals(kb, events);
 
@@ -502,7 +622,11 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
     if (e.type === 'stats')
       for (const x of e.unique_items ?? []) kb.item(x.name, x.rarity, x.usable);
     if (e.type === 'recipe_list') {
-      for (const r of e.recipes) kb.recipe(r.name).level = r.level;
+      for (const r of e.recipes) {
+        const kr = kb.recipe(r.name);
+        kr.level = r.level;
+        kr.channel?.fields.delete('level');
+      }
     } else if (e.type === 'recipe_detail') {
       const r = kb.recipe(e.recipe);
       const ingr = new Map<string, number>();
@@ -525,6 +649,8 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       if (truthy(e.cooldown)) it.usable = true;
     } else if (e.type === 'inventory') {
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable);
+    } else if (e.type === 'recipe_card') {
+      mergeRecipeCard(kb, e, itemCanon, recipeCanon);
     } else if (e.type === 'title') {
       // A fact of the game: these items give a title (whoever owns them).
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable).givesTitle = true;
@@ -846,6 +972,7 @@ function resolveCrafts(kb: KB, crafts: readonly Craft[], recipeNames: ReadonlySe
     if (truthy(e.output) && kb.newer(r, 'output')) {
       r.output = e.output;
       r.craft_text = e.flavor;
+      r.channel?.fields.delete('output');
     }
     if (truthy(e.output)) (kb.items.get(e.output) as KbItem).made_by.add(name);
   }
@@ -1485,6 +1612,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       ...(it.use !== undefined && { use: it.use }),
       ...(it.oldNames !== undefined && { old_names: it.oldNames }),
       ...(it.givesTitle !== undefined && { gives_title: it.givesTitle }),
+      ...(it.title !== undefined && { title: it.title }),
       ...(it.sourcesInferred !== undefined && { sources_inferred: it.sourcesInferred }),
       exclusive,
       locations: exclusive ? sortedStrings(it.dropLocations) : [],
@@ -1505,6 +1633,16 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       craft_text: r.craft_text,
       last_seen: r.last_seen,
       ...(r.levelInferred !== undefined && { level_inferred: r.levelInferred }),
+      ...(r.channel !== undefined && {
+        channel: {
+          name: r.channel.name,
+          date: r.channel.date,
+          fields: (['level', 'ingredients', 'output'] as const).filter((f) =>
+            r.channel?.fields.has(f)
+          ),
+          notes: [...r.channel.notes],
+        },
+      }),
     },
   ]);
   const exclusiveItems = new Map<string, string[]>();
