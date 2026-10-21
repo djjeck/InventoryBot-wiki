@@ -491,7 +491,9 @@ the player has not moved; the reply does not name the missing item. `UNLOCK` nam
 item, which is not consumed. Most places that need an item have their own arrival text, written as a
 sentence that ends with the place itself ("guidato dalla tua bussola fatata … finalmente ti trovi
 nella palude sussurrante 🌾"), without "arrivi"; only the exits block marks it as an arrival, and
-nothing but the known place names delimits the place.
+nothing but the known place names delimits the place. Neither does "arrivi" without the colon, which
+may be followed by more words or a full stop ("arrivi esausto nella baia di Scogliola 🦀", "arrivi
+(stremato) nell'immenso deserto di Sabbiora 🏜.").
 
 `NEEDED` is a separate, unaddressed notice that is not the answer to a command: it names the item a
 place requires, on the player's way back to the village.

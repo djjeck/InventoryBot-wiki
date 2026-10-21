@@ -318,6 +318,19 @@ describe('travel', () => {
     ]);
   });
 
+  it('arrival_with_unlock_text_and_arrivi_without_colon_leaves_the_place_to_phase_5', () => {
+    const e = fields(
+      '@djjeck, ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀\n\n' +
+        'Puoi andare verso:\n - nella valle ventosa 🏞',
+      '/viaggio baia'
+    );
+    expect([e['type'], e['location'], e['narrative']]).toStrictEqual([
+      'travel',
+      null,
+      'ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀',
+    ]);
+  });
+
   it('blocked', () => {
     expect(
       classify('@djjeck non puoi andare: sul banco corallino 🐠.. Forse ti manca qualcosa!', null)

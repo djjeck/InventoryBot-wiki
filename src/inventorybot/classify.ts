@@ -458,6 +458,15 @@ const cTravel: Classifier = (t) => {
   if (m) {
     const narrative = stripWs(stripAddr(head.slice(0, m.index)));
     const standard = narrative.startsWith('ti metti in cammino');
+    // Only the standard text and "arrivi:" delimit the place: "… arrivi esausto nella baia di
+    // Scogliola 🦀" is left to phase 5, which finds the known place that ends it.
+    if (!standard && !ARRIVAL_COLON.test(head))
+      return {
+        type: 'travel',
+        location: null,
+        exits: exits(t),
+        narrative: stripWs(stripAddr(head)),
+      };
     return {
       type: 'travel',
       location: stripWs(groups(m)['loc'] as string),

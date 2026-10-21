@@ -1019,6 +1019,22 @@ describe('travel unlocks', () => {
     ]);
   });
 
+  it('arrivi_without_colon_leaves_out_the_words_and_full_stop_before_and_after', () => {
+    // With the exits block: "arrivi" without the colon does not delimit the place.
+    const arrival = ev(
+      "@djjeck, con dieci borracce piene d'acqua arrivi (stremato) nell'immenso deserto di Sabbiora 🏜.\n\nPuoi andare verso:\n - " +
+        BOSCO,
+      '/viaggio deserto',
+      { t: 10 }
+    );
+    const { wiki } = runBuild([ev(T.where(BOSCO, [DESERTO]), '/viaggio', { t: 0 }), arrival]);
+    expect([f(arrival)['location'], f(arrival)['narrative']]).toStrictEqual([
+      DESERTO,
+      "con dieci borracce piene d'acqua arrivi (stremato)",
+    ]);
+    expect(Object.keys(wiki.locations).sort()).toStrictEqual([DESERTO, BOSCO].sort());
+  });
+
   it('arrival_at_an_unknown_place_is_reported', () => {
     const arrival = ev(racchetta, '/viaggio palude', { t: 10 });
     const { wiki, kb, state } = runBuild([arrival]);

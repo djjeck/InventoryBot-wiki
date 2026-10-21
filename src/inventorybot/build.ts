@@ -622,7 +622,8 @@ function knownPlaces(events: readonly BuildEvent[]): Set<string> {
 
 /**
  * Arrivals whose reply does not delimit the place (narrated through an item): the
- * place is the longest known place that ends the narrative, on a word boundary; the
+ * place is the longest known place that ends the narrative (a final full stop aside), on a
+ * word boundary; the
  * narrative keeps the text before it (the unlock text). Places named anywhere in the
  * events count, also later ones. Otherwise the arrival is reported and its place stays null.
  */
@@ -637,7 +638,8 @@ function resolveArrivals(kb: KB, events: BuildEvent[]): void {
     .sort((a, b) => b.len - a.len)
     .map((x) => x.n);
   for (const e of pending) {
-    const text = e.narrative ?? '';
+    // A full stop may follow the place ("… arrivi nella baia di Scogliola 🦀.").
+    const text = stripWs(e.narrative ?? '').replace(/\.$/u, '');
     const name = names.find(
       (n) =>
         text.endsWith(n) && (text.length === n.length || text[text.length - n.length - 1] === ' ')
