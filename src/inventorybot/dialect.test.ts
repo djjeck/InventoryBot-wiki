@@ -112,7 +112,7 @@ describe('anonymisation', () => {
     const d = inventoryBotDialect(['il fornaio']);
     expect(d.normalizeReply('Sua Maestà @msx80 il fornaio, possiedi:')).toBe('@msx80, possiedi:');
     expect(d.compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
-      new Set(['/inventario', '/i'])
+      new Set(['/inventario', '/i', '/inventory'])
     );
     expect([...d.publicNames, ...d.userCommands]).toStrictEqual(['msx80', '/stats', '/dai']);
     expect(d.groupWindow).toBe(120);
@@ -154,7 +154,7 @@ describe('pairing', () => {
       compatibleCommands('@mario_r, per fare Torre ti manca:\n- un sasso [C] x1')
     ).toStrictEqual(new Set(['/ricetta', '/esamina']));
     expect(compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
-      new Set(['/inventario', '/i'])
+      new Set(['/inventario', '/i', '/inventory'])
     );
     // A successful /usa has no grammar (each item answers in its own words): read without its
     // command it is unrecognised, so it may answer any command, and pairing finds its /usa.

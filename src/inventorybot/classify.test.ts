@@ -756,7 +756,7 @@ describe('known fixed-text replies', () => {
       ['use_wrong_key', '/usa', ['/usa']],
       ['item_ambiguous', undefined, ['/dai', '/mostra', '/usa']],
       ['place_ambiguous', '/viaggio', ['/viaggio']],
-      ['inventory_bad_filter', '/inventario', ['/i', '/inventario']],
+      ['inventory_bad_filter', '/inventario', ['/i', '/inventario', '/inventory']],
     ]);
   });
 
@@ -856,7 +856,7 @@ describe('old formats', () => {
       ['old_format', 'hide_not_found', ['/nascondi']],
       ['old_format', 'title_none', ['/titolo']],
       ['old_format', 'title_choice', ['/titolo']],
-      ['old_format', 'inventory_header', ['/i', '/inventario']],
+      ['old_format', 'inventory_header', ['/i', '/inventario', '/inventory']],
       ['old_format', 'pakkomon_fight', ['/usa']],
       ['old_format', 'pakkomon_fight', ['/usa']],
       ['old_format', 'pakkomon_record', ['/usa']],

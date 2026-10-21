@@ -30,8 +30,8 @@ import {
   type StatsEvent,
 } from './types.ts';
 
-/** /inventario and its short form /i. */
-export const INVENTORY_COMMANDS: readonly string[] = ['/inventario', '/i'];
+/** /inventario and its other names (dialect.ts ALIASES). */
+export const INVENTORY_COMMANDS: readonly string[] = ['/inventario', '/inventory', '/i'];
 
 const RARITY = `[A-Z]${D}*\\+?`;
 // "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space; any

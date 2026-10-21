@@ -43,24 +43,27 @@ export const COMPATIBLE: Readonly<Partial<Record<EventType, ReadonlySet<string>>
 const USE_COMMANDS: ReadonlySet<string> = new Set(['/usa', '/use']);
 const GIVE_COMMANDS: ReadonlySet<string> = new Set(['/dai']);
 
-/** Short forms the bot takes for a command: `/i` for `/inventario`. */
-const SHORT_FORMS: ReadonlyMap<string, string> = new Map([['/i', '/inventario']]);
+/** Other names the bot takes for a command: `/i` and `/inventory` for `/inventario`. */
+const ALIASES: ReadonlyMap<string, string> = new Map([
+  ['/i', '/inventario'],
+  ['/inventory', '/inventario'],
+]);
 
-/** The commands with the short forms of those among them. */
-function withShortForms(commands: ReadonlySet<string> | null): ReadonlySet<string> | null {
+/** The commands with the aliases of those among them. */
+function withAliases(commands: ReadonlySet<string> | null): ReadonlySet<string> | null {
   if (commands === null) return null;
-  const short = [...SHORT_FORMS].filter(([, full]) => commands.has(full)).map(([s]) => s);
-  return short.length === 0 ? commands : new Set([...commands, ...short]);
+  const more = [...ALIASES].filter(([, full]) => commands.has(full)).map(([a]) => a);
+  return more.length === 0 ? commands : new Set([...commands, ...more]);
 }
 
 /** Commands that can produce an event of this kind (first words), or null when any can. */
 export function commandFamily(ev: Event): ReadonlySet<string> | null {
   if (ev.type === 'miss' || ev.type === 'old_format') {
     const c = producersOf(ev);
-    return withShortForms(c === 'any' ? null : new Set(c === 'none' ? [] : c));
+    return withAliases(c === 'any' ? null : new Set(c === 'none' ? [] : c));
   }
   if (ev.type === 'item_cooldown') return ev.action === 'use' ? USE_COMMANDS : GIVE_COMMANDS;
-  return withShortForms(COMPATIBLE[ev.type] ?? null);
+  return withAliases(COMPATIBLE[ev.type] ?? null);
 }
 
 /** Commands that can have produced this reply, or null when any could have; the reply type is classify()'s without a command. */
