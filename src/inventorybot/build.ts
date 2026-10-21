@@ -826,12 +826,25 @@ export function useCandidates(
   query: string,
   usable: readonly string[]
 ): string[] {
+  return candidatesOf(namesWithWords([...items.keys()]), namesWithWords(usable), query);
+}
+
+/** Names with their words (norm). */
+type NamesWithWords = readonly (readonly [string, readonly string[]])[];
+
+const namesWithWords = (names: readonly string[]): NamesWithWords =>
+  names.map((n) => [n, norm(n)] as const);
+
+/** The names whose words contain each of `words` (as substrings). */
+const fitting = (pool: NamesWithWords, words: readonly string[]): string[] =>
+  pool.filter(([, nw]) => words.every((x) => nw.some((w) => w.includes(x)))).map(([n]) => n);
+
+/** useCandidates, on the items' and usable items' names with their words. */
+function candidatesOf(all: NamesWithWords, usable: NamesWithWords, query: string): string[] {
   let qw = norm(query);
-  const all = [...items.keys()];
   while (qw.length > 0) {
     for (const pool of [usable, all]) {
-      const words = qw;
-      const c = pool.filter((n) => words.every((x) => norm(n).some((w) => w.includes(x))));
+      const c = fitting(pool, qw);
       if (c.length > 0) return c;
     }
     qw = qw.slice(0, -1);
@@ -930,9 +943,17 @@ export function attributeUses<U extends UseLike>(
   items: ReadonlyMap<string, { name: string; usable: boolean }>,
   recorded: readonly U[]
 ): { uses: U[]; pending: [U, string[]][] } {
-  const usable = [...items.values()].filter((it) => it.usable).map((it) => it.name);
+  const all = namesWithWords([...items.keys()]);
+  const usable = namesWithWords([...items.values()].filter((it) => it.usable).map((it) => it.name));
   const uses = recorded.filter((e) => !hasAny(e.text, USE_NOISE));
   const pending: [U, string[]][] = [];
+  // query -> useCandidates: many replies answer the same query
+  const byQuery = new Map<string, readonly string[]>();
+  const candidates = (q: string): string[] => {
+    let c = byQuery.get(q);
+    if (c === undefined) byQuery.set(q, (c = candidatesOf(all, usable, q)));
+    return [...c];
+  };
   for (const e of uses) {
     const q = queryArg(e.query, '/usa', '/use') || '';
     // A reply that names its item (a Pakkomon sphere's) is stronger evidence than the command: the items
@@ -940,11 +961,10 @@ export function attributeUses<U extends UseLike>(
     let c: string[] = [];
     if (truthy(e.named)) {
       const words = norm(e.named);
-      const fits = (n: string): boolean => words.every((x) => norm(n).some((w) => w.includes(x)));
-      c = usable.filter(fits);
-      if (c.length === 0) c = [...items.keys()].filter(fits);
+      c = fitting(usable, words);
+      if (c.length === 0) c = fitting(all, words);
     }
-    if (c.length === 0) c = useCandidates(items, q, usable);
+    if (c.length === 0) c = candidates(q);
     if (c.length > 1) {
       // prefer the item named explicitly in, or sharing most words with, the reply
       const named = c.filter((n) => e.text.includes(n));
