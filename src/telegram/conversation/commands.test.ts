@@ -28,13 +28,13 @@ describe('resolveCommand', () => {
     expect(resolveCommand<Cmd>(m, BOT)).toBe(m);
   });
 
-  it('commands_as_phase_1_reads_them_from_html', () => {
+  it('commands_as_phase_1_reads_them_from_html', async () => {
     const dir = tempDir();
     const c = new Chat('G');
     c.user('Mario', 'x', 0).text = '/inventario@InventoryBot oro'; // raw, as in the HTML
     c.user('Mario', 'x', 1).text = '/start@AltroBot';
     writeExport(path.join(dir, 'E'), 'G', [c.messages]);
-    const { msgs } = runParse([dir]);
+    const { msgs } = await runParse([dir]);
     expect(msgs.map((m) => resolveCommand(m, BOT)).map((m) => [m.text, m.other_bot])).toStrictEqual(
       [
         ['/inventario oro', false],

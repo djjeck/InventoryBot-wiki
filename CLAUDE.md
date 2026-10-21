@@ -59,9 +59,20 @@ The pipeline is a chain of phases, each a function with typed input and output t
 order:
 
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become `Message`s
-   (`src/telegram/messages.ts`), kept in memory. `parsePages` is pure and takes the pages as
-   strings. Which files of an export folder are pages is decided by `export-listing.ts`, also pure;
-   two adapters list and read them: `browser-files.ts` for the files of a browser folder picker,
+   (`src/telegram/messages.ts`), in two steps, so that each export is parsed once. `readExport`
+   (`record.ts`) reads the pages of one export into an `ExportRecord`, plain JSON data that can be
+   kept: the bot's messages and the commands for the bot in full, every other message as a stub
+   without text (chat, id, date, display name, sender key), which is all phase 2 reads of it, plus
+   the export's metadata (folder, a SHA-256 of the pages, counts, chats, first and last date) and a
+   `formatVersion`. `mergeExports` joins the records of a run, which needs them all: macOS dates
+   take their offset from the other exports, then copies are de-duplicated by (chat, id), the one
+   read last winning, and sorted; a stub becomes a message with an empty text, so the results are
+   those of the whole chat. A macOS export's Telegram user ids become sender keys there and nowhere
+   else: a salted SHA-256 of the id (`senderKey`), with the pseudonyms' salt, so a person has the
+   same key in every record and every run, and nobody without the salt can work back to the id.
+   `parsePages` is the two steps in a row. All of it is pure and takes the pages as strings. Which
+   files of an export folder are pages is decided by `export-listing.ts`, also pure; two adapters
+   list and read them: `browser-files.ts` for the files of a browser folder picker,
    `export-files.ts` on disk (used by the tests).
 
 2. **Conversation** (`src/telegram/conversation/`, `readConversation`): the messages become the
@@ -98,13 +109,16 @@ order:
    the owner's own state (recipes made, items seen, places visited, an estimate of the inventory),
    kept apart so that the wiki can be shared. `build` merges the events into a knowledge base,
    newest observation first; `toJson` writes the wiki, `playerState` the player state. Phase 5 reads
-   plain JSON copies of the events (`buildWiki` in `src/pipeline.ts`), since `build` annotates them
-   for `playerState`.
+   plain JSON copies of the events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates
+   them for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply
-(`compatibleCommands`, from the reply type the classifier gives). `src/pipeline.ts` runs phases 2 to
-5 on the messages of phase 1 (`converse`, `interpret`, `buildWiki`) and words their report lines.
+(`compatibleCommands`, from the reply type the classifier gives). `src/pipeline.ts` runs the phases
+and words their report lines: `processExport` is phase 1 for one export (its record), `buildWiki`
+runs the rest of phase 1 and phases 2 to 5 on the records of a run (`converse`, `interpret`,
+`buildFromEvents`), and `runPipeline` is `buildWiki` on the `processExport` of each export of the
+given pages: one code path, whether the records were just read or kept from earlier.
 
 The web app (`src/web/`, `npm run web:dev`) is the interface, published on GitHub Pages by
 `.github/workflows/ci.yml` on every push to `main` that passes the checks (`npm run web:build`

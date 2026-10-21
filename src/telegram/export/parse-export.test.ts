@@ -21,10 +21,11 @@ import {
 } from '#test/helpers.ts';
 import { tempDir } from '#test/temp-dir.ts';
 import { iterPages } from './export-files.ts';
-import { exportKey, ExportParser, pageKey, parsePages, sortMessages } from './parse-export.ts';
+import { exportKey, ExportParser, pageKey, sortMessages } from './parse-export.ts';
+import { parsePages, senderKey } from './record.ts';
 
 /** The test exports' dates are in New York's winter time (UTC-05:00, test/helpers.ts). */
-const OPTS = { bot: BOT_IDENTITY, timeZone: 'America/New_York' };
+const OPTS = { bot: BOT_IDENTITY, timeZone: 'America/New_York', salt: 'test-salt' };
 
 function parseHtml(
   title: string,
@@ -104,7 +105,7 @@ describe('joined messages', () => {
     expect(p.messages.map((m) => m.sender)).toStrictEqual(['Mario', 'Mario', 'Luigi']);
   });
 
-  it('joined_across_pages_of_one_export', () => {
+  it('joined_across_pages_of_one_export', async () => {
     const dir = tempDir();
     const c = new Chat('G');
     c.user('Mario', 'fine pagina uno', 0);
@@ -115,7 +116,7 @@ describe('joined messages', () => {
       [c.messages.slice(0, 1), c.messages.slice(1)],
       new Set([2])
     );
-    const { msgs } = runParse([dir]);
+    const { msgs } = await runParse([dir]);
     expect(msgs.map((m) => m.sender)).toStrictEqual(['Mario', 'Mario']);
   });
 
@@ -126,7 +127,7 @@ describe('joined messages', () => {
     expect(p.messages[0]?.sender).toBe('Luigi');
   });
 
-  it('joined_does_not_cross_into_another_export', () => {
+  it('joined_does_not_cross_into_another_export', async () => {
     const dir = tempDir();
     const a = new Chat('G');
     const b = new Chat('G', 5000);
@@ -134,14 +135,14 @@ describe('joined messages', () => {
     b.user('Luigi', 'export due', 10);
     writeExport(path.join(dir, 'A'), 'G', [a.messages]);
     writeExport(path.join(dir, 'B'), 'G', [b.messages], new Set([1]));
-    const { msgs } = runParse([dir]);
+    const { msgs } = await runParse([dir]);
     expect(Object.fromEntries(msgs.map((m) => [m.id, m.sender]))).toStrictEqual({
       1000: 'Mario',
       5000: null,
     });
   });
 
-  it('joined_across_pages_with_windows_paths', () => {
+  it('joined_across_pages_with_windows_paths', async () => {
     const c = new Chat('G');
     c.user('Mario', 'fine pagina uno', 0);
     c.user('Mario', 'inizio pagina due', 1);
@@ -156,7 +157,7 @@ describe('joined messages', () => {
         html: pageHtml('G', c.messages.slice(1), true),
       },
     ];
-    const { messages } = parsePages([pages], OPTS);
+    const { messages } = await parsePages([pages], OPTS);
     expect(messages.map((m) => m.sender)).toStrictEqual(['Mario', 'Mario']);
   });
 });
@@ -184,7 +185,7 @@ describe('page order', () => {
     ]);
   });
 
-  it('sender_carried_from_page9_to_page10', () => {
+  it('sender_carried_from_page9_to_page10', async () => {
     const dir = tempDir();
     const c = new Chat('G');
     for (let i = 0; i < 10; i++) c.user(i < 9 ? 'Mario' : 'Luigi', `m${i}`, i);
@@ -195,24 +196,24 @@ describe('page order', () => {
       c.messages.map((m) => [m]),
       new Set([11])
     );
-    const { msgs } = runParse([dir]);
+    const { msgs } = await runParse([dir]);
     expect(msgs.at(-1)?.sender).toBe('Luigi');
   });
 });
 
 describe('de-duplication', () => {
-  it('overlapping_exports_deduplicated', () => {
+  it('overlapping_exports_deduplicated', async () => {
     const dir = tempDir();
     const c = new Chat(BOT);
     for (let i = 0; i < 6; i++) c.user('Daniele', `/esamina oggetto ${i}`, i * 10);
     writeExport(path.join(dir, 'ChatExport_2026-10-17'), BOT, [c.messages.slice(0, 4)]);
     writeExport(path.join(dir, 'ChatExport_2026-11-02'), BOT, [c.messages.slice(2)]);
-    const { msgs, err } = runParse([dir]);
+    const { msgs, err } = await runParse([dir]);
     expect(msgs.map((m) => m.id)).toStrictEqual([1000, 1001, 1002, 1003, 1004, 1005]);
     expect(err).toContain('cartelle di esportazione: 2;');
   });
 
-  it('same_id_in_different_chats_kept', () => {
+  it('same_id_in_different_chats_kept', async () => {
     const dir = tempDir();
     const a = new Chat(BOT);
     const b = new Chat('G');
@@ -220,7 +221,7 @@ describe('de-duplication', () => {
     b.user('Mario', 'ciao', 1);
     writeExport(path.join(dir, 'A'), BOT, [a.messages]);
     writeExport(path.join(dir, 'B'), 'G', [b.messages]);
-    const { msgs } = runParse([dir]);
+    const { msgs } = await runParse([dir]);
     expect(msgs.map((m) => [m.chat, m.id]).sort()).toStrictEqual([
       ['G', 1000],
       [BOT, 1000],
@@ -236,21 +237,21 @@ describe('discovery', () => {
     return c;
   };
 
-  it('plain_folder', () => {
+  it('plain_folder', async () => {
     const dir = tempDir();
     writeExport(path.join(dir, 'ChatExport'), 'G', [twoMessages().messages]);
-    expect(runParse([path.join(dir, 'ChatExport')]).msgs).toHaveLength(2);
+    expect((await runParse([path.join(dir, 'ChatExport')])).msgs).toHaveLength(2);
   });
 
-  it('deep_subfolders', () => {
+  it('deep_subfolders', async () => {
     const dir = tempDir();
     writeExport(path.join(dir, 'inbox', 'a', 'b', 'c', 'ChatExport'), 'G', [
       twoMessages().messages,
     ]);
-    expect(runParse([path.join(dir, 'inbox')]).msgs).toHaveLength(2);
+    expect((await runParse([path.join(dir, 'inbox')])).msgs).toHaveLength(2);
   });
 
-  it('non_page_html_ignored', () => {
+  it('non_page_html_ignored', async () => {
     const dir = tempDir();
     const folder = writeExport(path.join(dir, 'E'), 'G', [twoMessages().messages]);
     const other = new Chat('G', 9000);
@@ -265,41 +266,41 @@ describe('discovery', () => {
       pageHtml('G', other.messages),
       'utf-8'
     );
-    const { msgs } = runParse([folder]);
+    const { msgs } = await runParse([folder]);
     expect(msgs.map((m) => m.text)).not.toContain('intruso');
     expect(msgs).toHaveLength(2);
   });
 
-  it('not_a_folder_or_zip', () => {
+  it('not_a_folder_or_zip', async () => {
     const dir = tempDir();
     const f = path.join(dir, 'notes.txt');
     fs.writeFileSync(f, 'x');
-    const { msgs, err } = runParse([f]);
+    const { msgs, err } = await runParse([f]);
     expect(msgs).toStrictEqual([]);
     expect(err).toContain('non è una cartella né un file .zip');
   });
 
-  it('zip_skipped_with_warning', () => {
+  it('zip_skipped_with_warning', async () => {
     // Zips are not read: only folders are input.
     const dir = tempDir();
     fs.mkdirSync(path.join(dir, 'inbox'));
     fs.writeFileSync(path.join(dir, 'inbox', 'export.zip'), 'PK');
-    const { msgs, err } = runParse([path.join(dir, 'inbox')]);
+    const { msgs, err } = await runParse([path.join(dir, 'inbox')]);
     expect(msgs).toStrictEqual([]);
     expect(err).toContain('i file zip non vengono letti');
   });
 
-  it('zip_given_as_path_skipped_with_warning', () => {
+  it('zip_given_as_path_skipped_with_warning', async () => {
     const dir = tempDir();
     const zip = path.join(dir, 'Export.ZIP');
     fs.writeFileSync(zip, 'PK');
-    const { msgs, err } = runParse([zip]);
+    const { msgs, err } = await runParse([zip]);
     expect(msgs).toStrictEqual([]);
     expect(err).toContain('i file zip non vengono letti');
   });
 
-  it('missing_path_skipped_with_warning', () => {
-    const { msgs, err } = runParse([path.join(tempDir(), 'missing')]);
+  it('missing_path_skipped_with_warning', async () => {
+    const { msgs, err } = await runParse([path.join(tempDir(), 'missing')]);
     expect(msgs).toStrictEqual([]);
     expect(err).toContain('non è una cartella né un file .zip');
   });
@@ -307,13 +308,13 @@ describe('discovery', () => {
   // Permissions do not block reading on Windows, nor for root.
   it.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
     'unreadable_subfolder_skipped',
-    () => {
+    async () => {
       const dir = tempDir();
       writeExport(path.join(dir, 'inbox', 'A'), 'G', [twoMessages().messages]);
       const locked = writeExport(path.join(dir, 'inbox', 'B'), 'H', [twoMessages().messages]);
       fs.chmodSync(locked, 0o000);
       try {
-        expect(runParse([path.join(dir, 'inbox')]).msgs.map((m) => m.chat)).toStrictEqual([
+        expect((await runParse([path.join(dir, 'inbox')])).msgs.map((m) => m.chat)).toStrictEqual([
           'G',
           'G',
         ]);
@@ -325,29 +326,29 @@ describe('discovery', () => {
 });
 
 describe('JSON exports', () => {
-  it('json_export_folder_warned_and_skipped', () => {
+  it('json_export_folder_warned_and_skipped', async () => {
     const dir = tempDir();
     fs.mkdirSync(path.join(dir, 'ChatExport'));
     fs.writeFileSync(path.join(dir, 'ChatExport', 'result.json'), '{}');
-    const { msgs, err } = runParse([dir]);
+    const { msgs, err } = await runParse([dir]);
     expect(msgs).toStrictEqual([]);
     expect(err).toContain('esportazione in formato JSON');
   });
 
-  it('html_next_to_result_json_is_not_warned', () => {
+  it('html_next_to_result_json_is_not_warned', async () => {
     const dir = tempDir();
     const c = new Chat('G');
     c.user('Mario', 'ciao', 0);
     const folder = writeExport(path.join(dir, 'E'), 'G', [c.messages]);
     fs.writeFileSync(path.join(folder, 'result.json'), '{}');
-    const { msgs, err } = runParse([dir]);
+    const { msgs, err } = await runParse([dir]);
     expect(msgs).toHaveLength(1);
     expect(err).not.toContain('esportazione in formato JSON');
   });
 });
 
 describe('chat title', () => {
-  it('dm_identified_by_title_not_folder', () => {
+  it('dm_identified_by_title_not_folder', async () => {
     const dir = tempDir();
     const a = new Chat(BOT);
     const b = new Chat('Gruppo Avventurieri');
@@ -355,7 +356,7 @@ describe('chat title', () => {
     b.user('Mario', '/avventura', 1);
     writeExport(path.join(dir, 'Gruppo Avventurieri'), BOT, [a.messages]); // misleading folder names
     writeExport(path.join(dir, 'InventoryBot'), 'Gruppo Avventurieri', [b.messages]);
-    const { msgs, err } = runParse([dir]);
+    const { msgs, err } = await runParse([dir]);
     expect(new Set(msgs.map((m) => `${m.chat}|${m.dm}`))).toStrictEqual(
       new Set([`${BOT}|true`, 'Gruppo Avventurieri|false'])
     );
@@ -424,13 +425,13 @@ describe('forwarded messages', () => {
 });
 
 describe('commands', () => {
-  it('commands_kept_as_written', () => {
+  it('commands_kept_as_written', async () => {
     const dir = tempDir();
     const c = new Chat('G');
     c.user('Mario', 'x', 0).text = '/inventario@InventoryBot oro'; // raw, as in the HTML
     c.user('Mario', 'x', 1).text = '/start@AltroBot';
     writeExport(path.join(dir, 'E'), 'G', [c.messages]);
-    const { msgs } = runParse([dir]);
+    const { msgs } = await runParse([dir]);
     // Phase 1 keeps `/cmd@Bot` as written: telling commands for this bot from others is
     // part of the conversation with the bot, not of the export format.
     expect(msgs.map((m) => m.text)).toStrictEqual([
@@ -465,7 +466,7 @@ describe('text', () => {
 });
 
 describe('order', () => {
-  it('chats_merged_by_timestamp', () => {
+  it('chats_merged_by_timestamp', async () => {
     const dir = tempDir();
     const dm = new Chat(BOT, 900000);
     const g = new Chat('G', 10);
@@ -475,7 +476,12 @@ describe('order', () => {
     g.user('Mario', 'g d', 15);
     writeExport(path.join(dir, 'A'), BOT, [dm.messages]);
     writeExport(path.join(dir, 'B'), 'G', [g.messages]);
-    expect(runParse([dir]).msgs.map((m) => m.text)).toStrictEqual(['dm a', 'g b', 'dm c', 'g d']);
+    expect((await runParse([dir])).msgs.map((m) => m.text)).toStrictEqual([
+      'dm a',
+      'g b',
+      'dm c',
+      'g d',
+    ]);
   });
 
   it('different_utc_offsets_compared_as_instants', () => {
@@ -497,6 +503,9 @@ describe('order', () => {
 
 /** Invented Telegram user ids for the avatar file names. */
 const IDS = { Daniele: 111000111, Mario: 222000222, Luigi: 333000333, [BOT]: 444000444 };
+
+/** The sender key of a sender of IDS, with the salt of OPTS. */
+const key = (name: keyof typeof IDS): Promise<string> => senderKey(OPTS.salt, String(IDS[name]));
 
 function macDm(): Chat {
   const c = new Chat(BOT, 5000);
@@ -578,12 +587,12 @@ describe('macOS dates', () => {
     }
   });
 
-  it('offset_from_overlapping_export_of_the_same_chat', () => {
+  it('offset_from_overlapping_export_of_the_same_chat', async () => {
     const dir = tempDir();
     const c = macDm();
     writeExport(path.join(dir, 'Win'), BOT, [c.messages.slice(0, 2)]);
     writeMacExport(path.join(dir, 'Mac'), BOT, c.messages.slice(1), IDS);
-    const { msgs, err } = runParse([dir]);
+    const { msgs, err } = await runParse([dir]);
     expect(msgs.map((m) => m.date)).toStrictEqual(c.messages.map((m) => m.date)); // UTC-05:00, as in the Windows export
     expect(err).toContain(
       'Mac: date senza fuso orario, lette come UTC-05:00 come le altre esportazioni della stessa chat (1 messaggi in comune)'
@@ -591,14 +600,14 @@ describe('macOS dates', () => {
     expect(err).not.toContain('show another date');
   });
 
-  it('inferred_offset_wins_over_the_time_zone_and_disagreement_is_reported', () => {
+  it('inferred_offset_wins_over_the_time_zone_and_disagreement_is_reported', async () => {
     const dir = tempDir();
     const c = macDm();
     const win = c.messages.map((m) => ({ ...m }));
     (win[1] as Item).date = tgDate(3600 + 1); // another wall clock for one shared message
     writeExport(path.join(dir, 'Win'), BOT, [win.slice(0, 3)]);
     writeMacExport(path.join(dir, 'Mac'), BOT, c.messages, IDS);
-    const { msgs, err } = runParse([dir], 'Europe/Athens');
+    const { msgs, err } = await runParse([dir], 'Europe/Athens');
     expect(err).toContain(
       "lette come UTC-05:00 come le altre esportazioni della stessa chat (3 messaggi in comune); in 1 di questi un'altra esportazione mostra un'altra data o un altro fuso orario"
     );
@@ -608,7 +617,7 @@ describe('macOS dates', () => {
     );
   });
 
-  it('other_chat_or_other_wall_clock_falls_back_to_the_time_zone', () => {
+  it('other_chat_or_other_wall_clock_falls_back_to_the_time_zone', async () => {
     const dir = tempDir();
     const c = macDm();
     const rome: Instant = { epoch: c.base.epoch, offsetMinutes: 60 };
@@ -619,21 +628,21 @@ describe('macOS dates', () => {
     g.user('Mario', 'ciao', 0);
     writeExport(path.join(dir, 'Group'), 'G', [g.messages]); // same ids and wall clock, other chat
     writeMacExport(path.join(dir, 'Mac'), BOT, c.messages, IDS);
-    const { err } = runParse([dir]);
+    const { err } = await runParse([dir]);
     expect(err).toContain(
       'Mac: date senza fuso orario, lette nel fuso orario America/New_York; i 4 messaggi in comune con altre esportazioni della stessa chat vi mostrano altre date'
     );
   });
 
-  it('unknown_time_zone_rejected', () => {
+  it('unknown_time_zone_rejected', async () => {
     const pages = [{ label: 'Mac/messages.html', html: macPageHtml(BOT, macDm().messages, IDS) }];
     for (const bad of ['Mars/Base', 'Italia'])
-      expect(() => parsePages([pages], { ...OPTS, timeZone: bad }), bad).toThrow(
+      await expect(parsePages([pages], { ...OPTS, timeZone: bad }), bad).rejects.toThrow(
         `fuso orario sconosciuto: ${bad}`
       );
   });
 
-  it('each_date_takes_the_offset_of_its_season', () => {
+  it('each_date_takes_the_offset_of_its_season', async () => {
     const summer = new Chat(BOT, 100, {
       epoch: Date.UTC(2025, 6, 1, 10) / 1000,
       offsetMinutes: 120,
@@ -645,7 +654,7 @@ describe('macOS dates', () => {
     });
     winter.user('Mario', 'inverno', 0);
     const all = [...summer.messages, ...winter.messages];
-    const r = parsePages([[{ label: 'Mac/messages.html', html: macPageHtml(BOT, all) }]], {
+    const r = await parsePages([[{ label: 'Mac/messages.html', html: macPageHtml(BOT, all) }]], {
       ...OPTS,
       timeZone: 'Europe/Rome',
     });
@@ -655,9 +664,9 @@ describe('macOS dates', () => {
     ]);
   });
 
-  it('time_zone_converts_dates_and_never_the_system_zone', () => {
+  it('time_zone_converts_dates_and_never_the_system_zone', async () => {
     const c = macDm();
-    const r = parsePages(
+    const r = await parsePages(
       [[{ label: 'Mac/messages.html', html: macPageHtml(BOT, c.messages, IDS) }]],
       { ...OPTS, timeZone: 'Asia/Kolkata' }
     );
@@ -666,28 +675,31 @@ describe('macOS dates', () => {
       'Mac: date senza fuso orario, lette nel fuso orario Asia/Kolkata',
     ]);
     // Only macOS exports need it: Windows dates are untouched and no line is printed.
-    const w = parsePages([[{ label: 'Win/messages.html', html: pageHtml(BOT, c.messages) }]], {
-      ...OPTS,
-      timeZone: 'Asia/Kolkata',
-    });
+    const w = await parsePages(
+      [[{ label: 'Win/messages.html', html: pageHtml(BOT, c.messages) }]],
+      {
+        ...OPTS,
+        timeZone: 'Asia/Kolkata',
+      }
+    );
     expect(w.messages.map((m) => m.date)).toStrictEqual(c.messages.map((m) => m.date));
     expect(w.warnings).toStrictEqual([]);
   });
 
-  it('undated_or_unparsable_macos_dates_need_no_offset', () => {
+  it('undated_or_unparsable_macos_dates_need_no_offset', async () => {
     const html = macPageHtml(BOT, []).replace(
       '<div class="history">',
       '<div class="history">\n<div class="message default clearfix" id="message1"><div class="body">' +
         '<div class="pull_right date details" title="17 Octobre 2026, 05:35:33">05:35</div><div class="from_name">Mario</div><div class="text">ciao</div></div></div>'
     );
-    const r = parsePages([[{ label: 'Mac/messages.html', html }]], OPTS);
+    const r = await parsePages([[{ label: 'Mac/messages.html', html }]], OPTS);
     expect(r.messages[0]?.date).toBe('17 Octobre 2026, 05:35:33'); // not a date: kept verbatim, sorted like an undated message
     expect(r.warnings).toStrictEqual([]);
   });
 });
 
 describe('sender user ids', () => {
-  it('opaque_keys_inherited_by_joined_messages_and_across_pages', () => {
+  it('opaque_keys_inherited_by_joined_messages_and_across_pages', async () => {
     const g = new Chat('G', 10);
     g.user('Mario', '/avventura', 0);
     g.user('Mario', 'ancora', 1); // joined
@@ -699,14 +711,14 @@ describe('sender user ids', () => {
       { label: 'G/messages.html', html: macPageHtml('G', g.messages.slice(0, 4), IDS) },
       { label: 'G/messages2.html', html: macPageHtml('G', g.messages.slice(4), IDS) },
     ];
-    const r = parsePages([pages], OPTS);
+    const r = await parsePages([pages], OPTS);
     expect(r.messages.map((m) => [m.sender, m.sender_key])).toStrictEqual([
-      ['Mario', 'u1'],
-      ['Mario', 'u1'],
-      [BOT, 'u2'],
-      ['Luigi', 'u3'],
-      ['Luigi', 'u3'],
-      ['Mario', 'u1'],
+      ['Mario', await key('Mario')],
+      ['Mario', await key('Mario')],
+      [BOT, await key(BOT)],
+      ['Luigi', await key('Luigi')],
+      ['Luigi', await key('Luigi')],
+      ['Mario', await key('Mario')],
     ]);
     const out = r.messages.map((m) => JSON.stringify(m)).join('\n');
     for (const id of Object.values(IDS)) expect(out).not.toContain(String(id));
@@ -714,40 +726,58 @@ describe('sender user ids', () => {
     expect(Object.keys(r.messages[0] as object).at(-1)).toBe('sender_key'); // last key, only when known
   });
 
-  it('keys_follow_output_order_not_folder_order', () => {
+  it('keys_the_same_in_every_export_and_run_with_one_salt', async () => {
     const g = new Chat('G', 10);
     g.user('Mario', 'uno', 0);
     g.user('Luigi', 'due', 1);
-    const a = parsePages(
-      [
-        [{ label: 'A/messages.html', html: macPageHtml('G', g.messages.slice(1), IDS) }],
-        [{ label: 'B/messages.html', html: macPageHtml('G', g.messages.slice(0, 1), IDS) }],
-      ],
-      { ...OPTS, timeZone: 'UTC' }
-    );
-    expect(a.messages.map((m) => [m.sender, m.sender_key])).toStrictEqual([
-      ['Mario', 'u1'],
-      ['Luigi', 'u2'],
+    g.user('Mario', 'tre', 2);
+    const pages = async (salt: string) =>
+      (
+        await parsePages(
+          [
+            [{ label: 'A/messages.html', html: macPageHtml('G', g.messages.slice(1), IDS) }],
+            [{ label: 'B/messages.html', html: macPageHtml('G', g.messages.slice(0, 1), IDS) }],
+          ],
+          { ...OPTS, timeZone: 'UTC', salt }
+        )
+      ).messages.map((m) => [m.sender, m.sender_key]);
+    expect(await pages(OPTS.salt)).toStrictEqual([
+      ['Mario', await key('Mario')],
+      ['Luigi', await key('Luigi')],
+      ['Mario', await key('Mario')],
     ]);
+    expect(await key('Mario')).toMatch(/^[0-9a-f]{16}$/u);
+    expect(await key('Mario')).not.toBe(await key('Luigi'));
+    // Another salt, other keys: nobody without the salt can tell whose they are.
+    const other = await pages('another salt');
+    expect(other[0]?.[1]).not.toBe(await key('Mario'));
+    expect(other[0]?.[1]).toBe(other[2]?.[1]);
   });
 
-  it('no_avatar_no_key_and_windows_messages_unchanged', () => {
+  it('no_avatar_no_key_and_windows_messages_unchanged', async () => {
     const g = new Chat('G', 10);
     g.user('Anna', 'senza foto', 0);
     g.user('Mario', 'con foto', 1);
     g.user('Bea', 'dopo', 2);
-    const r = parsePages(
+    const r = await parsePages(
       [[{ label: 'G/messages.html', html: macPageHtml('G', g.messages, { Mario: IDS.Mario }) }]],
       { ...OPTS, timeZone: 'UTC' }
     );
-    expect(r.messages.map((m) => m.sender_key)).toStrictEqual([undefined, 'u1', undefined]);
-    const w = parsePages([[{ label: 'W/messages.html', html: pageHtml('G', g.messages) }]], OPTS);
+    expect(r.messages.map((m) => m.sender_key)).toStrictEqual([
+      undefined,
+      await key('Mario'),
+      undefined,
+    ]);
+    const w = await parsePages(
+      [[{ label: 'W/messages.html', html: pageHtml('G', g.messages) }]],
+      OPTS
+    );
     expect(w.messages.every((m) => !('sender_key' in m))).toBe(true);
   });
 });
 
 describe('Windows and macOS copies of a message', () => {
-  it('one_message_with_the_windows_date_and_the_macos_key', () => {
+  it('one_message_with_the_windows_date_and_the_macos_key', async () => {
     const c = macDm();
     const ids = c.messages.map((m) => m.id);
     for (const order of [
@@ -759,7 +789,7 @@ describe('Windows and macOS copies of a message', () => {
           ? { label: 'Mac/messages.html', html: macPageHtml(BOT, c.messages, IDS) }
           : { label: 'Win/messages.html', html: pageHtml(BOT, c.messages.slice(0, 2)) };
       // Another offset than the Windows one: the converted date gives way where both exist.
-      const r = parsePages(
+      const r = await parsePages(
         order.map((n) => [page(n)]),
         { ...OPTS, timeZone: 'Europe/Rome' }
       );
@@ -768,14 +798,19 @@ describe('Windows and macOS copies of a message', () => {
         order.join()
       ).toStrictEqual(ids);
       expect(r.messages.map((m) => m.date)).toStrictEqual(c.messages.map((m) => m.date)); // inferred UTC-05:00
-      expect(r.messages.map((m) => m.sender_key)).toStrictEqual(['u1', 'u2', 'u1', 'u2']);
+      expect(r.messages.map((m) => m.sender_key)).toStrictEqual([
+        await key('Daniele'),
+        await key(BOT),
+        await key('Daniele'),
+        await key(BOT),
+      ]);
     }
   });
 
-  it('native_date_kept_over_the_converted_one', () => {
+  it('native_date_kept_over_the_converted_one', async () => {
     const c = macDm();
     const win = c.messages.map((m) => ({ ...m, date: tgDate(0, c.base, 60) })); // another wall clock: no inference
-    const r = parsePages(
+    const r = await parsePages(
       [
         [{ label: 'Win/messages.html', html: pageHtml(BOT, win.slice(0, 1)) }],
         [{ label: 'Mac/messages.html', html: macPageHtml(BOT, c.messages.slice(0, 2), IDS) }],
@@ -898,7 +933,7 @@ describe('markup edge cases', () => {
     ]);
   });
 
-  it('pages_in_the_working_folder_are_one_export', () => {
+  it('pages_in_the_working_folder_are_one_export', async () => {
     const dir = tempDir();
     const c = new Chat('G');
     c.user('Mario', 'fine pagina uno', 0);
@@ -906,9 +941,9 @@ describe('markup edge cases', () => {
     writeExport(dir, 'G', [c.messages.slice(0, 1), c.messages.slice(1)], new Set([2]));
     const cwd = process.cwd();
     process.chdir(dir);
-    let result: ReturnType<typeof runParse>;
+    let result: Awaited<ReturnType<typeof runParse>>;
     try {
-      result = runParse(['.']);
+      result = await runParse(['.']);
     } finally {
       process.chdir(cwd);
     }
@@ -928,7 +963,7 @@ describe('markup edge cases', () => {
     ).toStrictEqual(['.', '.', '.', 'a', 'a/b']);
   });
 
-  it('message_without_a_date_does_not_sort_first', () => {
+  it('message_without_a_date_does_not_sort_first', async () => {
     const dir = tempDir();
     const blocks = [
       msg(1, date(0) + from('Anna') + text('first')),
@@ -937,7 +972,7 @@ describe('markup edge cases', () => {
     ];
     fs.writeFileSync(path.join(dir, 'messages.html'), rawPage('G', blocks), 'utf-8');
     // Within a chat a message without a date keeps its place by id.
-    expect(runParse([dir]).msgs.map((m) => m.id)).toStrictEqual([1, 2, 3]);
+    expect((await runParse([dir])).msgs.map((m) => m.id)).toStrictEqual([1, 2, 3]);
   });
 
   it('undated_messages_take_the_nearest_dated_neighbour_of_their_chat', () => {
@@ -963,7 +998,7 @@ describe('markup edge cases', () => {
     ]);
   });
 
-  it('page_name_telegram_does_not_write_is_not_read', () => {
+  it('page_name_telegram_does_not_write_is_not_read', async () => {
     // messages01.html would otherwise be read as a second page 1 next to messages.html.
     const dir = tempDir();
     fs.writeFileSync(
@@ -976,7 +1011,7 @@ describe('markup edge cases', () => {
       rawPage('G', [msg(2, date(1) + from('Anna') + text('page 01'))]),
       'utf-8'
     );
-    expect(runParse([dir]).msgs.map((m) => m.id)).toStrictEqual([1]);
+    expect((await runParse([dir])).msgs.map((m) => m.id)).toStrictEqual([1]);
   });
 
   it('only_telegram_page_names_are_pages', () => {

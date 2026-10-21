@@ -6,7 +6,7 @@
  * key order so that serialising them gives byte-identical output from run to run.
  */
 
-/** One message of phase 1 (`telegram/export/parse-export.ts`). */
+/** One message of phase 1 (`telegram/export/parse-export.ts`, `record.ts`). */
 export interface Message {
   /** Chat title from the page header; `null` only if a page has no header. */
   chat: string | null;
@@ -32,8 +32,9 @@ export interface Message {
   text: string;
   /**
    * Present only when the export identifies the sender (macOS export avatars): an opaque
-   * key (`u1`, `u2`, ...), the same for every message of one user within one parse run.
-   * Never the Telegram user id itself, which no output file may contain.
+   * key, a salted hash of the user id (senderKey, telegram/export/record.ts), the same for
+   * one user in every export and run with the same salt. Never the Telegram user id
+   * itself, which no output file may contain.
    */
   sender_key?: string;
 }

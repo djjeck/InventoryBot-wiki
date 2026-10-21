@@ -1,7 +1,9 @@
 /**
  * The pipeline in memory: phases 1 to 5, from the pages of the exports to the wiki, the
- * player state and the report lines (runPipeline), or from phase 2 on given messages
- * (converse, then finishPipeline).
+ * player state and the report lines. Each export is read once into a record
+ * (processExport), which can be kept; the records of a run give the results (buildWiki).
+ * runPipeline is the two in a row; converse, then finishPipeline, run from phase 2 on
+ * given messages.
  * It joins the generic Telegram-bot layer and the InventoryBot layer, and uses no Node or
  * browser API: the web app's worker (src/web/run.ts) runs it, and the tests run it in Node.
  *
@@ -27,7 +29,13 @@ import {
   readConversation,
 } from './telegram/conversation/conversation.ts';
 import { hasDm, ownerFromDm } from './telegram/conversation/owner.ts';
-import { parsePages, summaryLine } from './telegram/export/parse-export.ts';
+import {
+  type ExportRecord,
+  mergeExports,
+  readExport,
+  splitExports,
+  summaryLine,
+} from './telegram/export/record.ts';
 import { type Message, type Page } from './telegram/messages.ts';
 
 /** What phases 2 and 3 return, with the player titles the dialect was built with. */
@@ -99,7 +107,7 @@ export function interpret(c: Conversed): { events: EventRecord[]; report: string
  * lines. The events are read as plain JSON copies: build() annotates its input in place,
  * and a copy keeps phase 4's events as they were.
  */
-export function buildWiki(
+export function buildFromEvents(
   events: readonly EventRecord[],
   owner: string | null
 ): { wiki: Wiki; player: PlayerState; report: string[] } {
@@ -127,7 +135,7 @@ export function finishPipeline(c: Conversed, onPhase: (p: Phase) => void = () =>
   onPhase('interpret');
   const interpreted = interpret(c);
   onPhase('build');
-  const built = buildWiki(interpreted.events, c.owner);
+  const built = buildFromEvents(interpreted.events, c.owner);
   return {
     events: interpreted.events,
     wiki: built.wiki,
@@ -148,17 +156,30 @@ export type PipelineOutcome =
   | { status: 'no-owner'; report: string[] };
 
 /**
- * Phases 1 to 5 on the pages of each input folder. The report lines are the warnings of
- * phase 1, its summary (with the chat titles of phase 3, so printed only once there is an
+ * Phase 1 for one export (the pages of one folder, in order: splitExports): its record,
+ * plain JSON data that buildWiki reads, so that an export is parsed only once. The
+ * sender keys are salted with the pseudonyms' salt, so they agree across records.
+ * Asynchronous: the hashes are Web Crypto's.
+ */
+export function processExport(
+  pages: Iterable<Page>,
+  options: Pick<ConverseOptions, 'salt'>
+): Promise<ExportRecord> {
+  return readExport(pages, { bot: INVENTORY_BOT, salt: options.salt });
+}
+
+/**
+ * Phases 1 to 5 on the records of the exports, in the order they were read (the end of
+ * phase 1, mergeExports, then phases 2 to 5). The report lines are the warnings of phase
+ * 1, its summary (with the chat titles of phase 3, so printed only once there is an
  * owner), then the lines of each phase.
  */
-export function runPipeline(
-  paths: Iterable<Iterable<Page>>,
+export function buildWiki(
+  records: readonly ExportRecord[],
   options: PipelineOptions,
   onPhase: (p: Phase) => void = () => {}
 ): PipelineOutcome {
-  onPhase('parse');
-  const parsed = parsePages(paths, { bot: INVENTORY_BOT, timeZone: options.timeZone });
+  const parsed = mergeExports(records, { bot: INVENTORY_BOT, timeZone: options.timeZone });
   const report = [...parsed.warnings];
   onPhase('conversation');
   const c = converse(parsed.messages, options);
@@ -178,4 +199,17 @@ export function runPipeline(
     ...finished,
     report: [...report, ...finished.report],
   };
+}
+
+/** Phases 1 to 5 on the pages of each input folder: buildWiki on each export's processExport. */
+export async function runPipeline(
+  paths: Iterable<Iterable<Page>>,
+  options: PipelineOptions,
+  onPhase: (p: Phase) => void = () => {}
+): Promise<PipelineOutcome> {
+  onPhase('parse');
+  const records: ExportRecord[] = [];
+  for (const pages of paths)
+    for (const p of splitExports(pages)) records.push(await processExport(p, options));
+  return buildWiki(records, options, onPhase);
 }

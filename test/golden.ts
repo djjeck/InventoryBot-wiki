@@ -17,7 +17,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { type EventRecord } from '#src/inventorybot/types.ts';
 import {
-  buildWiki,
+  buildFromEvents,
   conversationReport,
   converse,
   type Finished,
@@ -171,7 +171,7 @@ const stoppedFiles = (report: readonly string[], reason: string): RunResult => (
 async function runExports(run: GoldenRun): Promise<RunResult> {
   const read = await readPicks(run.paths.map(pickFolder));
   if (read.total === 0) return stoppedFiles(read.warnings, 'no-pages');
-  const outcome = runPipeline(read.paths, { ...GOLDEN_OPTIONS, player: run.player ?? null });
+  const outcome = await runPipeline(read.paths, { ...GOLDEN_OPTIONS, player: run.player ?? null });
   const report = [...read.warnings, ...outcome.report];
   if (outcome.status === 'no-owner') return stoppedFiles(report, 'no-owner');
   return doneFiles(outcome.conversed.conversation.replies, outcome, report);
@@ -192,7 +192,7 @@ function runMessages(run: GoldenRun): RunResult {
 /** Phase 5 on a file of events; the owner is the username given, else the DM's. */
 function runEvents(run: GoldenRun): RunResult {
   const events = readJsonLines<EventRecord>(run.paths[0] as string);
-  const built = buildWiki(events, run.player ?? ownerFromDm(events));
+  const built = buildFromEvents(events, run.player ?? ownerFromDm(events));
   return doneFiles(null, { events, ...built }, built.report);
 }
 

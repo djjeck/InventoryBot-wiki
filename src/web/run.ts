@@ -67,7 +67,7 @@ export async function handleRun(
     report.push(...read.warnings);
     if (read.total === 0) return end({ type: 'stopped', reason: 'no-pages', report });
     const { timeZone, player } = request.options;
-    const run = runPipeline(read.paths, request.options, (phase) =>
+    const run = await runPipeline(read.paths, request.options, (phase) =>
       post({ type: 'progress', phase })
     );
     report.push(...run.report);

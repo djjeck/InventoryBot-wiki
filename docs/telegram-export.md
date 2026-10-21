@@ -4,10 +4,11 @@ Documented as of 2026-10-17 (Telegram Desktop); [§11](#11-the-macos-export) as 
 export format changes, update this document.
 
 This is the input of phase 1 of the pipeline, export parsing
-([`src/telegram/export/parse-export.ts`](../src/telegram/export/parse-export.ts)): the HTML chat
-history that Telegram Desktop writes. It describes the format for someone who has never seen it; how
-the parser reads each element is summarised in [§9](#9-how-the-parser-reads-each-element). All names
-and ids in examples are invented.
+([`src/telegram/export/parse-export.ts`](../src/telegram/export/parse-export.ts), with
+[`record.ts`](../src/telegram/export/record.ts) reading each export into a record and merging the
+records of a run): the HTML chat history that Telegram Desktop writes. It describes the format for
+someone who has never seen it; how the parser reads each element is summarised in
+[§9](#9-how-the-parser-reads-each-element). All names and ids in examples are invented.
 
 Two variants of the markup are known, both from Telegram Desktop: the **Windows export** (written by
 Telegram Desktop on Windows), described in sections 2-10, and the **macOS export** (Telegram Desktop
@@ -404,18 +405,18 @@ block contains its own `div.body` and `div.title bold`.
 | Element                                                                | Function                                                                                                             | Emits                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `messages*.html` in folders (any depth)                                | [`iterPages`](../src/telegram/export/export-files.ts), [`pageKey`](../src/telegram/export/parse-export.ts)           | Pages (`messages.html`, `messagesN.html`, N ≥ 2 unpadded; other names ignored) in (folder, page number) order, folders and their entries sorted by name (code point order) at every level; `result.json` without pages → [`warnJson`](../src/telegram/export/export-files.ts), skipped. |
-| Page folder (label minus last component, `\` → `/`)                    | [`exportKey`](../src/telegram/export/parse-export.ts), [`parsePages`](../src/telegram/export/parse-export.ts)        | Export key (`.` for a bare page name): the last sender is carried to the next page only within the same export.                                                                                                                                                                         |
+| Page folder (label minus last component, `\` → `/`)                    | [`exportKey`](../src/telegram/export/parse-export.ts), [`splitExports`](../src/telegram/export/record.ts)            | Export key (`.` for a bare page name): one export, read into one record by [`readExport`](../src/telegram/export/record.ts); the last sender is carried to the next page only within it.                                                                                                |
 | First `div.text bold`; macOS: `div.name bold` inside `div.page_header` | [`ExportParser.starttag`](../src/telegram/export/parse-export.ts), [`data`](../src/telegram/export/parse-export.ts)  | `chat` (stripped); `dm` = (`chat` == the bot's DM title, `InventoryBot`). The macOS `div.subtitle details` is ignored.                                                                                                                                                                  |
 | `div` with class starting `message default`                            | [`ExportParser.starttag`](../src/telegram/export/parse-export.ts), [`flush`](../src/telegram/export/parse-export.ts) | Starts a message, flushes the previous one; `id` from `message<N>`. A `message service` div also flushes it, and its content is ignored.                                                                                                                                                |
 | `div.date details[title]` outside the forwarded block                  | `ExportParser.starttag`                                                                                              | `date`, verbatim.                                                                                                                                                                                                                                                                       |
-| macOS date title (`27 November 2025, 19:00:02`)                        | [`parseMacDate`](../src/lib/dates.ts), `exportOffsets`, [`parsePages`](../src/telegram/export/parse-export.ts)       | `date` in the Windows form (`27.11.2025 19:00:02 UTC-05:00`) with the export's offset ([§11.3](#113-dates-without-an-offset)); a stderr line says which offset and where it comes from.                                                                                                 |
-| macOS `img.userpic` in the message's own `div.pull_left userpic_wrap`  | `ExportParser.avatar`, `flush`, `parsePages`                                                                         | The sender's user id, inherited by joined messages like the name; written only as the opaque `sender_key` ([§11.4](#114-sender-ids)).                                                                                                                                                   |
+| macOS date title (`27 November 2025, 19:00:02`)                        | [`parseMacDate`](../src/lib/dates.ts), `exportOffsets`, [`mergeExports`](../src/telegram/export/record.ts)           | `date` in the Windows form (`27.11.2025 19:00:02 UTC-05:00`) with the export's offset ([§11.3](#113-dates-without-an-offset)); a stderr line says which offset and where it comes from.                                                                                                 |
+| macOS `img.userpic` in the message's own `div.pull_left userpic_wrap`  | `ExportParser.avatar`, `flush`, `readExport`                                                                         | The sender's user id, inherited by joined messages like the name; written only as the opaque `sender_key` ([§11.4](#114-sender-ids)).                                                                                                                                                   |
 | Outer `div.from_name`                                                  | `ExportParser.endtag`, `flush`                                                                                       | `sender` (stripped, trailing `via @bot` removed); if absent, the previous message's sender.                                                                                                                                                                                             |
 | `div.reply_to` → `<a href=…go_to_message(-?\d+)>`                      | `ExportParser.starttag`                                                                                              | `reply_to`, negative ids included.                                                                                                                                                                                                                                                      |
 | `div.forwarded body` → `div.from_name` (its `date` span skipped)       | `ExportParser.starttag`, `endtag`, `flush`                                                                           | `forwarded_from` (trailing `via @bot` removed); a joined forward without it takes the previous forward's.                                                                                                                                                                               |
 | `div.text` (`<br>` → `\n`, entities decoded, tags dropped)             | `ExportParser.starttag`, `startendtag`, `data`, `endtag`                                                             | `text`; messages without it are not emitted but still set the sender.                                                                                                                                                                                                                   |
 | Original author (`forwarded_from`, else `sender`)                      | `ExportParser.flush`                                                                                                 | `from_bot` = author stripped equals the bot's name, `InventoryBot`.                                                                                                                                                                                                                     |
-| (chat, id)                                                             | `parsePages`                                                                                                         | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` is kept.                                                                                                                           |
+| (chat, id)                                                             | `mergeExports`                                                                                                       | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` is kept.                                                                                                                           |
 | Date title                                                             | [`parseWindowsDate`](../src/lib/dates.ts), [`sortMessages`](../src/telegram/export/parse-export.ts)                  | Output sorted by instant, then chat, then id; a date not in the exact form of [§5.1](#51-date) counts as missing, and an undated message takes its chat neighbour's instant (by id).                                                                                                    |
 
 Media, reactions, inline keyboards, avatars (except the macOS sender id), pagination links and
@@ -424,6 +425,20 @@ resolves it ([`resolveCommand`](../src/telegram/conversation/commands.ts)). Outp
 ([`src/telegram/messages.ts`](../src/telegram/messages.ts)) per message, kept in memory, with keys
 `chat`, `dm`, `id`, `date`, `from_bot`, `sender`, `forwarded_from`, `reply_to`, `text`, then
 `sender_key` when applicable.
+
+Each export is parsed once, into an `ExportRecord`
+([`readExport`](../src/telegram/export/record.ts)): plain JSON data that can be kept and merged
+again with other records without reading the pages again. A record holds the export's folder, a
+SHA-256 of its pages (file names and HTML), its page and message counts, its chat titles, its first
+and last date, and its messages in page order. The bot's messages and the commands for the bot (not
+forwarded) are kept in full; every other message (ordinary chat, commands for other bots, forwarded
+commands) only as a stub of chat, id, date, display name and `sender_key`, the parts of it that the
+conversation phase reads. Dates stay as written, since the offset of a macOS date depends on the
+other exports of the run ([§11.3](#113-dates-without-an-offset)). Merging the records of a run
+([`mergeExports`](../src/telegram/export/record.ts)) converts the dates, de-duplicates and sorts as
+above, and turns each stub into a message with an empty text; the result is the same as from the
+whole chat. A record's shape has a version (`formatVersion`): a record of another version is read
+again from its pages.
 
 ## 10. Annotated sample page
 
@@ -691,10 +706,13 @@ display name it is unique and does not change when the user renames themselves, 
 senders far better (two people named `Andrea` are told apart).
 
 **Rule: the user id never leaves phase 1's memory.** No output may contain it: messages carry only
-an opaque `sender_key` (`u1`, `u2`, … numbered in output order), the same for one user within one
-run and meaningless outside it, which tells senders apart better than their display names. Phase 2,
-the conversation, uses the key in place of the display name to map senders to @usernames and to pair
-group replies with commands; no output of phase 2 carries a sender.
+an opaque `sender_key`: the first 16 hex digits of the SHA-256 of the id with the caller's secret
+salt ([`senderKey`](../src/telegram/export/record.ts)). With the same salt, one user has the same
+key in every export and every run; without the salt, nobody can work back to the id, as they could
+from a hash of the id alone, since user ids are few enough to try them all. The key tells senders
+apart better than their display names. Phase 2, the conversation, uses the key in place of the
+display name to map senders to @usernames and to pair group replies with commands; no output of
+phase 2 carries a sender.
 
 ## 12. Unknowns
 

@@ -1,7 +1,7 @@
 /** Phases 2 and 3 joined with InventoryBot's dialect (pipeline.ts). */
 import { describe, expect, it } from 'vitest';
 import { BOT, Chat } from '#test/helpers.ts';
-import { buildWiki, conversationReport, converse, interpret } from './pipeline.ts';
+import { buildFromEvents, conversationReport, converse, interpret } from './pipeline.ts';
 
 const SALT = 'test-salt';
 
@@ -67,7 +67,7 @@ describe('converse', () => {
       '  coppie nei gruppi verificate dalla risposta: confermate=1, sciolte=0',
     ]);
     const before = JSON.stringify(events);
-    const built = buildWiki(events, c.owner);
+    const built = buildFromEvents(events, c.owner);
     // build() annotates its input: phase 4's events are left as they were.
     expect(JSON.stringify(events)).toBe(before);
     expect(Object.keys(built.wiki.items)).toStrictEqual(['un sasso']);

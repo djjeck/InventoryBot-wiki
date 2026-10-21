@@ -18,7 +18,7 @@ import {
   notAFolderWarning,
   zipWarning,
 } from './export-listing.ts';
-import { type ParseOptions, parsePages, type ParseResult, summaryLine } from './parse-export.ts';
+import { type ParseOptions, parsePages, type ParseResult, summaryLine } from './record.ts';
 
 export type Log = (line: string) => void;
 
@@ -83,12 +83,12 @@ export function* iterPages(path: string, log: Log): Generator<Page> {
  * warnings (not the summary line, which names the chats: a caller that renames them
  * prints its own).
  */
-export function readExportPaths(
+export async function readExportPaths(
   paths: readonly string[],
   log: Log,
   options: ParseOptions
-): ParseResult {
-  const result = parsePages(
+): Promise<ParseResult> {
+  const result = await parsePages(
     paths.map((p) => iterPages(p, log)),
     options
   );
@@ -97,12 +97,12 @@ export function readExportPaths(
 }
 
 /** readExportPaths, then the summary line with the chat titles as written. */
-export function parseExportPaths(
+export async function parseExportPaths(
   paths: readonly string[],
   log: Log,
   options: ParseOptions
-): Message[] {
-  const result = readExportPaths(paths, log, options);
+): Promise<Message[]> {
+  const result = await readExportPaths(paths, log, options);
   log(summaryLine(result));
   return result.messages;
 }

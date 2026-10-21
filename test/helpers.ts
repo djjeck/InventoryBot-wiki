@@ -425,12 +425,20 @@ export function writeMacExport(
   return folder;
 }
 
-/** Runs phase 1 on paths -> messages and the stderr text. */
-export function runParse(
+/**
+ * Runs phase 1 on paths -> messages and the stderr text. Every message is kept in full
+ * (ReadOptions.keepAll), ordinary chat included, as the export has it.
+ */
+export async function runParse(
   paths: readonly string[],
   timeZone = 'America/New_York' // the zone of BASE in winter
-): { msgs: Message[]; err: string } {
+): Promise<{ msgs: Message[]; err: string }> {
   const lines: string[] = [];
-  const msgs = parseExportPaths(paths, (l) => lines.push(l), { bot: BOT_IDENTITY, timeZone });
+  const msgs = await parseExportPaths(paths, (l) => lines.push(l), {
+    bot: BOT_IDENTITY,
+    timeZone,
+    salt: 'test-salt',
+    keepAll: true,
+  });
   return { msgs, err: lines.map((l) => l + '\n').join('') };
 }

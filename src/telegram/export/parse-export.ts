@@ -6,14 +6,13 @@
  * Generic: the bot is a parameter (BotIdentity), which decides `dm` and `from_bot`.
  * Texts are kept as written, `/cmd@Bot` included.
  *
- * Pure logic only (no Node APIs): pages come in as strings, grouped by input path.
- * Finding the pages on disk is export-files.ts.
+ * Pure logic only (no Node APIs): pages come in as strings. Reading the pages of one
+ * export into a record, and merging the records of a run, is record.ts; finding the pages
+ * on disk is export-files.ts.
  */
 import {
   formatOffset,
-  formatWindowsDate,
   isTimeZone,
-  parseMacDate,
   parseWindowsDate,
   type WallClock,
   wallClockOffset,
@@ -29,7 +28,7 @@ import {
   WS_CLASS,
 } from '#src/lib/text.ts';
 import { type BotIdentity } from '#src/telegram/bot.ts';
-import { type Message, type Page } from '#src/telegram/messages.ts';
+import { type Message } from '#src/telegram/messages.ts';
 import { type Attrs, feedHtml, type HtmlEvents } from './html-events.ts';
 
 /**
@@ -76,7 +75,7 @@ export class ExportParser implements HtmlEvents {
   /**
    * Numeric Telegram user id of each message's sender, when the export gives it (the
    * macOS export's avatar file names). Kept off the messages: it must never be written
-   * anywhere; parsePages() turns it into an opaque per-run `sender_key`.
+   * anywhere; readExport() (record.ts) turns it into an opaque, salted `sender_key`.
    */
   readonly authorIds = new Map<Message, string>();
   chat: string | null = null;
@@ -366,60 +365,35 @@ const sameWallClock = (w: WallClock, d: ZonedDate): boolean =>
   w.minute === d.minute &&
   w.second === d.second;
 
-// ---- reading the exports ------------------------------------------------------------
+// ---- dates without offset across exports ----------------------------------------------
 
-export interface ParseOptions {
-  /** The bot the exports are about. */
-  bot: BotIdentity;
-  /**
-   * The IANA time zone (`Europe/Rome`) of the computer that made the exports, for the
-   * dates of macOS exports, which have no offset, when the run gives none (exportOffsets).
-   */
-  timeZone: string;
-}
-
-export interface ParseResult {
-  /**
-   * De-duplicated by (chat, id), the copy read last winning, except that a date read with
-   * its UTC offset is kept over one converted from a macOS export; sorted by sortKey.
-   */
-  messages: Message[];
-  /** Number of distinct export keys seen. */
-  exports: number;
-  /** Chat titles, sorted by code point; a missing or empty title is "?". */
-  chats: string[];
-  /** stderr lines about the UTC offset given to the dates of macOS exports. */
-  warnings: string[];
-}
-
-/** One parsed copy of a message, with what the second pass needs. */
-interface Copy {
-  m: Message;
-  /** Export key of its page. */
+/** One copy of a message, as the offsets of macOS dates are inferred from it. */
+export interface DatedCopy {
+  m: Pick<Message, 'chat' | 'id' | 'date'>;
+  /** The export it was read from (any key that tells exports apart). */
   exp: string;
-  /** Sender's Telegram user id (macOS export); never output. */
-  authorId: string | null;
   /** Wall clock of a date title without offset (macOS export), else null. */
   local: WallClock | null;
 }
 
 /** The UTC offset, in minutes east of UTC, of each offset-less date of an export. */
-type ExportOffset = (w: WallClock) => number;
+export type ExportOffset = (w: WallClock) => number;
 
 /**
  * The UTC offset of the dates of each export with offset-less dates: the offset of the
  * other exports in the run that share messages with it (same chat and id) and show the
  * same wall clock for them (the most frequent, if several), which reproduces their
  * labelling; else, for each date, the offset `timeZone` had then. Writes one line per
- * such export to `warnings`.
+ * such export to `warnings`, naming it by `label`.
  */
-function exportOffsets(
-  copies: readonly Copy[],
+export function exportOffsets(
+  copies: readonly DatedCopy[],
   timeZone: string,
-  warnings: string[]
+  warnings: string[],
+  label: (exp: string) => string
 ): Map<string, ExportOffset> {
   const out = new Map<string, ExportOffset>();
-  const local = new Map<string, Copy[]>();
+  const local = new Map<string, DatedCopy[]>();
   for (const c of copies) {
     if (c.local === null) continue;
     const list = local.get(c.exp);
@@ -460,99 +434,17 @@ function exportOffsets(
     const n = shared.length;
     if (best !== null) {
       out.set(exp, () => best);
-      let line = `${exp}: date senza fuso orario, lette come ${offsetLabel(best)} come le altre esportazioni della stessa chat (${n} messaggi in comune)`;
+      let line = `${label(exp)}: date senza fuso orario, lette come ${offsetLabel(best)} come le altre esportazioni della stessa chat (${n} messaggi in comune)`;
       if (disagree > 0)
         line += `; in ${disagree} di questi un'altra esportazione mostra un'altra data o un altro fuso orario`;
       warnings.push(line);
     } else {
       out.set(exp, (w) => wallClockOffset(w, timeZone));
-      let line = `${exp}: date senza fuso orario, lette nel fuso orario ${timeZone}`;
+      let line = `${label(exp)}: date senza fuso orario, lette nel fuso orario ${timeZone}`;
       if (n > 0)
         line += `; i ${n} messaggi in comune con altre esportazioni della stessa chat vi mostrano altre date`;
       warnings.push(line);
     }
   }
   return out;
-}
-
-/**
- * Parses the pages of each input path (one inner iterable per command-line PATH).
- *
- * Two passes, so that the core stays pure: the first parses every page; the second gives
- * macOS dates their UTC offset (exportOffsets) and converts them to the Windows form, so
- * later phases see one date format, then de-duplicates, sorts, and replaces Telegram user
- * ids with opaque sender keys (`u1`, `u2`, ... in output order), which are all that is
- * written.
- */
-export function parsePages(paths: Iterable<Iterable<Page>>, options: ParseOptions): ParseResult {
-  const copies: Copy[] = [];
-  const exports = new Set<string>();
-  for (const pages of paths) {
-    let prevExport: string | null = null;
-    let lastSender: string | null = null;
-    let lastSenderId: string | null = null;
-    for (const page of pages) {
-      const exp = exportKey(page.label);
-      // Pages of one export are consecutive: carry the sender across page breaks.
-      const same = exp === prevExport;
-      const p: ExportParser = new ExportParser(
-        options.bot,
-        same ? lastSender : null,
-        same ? lastSenderId : null
-      );
-      p.feed(page.html);
-      p.close();
-      prevExport = exp;
-      lastSender = p.lastSender;
-      lastSenderId = p.lastSenderId;
-      exports.add(exp);
-      for (const m of p.messages) {
-        copies.push({
-          m,
-          exp,
-          authorId: p.authorIds.get(m) ?? null,
-          local: parseMacDate(m.date),
-        });
-      }
-    }
-  }
-  const warnings: string[] = [];
-  const offsets = exportOffsets(copies, options.timeZone, warnings);
-  const byKey = new Map<string, Copy>();
-  for (const c of copies) {
-    if (c.local !== null)
-      c.m.date = formatWindowsDate({
-        ...c.local,
-        offsetMinutes: (offsets.get(c.exp) as ExportOffset)(c.local),
-      });
-    const k = JSON.stringify([c.m.chat, c.m.id]);
-    const prev = byKey.get(k);
-    if (prev !== undefined) {
-      // One date per message: a converted date gives way to one Telegram wrote with its offset.
-      if (c.local !== null && prev.local === null && parseWindowsDate(prev.m.date) !== null) {
-        c.m.date = prev.m.date;
-        c.local = null;
-      }
-      c.authorId ??= prev.authorId;
-    }
-    byKey.set(k, c);
-  }
-  const kept = [...byKey.values()];
-  const authorOf = new Map(kept.map((c) => [c.m, c.authorId]));
-  const messages = sortMessages(kept.map((c) => c.m));
-  const keys = new Map<string, string>();
-  for (const m of messages) {
-    const id = authorOf.get(m);
-    if (id === null || id === undefined) continue;
-    let key = keys.get(id);
-    if (key === undefined) keys.set(id, (key = `u${keys.size + 1}`));
-    m.sender_key = key;
-  }
-  const chats = [...new Set(messages.map((m) => m.chat || '?'))].sort(compareCodePoints);
-  return { messages, exports: exports.size, chats, warnings };
-}
-
-/** The stderr line printed after parsing. */
-export function summaryLine(r: ParseResult): string {
-  return `cartelle di esportazione: ${r.exports}; chat: ${r.chats.join(', ')}`;
 }
