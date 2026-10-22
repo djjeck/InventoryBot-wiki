@@ -1,22 +1,16 @@
 /* global window, localStorage, location, matchMedia */
 /**
  * The wiki view: renders a wiki and, optionally, the owner's player state into an
- * element, below the page's own header (title and actions). The web app's page
- * (src/web/main.ts) imports it. It defines
+ * element, below the page's own header (title and actions). As in Telegram's chat list,
+ * the categories are tabs of a sidebar fixed to the side of the window, whose list
+ * scrolls on its own; the selected entry is in the page, which scrolls as a whole. The
+ * web app's page (src/web/main.ts) imports it. It defines
  * `window.renderWiki(root, wiki, player, missing)`: `root` gets the whole view, its
  * listeners stay on `root`, so a new render goes in a new element.
  */
 (() => {
-  const MARKUP = `<div class="wrap">
-  <div class="tally" id="tally"></div>
-
-  <div class="bar">
-    <div class="tabs" role="tablist" id="tabs">
-      <button role="tab" data-tab="ricette">Ricette</button>
-      <button role="tab" data-tab="oggetti">Oggetti</button>
-      <button role="tab" data-tab="luoghi">Luoghi</button>
-      <button role="tab" data-tab="catene">Catene</button>
-    </div>
+  const MARKUP = `<aside class="sidebar" aria-label="Elenco">
+  <div class="side-search">
     <input
       id="q"
       type="search"
@@ -25,7 +19,17 @@
       aria-label="Cerca"
     />
   </div>
-
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="ricette">Ricette</button>
+    <button role="tab" data-tab="oggetti">Oggetti</button>
+    <button role="tab" data-tab="luoghi">Luoghi</button>
+    <button role="tab" data-tab="catene">Catene</button>
+  </div>
+  <div class="side-tools" id="side-tools"></div>
+  <div class="list" id="list"></div>
+</aside>
+<div class="wrap content">
+  <div class="tally" id="tally"></div>
   <div id="view"></div>
   <details id="rules" class="rules"></details>
   <details id="trivia" class="rules"></details>
@@ -39,11 +43,11 @@
    * @param {string} missing the message shown when there is no wiki
    */
   window.renderWiki = (root, W, player, missing = 'Dati mancanti.') => {
-    root.innerHTML = MARKUP;
     if (!W) {
-      root.querySelector('#view').innerHTML = `<p class="empty">${missing}</p>`;
+      root.innerHTML = `<p class="empty">${missing}</p>`;
       return;
     }
+    root.innerHTML = MARKUP;
     const R = W.recipes,
       I = W.items,
       L = W.locations;
@@ -711,9 +715,16 @@
         .querySelectorAll('#tabs button')
         .forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === state.tab));
       const v = $('#view');
+      const list = (rows, rowFn) =>
+        rows.map(rowFn).join('') ||
+        `<p class="empty" style="padding:12px">Nessun risultato per questa ricerca.</p>`;
       if (state.tab === 'catene') {
         const g = chainsSvg();
-        v.innerHTML = `<div class="listpane"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
+        // The sidebar lists the recipes, each opening as from the graph.
+        const rows = recipeRows(q);
+        $('#side-tools').innerHTML = `<span class="count">${rows.length} ricette</span>`;
+        $('#list').innerHTML = list(rows, recipeRow);
+        v.innerHTML = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
       <div class="graphbox">${g.svg}</div></div>`;
         v.querySelectorAll('.g-node').forEach((el) => {
           const hi = (on) =>
@@ -754,13 +765,12 @@
         extra = `<div class="graphbox">${mapSvg()}</div><div class="legend"><span>◌ tratteggiato: serve un oggetto per entrare</span>${P ? '<span>● bordo blu: visitato da te</span>' : ''}</div>`;
       }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
-      v.innerHTML = `${extra}<div class="split">
-    <div class="listpane">${filters}<span class="count">${rows.length} risultati</span>
-      <div class="list" id="list">${rows.map(rowFn).join('') || `<p class="empty" style="padding:12px">Nessun risultato per questa ricerca.</p>`}</div></div>
-    <aside class="detail" aria-live="polite">${detail}</aside></div>`;
-      v.querySelectorAll('.row').forEach((b) =>
-        b.setAttribute('aria-current', b.dataset.sel === curSel)
-      );
+      $('#side-tools').innerHTML = `${filters}<span class="count">${rows.length} risultati</span>`;
+      $('#list').innerHTML = list(rows, rowFn);
+      v.innerHTML = `${extra}<section class="detail" aria-live="polite">${detail}</section>`;
+      root
+        .querySelectorAll('#list .row')
+        .forEach((b) => b.setAttribute('aria-current', b.dataset.sel === curSel));
     }
     function go(kind, name) {
       if (kind === 'item' && !I[name] && W.renames?.[name]) name = W.renames[name]; // old name of a renamed item
@@ -774,8 +784,14 @@
       render();
       const cur = root.querySelector(`.row[aria-current="true"]`);
       cur?.scrollIntoView({ block: 'nearest' });
-      if (matchMedia('(max-width: 860px)').matches)
-        $('.detail')?.scrollIntoView({ block: 'start' });
+      showDetail();
+    }
+    // Brings the selected entry into view: below the list on a narrow screen, else back
+    // up the page when it was scrolled past the entry's start.
+    function showDetail() {
+      const d = $('.detail');
+      if (d && (matchMedia('(max-width: 860px)').matches || d.getBoundingClientRect().top < 0))
+        d.scrollIntoView({ block: 'start' });
     }
 
     root.addEventListener('click', (e) => {
@@ -793,10 +809,13 @@
         return;
       }
       if (t.dataset.sel) {
+        if (state.tab === 'catene') {
+          go('recipe', t.dataset.sel);
+          return;
+        }
         state.sel[state.tab] = t.dataset.sel;
         render();
-        if (matchMedia('(max-width: 860px)').matches)
-          $('.detail')?.scrollIntoView({ block: 'start' });
+        showDetail();
         return;
       }
       if (t.dataset.go) go(t.dataset.go, t.dataset.name);

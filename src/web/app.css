@@ -1,6 +1,6 @@
 /* The web app's own parts: the header with its actions and the exports panel, the
-   messages, the empty state and the report. The wiki itself, and the colour tokens used
-   here, come from view/wiki-view.css. Fonts come from Google Fonts
+   messages, the empty state and the report. The wiki itself, and the colour, shape and
+   font tokens used here, come from view/wiki-view.css. Fonts come from Google Fonts
    (index.html); without them the view's font stacks fall back to system fonts. */
 .visually-hidden {
   position: absolute;
@@ -40,7 +40,7 @@ main:focus {
   gap: 4px;
 }
 .field label {
-  font-weight: 600;
+  font-weight: 500;
 }
 .field select,
 .field input {
@@ -48,8 +48,8 @@ main:focus {
   color: var(--ink);
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 8px 10px;
+  border-radius: var(--radius);
+  padding: 10px 12px;
   max-width: 24rem;
   width: 100%;
 }
@@ -67,25 +67,37 @@ main:focus {
   align-items: center;
   min-height: 40px;
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
+}
+.btn:hover {
+  background: var(--accent-soft);
 }
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--surface);
+  color: #fff;
+}
+.btn.primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 .btn.ghost {
   background: transparent;
+  border-color: transparent;
+  color: var(--accent-ink);
 }
 .btn.danger {
-  border-color: var(--warn);
-  color: var(--warn);
+  border-color: var(--danger);
+  color: var(--danger);
   background: transparent;
+}
+.btn.danger:hover {
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 .btn:disabled {
   opacity: 0.5;
@@ -100,8 +112,8 @@ main:focus {
   overflow-x: auto;
   font: 12px/1.5 var(--font-mono);
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   padding: 12px;
 }
 .app {
@@ -115,6 +127,20 @@ main:focus {
 .app-top {
   position: relative;
   align-items: center;
+}
+/* The bot's own picture, round as Telegram shows it. It is pixel art: drawn at twice
+   its size, pixelated, so it stays sharp. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar {
+  flex: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow);
+  image-rendering: pixelated;
 }
 .actions {
   display: flex;
@@ -168,9 +194,8 @@ main:focus {
   max-height: min(78vh, 720px);
   overflow-y: auto;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
   padding: 16px;
   display: grid;
   gap: 14px;
@@ -204,7 +229,7 @@ main:focus {
   gap: 8px;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   overflow-wrap: anywhere;
 }
 .export-text {
@@ -213,7 +238,7 @@ main:focus {
   min-width: 0;
 }
 .export-name {
-  font-weight: 600;
+  font-weight: 500;
 }
 .export-meta {
   color: var(--muted);
@@ -225,7 +250,7 @@ main:focus {
 .s-stale .export-status,
 .s-error .export-status {
   color: var(--warn);
-  font-weight: 600;
+  font-weight: 500;
 }
 .s-error,
 .s-stale {
@@ -243,7 +268,7 @@ main:focus {
   flex: none;
   background: none;
   border: 0;
-  color: var(--accent);
+  color: var(--accent-ink);
   cursor: pointer;
   padding: 4px;
   text-decoration: underline;
@@ -269,13 +294,13 @@ main:focus {
   align-items: start;
   gap: 8px;
   background: var(--surface);
-  border: 1px solid var(--line);
   border-left: 4px solid var(--accent);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
   padding: 8px 12px;
 }
 .msg.error {
-  border-color: var(--warn);
+  border-color: var(--danger);
 }
 .msg p {
   margin: 0;
@@ -300,8 +325,8 @@ main:focus {
 /* ---- the empty wiki and below the wiki ------------------------------------------- */
 .empty-state {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   padding: 20px;
   max-width: 68ch;
   display: grid;
