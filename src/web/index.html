@@ -33,20 +33,11 @@
           <p id="activity" class="activity" hidden>
             <span class="spinner" aria-hidden="true"></span><span id="activity-text"></span>
           </p>
-          <input
-            id="folders"
-            class="visually-hidden"
-            type="file"
-            webkitdirectory
-            multiple
-            tabindex="-1"
-            aria-hidden="true"
-          />
-          <button type="button" class="btn primary" id="add">Aggiungi esportazione</button>
           <button
             type="button"
-            class="btn"
+            class="btn primary"
             id="panel-toggle"
+            aria-haspopup="dialog"
             aria-expanded="false"
             aria-controls="panel"
           >
@@ -54,45 +45,61 @@
           </button>
         </div>
 
-        <section id="panel" class="panel" aria-labelledby="panel-title" tabindex="-1" hidden>
-          <div class="panel-head">
-            <h2 id="panel-title">Esportazioni</h2>
-            <button type="button" class="btn ghost" id="panel-close">Chiudi</button>
-          </div>
-          <ul id="exports" class="exports" aria-labelledby="panel-title"></ul>
-          <p class="hint" id="exports-none">
-            Nessuna esportazione: aggiungine una con «Aggiungi esportazione».
-          </p>
-          <form id="options" class="options" novalidate>
-            <div class="field" id="player-field" hidden>
-              <label for="player">Il tuo nome utente Telegram</label>
-              <input
-                id="player"
-                name="player"
-                autocomplete="off"
-                autocapitalize="off"
-                spellcheck="false"
-                aria-describedby="player-hint"
-              />
-              <p class="hint" id="player-hint">
-                Serve solo se tra le esportazioni non c’è la chat privata con il bot. La wiki si
-                aggiorna appena smetti di scrivere.
-              </p>
+        <dialog id="panel" class="panel" aria-labelledby="panel-title" tabindex="-1">
+          <div class="panel-body">
+            <div class="panel-head">
+              <h2 id="panel-title">Esportazioni</h2>
+              <button type="button" class="icon-btn" id="panel-close" aria-label="Chiudi">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+              </button>
             </div>
-            <div class="field">
-              <label for="time-zone">Fuso orario delle esportazioni</label>
-              <select id="time-zone" name="time-zone" aria-describedby="time-zone-hint"></select>
-              <p class="hint" id="time-zone-hint">
-                Quello del computer che ha fatto le esportazioni: di solito è questo, già scelto.
-                Serve solo per le esportazioni fatte su macOS, le cui date non lo indicano.
-              </p>
+            <ul id="exports" class="exports" aria-labelledby="panel-title"></ul>
+            <p class="hint" id="exports-none">
+              Nessuna esportazione: aggiungine una con «Aggiungi esportazione».
+            </p>
+            <input
+              id="folders"
+              class="visually-hidden"
+              type="file"
+              webkitdirectory
+              multiple
+              tabindex="-1"
+              aria-hidden="true"
+            />
+            <div class="row-actions">
+              <button type="button" class="btn primary" id="add">Aggiungi esportazione</button>
             </div>
-          </form>
-          <p class="hint" id="storage-note"></p>
-          <div class="row-actions">
-            <button type="button" class="btn danger" id="clear">Cancella i miei dati</button>
+            <form id="options" class="options" novalidate>
+              <div class="field" id="player-field" hidden>
+                <label for="player">Il tuo nome utente Telegram</label>
+                <input
+                  id="player"
+                  name="player"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  aria-describedby="player-hint"
+                />
+                <p class="hint" id="player-hint">
+                  Serve solo se tra le esportazioni non c’è la chat privata con il bot. La wiki si
+                  aggiorna appena smetti di scrivere.
+                </p>
+              </div>
+              <div class="field">
+                <label for="time-zone">Fuso orario delle esportazioni</label>
+                <select id="time-zone" name="time-zone" aria-describedby="time-zone-hint"></select>
+                <p class="hint" id="time-zone-hint">
+                  Quello del computer che ha fatto le esportazioni: di solito è questo, già scelto.
+                  Serve solo per le esportazioni fatte su macOS, le cui date non lo indicano.
+                </p>
+              </div>
+            </form>
+            <p class="hint" id="storage-note"></p>
+            <div class="row-actions">
+              <button type="button" class="btn danger" id="clear">Cancella i miei dati</button>
+            </div>
           </div>
-        </section>
+        </dialog>
       </header>
 
       <div class="messages">
@@ -114,9 +121,9 @@
         <section id="empty" class="empty-state" aria-labelledby="empty-title">
           <h2 id="empty-title">La tua wiki è ancora vuota</h2>
           <p>
-            Premi <b>Aggiungi esportazione</b>, qui in alto, e scegli la cartella di un’esportazione
-            di Telegram Desktop: la wiki si crea da sola, e si aggiorna a ogni esportazione che
-            aggiungi o togli.
+            Premi <b>Esportazioni</b>, qui in alto, poi <b>Aggiungi esportazione</b>, e scegli la
+            cartella di un’esportazione di Telegram Desktop: la wiki si crea da sola, e si aggiorna
+            a ogni esportazione che aggiungi o togli.
           </p>
           <p>
             Per esportare, in <b>Telegram Desktop</b> apri la chat con il bot (o un gruppo in cui si

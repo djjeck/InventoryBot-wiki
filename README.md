@@ -9,8 +9,8 @@ dall'export della propria chat Telegram, e li mostra in una piccola webapp stati
 
 1. In **Telegram Desktop** apri la chat con il bot (o un gruppo in cui si gioca), menu **⋮** →
    **Esporta cronologia chat**, formato **HTML**; foto e altri allegati non servono.
-2. Apri la pagina, premi **Aggiungi esportazione** in alto a destra e scegli la cartella creata
-   dall'esportazione (o una cartella che ne contiene più d'una).
+2. Apri la pagina, premi **Esportazioni** in alto a destra, poi **Aggiungi esportazione**, e scegli
+   la cartella creata dall'esportazione (o una cartella che ne contiene più d'una).
 3. Facoltativo: esporta allo stesso modo i tre canali enciclopedici che il bot indica in `/gruppi`
    (**La Cittadella dei Demiurghi**, **Il Grimorio del Golem**, **L'Atlante di Barbabeige**) e
    aggiungili: la wiki ne prende ricette, oggetti e luoghi. Le loro schede sono per lo più del 2017,

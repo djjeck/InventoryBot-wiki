@@ -1,7 +1,8 @@
 /**
- * The web app's page: the wiki, the only view, under a header whose "Aggiungi
- * esportazione" button opens the folder picker and whose "Esportazioni" button toggles a
- * panel with the list of exports, the options and "Cancella i miei dati". Each folder
+ * The web app's page: the wiki, the only view, under a header whose "Esportazioni"
+ * button opens a modal panel below it with the list of exports (each removed by its bin button),
+ * "Aggiungi esportazione", which opens the folder picker, the options and "Cancella i
+ * miei dati"; the panel closes on Escape or on a click outside it. Each folder
  * picked is sent at once to the worker, which reads it, keeps it and builds the wiki
  * again; a change of the options (the time zone, the username once a build asked for it)
  * builds again too. The saved wiki shows at once, and each build's wiki replaces it in
@@ -44,7 +45,7 @@ const ui = {
   add: $<HTMLButtonElement>('add'),
   toggle: $<HTMLButtonElement>('panel-toggle'),
   count: $('export-count'),
-  panel: $('panel'),
+  panel: $<HTMLDialogElement>('panel'),
   panelClose: $<HTMLButtonElement>('panel-close'),
   exports: $<HTMLUListElement>('exports'),
   exportsNone: $('exports-none'),
@@ -133,39 +134,63 @@ function showError(html: string, details: readonly string[] = [], focus?: HTMLEl
 
 $('notice-close').addEventListener('click', () => {
   hideNotice();
-  ui.add.focus();
+  ui.toggle.focus();
 });
 $('error-close').addEventListener('click', () => {
   hideError();
-  ui.add.focus();
+  ui.toggle.focus();
 });
 
 // ---- the panel -----------------------------------------------------------------------
 
-function openPanel(focus = true): void {
-  ui.panel.hidden = false;
+// A modal dialog: the page behind it is inert, Escape closes it, and so does a click on
+// the backdrop (outside the panel's box, where the dialog itself is the target). It is
+// drawn below the button that opens it, following it as the page scrolls or resizes.
+
+function placePanel(): void {
+  const r = ui.toggle.getBoundingClientRect();
+  ui.panel.style.setProperty('--panel-top', `${Math.max(8, r.bottom + 8)}px`);
+  ui.panel.style.setProperty(
+    '--panel-right',
+    `${Math.max(16, document.documentElement.clientWidth - r.right)}px`
+  );
+}
+
+function openPanel(): void {
+  if (ui.panel.open) return;
+  placePanel();
+  ui.panel.showModal();
+  ui.panel.focus();
   ui.toggle.setAttribute('aria-expanded', 'true');
-  if (focus) ui.panel.focus();
+  window.addEventListener('scroll', placePanel, { passive: true });
+  window.addEventListener('resize', placePanel);
 }
 
 function closePanel(): void {
-  if (ui.panel.hidden) return;
-  const inside = ui.panel.contains(document.activeElement);
-  ui.panel.hidden = true;
-  ui.toggle.setAttribute('aria-expanded', 'false');
-  if (inside) ui.toggle.focus();
+  if (ui.panel.open) ui.panel.close();
 }
 
-ui.toggle.addEventListener('click', () => (ui.panel.hidden ? openPanel() : closePanel()));
+ui.panel.addEventListener('close', () => {
+  window.removeEventListener('scroll', placePanel);
+  window.removeEventListener('resize', placePanel);
+  ui.toggle.setAttribute('aria-expanded', 'false');
+  ui.toggle.focus();
+});
+ui.toggle.addEventListener('click', openPanel);
 ui.panelClose.addEventListener('click', closePanel);
-ui.panel.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    closePanel();
-  }
+// Both ends of the click on the backdrop, so that selecting text in the panel and
+// releasing outside it does not close it.
+let pressedOutside = false;
+ui.panel.addEventListener('pointerdown', (e) => (pressedOutside = e.target === ui.panel));
+ui.panel.addEventListener('click', (e) => {
+  if (pressedOutside && e.target === ui.panel) closePanel();
+  pressedOutside = false;
 });
 
 // ---- exports --------------------------------------------------------------------------
+
+const BIN_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg>';
 
 function renderExports(): void {
   ui.exports.replaceChildren(
@@ -206,10 +231,11 @@ function renderExports(): void {
       }
       const remove = document.createElement('button');
       remove.type = 'button';
-      remove.className = 'export-remove';
-      remove.textContent = 'Togli';
+      remove.className = 'icon-btn export-remove';
+      remove.innerHTML = BIN_ICON;
       const what = l.days === null ? l.name : `${l.name} (${l.days})`;
       remove.setAttribute('aria-label', `Togli ${what}`);
+      remove.title = 'Togli';
       remove.addEventListener('click', () => {
         if (
           (e.status === 'ready' || e.status === 'stale') &&
@@ -352,7 +378,7 @@ function showNoOwner(): void {
   // Asked only here: the owner is normally found in the private chat with the bot.
   ui.playerField.hidden = false;
   ui.player.setAttribute('aria-invalid', 'true');
-  openPanel(false);
+  openPanel();
   showError(
     '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
       'Scrivilo nel campo <b>Il tuo nome utente Telegram</b>, nel pannello delle esportazioni: ' +
@@ -479,7 +505,6 @@ ui.clear.addEventListener('click', () => {
   hideNotice();
   closePanel();
   announce('Dati cancellati da questo browser.');
-  ui.add.focus();
 });
 
 // ---- start ---------------------------------------------------------------------------
