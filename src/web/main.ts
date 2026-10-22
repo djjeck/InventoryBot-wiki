@@ -1,7 +1,7 @@
 /**
- * The web app's page: the wiki, the only view, under a header whose "Esportazioni"
- * button opens a modal panel below it with the list of exports (each removed by its bin button),
- * "Aggiungi esportazione", which opens the folder picker, the options and "Cancella i
+ * The web app's page: the wiki, the only view, under a header whose "Importa" button
+ * opens a modal panel below it with the owner whose wiki it is, the list of exports (each removed by its bin button),
+ * how to export a chat, "Aggiungi esportazione", which opens the folder picker, the options and "Cancella i
  * miei dati"; the panel closes on Escape or on a click outside it. Each folder
  * picked is sent at once to the worker, which reads it, keeps it and builds the wiki
  * again; a change of the options (the time zone, the username once a build asked for it)
@@ -16,7 +16,7 @@
  */
 import { type Phase } from '#src/pipeline.ts';
 import { debounce } from './debounce.ts';
-import { activityText, entryLabel } from './labels.ts';
+import { accountLabel, activityText, entryLabel } from './labels.ts';
 import {
   type BuildOptions,
   type ExportEntry,
@@ -47,6 +47,11 @@ const ui = {
   count: $('export-count'),
   panel: $<HTMLDialogElement>('panel'),
   panelClose: $<HTMLButtonElement>('panel-close'),
+  account: $('account'),
+  accountInitial: $('account-initial'),
+  accountName: $('account-name'),
+  accountMeta: $('account-meta'),
+  accountEstimate: $('account-estimate'),
   exports: $<HTMLUListElement>('exports'),
   exportsNone: $('exports-none'),
   form: $<HTMLFormElement>('options'),
@@ -250,7 +255,13 @@ function renderExports(): void {
     })
   );
   ui.exportsNone.hidden = exportList.length > 0;
-  ui.count.textContent = exportList.length ? ` (${exportList.length})` : '';
+  ui.count.textContent = exportList.length ? String(exportList.length) : '';
+  ui.toggle.setAttribute(
+    'aria-label',
+    exportList.length
+      ? `Importa, ${exportList.length} ${exportList.length === 1 ? 'esportazione' : 'esportazioni'}`
+      : 'Importa'
+  );
   // An export that cannot be read is told once, also with the panel closed.
   for (const e of exportList)
     if (e.status === 'error' && !errorsShown.has(e.id)) {
@@ -381,7 +392,7 @@ function showNoOwner(): void {
   openPanel();
   showError(
     '<p>Tra le esportazioni non c’è la chat privata con il bot, da cui ricavare il tuo nome utente. ' +
-      'Scrivilo nel campo <b>Il tuo nome utente Telegram</b>, nel pannello delle esportazioni: ' +
+      'Scrivilo nel campo <b>Il tuo nome utente Telegram</b>, nel pannello «Importa»: ' +
       'la wiki si crea appena smetti di scrivere.</p>',
     [],
     ui.player
@@ -389,6 +400,7 @@ function showNoOwner(): void {
 }
 
 function showEmpty(): void {
+  ui.account.hidden = true;
   ui.wiki.replaceChildren();
   ui.empty.hidden = false;
   ui.resultInfo.textContent = '';
@@ -415,6 +427,14 @@ function showResult(result: RunResult): void {
   if (inSearch) q?.focus({ preventScroll: true });
   else if (hadFocus) ui.main.focus({ preventScroll: true });
   ui.empty.hidden = true;
+  const a = accountLabel(result.player);
+  ui.accountInitial.textContent = a.name.charAt(1).toUpperCase();
+  ui.accountName.textContent = a.name;
+  ui.accountMeta.textContent =
+    a.asOf === null ? 'nessun dato personale' : `dati personali al ${a.asOf}`;
+  ui.accountEstimate.textContent =
+    a.agreement === null ? '' : `stima dell’inventario: ${a.agreement}`;
+  ui.account.hidden = false;
   const who = result.owner ? `@${result.owner}` : 'giocatore sconosciuto';
   ui.resultInfo.textContent =
     `Wiki di ${who}, da ${result.folders.length === 1 ? 'un’esportazione' : `${result.folders.length} esportazioni`} ` +

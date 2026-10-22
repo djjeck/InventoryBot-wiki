@@ -143,21 +143,6 @@ header.top {
   color: var(--muted);
   font-size: 0.9rem;
 }
-.tally {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--muted);
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.tally:empty {
-  display: none;
-}
-.tally b {
-  color: var(--ink);
-  font-weight: 500;
-}
 
 /* The sidebar: fixed to the left of the window, as tall as it, with its own scrolling
    list, like Telegram's chat list (a little wider, for the longer rows). The page leaves

@@ -29,7 +29,6 @@
   <div class="list" id="list"></div>
 </aside>
 <div class="wrap content">
-  <div class="tally" id="tally"></div>
   <div id="view"></div>
   <details id="rules" class="rules"></details>
   <details id="trivia" class="rules"></details>
@@ -855,12 +854,6 @@
       check && check.compared > 0
         ? (Math.floor((check.agreed * 1000) / check.compared) / 10).toLocaleString('it-IT')
         : null;
-    if (P)
-      $('#tally').insertAdjacentHTML(
-        'beforeend',
-        `<span>dati personali di <b>@${esc(P.player)}</b> al ${fmtDate(P.as_of)}</span>` +
-          (agreement === null ? '' : `<span>stima dell'inventario: <b>${agreement}%</b></span>`)
-      );
     if (W.rules?.length)
       $('#rules').innerHTML =
         `<summary>Regole del gioco (dalla /faq del bot)</summary>${W.rules.map((r) => `<p class="note">${esc(r)}</p>`).join('')}`;
@@ -879,7 +872,7 @@
       : " Le quantità possedute sono una stima ricostruita dallo storico: l'inventario reale può differire." +
         (agreement === null
           ? ''
-          : ` La percentuale della stima dice quante volte, a ogni /ricetta, la stima dava per ogni ricetta gli stessi ingredienti mancanti del bot (${check.agreed} su ${check.compared}): se non è 100%, alcune interazioni (oggetti trovati, dati, ricevuti o usati) sono avvenute fuori dalle chat importate.`);
+          : ` La percentuale della stima, nel pannello «Importa», dice quante volte, a ogni /ricetta, la stima dava per ogni ricetta gli stessi ingredienti mancanti del bot (${check.agreed} su ${check.compared}): se non è 100%, alcune interazioni (oggetti trovati, dati, ricevuti o usati) sono avvenute fuori dalle chat importate.`);
     $('#foot').textContent =
       `Dati generati il ${fmtDate(W.generated)}.${estimate} Le ricette si conoscono solo dopo averne posseduto metà degli ingredienti, e l'output solo dopo averle eseguite: ciò che manca qui non è stato ancora osservato.`;
     render();

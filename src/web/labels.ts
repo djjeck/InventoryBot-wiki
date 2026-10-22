@@ -1,9 +1,10 @@
 /**
  * What the page (main.ts) writes about the exports and the work in progress, in Italian:
- * an export's chat name, the days of its first and last message, its status, and the
- * header's progress line. Pure functions, tested in Node.
+ * an export's chat name, the days of its first and last message, its status, the owner
+ * whose wiki it is, and the header's progress line. Pure functions, tested in Node.
  */
 import { INVENTORY_BOT } from '#src/inventorybot/bot.ts';
+import { type PlayerState } from '#src/inventorybot/types.ts';
 import { parseMacDate, parseWindowsDate, type WallClock } from '#src/lib/dates.ts';
 import { type Phase } from '#src/pipeline.ts';
 import { type ExportEntry } from './protocol.ts';
@@ -42,6 +43,37 @@ export function chatName(info: Pick<RecordInfo, 'chats'>, fallback: string): str
     ),
   ];
   return names.length > 0 ? names.join(', ') : fallback;
+}
+
+/** What the panel shows of the owner whose wiki it is. */
+export interface AccountLabel {
+  /** `@username`. */
+  name: string;
+  /** The day of their latest observation, as the export wrote it, else null. */
+  asOf: string | null;
+  /**
+   * How often the inventory estimate agreed with the bot's /ricetta lists, as a
+   * percentage rounded down (`98,5%`: 100% only when always); null if never compared.
+   */
+  agreement: string | null;
+}
+
+export function accountLabel(
+  p: Pick<PlayerState, 'player' | 'as_of' | 'inventory_check'>
+): AccountLabel {
+  const day = /^(\d{4})-(\d{2})-(\d{2})/u.exec(p.as_of ?? '');
+  const { compared, agreed } = p.inventory_check;
+  return {
+    name: `@${p.player}`,
+    asOf:
+      day === null
+        ? null
+        : `${Number(day[3])} ${MONTHS[Number(day[2]) - 1] as string} ${day[1] as string}`,
+    agreement:
+      compared > 0
+        ? `${(Math.floor((agreed * 1000) / compared) / 10).toLocaleString('it-IT')}%`
+        : null,
+  };
 }
 
 /** What the list shows of an export. */

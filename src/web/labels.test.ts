@@ -1,6 +1,13 @@
 /** What the page writes about the exports (labels.ts). Synthetic data only. */
 import { describe, expect, it } from 'vitest';
-import { activityText, chatName, entryLabel, exportDay, exportDays } from './labels.ts';
+import {
+  accountLabel,
+  activityText,
+  chatName,
+  entryLabel,
+  exportDay,
+  exportDays,
+} from './labels.ts';
 import { type ExportEntry } from './protocol.ts';
 import { type RecordInfo } from './storage.ts';
 
@@ -128,5 +135,31 @@ describe('activity', () => {
 
   it('nothing_going_on_is_null', () => {
     expect(activityText([{ id: 'h', status: 'ready', folder: 'A' }], null)).toBeNull();
+  });
+});
+
+describe('account', () => {
+  const player = { player: 'mario', as_of: '2025-11-27T22:18:21-05:00' };
+
+  it('the_owner_is_named_with_the_day_of_their_latest_observation', () => {
+    const l = accountLabel({ ...player, inventory_check: { compared: 0, agreed: 0 } });
+    expect(l).toEqual({ name: '@mario', asOf: '27 nov 2025', agreement: null });
+  });
+
+  it('the_agreement_is_rounded_down_so_only_always_is_100', () => {
+    const check = (agreed: number, compared: number): string | null =>
+      accountLabel({ ...player, inventory_check: { compared, agreed } }).agreement;
+    expect(check(197, 200)).toBe('98,5%');
+    expect(check(1999, 2000)).toBe('99,9%');
+    expect(check(5, 5)).toBe('100%');
+  });
+
+  it('without_observations_there_is_no_day', () => {
+    const l = accountLabel({
+      player: 'mario',
+      as_of: null,
+      inventory_check: { compared: 0, agreed: 0 },
+    });
+    expect(l.asOf).toBeNull();
   });
 });

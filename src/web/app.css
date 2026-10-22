@@ -176,7 +176,22 @@ main:focus {
   }
 }
 #panel-toggle {
-  gap: 0.3em;
+  gap: 6px;
+}
+/* The number of exports, as a badge on the button: white on its blue. */
+#panel-toggle .badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #fff;
+  color: color-mix(in srgb, var(--accent) 70%, #000);
+  font-size: 0.75rem;
+  line-height: 20px;
+  text-align: center;
+}
+#panel-toggle .badge:empty {
+  display: none;
 }
 
 /* ---- exports panel --------------------------------------------------------------- */
@@ -244,6 +259,36 @@ main:focus {
 }
 .panel-head h2 {
   font-size: 1.15rem;
+}
+/* The owner whose wiki it is, as a Telegram profile row: a round initial and the name. */
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.account p {
+  margin: 0;
+}
+.account p:empty {
+  display: none;
+}
+.account-name {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.peer {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(#5caffa, #408acf);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 500;
 }
 .exports {
   list-style: none;

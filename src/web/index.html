@@ -41,19 +41,27 @@
             aria-expanded="false"
             aria-controls="panel"
           >
-            Esportazioni<span id="export-count"></span>
+            Importa<span id="export-count" class="badge" aria-hidden="true"></span>
           </button>
         </div>
 
         <dialog id="panel" class="panel" aria-labelledby="panel-title" tabindex="-1">
           <div class="panel-body">
             <div class="panel-head">
-              <h2 id="panel-title">Esportazioni</h2>
+              <h2 id="panel-title">Importa</h2>
               <button type="button" class="icon-btn" id="panel-close" aria-label="Chiudi">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
               </button>
             </div>
-            <ul id="exports" class="exports" aria-labelledby="panel-title"></ul>
+            <section id="account" class="account" aria-label="Il tuo account" hidden>
+              <span class="peer" id="account-initial" aria-hidden="true"></span>
+              <div>
+                <p class="account-name" id="account-name"></p>
+                <p class="hint" id="account-meta"></p>
+                <p class="hint" id="account-estimate"></p>
+              </div>
+            </section>
+            <ul id="exports" class="exports" aria-label="Esportazioni importate"></ul>
             <p class="hint" id="exports-none">
               Nessuna esportazione: aggiungine una con «Aggiungi esportazione».
             </p>
@@ -66,6 +74,11 @@
               tabindex="-1"
               aria-hidden="true"
             />
+            <p class="hint">
+              In <b>Telegram Desktop</b> apri la chat con il bot o un gruppo in cui si gioca, menu
+              <b>⋮</b> → <b>Esporta cronologia chat</b>, formato <b>HTML</b>, senza allegati; poi
+              aggiungi qui la cartella.
+            </p>
             <div class="row-actions">
               <button type="button" class="btn primary" id="add">Aggiungi esportazione</button>
             </div>
@@ -121,7 +134,7 @@
         <section id="empty" class="empty-state" aria-labelledby="empty-title">
           <h2 id="empty-title">La tua wiki è ancora vuota</h2>
           <p>
-            Premi <b>Esportazioni</b>, qui in alto, poi <b>Aggiungi esportazione</b>, e scegli la
+            Premi <b>Importa</b>, qui in alto, poi <b>Aggiungi esportazione</b>, e scegli la
             cartella di un’esportazione di Telegram Desktop: la wiki si crea da sola, e si aggiorna
             a ogni esportazione che aggiungi o togli.
           </p>
