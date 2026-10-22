@@ -151,6 +151,9 @@ header.top {
   gap: 14px;
   flex-wrap: wrap;
 }
+.tally:empty {
+  display: none;
+}
 .tally b {
   color: var(--ink);
   font-weight: 500;
@@ -215,13 +218,23 @@ body:has(.sidebar) {
   display: flex;
   padding: 0 8px;
   border-bottom: 1px solid var(--line);
+  /* When they do not fit, as on a narrow screen, they scroll sideways, as Telegram's. */
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+/* Sized by their content, so that a long name with its count takes more room, and
+   never wrapped. */
 .tabs button {
-  flex: 1;
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
   position: relative;
   border: 0;
   background: transparent;
-  padding: 12px 6px;
+  padding: 12px 4px;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   cursor: pointer;
   font-weight: 500;
@@ -232,6 +245,23 @@ body:has(.sidebar) {
 }
 .tabs button[aria-selected='true'] {
   color: var(--accent-ink);
+}
+/* A search's count on each tab, as Telegram's unread badges. */
+.tabs .badge {
+  flex: none;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+}
+.tabs .badge:empty {
+  display: none;
 }
 .tabs button[aria-selected='true']::after {
   content: '';

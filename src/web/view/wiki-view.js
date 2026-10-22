@@ -20,10 +20,10 @@
     />
   </div>
   <div class="tabs" role="tablist" id="tabs">
-    <button role="tab" data-tab="ricette">Ricette</button>
-    <button role="tab" data-tab="oggetti">Oggetti</button>
-    <button role="tab" data-tab="luoghi">Luoghi</button>
-    <button role="tab" data-tab="catene">Catene</button>
+    <button role="tab" data-tab="ricette"><span class="tab-name">Ricette</span><span class="badge" aria-hidden="true"></span></button>
+    <button role="tab" data-tab="oggetti"><span class="tab-name">Oggetti</span><span class="badge" aria-hidden="true"></span></button>
+    <button role="tab" data-tab="luoghi"><span class="tab-name">Luoghi</span><span class="badge" aria-hidden="true"></span></button>
+    <button role="tab" data-tab="catene"><span class="tab-name">Catene</span><span class="badge" aria-hidden="true"></span></button>
   </div>
   <div class="side-tools" id="side-tools"></div>
   <div class="list" id="list"></div>
@@ -709,11 +709,32 @@
         )
         .join('')}</div>`;
     }
+    // Each tab shows how many entries it would list, with the search and its own filter,
+    // as Telegram's unread counts: the wiki's totals, and while searching, where the
+    // matches are, so a search made in the wrong tab still points to the right one. No
+    // count is shown for none.
+    const TAB_ROWS = {
+      ricette: recipeRows,
+      oggetti: itemRows,
+      luoghi: locRows,
+      catene: recipeRows,
+    };
+    function renderTabs(q) {
+      root.querySelectorAll('#tabs button').forEach((b) => {
+        b.setAttribute('aria-selected', b.dataset.tab === state.tab);
+        const n = TAB_ROWS[b.dataset.tab](q).length;
+        b.querySelector('.badge').textContent = n ? String(n) : '';
+        if (n)
+          b.setAttribute(
+            'aria-label',
+            `${b.querySelector('.tab-name').textContent}, ${n} risultati`
+          );
+        else b.removeAttribute('aria-label');
+      });
+    }
     function render() {
       const q = fold($('#q').value.trim());
-      root
-        .querySelectorAll('#tabs button')
-        .forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === state.tab));
+      renderTabs(q);
       const v = $('#view');
       const list = (rows, rowFn) =>
         rows.map(rowFn).join('') ||
@@ -828,9 +849,6 @@
     });
     $('#q').addEventListener('input', render);
 
-    const rs = Object.values(R);
-    $('#tally').innerHTML =
-      `<span><b>${rs.length}</b> ricette</span><span><b>${rs.filter((r) => r.output).length}</b> con output noto</span><span><b>${Object.keys(I).length}</b> oggetti</span><span><b>${Object.keys(L).length}</b> luoghi</span>`;
     // How often the estimate agreed with the bot's /ricetta lists, rounded down: 100% only when always.
     const check = P?.inventory_check;
     const agreement =
