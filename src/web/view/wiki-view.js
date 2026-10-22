@@ -762,7 +762,7 @@
         rows = locRows(q);
         rowFn = locRow;
         detail = locDetail(state.sel.luoghi ?? rows[0]?.name);
-        extra = `<div class="graphbox">${mapSvg()}</div><div class="legend"><span>◌ tratteggiato: serve un oggetto per entrare</span>${P ? '<span>● bordo blu: visitato da te</span>' : ''}</div>`;
+        extra = `<div class="graphbox">${mapSvg()}</div><div class="legend"><span>◌ tratteggiato: serve un oggetto per entrare</span>${P ? '<span>● bordo colorato: visitato da te</span>' : ''}</div>`;
       }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
       $('#side-tools').innerHTML = `${filters}<span class="count">${rows.length} risultati</span>`;

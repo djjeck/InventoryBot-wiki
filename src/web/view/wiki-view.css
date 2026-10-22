@@ -1,12 +1,13 @@
 /* The wiki view (wiki-view.js), as the web app's page shows it. */
-/* Layout: a field-notebook index — filterable list on the left, the selected entry's
-   relations on the right; rarity is the colour system, everything else stays ink-on-slate. */
-/* Colours, type and shapes follow Telegram Web's default light theme, so the page reads
-   as a companion of the chat: Telegram blue on its grey page, white surfaces with its
-   bubble shadow and radius, Roboto. Where a Telegram colour is used as text and falls
-   short of 4.5:1 contrast, it is darkened just enough (same hue): --accent-ink is
-   Telegram blue as text, and the rarities are Telegram's name colours. The headings use
-   a pixel font, after the bot's pixel-art picture. */
+/* Layout: as Telegram's chat list, a sidebar with the search, the categories as tabs
+   and their filterable list; the selected entry's relations in the page beside it. */
+/* Colours, type and shapes follow Telegram Web's default themes, light, and night when
+   the system asks for a dark one, so the page reads as a companion of the chat:
+   Telegram's blue (purple at night) on its page, surfaces with its bubble shadow and
+   radius, Roboto. Where a Telegram colour is used as text and falls short of 4.5:1
+   contrast, it is darkened (lightened at night) just enough, same hue: --accent-ink is
+   the accent as text, and the rarities are Telegram's name colours. The headings use a
+   pixel font, after the bot's pixel-art picture. */
 :root {
   --bg: #f4f4f5;
   --surface: #ffffff;
@@ -33,62 +34,42 @@
   --radius: 12px;
   --radius-sm: 8px;
   --sidebar-w: 420px;
+  color-scheme: light;
   --font-display: 'Pixelify Sans', 'Roboto', system-ui, sans-serif;
   --font-body:
     'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   --font-mono: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
+/* Telegram Web's night theme, whenever the system asks for a dark one. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg: #11151b;
-    --surface: #181e27;
-    --ink: #e5e9ef;
-    --muted: #9aa4b4;
-    --line: #2a323e;
-    --accent: #8eaaff;
-    --accent-hover: #a5bbff;
-    --accent-ink: #8eaaff;
-    --accent-soft: #222c44;
-    --r-C: #a1a8b3;
-    --r-N: #5cc489;
-    --r-R: #6ea6f5;
-    --r-S: #c08ae8;
-    --r-X: #e3b341;
-    --r-M: #f07aa6;
-    --r-L: #f0915a;
-    --warn: #f0a050;
-    --danger: #ff6b6b;
+  :root {
+    --bg: #181818;
+    --surface: #212121;
+    --ink: #ffffff;
+    --muted: #aaaaaa;
+    --line: #2f2f2f;
+    --accent: #8774e1;
+    --accent-hover: #7963dd;
+    --accent-ink: #9787e5;
+    --accent-soft: #292730;
+    --r-C: #aaaaaa;
+    --r-N: #40a920;
+    --r-R: #519ad7;
+    --r-S: #ac80e3;
+    --r-X: #c58809;
+    --r-M: #d375a3;
+    --r-L: #dc7b24;
+    --warn: #dc7b24;
+    --danger: #ff595a;
     --shadow: 0 1px 2px #0000003d;
-    --shadow-pop: 0 4px 16px #00000066;
-    --hover: #ffffff12;
-    --search-bg: #222a35;
+    --shadow-pop: 0 4px 16px #00000080;
+    --hover: #aaaaaa14;
+    --search-bg: #181818;
     color-scheme: dark;
   }
-}
-:root[data-theme='dark'] {
-  --bg: #11151b;
-  --surface: #181e27;
-  --ink: #e5e9ef;
-  --muted: #9aa4b4;
-  --line: #2a323e;
-  --accent: #8eaaff;
-  --accent-hover: #a5bbff;
-  --accent-ink: #8eaaff;
-  --accent-soft: #222c44;
-  --r-C: #a1a8b3;
-  --r-N: #5cc489;
-  --r-R: #6ea6f5;
-  --r-S: #c08ae8;
-  --r-X: #e3b341;
-  --r-M: #f07aa6;
-  --r-L: #f0915a;
-  --warn: #f0a050;
-  --danger: #ff6b6b;
-  --shadow: 0 1px 2px #0000003d;
-  --shadow-pop: 0 4px 16px #00000066;
-  --hover: #ffffff12;
-  --search-bg: #222a35;
-  color-scheme: dark;
+  .sidebar {
+    border-color: #0f0f0f;
+  }
 }
 * {
   box-sizing: border-box;
@@ -330,8 +311,8 @@ body:has(.sidebar) {
   color: #fff !important;
 }
 .row[aria-current='true'] .lvl {
-  background: #fff;
-  color: var(--accent-ink) !important;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px #fff;
 }
 .row .name {
   font-weight: 500;
