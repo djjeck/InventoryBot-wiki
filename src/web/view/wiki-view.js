@@ -742,7 +742,7 @@
         const g = chainsSvg();
         // The sidebar lists the recipes, each opening as from the graph.
         const rows = recipeRows(q);
-        $('#side-tools').innerHTML = `<span class="count">${rows.length} ricette</span>`;
+        $('#side-tools').innerHTML = '';
         $('#list').innerHTML = list(rows, recipeRow);
         v.innerHTML = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
       <div class="graphbox">${g.svg}</div></div>`;
@@ -785,7 +785,7 @@
         extra = `<div class="graphbox">${mapSvg()}</div><div class="legend"><span>◌ tratteggiato: serve un oggetto per entrare</span>${P ? '<span>● bordo colorato: visitato da te</span>' : ''}</div>`;
       }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
-      $('#side-tools').innerHTML = `${filters}<span class="count">${rows.length} risultati</span>`;
+      $('#side-tools').innerHTML = filters;
       $('#list').innerHTML = list(rows, rowFn);
       v.innerHTML = `${extra}<section class="detail" aria-live="polite">${detail}</section>`;
       root
