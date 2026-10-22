@@ -1,14 +1,18 @@
-/* global window, localStorage, location, matchMedia */
+/* global window, localStorage, location, history, matchMedia */
 /**
  * The wiki view: renders a wiki and, optionally, the owner's player state into an
  * element, below the page's own header (title and actions). As in Telegram's chat list,
  * the categories are tabs of a sidebar fixed to the side of the window, whose list
  * scrolls on its own; the selected entry is in the page, which scrolls as a whole. The
- * web app's page (src/web/main.ts) imports it. It defines
+ * web app's page (src/web/main.ts) imports it. The tab and the selected entry are in the
+ * URL's fragment (`#oggetti/<slug>`): each change of them is a step of the browser's
+ * history, and a reload or a new render keeps them. It defines
  * `window.renderWiki(root, wiki, player, missing)`: `root` gets the whole view, its
  * listeners stay on `root`, so a new render goes in a new element.
  */
 (() => {
+  /** The history listener of the latest render: a new render replaces it. */
+  let onHistory = null;
   const MARKUP = `<aside class="sidebar" aria-label="Elenco">
   <div class="side-search">
     <input
@@ -189,7 +193,7 @@
     // ---- state -------------------------------------------------------------------
     const state = {
       tab: 'ricette',
-      sel: { ricette: null, oggetti: null, luoghi: null },
+      sel: { ricette: null, oggetti: null, luoghi: null, catene: null },
       filter: { ricette: 'tutte', oggetti: 'tutti' },
     };
     const store = {
@@ -209,12 +213,70 @@
       },
     };
     const TABS = ['ricette', 'oggetti', 'luoghi', 'catene'];
-    const initial = location.hash.slice(1);
-    state.tab = TABS.includes(initial)
-      ? initial
-      : TABS.includes(store.get('ib-tab'))
-        ? store.get('ib-tab')
-        : 'ricette';
+    // ---- the URL -------------------------------------------------------------------
+    // `#tab` or `#tab/slug`. A slug is the name folded to lower-case ASCII letters and
+    // digits, with `_` in place of everything else (`l'oro` is `l_oro`); names with the
+    // same slug take `_2`, `_3`, ... in the order of their names, so each is one entry.
+    const ENTRIES = { ricette: R, oggetti: I, luoghi: L, catene: R };
+    const slugify = (s) =>
+      fold(s)
+        .replace(/[^a-z0-9]+/gu, '_')
+        .replace(/^_+|_+$/gu, '') || '_';
+    function slugTable(names) {
+      const bySlug = new Map(),
+        byName = new Map();
+      for (const name of [...names].sort()) {
+        const base = slugify(name);
+        let slug = base;
+        for (let k = 2; bySlug.has(slug); k++) slug = `${base}_${k}`;
+        bySlug.set(slug, name);
+        byName.set(name, slug);
+      }
+      return { bySlug, byName };
+    }
+    const recipeSlugs = slugTable(Object.keys(R));
+    const SLUGS = {
+      ricette: recipeSlugs,
+      catene: recipeSlugs,
+      oggetti: slugTable(Object.keys(I)),
+      luoghi: slugTable(Object.keys(L)),
+    };
+    // The old names of renamed items lead to the item, where no current name has the slug.
+    for (const [old, name] of Object.entries(W.renames || {}))
+      if (I[name] && !SLUGS.oggetti.bySlug.has(slugify(old)))
+        SLUGS.oggetti.bySlug.set(slugify(old), name);
+    /** The tab and entry of a fragment, or null if it names no tab (e.g. `#main`). */
+    function fromHash(hash) {
+      const [tab, ...rest] = hash.replace(/^#/u, '').split('/');
+      if (!TABS.includes(tab)) return null;
+      // An entry the wiki no longer has (an old link, a rebuilt wiki) is not selected.
+      const name = SLUGS[tab].bySlug.get(rest.join('/')) ?? null;
+      return { tab, name: name !== null && ENTRIES[tab][name] ? name : null };
+    }
+    function toHash() {
+      const name = state.sel[state.tab];
+      const slug = name ? SLUGS[state.tab].byName.get(name) : undefined;
+      return `#${state.tab}${slug ? '/' + slug : ''}`;
+    }
+    /** Records the tab and entry shown as a new step of the history, if they changed. */
+    function pushUrl() {
+      store.set('ib-tab', state.tab);
+      const hash = toHash();
+      if (hash !== location.hash) history.pushState(null, '', hash);
+    }
+    function applyHash() {
+      const at = fromHash(location.hash);
+      if (!at) return false;
+      state.tab = at.tab;
+      // No name: the list's first entry, as when the tab was first opened.
+      state.sel[at.tab] = at.name;
+      return true;
+    }
+    // Without a fragment, the tab last used in this browser. The URL then shows what is
+    // shown, also in place of a name the wiki no longer has.
+    if (!applyHash())
+      state.tab = TABS.includes(store.get('ib-tab')) ? store.get('ib-tab') : 'ricette';
+    history.replaceState(null, '', toHash());
 
     // ---- recipes -----------------------------------------------------------------
     const RECIPE_FILTERS = {
@@ -624,7 +686,7 @@
     }
 
     // ---- chains graph: recipes linked when one's output is another's ingredient ----
-    function chainsSvg() {
+    function chainsSvg(sel) {
       const linked = new Set(),
         edges = [];
       for (const r of Object.values(R))
@@ -690,7 +752,7 @@
     ${[...linked]
       .map((n) => {
         const p = xy.get(n);
-        return `<g class="g-node" data-go="recipe" data-name="${esc(n)}" tabindex="0"><title>${esc(n)}${R[n]?.output ? ' → ' + esc(R[n].output) : ''}</title>
+        return `<g class="g-node${n === sel ? ' sel' : ''}" data-go="recipe" data-name="${esc(n)}" tabindex="0"><title>${esc(n)}${R[n]?.output ? ' → ' + esc(R[n].output) : ''}</title>
       <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="26" rx="5"/>
       <text x="${p.x + 8}" y="${p.y + 17}">${esc(short(n))}</text></g>`;
       })
@@ -738,29 +800,6 @@
       const list = (rows, rowFn) =>
         rows.map(rowFn).join('') ||
         `<p class="empty" style="padding:12px">Nessun risultato per questa ricerca.</p>`;
-      if (state.tab === 'catene') {
-        const g = chainsSvg();
-        // The sidebar lists the recipes, each opening as from the graph.
-        const rows = recipeRows(q);
-        $('#side-tools').innerHTML = '';
-        $('#list').innerHTML = list(rows, recipeRow);
-        v.innerHTML = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
-      <div class="graphbox">${g.svg}</div></div>`;
-        v.querySelectorAll('.g-node').forEach((el) => {
-          const hi = (on) =>
-            v
-              .querySelectorAll('.g-edge')
-              .forEach((e) =>
-                e.classList.toggle(
-                  'hi',
-                  on && (e.dataset.a === el.dataset.name || e.dataset.b === el.dataset.name)
-                )
-              );
-          el.addEventListener('mouseenter', () => hi(true));
-          el.addEventListener('mouseleave', () => hi(false));
-        });
-        return;
-      }
       let rows,
         rowFn,
         detail,
@@ -784,23 +823,49 @@
         detail = locDetail(state.sel.luoghi ?? rows[0]?.name);
         extra = `<div class="graphbox">${mapSvg()}</div><div class="legend"><span>◌ tratteggiato: serve un oggetto per entrare</span>${P ? '<span>● bordo colorato: visitato da te</span>' : ''}</div>`;
       }
+      // The recipes again, in the graph of their chains: a recipe opens below it.
+      if (state.tab === 'catene') {
+        rows = recipeRows(q);
+        rowFn = recipeRow;
+        const g = chainsSvg(state.sel.catene ?? rows[0]?.name);
+        detail = recipeDetail(state.sel.catene ?? rows[0]?.name);
+        extra = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
+      <div class="graphbox">${g.svg}</div></div>`;
+      }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
       $('#side-tools').innerHTML = filters;
       $('#list').innerHTML = list(rows, rowFn);
       v.innerHTML = `${extra}<section class="detail" aria-live="polite">${detail}</section>`;
+      v.querySelectorAll('.g-node[data-go="recipe"]').forEach((el) => {
+        const hi = (on) =>
+          v
+            .querySelectorAll('.g-edge')
+            .forEach((e) =>
+              e.classList.toggle(
+                'hi',
+                on && (e.dataset.a === el.dataset.name || e.dataset.b === el.dataset.name)
+              )
+            );
+        el.addEventListener('mouseenter', () => hi(true));
+        el.addEventListener('mouseleave', () => hi(false));
+      });
       root
         .querySelectorAll('#list .row')
         .forEach((b) => b.setAttribute('aria-current', b.dataset.sel === curSel));
     }
     function go(kind, name) {
       if (kind === 'item' && !I[name] && W.renames?.[name]) name = W.renames[name]; // old name of a renamed item
-      const tab = { recipe: 'ricette', item: 'oggetti', loc: 'luoghi' }[kind];
+      // A recipe opened from Catene stays there, in the graph.
+      const tab =
+        kind === 'recipe' && state.tab === 'catene'
+          ? 'catene'
+          : { recipe: 'ricette', item: 'oggetti', loc: 'luoghi' }[kind];
       state.sel[tab] = name;
       if (state.tab !== tab) {
         state.tab = tab;
         $('#q').value = '';
-        store.set('ib-tab', tab);
       }
+      pushUrl();
       render();
       const cur = root.querySelector(`.row[aria-current="true"]`);
       cur?.scrollIntoView({ block: 'nearest' });
@@ -819,7 +884,7 @@
       if (!t) return;
       if (t.dataset.tab) {
         state.tab = t.dataset.tab;
-        store.set('ib-tab', state.tab);
+        pushUrl();
         render();
         return;
       }
@@ -829,11 +894,8 @@
         return;
       }
       if (t.dataset.sel) {
-        if (state.tab === 'catene') {
-          go('recipe', t.dataset.sel);
-          return;
-        }
         state.sel[state.tab] = t.dataset.sel;
+        pushUrl();
         render();
         showDetail();
         return;
@@ -847,6 +909,14 @@
       }
     });
     $('#q').addEventListener('input', render);
+    // Back and forward (and a fragment typed in the address bar) show their tab and entry.
+    if (onHistory) window.removeEventListener('popstate', onHistory);
+    onHistory = () => {
+      if (!root.isConnected || !applyHash()) return;
+      render();
+      root.querySelector('.row[aria-current="true"]')?.scrollIntoView({ block: 'nearest' });
+    };
+    window.addEventListener('popstate', onHistory);
 
     // How often the estimate agreed with the bot's /ricetta lists, rounded down: 100% only when always.
     const check = P?.inventory_check;

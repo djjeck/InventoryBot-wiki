@@ -160,10 +160,12 @@ in place, without moving the focus. The wiki and the player state are drawn by t
 Telegram's chat list, the search, the categories (as tabs, each with how many entries it lists, with
 the search if any, as unread counts) and their list are in a sidebar fixed to the left of the
 window, whose list scrolls on its own, while the selected entry is in the page, which scrolls as a
-whole (on a narrow screen the sidebar is a block above it), and the report is in a collapsed
-section. The owner is the player the bot addresses most in the DM; without a DM the build stops, the
-records stay kept, and the panel shows a username field, which the page offers nowhere else. What
-the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the records of the exports
+whole (on a narrow screen the sidebar is a block above it); the tab and the selected entry are in
+the URL's fragment (`#oggetti/l_oro`: a slug of the name, unique within its tab), so a reload keeps
+them and each change is a step of the browser's history; and the report is in a collapsed section.
+The owner is the player the bot addresses most in the DM; without a DM the build stops, the records
+stay kept, and the panel shows a username field, which the page offers nowhere else. What the worker
+keeps is in IndexedDB, in this browser only (`storage.ts`): the records of the exports
 (`ExportRecord`, never the export pages), each with its folder, dates and counts, in upload order,
 which is their merge order; the last results (wiki, player state, report, options) with the records
 they were built from, so a returning player sees their wiki at once and the worker rebuilds only if
