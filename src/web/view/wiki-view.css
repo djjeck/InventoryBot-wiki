@@ -320,10 +320,6 @@ body:has(.sidebar) {
 .row[aria-current='true'] * {
   color: #fff !important;
 }
-.row[aria-current='true'] .lvl {
-  background: transparent;
-  box-shadow: inset 0 0 0 1px #fff;
-}
 .row .name {
   font-weight: 500;
   overflow-wrap: anywhere;
@@ -378,16 +374,6 @@ body:has(.sidebar) {
   color: var(--muted);
   border-style: dashed;
 }
-.lvl {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: var(--r-L);
-  color: var(--surface);
-  white-space: nowrap;
-}
 
 .detail {
   background: var(--surface);
@@ -423,8 +409,47 @@ body:has(.sidebar) {
   color: var(--muted);
   font-size: 0.9rem;
 }
-.obtain {
-  margin: 0;
+/* A reply of the bot, as Telegram draws an incoming message: one line per line of the
+   reply, a corner flattened towards its sender; names in it are links. */
+.bubble {
+  max-width: 640px;
+  padding: 8px 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--bg);
+  overflow-wrap: anywhere;
+}
+.b-line {
+  min-height: 1em;
+}
+.b-line + .b-line {
+  margin-top: 2px;
+}
+.bubble .link {
+  color: var(--accent-ink);
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.bubble .aside {
+  display: block;
+  margin: 0 0 4px 1em;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.bubble .aside .link {
+  color: inherit;
+}
+.bubble .hot {
+  color: var(--warn);
+}
+/* Rarities and levels: in brackets in the bot's text, as the bot writes them ("[C]",
+   "[L1]"), and as bordered tags in titles, rows and lists. What we add to the bot's words
+   (a recipe's level, an item's rarity where the bot does not write it) is smaller, so the
+   bot's text stays recognisable. */
+.bubble .added {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.bubble .unknown {
+  color: var(--muted);
 }
 .note {
   color: var(--muted);

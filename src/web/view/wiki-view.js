@@ -149,7 +149,7 @@
       `<span class="tag t-${rarityGroup(rar)}" title="${esc(rarityName(rarityGroup(rar)))}">${esc(rar || '?')}</span>`;
     const lvlTag = (r) =>
       r?.level
-        ? `<span class="lvl" title="Livello ricetta${r.level_inferred ? ' (dedotto)' : ''}">L${r.level}</span>`
+        ? `<span class="tag t-L" title="Livello ricetta${r.level_inferred ? ' (dedotto)' : ''}">L${r.level}</span>`
         : `<span class="tag t-q">L?</span>`;
     const current = (n) => (I[n] ? n : W.renames?.[n] || n); // an old name shows as the item's current name
     const itemLink = (n) => {
@@ -161,6 +161,61 @@
     const locLink = (n) =>
       `<button class="link" data-go="loc" data-name="${esc(n)}">${esc(L[n]?.label || n)}</button>`;
     const sec = (title, body) => `<div class="section"><h3>${title}</h3>${body}</div>`;
+    // ---- the bot's own words ---------------------------------------------------------
+    // An entry is shown first as the bot's reply to the command that describes it, in a
+    // Telegram bubble, worded for any player ("serve", not "ti serve"), with links; what
+    // the bot does not say follows it.
+    const bubble = (lines) =>
+      `<div class="bubble">${lines.map((l) => `<div class="b-line">${l}</div>`).join('')}</div>`;
+    /** A plain link, as a name inside a bot's reply. */
+    const goLink = (kind, n, text = n) =>
+      `<button class="link" data-go="${kind}" data-name="${esc(n)}">${esc(text)}</button>`;
+    /** An item as the bot writes it: its name, then `[R]` and `[usabile]`. */
+    const rarityRef = (i, cls = '') =>
+      `<span class="t-${rarityGroup(i?.rarity)}${cls}" title="${esc(rarityName(rarityGroup(i?.rarity)))}">[${esc(i?.rarity || '?')}]</span>`;
+    /**
+     * An item as the bot writes it in a list: its name, then `[R]` and `[usabile]`; with
+     * `added`, these are ours, where the bot names the item without them.
+     */
+    const itemRef = (n, added = false) => {
+      n = current(n);
+      const i = I[n];
+      const meta = `${rarityRef(i)}${i?.usable ? ' [usabile]' : ''}`;
+      return `${goLink('item', n)} ${added ? `<span class="added">${meta}</span>` : meta}`;
+    };
+    /**
+     * A recipe with its level (if known) in brackets, as an item's rarity in the bot's
+     * text, coloured as the Ln rarity, which is that of the items a level-n recipe makes.
+     */
+    const recipeRef = (n, quoted = false) => {
+      const link = goLink('recipe', n);
+      const level = R[n]?.level;
+      return `${quoted ? `"${link}"` : link}${level ? ` <span class="added"><span class="t-L" title="Livello ricetta">[L${level}]</span></span>` : ''}`;
+    };
+    // The items a reply of the bot names, as links with their rarity: the longest names
+    // first, each a whole phrase (not inside a word).
+    const itemNames = Object.keys(I).sort((a, b) => b.length - a.length);
+    const itemPattern = itemNames.length
+      ? new RegExp(
+          `(?<![\\p{L}'’])(${itemNames.map((n) => n.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')).join('|')})(?!\\p{L})(?:(\\s*)\\[([A-Z][0-9]*\\+?)\\])?`,
+          'gu'
+        )
+      : null;
+    /** A text of the bot, escaped, with the items it names linked. */
+    const linkItems = (text) => {
+      if (!itemPattern) return esc(text);
+      let out = '',
+        at = 0;
+      for (const m of text.matchAll(itemPattern)) {
+        out += esc(text.slice(at, m.index));
+        // The bot's own "[R]" after the name stays, as it was then; else ours is added.
+        out += m[3]
+          ? `${goLink('item', m[1])}${esc(m[2])}${rarityRef({ rarity: m[3] })}`
+          : `${goLink('item', m[1])} <span class="added">${rarityRef(I[m[1]])}</span>`;
+        at = m.index + m[0].length;
+      }
+      return out + esc(text.slice(at));
+    };
     /** "a, b e c". */
     const listIt = (xs) =>
       xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} e ${xs.at(-1)}`;
@@ -308,28 +363,45 @@
     function recipeDetail(name) {
       const r = R[name];
       if (!r) return `<p class="empty">Seleziona una ricetta dall'elenco.</p>`;
-      const ingr = ingredientsOf(r)
-        .map(([n, q]) => {
-          const others = (I[n]?.used_in || [])
-            .filter((o) => o !== name)
-            .sort((a, b) => lvl(b) - lvl(a));
-          const hot = others.some((o) => lvl(o) > (r.level || 0));
-          const made = I[n]?.made_by || [];
-          const h = have(n),
-            mine = P
-              ? ` <span class="mine${(h?.qty || 0) >= (q || 1) ? ' ok' : ''}" title="Stima dal tuo storico">hai ${haveTxt(h)}</span>`
-              : '';
-          return `<div class="ing"><span class="qty">${q ? '×' + q : '?'}</span><span>${itemLink(n)}${mine}</span>
-      ${made.length ? `<div class="also">si crea con ${made.map(recipeLink).join(' ')}</div>` : ''}
-      ${others.length ? `<div class="also${hot ? ' hot' : ''}">${hot ? 'conteso, serve anche a' : 'serve anche a'} ${others.map(recipeLink).join(' ')}</div>` : ''}
-    </div>`;
-        })
-        .join('');
+      const ingredients = ingredientsOf(r);
+      // An ingredient line as the bot writes it, with what else makes or needs the item.
+      const ingLine = ([n, q]) => {
+        const others = (I[n]?.used_in || [])
+          .filter((o) => o !== name)
+          .sort((a, b) => lvl(b) - lvl(a));
+        const hot = others.some((o) => lvl(o) > (r.level || 0));
+        const made = I[n]?.made_by || [];
+        const aside = [
+          made.length ? `si crea con ${made.map((m) => recipeRef(m)).join(', ')}` : '',
+          others.length
+            ? `<span class="${hot ? 'hot' : ''}">${hot ? 'conteso, serve anche a' : 'serve anche a'} ${others.map((o) => recipeRef(o)).join(', ')}</span>`
+            : '',
+        ].filter(Boolean);
+        return `- ${itemRef(n)} x${q ?? '?'}${aside.length ? `<span class="aside">${aside.join(' · ')}</span>` : ''}`;
+      };
+      // /esamina of the recipe, for any player: everything it needs.
+      const detailBubble = ingredients.length
+        ? bubble([`per fare la ricetta <b>${esc(name)}</b> serve:`, ...ingredients.map(ingLine)])
+        : '';
+      // Its craft, as the bot tells it: what goes in, the story, what comes out.
+      const craftBubble =
+        r.output || r.craft_text
+          ? bubble([
+              ...(r.ingredients
+                ? [
+                    'prendi in mano:',
+                    ...Object.entries(r.ingredients).map(([n, q]) => `- ${itemRef(n)} x${q}`),
+                  ]
+                : []),
+              ...(r.craft_text ? [esc(r.craft_text)] : []),
+              ...(r.output ? [`Ottieni: ${itemRef(r.output, true)}!`] : []),
+            ])
+          : '';
       const up = upstream(r),
         down = downstream(r),
         cand = candidates(r);
       const out = r.output
-        ? itemLink(r.output)
+        ? ''
         : `<p class="note">Output non ancora osservato: compare solo dopo aver eseguito la ricetta.</p>` +
           (cand.length
             ? `<details class="cand"><summary>${cand.length} oggetti L${r.level} senza ricetta nota: possibili candidati</summary>${chips(cand, itemLink)}</details>`
@@ -356,21 +428,29 @@
                 ? 'Secondo la stima hai tutti gli ingredienti.'
                 : 'Secondo la stima ti mancano degli ingredienti.'
               : '',
+            ingredients.length
+              ? `Ne hai, secondo la stima: ${ingredients
+                  .map(([n, q]) => {
+                    const h = have(n);
+                    return `${goLink('item', current(n))} <span class="mine${(h?.qty || 0) >= (q || 1) ? ' ok' : ''}">${haveTxt(h)}${q ? '/' + q : ''}</span>`;
+                  })
+                  .join(', ')}.`
+              : '',
           ])
         : '';
       return `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span>${freshness(r.last_seen)}</div>
     <h2>${esc(name)}</h2></div>
-    ${sec(
-      'Ingredienti',
+    ${detailBubble}
+    ${
       r.ingredients
-        ? `<div class="ingr">${ingr}</div>`
-        : ingr
-          ? `<p class="note">Lista parziale: ricavata da /esamina sugli oggetti, quantità ignote.</p><div class="ingr">${ingr}</div>`
+        ? ''
+        : ingredients.length
+          ? '<p class="note">Lista parziale: ricavata da /esamina sugli oggetti, quantità ignote.</p>'
           : `<p class="note">Vista solo nell'elenco di /ricetta. Usa /esamina ${esc(name)} per vederne gli ingredienti.</p>`
-    )}
-    ${sec('Ottieni', out)}
+    }
+    ${craftBubble}
+    ${out}
     ${flow}
-    ${r.craft_text ? sec('Descrizione', `<p class="flavor">${esc(r.craft_text)}</p>`) : ''}
     ${channelSec(r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}
     ${personal}`;
     }
@@ -449,7 +529,7 @@
             : 'Non ancora verificato se si consuma.';
       const shown = u.outcomes
         .slice(0, 4)
-        .map((t) => `<p class="flavor">${esc(t)}</p>`)
+        .map((t) => bubble(t.split('\n').map(linkItems)))
         .join('');
       const more =
         u.outcomes.length > 4
@@ -483,37 +563,31 @@
       }
       return parts.length ? parts.slice(0, 2).join(' e ') : '0 secondi';
     }
-    /**
-     * How an item is obtained, first on its page, in the words of the bot's /esamina
-     * ("E' un oggetto trovabile in avventura."), each source with what is known of it: the
-     * recipes that make it, the places where it drops.
-     */
-    function obtainSec(i) {
+    /** How an item is obtained, as the last lines of /esamina put it. */
+    function obtainLines(i) {
       const lines = [];
-      if (i.sources.includes('adventure') || i.exclusive) {
-        // Only a "+" item has a place of its own; the others drop anywhere, unsaid.
-        const where = !i.exclusive
-          ? ''
-          : i.locations.length
-            ? ` Esce solo qui: ${i.locations.map(locLink).join(', ')}.`
-            : ' Esce in un solo luogo, non ancora identificato.';
-        lines.push(`E' un oggetto trovabile in avventura.${where}`);
-      }
-      const recipes = i.made_by.length
-        ? `${i.made_by.length === 1 ? 'la ricetta' : 'le ricette'} ${i.made_by.map(recipeLink).join(', ')}`
-        : null;
-      if (recipes) lines.push(`E' un oggetto che si ottiene con ${recipes}.`);
+      if (i.sources.includes('adventure') || i.exclusive)
+        lines.push("E' un oggetto trovabile in avventura.");
+      if (i.made_by.length)
+        lines.push(
+          `E' un oggetto che si ottiene con ${i.made_by.length === 1 ? 'la ricetta' : 'le ricette'} ${i.made_by.map((r) => recipeRef(r, true)).join(', ')}.`
+        );
       else if (i.sources.includes('recipe'))
         lines.push("E' un oggetto che si ottiene con una ricetta, non ancora identificata.");
       if (i.sources.includes('special')) lines.push("E' un oggetto speciale.");
-      if (!lines.length) lines.push('Non si sa ancora come si ottiene.');
-      const inferred = i.sources_inferred
-        ? '<p class="note">Dedotto dalla rarità: il bot non lo ha ancora detto.</p>'
-        : '';
-      return sec(
-        'Come si ottiene',
-        lines.map((l) => `<p class="obtain">${l}</p>`).join('') + inferred
-      );
+      if (!lines.length)
+        lines.push('<span class="unknown">Non si sa ancora come si ottiene.</span>');
+      return lines;
+    }
+    /** /esamina of an item, for any player. */
+    function itemBubble(i) {
+      const usedIn = [...i.used_in].sort((a, b) => lvl(b) - lvl(a));
+      const cd = i.use?.cooldown?.seconds;
+      return bubble([
+        `<b>${esc(i.name)}</b> <span class="t-${rarityGroup(i.rarity)}">[${esc(i.rarity || '?')}]</span>${i.usable ? ' [usabile]' : ''} al momento ${usedIn.length ? `serve nelle ricette: ${usedIn.map((r) => recipeRef(r)).join(', ')}.` : 'non serve in nessuna ricetta.'}`,
+        ...obtainLines(i),
+        ...(cd !== undefined ? [`Raffreddamento: ${duration(cd)}.`] : []),
+      ]);
     }
     function itemDetail(name) {
       const i = I[name];
@@ -528,12 +602,17 @@
             seenAt ? `Visto per la prima volta il ${fmtDate(seenAt)}.` : '',
           ])
         : '';
-      const usedIn = [...i.used_in].sort((a, b) => lvl(b) - lvl(a));
       return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${freshness(i.last_seen)}</div>
     <h2>${esc(name)}</h2>
     ${i.exclusive ? `<p class="note">Il + nella rarità indica un oggetto che esce in un solo luogo.</p>` : ''}
     ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
-    ${obtainSec(i)}
+    ${itemBubble(i)}
+    ${
+      i.exclusive
+        ? `<p class="note">${i.locations.length ? `Esce solo qui: ${i.locations.map(locLink).join(', ')}.` : 'Esce in un solo luogo, non ancora identificato.'}</p>`
+        : ''
+    }
+    ${i.sources_inferred ? '<p class="note">Come si ottiene è dedotto dalla rarità: il bot non lo ha ancora detto.</p>' : ''}
     ${
       i.old_names?.length
         ? sec(
@@ -547,7 +626,6 @@
           )
         : ''
     }
-    ${sec('Serve nelle ricette', chips(usedIn, recipeLink))}
     ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
     ${itemCardSec(i.channel)}
     ${personal}`;
