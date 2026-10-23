@@ -1,4 +1,4 @@
-/* global window, document, localStorage, location, history, matchMedia */
+/* global window, document, localStorage, location, history, matchMedia, URLSearchParams */
 import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
 
 /**
@@ -177,8 +177,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // new tab like any link; a plain click shows the entry in place (see `go`).
     const goLink = (kind, n, text = n) => {
       const tab = { item: 'oggetti', recipe: 'ricette', loc: 'luoghi' }[kind];
-      const slug = SLUGS[tab].byName.get(n);
-      return `<a class="link" href="#${tab}${slug ? '/' + slug : ''}" data-go="${kind}" data-name="${esc(n)}">${esc(text)}</a>`;
+      return `<a class="link" href="${hashOf(tab, n)}" data-go="${kind}" data-name="${esc(n)}">${esc(text)}</a>`;
     };
     /** An item as the bot writes it: its name, then `[R]` and `[usabile]`. */
     const rarityRef = (i, cls = '') =>
@@ -230,22 +229,30 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     const listIt = (xs) =>
       xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} e ${xs.at(-1)}`;
     /**
-     * The last line of an entry: its sources (the channel card behind it, with what of it
-     * the page still shows, `what`: field -> its name; and the bot, unless the card is
-     * all), how many observations name it, and when it was last confirmed.
+     * The last line of an entry: its sources (the channel cards behind it, with what of
+     * them the page still shows, `what`: field -> its name; and the bot, unless the cards
+     * are all), how many observations name it, and when it was last confirmed. `also`:
+     * the entry's recipes, shown on its page ({ x, card, what, of: "della ricetta X" }).
      */
-    const sourcesLine = (x, card, what = {}) => {
-      const given = card ? card.fields.map((f) => what[f]).filter(Boolean) : [];
-      const names = [
-        ...(card
-          ? [
-              `${esc(card.name)}${card.date ? ` del ${fmtDate(card.date)}` : ''}${given.length ? ` (${listIt(given)})` : ''}`,
-            ]
-          : []),
-        ...(!card || x.observations > 1 ? ['InventoryBot'] : []),
-      ];
+    const sourcesLine = (x, card, what = {}, also = []) => {
+      const all = [{ x, card, what }, ...also];
+      const channels = all
+        .filter((a) => a.card)
+        .map((a) => {
+          const given = a.card.fields.map((f) => a.what[f]).filter(Boolean);
+          return `${esc(a.card.name)}${a.card.date ? ` del ${fmtDate(a.card.date)}` : ''}${given.length ? ` (${listIt(given)})` : ''}`;
+        });
+      const bot = all.some((a) => !a.card || a.x.observations > 1) ? ['InventoryBot'] : [];
       const n = x.observations;
-      return `<p class="sources">Fonti: ${[names.join(', '), n ? `${n} ${n === 1 ? 'osservazione' : 'osservazioni'}` : '', freshness(x.last_seen)].filter(Boolean).join(' · ')}</p>`;
+      const counts = [
+        n ? `${n} ${n === 1 ? 'osservazione' : 'osservazioni'}` : '',
+        ...also.map((a) => (a.x.observations ? `${a.x.observations} ${a.of}` : '')),
+      ].filter(Boolean);
+      const last = all
+        .map((a) => a.x.last_seen)
+        .filter(Boolean)
+        .sort((p, q) => new Date(q) - new Date(p))[0];
+      return `<p class="sources">Fonti: ${[[...channels, ...bot].join(', '), counts.join(', '), freshness(last)].filter(Boolean).join(' · ')}</p>`;
     };
     /** What else is known of an entry, beyond the bot's reply: a channel card's text, trivia. */
     const moreInfo = (...parts) => {
@@ -314,19 +321,45 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     for (const [old, name] of Object.entries(W.renames || {}))
       if (I[name] && !SLUGS.oggetti.bySlug.has(slugify(old)))
         SLUGS.oggetti.bySlug.set(slugify(old), name);
+    // A recipe whose item is known is shown on the item's page, so its address is the
+    // item's, with the list it was opened from: `#oggetti/una_torre?lista=ricette`, and
+    // `&ricetta=<slug>` when several recipes make the item. `#ricette/<slug>` stays the
+    // address of a recipe whose item is not known, and leads to the item's otherwise.
+    const LISTS = ['ricette', 'catene'];
+    /** The item a recipe makes, when the wiki has it. */
+    const madeItem = (recipe) => {
+      const o = R[recipe]?.output;
+      const c = o ? current(o) : null;
+      return c && I[c] ? c : null;
+    };
     /** The tab and entry of a fragment, or null if it names no tab (e.g. `#main`). */
     function fromHash(hash) {
-      const [tab, ...rest] = hash.replace(/^#/u, '').split('/');
+      const [path, query = ''] = hash.replace(/^#/u, '').split('?');
+      const [tab, ...rest] = path.split('/');
       if (!TABS.includes(tab)) return null;
       // An entry the wiki no longer has (an old link, a rebuilt wiki) is not selected.
       const name = SLUGS[tab].bySlug.get(rest.join('/')) ?? null;
-      return { tab, name: name !== null && ENTRIES[tab][name] ? name : null };
+      const found = name !== null && ENTRIES[tab][name] ? name : null;
+      const params = new URLSearchParams(query);
+      const list = params.get('lista');
+      if (tab === 'oggetti' && LISTS.includes(list)) {
+        const made = found ? I[found].made_by.filter((n) => R[n]) : [];
+        const named = SLUGS.ricette.bySlug.get(params.get('ricetta') ?? '');
+        return { tab: list, name: made.includes(named) ? named : (made[0] ?? null) };
+      }
+      return { tab, name: found };
     }
-    function toHash() {
-      const name = state.sel[state.tab];
-      const slug = name ? SLUGS[state.tab].byName.get(name) : undefined;
-      return `#${state.tab}${slug ? '/' + slug : ''}`;
+    /** The address of an entry of a tab (its first entry when `name` is null). */
+    function hashOf(tab, name) {
+      const item = LISTS.includes(tab) && name ? madeItem(name) : null;
+      if (item) {
+        const several = I[item].made_by.filter((n) => R[n]).length > 1;
+        return `#oggetti/${SLUGS.oggetti.byName.get(item)}?lista=${tab}${several ? `&ricetta=${SLUGS.ricette.byName.get(name)}` : ''}`;
+      }
+      const slug = name ? SLUGS[tab].byName.get(name) : undefined;
+      return `#${tab}${slug ? '/' + slug : ''}`;
     }
+    const toHash = () => hashOf(state.tab, state.sel[state.tab]);
     /** Records the tab and entry shown as a new step of the history, if they changed. */
     function pushUrl() {
       store.set('ib-tab', state.tab);
@@ -377,9 +410,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     <span class="sub">${r.output ? '→ ' + esc(r.output) : '→ output ignoto'} · ${!n ? 'ingredienti ignoti' : `${n} ingredient${n === 1 ? 'e' : 'i'}${r.ingredients ? '' : ' (parziali)'}`}${c ? ` · <span style="color:var(--warn)">${c} contesi</span>` : ''}</span>
   </button>`;
     }
-    function recipeDetail(name) {
+    /**
+     * A recipe's parts, for its own page (while its output is unknown) and for the page of
+     * the item it makes: its bubbles, notes, chain, and the owner's lines.
+     */
+    function recipeParts(name) {
       const r = R[name];
-      if (!r) return `<p class="empty">Seleziona una ricetta dall'elenco.</p>`;
       const ingredients = ingredientsOf(r);
       // An ingredient line as the bot writes it, with what else makes or needs the item.
       const ingLine = ([n, q]) => {
@@ -396,24 +432,25 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         ].filter(Boolean);
         return `- ${itemRef(n)} x${q ?? '?'}${aside.length ? `<span class="aside">${aside.join(' · ')}</span>` : ''}`;
       };
-      // /esamina of the recipe, for any player: everything it needs.
+      // /esamina of the recipe, for any player: everything it needs (until it is made).
       const detailBubble = ingredients.length
         ? bubble([`per fare la ricetta <b>${esc(name)}</b> serve:`, ...ingredients.map(ingLine)])
         : '';
-      // Its craft, as the bot tells it: what goes in, the story, what comes out.
+      // Its craft, as the bot tells it: what goes in, the story, what comes out; each
+      // ingredient with what else makes or needs it.
       const craftBubble =
         r.output || r.craft_text
           ? bubble([
-              ...(r.ingredients
-                ? [
-                    'prendi in mano:',
-                    ...Object.entries(r.ingredients).map(([n, q]) => `- ${itemRef(n)} x${q}`),
-                  ]
-                : []),
+              ...(ingredients.length ? ['prendi in mano:', ...ingredients.map(ingLine)] : []),
               ...(r.craft_text ? [esc(r.craft_text)] : []),
               ...(r.output ? [`Ottieni: ${itemRef(r.output, true)}!`] : []),
             ])
           : '';
+      const ingNote = r.ingredients
+        ? ''
+        : ingredients.length
+          ? '<p class="note">Lista parziale: ricavata da /esamina sugli oggetti, quantità ignote.</p>'
+          : `<p class="note">Vista solo nell'elenco di /ricetta. Usa /esamina ${esc(name)} per vederne gli ingredienti.</p>`;
       const up = upstream(r),
         down = downstream(r),
         cand = candidates(r);
@@ -447,22 +484,35 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const holding = owned
         .filter((o) => o.own)
         .map((o) => `- ${itemRef(o.n)} ${count(o.q ? Math.min(o.own, o.q) : o.own, o.exact)}`);
-      const personal = P
-        ? myCard(
-            ingredients.length
-              ? [
-                  `@${esc(P.player)}, per fare la ricetta <b>${esc(name)}</b> ti manca:`,
-                  ...lacking,
-                  ...(holding.length ? ["Mentre hai gia':", ...holding] : []),
-                ]
-              : [],
-            [
-              me
-                ? `Eseguita ${me.crafted} ${me.crafted === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(me.last_crafted)}.`
-                : 'Mai eseguita.',
+      const myLines =
+        P && ingredients.length
+          ? [
+              `@${esc(P.player)}, per fare la ricetta <b>${esc(name)}</b> ti manca:`,
+              ...lacking,
+              ...(holding.length ? ["Mentre hai gia':", ...holding] : []),
             ]
-          )
-        : '';
+          : [];
+      const myNote = !P
+        ? ''
+        : me
+          ? `${esc(name)}: eseguita ${me.crafted} ${me.crafted === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(me.last_crafted)}.`
+          : `${esc(name)}: mai eseguita.`;
+      return { r, detailBubble, craftBubble, ingNote, out, flow, myLines, myNote };
+    }
+    /** The fields a recipe card may give, by name. */
+    const RECIPE_FIELDS = {
+      level: 'il livello',
+      ingredients: 'gli ingredienti',
+      output: "l'oggetto ottenuto",
+    };
+    /** The page of a recipe: its item's, if known, else its own. */
+    const recipePage = (name) => (madeItem(name) ? itemDetail(madeItem(name)) : recipeDetail(name));
+    /** A recipe's own page, while the item it makes is not known. */
+    function recipeDetail(name) {
+      if (!R[name]) return `<p class="empty">Seleziona una ricetta dall'elenco.</p>`;
+      const { r, detailBubble, craftBubble, ingNote, out, flow, myLines, myNote } =
+        recipeParts(name);
+      const personal = P ? myCard(myLines, [myNote]) : '';
       // The item it makes is part of the title: a recipe is the way to obtain it.
       const makes = r.output
         ? `<span class="arrow" aria-hidden="true">→</span> ${goLink('item', current(r.output))} ${tag(I[current(r.output)]?.rarity)}`
@@ -474,18 +524,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p>
     ${opensLines(r.output)}</div>
     ${detailBubble}
-    ${
-      r.ingredients
-        ? ''
-        : ingredients.length
-          ? '<p class="note">Lista parziale: ricavata da /esamina sugli oggetti, quantità ignote.</p>'
-          : `<p class="note">Vista solo nell'elenco di /ricetta. Usa /esamina ${esc(name)} per vederne gli ingredienti.</p>`
-    }
+    ${ingNote}
     ${craftBubble}
     ${out}
     ${flow}
     ${moreInfo(notesOf(r.channel))}
-    ${sourcesLine(r, r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}`
+    ${sourcesLine(r, r.channel, RECIPE_FIELDS)}`
       );
     }
 
@@ -495,8 +539,13 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
      * then what it would not say (`notes`).
      */
     function myCard(lines, notes) {
+      // One bubble per reply: `lines` is a reply's lines, or a list of replies.
+      const replies = Array.isArray(lines[0]) ? lines : [lines];
       const body =
-        (lines.length ? bubble(lines) : '') +
+        replies
+          .filter((r) => r.length)
+          .map(bubble)
+          .join('') +
         notes
           .filter(Boolean)
           .map((l) => `<p class="note">${l}</p>`)
@@ -683,14 +732,20 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     function itemDetail(name) {
       const i = I[name];
       if (!i) return `<p class="empty">Seleziona un oggetto dall'elenco.</p>`;
+      // Its recipes are part of its page: a recipe is the way to obtain it.
+      const recipes = i.made_by.filter((n) => R[n]).map((n) => [n, recipeParts(n)]);
       const h = have(name),
         mineI = P?.items[name],
         seenAt = mineI?.first_seen;
       // As /esamina of the item would answer the owner.
       const personal = P
         ? myCard(
-            [h ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty}.` : 'Non ne hai neanche uno.'],
             [
+              [h ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty}.` : 'Non ne hai neanche uno.'],
+              ...recipes.map(([, p]) => p.myLines),
+            ],
+            [
+              ...recipes.map(([, p]) => p.myNote),
               h ? `Ultimo riscontro con ${VIA[h.via] || h.via} il ${fmtDate(h.date)}.` : '',
               seenAt ? `Visto per la prima volta il ${fmtDate(seenAt)}.` : '',
               i.usable
@@ -716,9 +771,17 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
     ${itemBubble(i)}
     ${i.sources_inferred ? '<p class="note">Come si ottiene è dedotto dalla rarità: il bot non lo ha ancora detto.</p>' : ''}
+    ${recipes
+      .map(
+        ([n, p]) =>
+          sec(`Ricetta · ${esc(n)} ${lvlTag(p.r)}`, (p.craftBubble || p.detailBubble) + p.ingNote) +
+          p.flow
+      )
+      .join('')}
     ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
     ${moreInfo(
       itemCardText(i.channel),
+      ...recipes.map(([, p]) => notesOf(p.r.channel)),
       i.old_names?.length
         ? '<h4>Nomi precedenti</h4>' +
             i.old_names
@@ -729,7 +792,17 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
               .join('')
         : ''
     )}
-    ${sourcesLine(i, i.channel, { rarity: 'la rarità' })}
+    ${sourcesLine(
+      i,
+      i.channel,
+      { rarity: 'la rarità' },
+      recipes.map(([n, p]) => ({
+        x: p.r,
+        card: p.r.channel,
+        what: RECIPE_FIELDS,
+        of: `della ricetta ${esc(n)}`,
+      }))
+    )}
 `
       );
     }
@@ -1078,7 +1151,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       if (state.tab === 'ricette') {
         rows = recipeRows(q);
         rowFn = recipeRow;
-        detail = recipeDetail(state.sel.ricette ?? rows[0]?.name);
+        detail = recipePage(state.sel.ricette ?? rows[0]?.name);
         filters = filtersHtml('ricette', RECIPE_FILTERS);
       }
       if (state.tab === 'oggetti') {
@@ -1101,7 +1174,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         // The same recipes as Ricette, with the same filter: shown here too.
         filters = filtersHtml('ricette', RECIPE_FILTERS);
         const g = chainsSvg(state.sel.catene ?? rows[0]?.name);
-        detail = recipeDetail(state.sel.catene ?? rows[0]?.name);
+        detail = recipePage(state.sel.catene ?? rows[0]?.name);
         extra = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
       <div class="graphbox">${g.svg}</div></div>`;
       }
@@ -1195,6 +1268,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     if (onHistory) window.removeEventListener('popstate', onHistory);
     onHistory = () => {
       if (!root.isConnected || !applyHash()) return;
+      // An address that is not the entry's own (an old recipe link) is replaced by it.
+      if (location.hash !== toHash()) history.replaceState(null, '', toHash());
       render();
       root.querySelector('.row[aria-current="true"]')?.scrollIntoView({ block: 'nearest' });
     };
