@@ -409,6 +409,40 @@ body:has(.sidebar) {
   color: var(--muted);
   font-size: 0.9rem;
 }
+/* What a recipe makes, under its name: part of the title, in the body's font. */
+.makes {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+.makes .arrow {
+  color: var(--muted);
+}
+.makes .link {
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+}
+.makes .link:hover {
+  color: var(--accent-ink);
+}
+.makes .made {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.makes .sep {
+  margin-left: -6px;
+  color: var(--muted);
+}
+.makes-unknown {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--muted);
+}
 /* A reply of the bot, as Telegram draws an incoming message: one line per line of the
    reply, a corner flattened towards its sender; names in it are links. */
 .bubble {
@@ -447,6 +481,10 @@ body:has(.sidebar) {
 .bubble .added {
   font-size: 0.85em;
   color: var(--muted);
+}
+/* An unknown rarity is dashed as a tag, but plain text in brackets. */
+.bubble .t-q {
+  border: 0;
 }
 .bubble .unknown {
   color: var(--muted);

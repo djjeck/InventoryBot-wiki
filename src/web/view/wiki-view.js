@@ -402,7 +402,7 @@
         cand = candidates(r);
       const out = r.output
         ? ''
-        : `<p class="note">Output non ancora osservato: compare solo dopo aver eseguito la ricetta.</p>` +
+        : `<p class="note">L'oggetto che si ottiene compare solo dopo aver eseguito la ricetta.</p>` +
           (cand.length
             ? `<details class="cand"><summary>${cand.length} oggetti L${r.level} senza ricetta nota: possibili candidati</summary>${chips(cand, itemLink)}</details>`
             : '');
@@ -438,8 +438,13 @@
               : '',
           ])
         : '';
+      // The item it makes is part of the title: a recipe is the way to obtain it.
+      const makes = r.output
+        ? `<span class="arrow" aria-hidden="true">→</span> ${goLink('item', current(r.output))} ${tag(I[current(r.output)]?.rarity)}`
+        : `<span class="arrow" aria-hidden="true">→</span> ? <span class="makes-unknown">non ancora osservato</span>`;
       return `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span>${freshness(r.last_seen)}</div>
-    <h2>${esc(name)}</h2></div>
+    <h2>${esc(name)}</h2>
+    <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p></div>
     ${detailBubble}
     ${
       r.ingredients
@@ -589,6 +594,15 @@
         ...(cd !== undefined ? [`Raffreddamento: ${duration(cd)}.`] : []),
       ]);
     }
+    // The recipes that make an item, under its name: the other half of a recipe's title.
+    function madeBy(i) {
+      const arrow = '<span class="arrow" aria-hidden="true">←</span>';
+      if (i.made_by.length)
+        return `<p class="makes"><span class="visually-hidden">Si ottiene con: </span>${arrow} ${i.made_by.map((r) => `<span class="made">${goLink('recipe', r)} ${lvlTag(R[r])}</span>`).join('<span class="sep">,</span> ')}</p>`;
+      if (i.sources.includes('recipe'))
+        return `<p class="makes"><span class="visually-hidden">Si ottiene con: </span>${arrow} ? <span class="makes-unknown">ricetta non ancora identificata</span></p>`;
+      return '';
+    }
     function itemDetail(name) {
       const i = I[name];
       if (!i) return `<p class="empty">Seleziona un oggetto dall'elenco.</p>`;
@@ -604,6 +618,7 @@
         : '';
       return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${freshness(i.last_seen)}</div>
     <h2>${esc(name)}</h2>
+    ${madeBy(i)}
     ${i.exclusive ? `<p class="note">Il + nella rarità indica un oggetto che esce in un solo luogo.</p>` : ''}
     ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
     ${itemBubble(i)}
