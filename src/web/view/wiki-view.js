@@ -471,7 +471,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         personal,
         `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span></div>
     <h2>${esc(name)}</h2>
-    <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p></div>
+    <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p>
+    ${opensLines(r.output)}</div>
     ${detailBubble}
     ${
       r.ingredients
@@ -548,6 +549,11 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       if (i.used_in.length)
         bits.push(`in ${i.used_in.length} ricett${i.used_in.length === 1 ? 'a' : 'e'}`);
       if (i.made_by.length) bits.push(`da ${i.made_by.join(', ')}`);
+      const opens = OPENS.get(i.name);
+      if (opens?.pass.length)
+        bits.push(`per passare: ${opens.pass.map((w) => L[w]?.label || w).join(', ')}`);
+      if (opens?.see.length)
+        bits.push(`per vedere: ${opens.see.map((w) => L[w]?.label || w).join(', ')}`);
       if (i.exclusive)
         bits.push(
           i.locations.length
@@ -640,6 +646,32 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ]);
     }
     // The recipes that make an item, under its name: the other half of a recipe's title.
+    // The places an item opens: those it takes to pass (to enter), and those it takes to
+    // see among the destinations. Among the most precious items of the game.
+    const OPENS = new Map();
+    for (const l of Object.values(L))
+      for (const [kind, items] of [
+        ['pass', l.required_items || []],
+        ['see', l.sight_items || []],
+      ])
+        for (const n of items) {
+          const o = OPENS.get(current(n)) ?? { pass: [], see: [] };
+          o[kind].push(l.name);
+          OPENS.set(current(n), o);
+        }
+    /** What an item opens, under the title of its page and of its recipes' pages. */
+    function opensLines(item) {
+      const o = item ? OPENS.get(current(item)) : undefined;
+      if (!o) return '';
+      const line = (label, places) =>
+        places.length
+          ? `<p class="makes">${label}: ${places.map((k) => goLink('loc', k, at(k))).join(', ')}</p>`
+          : '';
+      // As the bot says it: "<item> ti serve per passare nelle cripte del monastero 👻".
+      return (
+        line('Serve per passare', o.pass) + line('Serve per vedere tra le destinazioni', o.see)
+      );
+    }
     function madeBy(i) {
       const arrow = '<span class="arrow" aria-hidden="true">←</span>';
       if (i.made_by.length)
@@ -674,6 +706,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}</div>
     <h2>${esc(name)}</h2>
     ${madeBy(i)}
+    ${opensLines(name)}
     ${
       // A "+" item drops in one place: where, right under its name.
       i.exclusive
