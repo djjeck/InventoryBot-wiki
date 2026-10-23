@@ -474,14 +474,29 @@ const cInventory: Classifier = (t, q) => {
   };
 };
 
-function exits(t: string): string[] {
+/** The places of the "Puoi andare verso:" block, as written. */
+function exitsWritten(t: string): string[] {
   if (!t.includes('Puoi andare verso:')) return [];
   const tail = after(t, 'Puoi andare verso:');
   return tail
     .split('\n')
     .filter((l) => stripWs(l).startsWith('- '))
-    .map((l) => placeName(stripWs(stripWs(l).slice(2))));
+    .map((l) => stripWs(stripWs(l).slice(2)));
 }
+
+function exits(t: string): string[] {
+  return exitsWritten(t).map(placeName);
+}
+
+/** The places a reply names, in their article form, mapped to the words it wrote them with. */
+function written(t: string, ...places: (string | null)[]): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const w of [...places, ...exitsWritten(t)]) if (w !== null) out[placeName(w)] = w;
+  return out;
+}
+
+/** The place a match names, as written. */
+const loc = (m: RegExpExecArray): string => stripWs(groups(m)['loc'] as string);
 
 const BLOCKED = rx(`non puoi andare: (?<loc>${DOT}+?)\\.\\. Forse ti manca qualcosa`);
 const WHERE = rx(`ti trovi: (?<loc>${DOT}+)`);
@@ -499,21 +514,23 @@ const cTravel: Classifier = (t) => {
     return m
       ? {
           type: 'travel',
-          location: placeName(stripWs(groups(m)['loc'] as string)),
+          location: placeName(loc(m)),
           exits: [],
           narrative: null,
+          written: written(t, loc(m)),
         }
       : null;
   }
   let m = BLOCKED.exec(t);
   if (m)
-    return { type: 'travel_blocked', location: placeName(stripWs(groups(m)['loc'] as string)) };
+    return { type: 'travel_blocked', location: placeName(loc(m)), written: written(t, loc(m)) };
   m = WHERE.exec(t);
   if (m)
     return {
       type: 'location',
-      location: placeName(stripWs(groups(m)['loc'] as string)),
+      location: placeName(loc(m)),
       exits: exits(t),
+      written: written(t, loc(m)),
     };
   const head = stripWs(t.split('Puoi andare verso:')[0] as string);
   m = ARRIVAL.exec(head);
@@ -528,17 +545,25 @@ const cTravel: Classifier = (t) => {
         location: null,
         exits: exits(t),
         narrative: stripWs(stripAddr(head)),
+        written: written(t),
       };
     return {
       type: 'travel',
-      location: placeName(stripWs(groups(m)['loc'] as string)),
+      location: placeName(loc(m)),
       exits: exits(t),
       narrative: standard ? null : narrative,
+      written: written(t, loc(m)),
     };
   }
   // An arrival narrated through an item without "arrivi" ("… finalmente ti trovi nella
   // palude sussurrante 🌾"): the place ends the text, and phase 5 finds it among the known places.
-  return { type: 'travel', location: null, exits: exits(t), narrative: stripWs(stripAddr(head)) };
+  return {
+    type: 'travel',
+    location: null,
+    exits: exits(t),
+    narrative: stripWs(stripAddr(head)),
+    written: written(t),
+  };
 };
 
 /**
@@ -557,11 +582,12 @@ const cNarratedArrival: Classifier = (t, q) => {
   if (m)
     return {
       type: 'travel',
-      location: placeName(stripWs(groups(m)['loc'] as string)),
+      location: placeName(loc(m)),
       exits: [],
       narrative: stripWs(text.slice(0, m.index)),
+      written: written('', loc(m)),
     };
-  return { type: 'travel', location: null, exits: [], narrative: text };
+  return { type: 'travel', location: null, exits: [], narrative: text, written: {} };
 };
 
 const TRAVEL_REQUIREMENT = rx(
@@ -576,7 +602,8 @@ const cTravelRequirement: Classifier = (t) => {
   return {
     type: 'travel_requirement',
     item: itemName(g['item'] as string),
-    location: placeName(stripWs(g['loc'] as string)),
+    location: placeName(loc(m)),
+    written: written('', loc(m)),
   };
 };
 

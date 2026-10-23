@@ -198,6 +198,7 @@
     "le cripte del monastero 👻": {
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
+      "at": null,
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
@@ -231,6 +232,7 @@
     "il villaggio di Borgoverde 🏡": {
       "name": "il villaggio di Borgoverde 🏡",
       "label": "Il villaggio di Borgoverde 🏡",
+      "at": null,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
       ],
@@ -243,6 +245,7 @@
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "at": null,
       "exits": [
         "le cripte del monastero 👻"
       ],

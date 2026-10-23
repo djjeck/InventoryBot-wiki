@@ -158,6 +158,7 @@ player sees anyway, and says why it is allowed.
 ## Places
 
 - ai piedi del monte Grevolo ⛰
+- al banco corallino 🐠
 - in cima al monte Grevolo 🏔
 - nel bosco nebbioso di Valtorbo 🌲
 - nel magnifico Palazzo di Cristallo 🏰

@@ -156,6 +156,7 @@
     "in cima al monte Grevolo 🏔": {
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
+      "at": "in cima al monte Grevolo 🏔",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

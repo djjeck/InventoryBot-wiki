@@ -103,12 +103,13 @@ order:
    command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
    `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). A place is named
    in its article form (`places.ts`: "nella valle" is "la valle"), whatever preposition the reply
-   used, so that every source names it the same way. The posts of the bot's channels become events
-   too (`channels.ts`, `docs/channels.md`): each card, with the date of its post, merged with the
-   replies' events in date order. The phase ends by verifying the group pairs (`verify.ts`): a reply
-   that, read with its command, is not of that command's family is read again without it, and so is
-   a group `/usa` reply that does not fit the item its query names (which uses phase 5's item
-   catalogue).
+   used, so that every source names it the same way; a travel event also keeps the words its reply
+   wrote each place with (`written`), from which the wiki keeps how the bot writes a place (`at`,
+   the latest wording). The posts of the bot's channels become events too (`channels.ts`,
+   `docs/channels.md`): each card, with the date of its post, merged with the replies' events in
+   date order. The phase ends by verifying the group pairs (`verify.ts`): a reply that, read with
+   its command, is not of that command's family is read again without it, and so is a group `/usa`
+   reply that does not fit the item its query names (which uses phase 5's item catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, the `/faq` rules), and
@@ -160,28 +161,28 @@ in place, without moving the focus. The wiki and the player state are drawn by t
 Telegram's chat list, the search, the categories (as tabs, each with how many entries it lists, with
 the search if any, as unread counts) and their list are in a sidebar fixed to the left of the
 window, whose list scrolls on its own, while the selected entry is in the page, shown first as the
-bot's own reply that describes it (`/esamina`, and a recipe's craft), worded for any player, in a
-Telegram bubble with links, then what the bot does not say, with the owner's own state in a card
-beside it (above it when narrow), as the bot would answer them ("ti manca: …"), which scrolls as a
-whole (on a narrow screen the sidebar is a block above it); the tab and the selected entry are in
-the URL's fragment (`#oggetti/l_oro`: a slug of the name, unique within its tab), so a reload keeps
-them and each change is a step of the browser's history; and the report is in a collapsed section.
-The owner is the player the bot addresses most in the DM; without a DM the build stops, the records
-stay kept, and the panel shows a username field, which the page offers nowhere else. What the worker
-keeps is in IndexedDB, in this browser only (`storage.ts`): the records of the exports
-(`ExportRecord`, never the export pages), each with its folder, dates and counts, in upload order,
-which is their merge order; the last results (wiki, player state, report, options) with the records
-they were built from, so a returning player sees their wiki at once and the worker rebuilds only if
-they are not current; and the salt of the pseudonyms and sender keys, made once. A record is valid
-only with the salt that made it, so the three live in one database: without a salt the records and
-results are dropped, and a record or results made with another salt are refused. A record of an
-older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can add the export again, but
-never used, and its payload is dropped. Opening the database of an older schema drops what it kept.
-Without storage the worker keeps the records of the visit in memory. "Cancella i miei dati" deletes
-the whole database and resets the options. `run.ts`, `storage.ts`, `labels.ts` and `debounce.ts` use
-no browser API and are tested in Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and
-`worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
-`tsconfig.web.json`, and left out of coverage).
+bot's own reply that describes it (`/esamina`, a recipe's craft, `/viaggio` for a place), worded for
+any player, in a Telegram bubble with links, then what the bot does not say, with the owner's own
+state in a card beside it (above it when narrow), as the bot would answer them ("ti manca: …"),
+which scrolls as a whole (on a narrow screen the sidebar is a block above it); the tab and the
+selected entry are in the URL's fragment (`#oggetti/l_oro`: a slug of the name, unique within its
+tab), so a reload keeps them and each change is a step of the browser's history; and the report is
+in a collapsed section. The owner is the player the bot addresses most in the DM; without a DM the
+build stops, the records stay kept, and the panel shows a username field, which the page offers
+nowhere else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the
+records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
+counts, in upload order, which is their merge order; the last results (wiki, player state, report,
+options) with the records they were built from, so a returning player sees their wiki at once and
+the worker rebuilds only if they are not current; and the salt of the pseudonyms and sender keys,
+made once. A record is valid only with the salt that made it, so the three live in one database:
+without a salt the records and results are dropped, and a record or results made with another salt
+are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can
+add the export again, but never used, and its payload is dropped. Opening the database of an older
+schema drops what it kept. Without storage the worker keeps the records of the visit in memory.
+"Cancella i miei dati" deletes the whole database and resets the options. `run.ts`, `storage.ts`,
+`labels.ts` and `debounce.ts` use no browser API and are tested in Node (on a fake IndexedDB,
+`test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
+(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
 
 `npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
 (`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the

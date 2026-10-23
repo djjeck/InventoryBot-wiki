@@ -197,6 +197,7 @@
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "at": "nel bosco nebbioso di Valtorbo 🌲",
       "exits": [
         "la valle ventosa 🏞"
       ],
@@ -211,6 +212,7 @@
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
+      "at": "nella valle ventosa 🏞",
       "exits": [
         "i piedi del monte Grevolo ⛰",
         "il bosco nebbioso di Valtorbo 🌲"
@@ -226,6 +228,7 @@
     "i piedi del monte Grevolo ⛰": {
       "name": "i piedi del monte Grevolo ⛰",
       "label": "I piedi del monte Grevolo ⛰",
+      "at": "ai piedi del monte Grevolo ⛰",
       "exits": [
         "il banco corallino 🐠",
         "la valle ventosa 🏞"
@@ -239,6 +242,7 @@
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
+      "at": "sul banco corallino 🐠",
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],

@@ -710,6 +710,7 @@ describe('position', () => {
       [P(FONDALE)]: {
         name: P(FONDALE),
         label: 'Il banco corallino 🐠',
+        at: FONDALE,
         exits: [],
         requires_item: true,
         unlock_texts: [],
@@ -718,6 +719,32 @@ describe('position', () => {
         sight_items: [],
       },
     });
+  });
+
+  it('a_place_is_written_as_the_latest_reply_wrote_it', () => {
+    const later = '@djjeck non puoi andare: al banco corallino 🐠.. Forse ti manca qualcosa!';
+    const at = (events: BuildEvent[]): string | null | undefined =>
+      runBuild(events).wiki.locations[P(FONDALE)]?.at;
+    expect(at([ev(T.blocked(FONDALE), null, { t: 0 }), ev(later, null, { t: 10 })])).toBe(
+      'al banco corallino 🐠'
+    );
+    // An older reply read after a newer one does not replace it.
+    expect(at([ev(later, null, { t: 10 }), ev(T.blocked(FONDALE), null, { t: 0 })])).toBe(
+      'al banco corallino 🐠'
+    );
+  });
+
+  it('a_narrated_arrival_writes_the_place_it_ends_with', () => {
+    const PALUDE = 'nella palude sussurrante 🌾';
+    const { wiki } = runBuild([
+      ev(T.where(BOSCO, [PALUDE]), '/viaggio', { t: 0 }),
+      ev(
+        `@djjeck, guidato dalla tua bussola fatata finalmente ti trovi ${PALUDE}\n\nPuoi andare verso:\n - ${BOSCO}`,
+        '/viaggio palude',
+        { t: 10 }
+      ),
+    ]);
+    expect(wiki.locations[P(PALUDE)]?.at).toBe(PALUDE);
   });
 
   it('other_players_moves_add_exits_but_do_not_move_owner', () => {

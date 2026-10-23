@@ -714,6 +714,18 @@
     <span class="meta">${excl ? excl + ' esclusivi' : ''}</span>
     <span class="sub">${l.exits.length} collegamenti${P ? (visited(l.name) ? ' · <span class="mine ok">visitato</span>' : ' · <span class="mine">mai visitato</span>') : ''}</span></button>`;
     }
+    /** A place as the bot writes it, with its preposition ("nel bosco …"), if known. */
+    const at = (n) => L[n]?.at || L[n]?.name || n;
+    /** /viaggio from the place, for any player: where one is, and where one can go. */
+    function placeBubble(l, inbound) {
+      const exits = [...new Set([...l.exits, ...inbound])];
+      return bubble([
+        `ti trovi: <b>${esc(at(l.name))}</b>`,
+        ...(exits.length
+          ? ['Puoi andare verso:', ...exits.map((x) => `- ${goLink('loc', x, at(x))}`)]
+          : []),
+      ]);
+    }
     function locDetail(name) {
       const l = L[name];
       if (!l) return `<p class="empty">Seleziona un luogo sulla mappa o dall'elenco.</p>`;
@@ -735,28 +747,22 @@
         personal,
         `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}${l.secret ? '<span>· segreto</span>' : ''}</div>
     <h2>${esc(l.label)}</h2></div>
+    ${placeBubble(l, inbound)}
     ${(l.required_items || []).length ? sec('Oggetti necessari', chips(l.required_items, itemLink)) : ''}
     ${(l.sight_items || []).length ? sec('Per vederlo tra le destinazioni', `<p class="note">Senza questi oggetti il luogo non compare nel pannello di viaggio.</p>` + chips(l.sight_items, itemLink)) : ''}
     ${
       l.unlock_texts.length
-        ? sec(
-            'Come si sblocca',
-            l.unlock_texts.map((u) => `<p class="flavor">${esc(u)}</p>`).join('')
-          )
-        : l.requires_item && !(l.required_items || []).length
+        ? sec('Come si sblocca', l.unlock_texts.map((u) => bubble([linkItems(u)])).join(''))
+        : l.requires_item
           ? sec(
               'Come si sblocca',
-              `<p class="note">Il bot risponde «Forse ti manca qualcosa!»: serve un oggetto non ancora identificato.</p>`
+              bubble([`non puoi andare: ${esc(at(name))}.. Forse ti manca qualcosa!`]) +
+                ((l.required_items || []).length
+                  ? ''
+                  : '<p class="note">Serve un oggetto non ancora identificato.</p>')
             )
           : ''
     }
-    ${sec(
-      'Collegamenti',
-      chips(
-        [...new Set([...l.exits, ...inbound])],
-        (n) => `<span class="chip">${locLink(n)}</span>`
-      )
-    )}
     ${sec('Oggetti esclusivi', chips(excl, itemLink))}
     ${channelSec(l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" }, false)}
 `

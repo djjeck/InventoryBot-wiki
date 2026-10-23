@@ -339,6 +339,11 @@ describe('travel', () => {
       location: 'la valle ventosa 🏞',
       exits: ['il bosco nebbioso di Valtorbo 🌲', 'i piedi del monte Grevolo ⛰'],
       narrative: null,
+      written: {
+        'la valle ventosa 🏞': 'nella valle ventosa 🏞',
+        'il bosco nebbioso di Valtorbo 🌲': 'nel bosco nebbioso di Valtorbo 🌲',
+        'i piedi del monte Grevolo ⛰': 'ai piedi del monte Grevolo ⛰',
+      },
     });
   });
 
@@ -374,6 +379,7 @@ describe('travel', () => {
     ).toStrictEqual({
       type: 'travel_blocked',
       location: 'il banco corallino 🐠',
+      written: { 'il banco corallino 🐠': 'sul banco corallino 🐠' },
     });
   });
 
@@ -388,6 +394,10 @@ describe('travel', () => {
       type: 'location',
       location: 'il bosco nebbioso di Valtorbo 🌲',
       exits: ['la valle ventosa 🏞'],
+      written: {
+        'il bosco nebbioso di Valtorbo 🌲': 'nel bosco nebbioso di Valtorbo 🌲',
+        'la valle ventosa 🏞': 'nella valle ventosa 🏞',
+      },
     });
   });
 });
@@ -406,6 +416,8 @@ describe('travel arrivals without a parsable place', () => {
       exits: ['il bosco nebbioso di Valtorbo 🌲'],
       narrative:
         'guidato dalla tua bussola fatata attraversi il canneto e finalmente ti trovi nella palude sussurrante 🌾',
+      // The place reached is written too, once phase 5 has found it.
+      written: { 'il bosco nebbioso di Valtorbo 🌲': 'nel bosco nebbioso di Valtorbo 🌲' },
     });
     expect(classify(RACCHETTA, null).type).toBe('travel'); // the exits are enough
   });
@@ -417,6 +429,7 @@ describe('travel arrivals without a parsable place', () => {
       exits: [],
       narrative:
         'ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀',
+      written: {},
     });
     expect([
       classify(SNORKELING, null).type,
@@ -436,6 +449,7 @@ describe('travel arrivals without a parsable place', () => {
       location: 'il banco corallino 🐠',
       exits: [],
       narrative: 'inghiotti un boccone di Respirella e ti tuffi.. Dopo numerose bracciate',
+      written: { 'il banco corallino 🐠': 'sul banco corallino 🐠' },
     });
   });
 
@@ -450,6 +464,7 @@ describe('travel arrivals without a parsable place', () => {
       location: 'la scogliera bianca 🏖',
       exits: [],
       narrative: null,
+      written: { 'la scogliera bianca 🏖': 'sulla scogliera bianca 🏖' },
     });
   });
 });
@@ -462,6 +477,7 @@ describe('travel requirement notice', () => {
       type: 'travel_requirement',
       item: 'una lanterna cieca',
       location: 'le cripte del monastero 👻',
+      written: { 'le cripte del monastero 👻': 'nelle cripte del monastero 👻' },
     });
     expect([...(compatibleCommands(t) ?? ['any'])]).toStrictEqual([]); // a side notice: it answers no command
   });
@@ -1024,6 +1040,7 @@ describe('edge cases', () => {
       location: 'in cima al monte Grevolo 🏔',
       exits: [],
       narrative: null,
+      written: { 'in cima al monte Grevolo 🏔': 'in cima al monte Grevolo 🏔' },
     });
   });
 

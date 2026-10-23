@@ -73,6 +73,7 @@
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "at": "nel bosco nebbioso di Valtorbo 🌲",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -83,6 +84,7 @@
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
+      "at": "nella valle ventosa 🏞",
       "exits": [
         "il banco corallino 🐠"
       ],
@@ -97,6 +99,7 @@
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
+      "at": "sul banco corallino 🐠",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

@@ -703,6 +703,7 @@
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "at": "nel bosco nebbioso di Valtorbo 🌲",
       "exits": [
         "l'immenso deserto di Sabbiora 🏜",
         "la palude sussurrante 🌾",
@@ -717,6 +718,7 @@
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
+      "at": "nella valle ventosa 🏞",
       "exits": [
         "i piedi del monte Grevolo ⛰",
         "il banco corallino 🐠",
@@ -732,6 +734,7 @@
     "la palude sussurrante 🌾": {
       "name": "la palude sussurrante 🌾",
       "label": "La palude sussurrante 🌾",
+      "at": "nella palude sussurrante 🌾",
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲",
         "il magnifico Palazzo di Cristallo 🏰",
@@ -748,6 +751,7 @@
     "l'immenso deserto di Sabbiora 🏜": {
       "name": "l'immenso deserto di Sabbiora 🏜",
       "label": "L'immenso deserto di Sabbiora 🏜",
+      "at": "nell'immenso deserto di Sabbiora 🏜",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -758,6 +762,7 @@
     "i piedi del monte Grevolo ⛰": {
       "name": "i piedi del monte Grevolo ⛰",
       "label": "I piedi del monte Grevolo ⛰",
+      "at": "ai piedi del monte Grevolo ⛰",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -768,6 +773,7 @@
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
+      "at": "sul banco corallino 🐠",
       "exits": [
         "in cima al monte Grevolo 🏔",
         "la palude sussurrante 🌾",
@@ -784,6 +790,7 @@
     "il magnifico Palazzo di Cristallo 🏰": {
       "name": "il magnifico Palazzo di Cristallo 🏰",
       "label": "Il magnifico Palazzo di Cristallo 🏰",
+      "at": "nel magnifico Palazzo di Cristallo 🏰",
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
@@ -794,6 +801,7 @@
     "le cripte del monastero 👻": {
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
+      "at": "nelle cripte del monastero 👻",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -804,6 +812,7 @@
     "in cima al monte Grevolo 🏔": {
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
+      "at": "in cima al monte Grevolo 🏔",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

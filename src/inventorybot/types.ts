@@ -100,12 +100,22 @@ export interface TitleEvent {
 export interface TravelBlockedEvent {
   type: 'travel_blocked';
   location: string;
+  /**
+   * The places the reply names, each in its article form (`location`, `exits`) mapped to
+   * the words the reply wrote it with, preposition included ("nella valle ventosa 🏞").
+   */
+  written: Record<string, string>;
 }
 
 export interface LocationEvent {
   type: 'location';
   location: string;
   exits: string[];
+  /**
+   * The places the reply names, each in its article form (`location`, `exits`) mapped to
+   * the words the reply wrote it with, preposition included ("nella valle ventosa 🏞").
+   */
+  written: Record<string, string>;
 }
 
 export interface TravelEvent {
@@ -119,6 +129,11 @@ export interface TravelEvent {
   exits: string[];
   /** Arrival text of a place that needs an item; null for the standard arrival. */
   narrative: string | null;
+  /**
+   * The places the reply names, each in its article form (`location`, `exits`) mapped to
+   * the words the reply wrote it with, preposition included ("nella valle ventosa 🏞").
+   */
+  written: Record<string, string>;
 }
 
 /**
@@ -129,6 +144,11 @@ export interface TravelRequirementEvent {
   type: 'travel_requirement';
   item: string;
   location: string;
+  /**
+   * The places the reply names, each in its article form (`location`, `exits`) mapped to
+   * the words the reply wrote it with, preposition included ("nella valle ventosa 🏞").
+   */
+  written: Record<string, string>;
 }
 
 /**
@@ -459,6 +479,11 @@ export interface WikiLocation {
   name: string;
   /** Name without the leading preposition, capitalised. */
   label: string;
+  /**
+   * The place as the bot writes it, with the preposition of being there ("nel bosco
+   * nebbioso di Valtorbo 🌲"), from the latest reply naming it; null if none did.
+   */
+  at: string | null;
   exits: string[];
   requires_item: boolean;
   unlock_texts: string[];

@@ -253,6 +253,7 @@
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "at": "nel bosco nebbioso di Valtorbo 🌲",
       "exits": [
         "la valle ventosa 🏞"
       ],
@@ -267,6 +268,7 @@
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
+      "at": "nella valle ventosa 🏞",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

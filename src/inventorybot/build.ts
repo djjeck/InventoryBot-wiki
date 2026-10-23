@@ -208,6 +208,9 @@ export interface KbRecipe {
 export interface KbLocation {
   name: string;
   label: string;
+  /** As the bot writes it ("nel bosco …"), from the latest reply naming it, and that reply's date. */
+  at: string | null;
+  atDate: string | null;
   exits: Set<string>;
   requires_item: boolean;
   unlock_texts: string[];
@@ -347,6 +350,8 @@ export class KB {
       l = {
         name,
         label: placeLabel(name),
+        at: null,
+        atDate: null,
         exits: new Set(),
         requires_item: false,
         unlock_texts: [],
@@ -683,6 +688,15 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
   for (const e of events) {
     kb.now = e.date ?? null;
     const t = e.type;
+    // How the bot writes each place a travel reply names: the latest wording wins.
+    if ('written' in e)
+      for (const [name, words] of Object.entries(e.written)) {
+        const l = kb.location(name);
+        if (l.atDate === null || kb.now === null || instant(kb.now) >= instant(l.atDate)) {
+          l.at = words;
+          l.atDate = kb.now;
+        }
+      }
     // Unique items listed by any player's /stats are items of the game (rarity as shown).
     if (e.type === 'stats')
       for (const x of e.unique_items ?? []) kb.item(x.name, x.rarity, x.usable);
@@ -918,6 +932,7 @@ function resolveArrivals(kb: KB, events: BuildEvent[]): void {
     if (start !== null) {
       e.location = placeName(text.slice(start));
       e.narrative = stripWs(text.slice(0, start)) || null;
+      e.written = { ...e.written, [e.location]: text.slice(start) };
     } else {
       kb.addReport({
         kind: 'unresolved_travel',
@@ -1749,6 +1764,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
     {
       name: l.name,
       label: l.label,
+      at: l.at,
       exits: sortedStrings(l.exits),
       requires_item: l.requires_item,
       unlock_texts: [...l.unlock_texts],

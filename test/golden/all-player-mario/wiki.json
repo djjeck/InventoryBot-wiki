@@ -1315,6 +1315,7 @@
     "in cima al monte Grevolo 🏔": {
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
+      "at": "in cima al monte Grevolo 🏔",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -1325,6 +1326,7 @@
     "le cripte del monastero 👻": {
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
+      "at": "nelle cripte del monastero 👻",
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
@@ -1357,6 +1359,7 @@
     "il villaggio di Borgoverde 🏡": {
       "name": "il villaggio di Borgoverde 🏡",
       "label": "Il villaggio di Borgoverde 🏡",
+      "at": null,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
       ],
@@ -1369,6 +1372,7 @@
     "il bosco nebbioso di Valtorbo 🌲": {
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
+      "at": "nel bosco nebbioso di Valtorbo 🌲",
       "exits": [
         "l'immenso deserto di Sabbiora 🏜",
         "la palude sussurrante 🌾",
@@ -1384,6 +1388,7 @@
     "la valle ventosa 🏞": {
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
+      "at": "nella valle ventosa 🏞",
       "exits": [
         "i piedi del monte Grevolo ⛰",
         "il banco corallino 🐠",
@@ -1400,6 +1405,7 @@
     "i piedi del monte Grevolo ⛰": {
       "name": "i piedi del monte Grevolo ⛰",
       "label": "I piedi del monte Grevolo ⛰",
+      "at": "ai piedi del monte Grevolo ⛰",
       "exits": [
         "il banco corallino 🐠",
         "la valle ventosa 🏞"
@@ -1413,6 +1419,7 @@
     "il banco corallino 🐠": {
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
+      "at": "sul banco corallino 🐠",
       "exits": [
         "la valle ventosa 🏞"
       ],
@@ -1427,6 +1434,7 @@
     "la palude sussurrante 🌾": {
       "name": "la palude sussurrante 🌾",
       "label": "La palude sussurrante 🌾",
+      "at": "nella palude sussurrante 🌾",
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
       ],
@@ -1441,6 +1449,7 @@
     "l'immenso deserto di Sabbiora 🏜": {
       "name": "l'immenso deserto di Sabbiora 🏜",
       "label": "L'immenso deserto di Sabbiora 🏜",
+      "at": "nell'immenso deserto di Sabbiora 🏜",
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -1451,6 +1460,7 @@
     "il magnifico Palazzo di Cristallo 🏰": {
       "name": "il magnifico Palazzo di Cristallo 🏰",
       "label": "Il magnifico Palazzo di Cristallo 🏰",
+      "at": "nel magnifico Palazzo di Cristallo 🏰",
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
