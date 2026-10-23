@@ -483,19 +483,41 @@
       }
       return parts.length ? parts.slice(0, 2).join(' e ') : '0 secondi';
     }
-    const SOURCE = {
-      adventure: 'trovabile in avventura',
-      recipe: 'si ottiene con una ricetta',
-      special: 'oggetto speciale',
-    };
+    /**
+     * How an item is obtained, first on its page, in the words of the bot's /esamina
+     * ("E' un oggetto trovabile in avventura."), each source with what is known of it: the
+     * recipes that make it, the places where it drops.
+     */
+    function obtainSec(i) {
+      const lines = [];
+      if (i.sources.includes('adventure') || i.exclusive) {
+        // Only a "+" item has a place of its own; the others drop anywhere, unsaid.
+        const where = !i.exclusive
+          ? ''
+          : i.locations.length
+            ? ` Esce solo qui: ${i.locations.map(locLink).join(', ')}.`
+            : ' Esce in un solo luogo, non ancora identificato.';
+        lines.push(`E' un oggetto trovabile in avventura.${where}`);
+      }
+      const recipes = i.made_by.length
+        ? `${i.made_by.length === 1 ? 'la ricetta' : 'le ricette'} ${i.made_by.map(recipeLink).join(', ')}`
+        : null;
+      if (recipes) lines.push(`E' un oggetto che si ottiene con ${recipes}.`);
+      else if (i.sources.includes('recipe'))
+        lines.push("E' un oggetto che si ottiene con una ricetta, non ancora identificata.");
+      if (i.sources.includes('special')) lines.push("E' un oggetto speciale.");
+      if (!lines.length) lines.push('Non si sa ancora come si ottiene.');
+      const inferred = i.sources_inferred
+        ? '<p class="note">Dedotto dalla rarità: il bot non lo ha ancora detto.</p>'
+        : '';
+      return sec(
+        'Come si ottiene',
+        lines.map((l) => `<p class="obtain">${l}</p>`).join('') + inferred
+      );
+    }
     function itemDetail(name) {
       const i = I[name];
       if (!i) return `<p class="empty">Seleziona un oggetto dall'elenco.</p>`;
-      const where = i.exclusive
-        ? i.locations.length
-          ? `<p class="note">Esce solo qui:</p><div class="chips">${i.locations.map((k) => `<span class="chip">${locLink(k)}</span>`).join('')}</div>`
-          : `<p class="note">Esce in un solo luogo, non ancora identificato.</p>`
-        : `<p class="note">Esce in qualsiasi luogo con la stessa probabilità.</p>`;
       const h = have(name),
         seenAt = P?.items[name]?.first_seen;
       const personal = P
@@ -507,10 +529,11 @@
           ])
         : '';
       const usedIn = [...i.used_in].sort((a, b) => lvl(b) - lvl(a));
-      return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${i.sources.map((s) => `<span>· ${SOURCE[s] || s}${i.sources_inferred ? ' (dedotto dalla rarità)' : ''}</span>`).join('')}${freshness(i.last_seen)}</div>
+      return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${freshness(i.last_seen)}</div>
     <h2>${esc(name)}</h2>
     ${i.exclusive ? `<p class="note">Il + nella rarità indica un oggetto che esce in un solo luogo.</p>` : ''}
     ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
+    ${obtainSec(i)}
     ${
       i.old_names?.length
         ? sec(
@@ -525,8 +548,6 @@
         : ''
     }
     ${sec('Serve nelle ricette', chips(usedIn, recipeLink))}
-    ${sec('Si ottiene con', i.made_by.length ? chips(i.made_by, recipeLink) : `<p class="empty">${i.sources.includes('recipe') ? 'Ricetta non ancora identificata.' : 'Non è un oggetto craftato.'}</p>`)}
-    ${i.sources.includes('adventure') || i.exclusive ? sec('Dove si trova', where) : ''}
     ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
     ${itemCardSec(i.channel)}
     ${personal}`;
@@ -608,7 +629,7 @@
         (n) => `<span class="chip">${locLink(n)}</span>`
       )
     )}
-    ${sec('Oggetti esclusivi', `<p class="note">Gli altri oggetti escono ovunque con la stessa probabilità.</p>` + chips(excl, itemLink))}
+    ${sec('Oggetti esclusivi', chips(excl, itemLink))}
     ${channelSec(l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" }, false)}
     ${personal}`;
     }

@@ -423,6 +423,9 @@ body:has(.sidebar) {
   color: var(--muted);
   font-size: 0.9rem;
 }
+.obtain {
+  margin: 0;
+}
 .note {
   color: var(--muted);
   font-size: 0.85rem;
