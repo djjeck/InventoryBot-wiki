@@ -24,8 +24,8 @@
     />
   </div>
   <div class="tabs" role="tablist" id="tabs">
-    <button role="tab" data-tab="ricette"><span class="tab-name">Ricette</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="oggetti"><span class="tab-name">Oggetti</span><span class="badge" aria-hidden="true"></span></button>
+    <button role="tab" data-tab="ricette"><span class="tab-name">Ricette</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="luoghi"><span class="tab-name">Luoghi</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="catene"><span class="tab-name">Catene</span><span class="badge" aria-hidden="true"></span></button>
   </div>
@@ -253,7 +253,7 @@
 
     // ---- state -------------------------------------------------------------------
     const state = {
-      tab: 'ricette',
+      tab: 'oggetti',
       sel: { ricette: null, oggetti: null, luoghi: null, catene: null },
       filter: { ricette: 'tutte', oggetti: 'tutti' },
     };
@@ -273,7 +273,7 @@
         }
       },
     };
-    const TABS = ['ricette', 'oggetti', 'luoghi', 'catene'];
+    const TABS = ['oggetti', 'ricette', 'luoghi', 'catene'];
     // ---- the URL -------------------------------------------------------------------
     // `#tab` or `#tab/slug`. A slug is the name folded to lower-case ASCII letters and
     // digits, with `_` in place of everything else (`l'oro` is `l_oro`); names with the
@@ -336,18 +336,21 @@
     // Without a fragment, the tab last used in this browser. The URL then shows what is
     // shown, also in place of a name the wiki no longer has.
     if (!applyHash())
-      state.tab = TABS.includes(store.get('ib-tab')) ? store.get('ib-tab') : 'ricette';
+      state.tab = TABS.includes(store.get('ib-tab')) ? store.get('ib-tab') : 'oggetti';
     history.replaceState(null, '', toHash());
 
     // ---- recipes -----------------------------------------------------------------
+    // With the owner's state, the second filter of each list is what they can use now,
+    // from the inventory estimate.
+    const ESTIMATE = "Secondo la stima dell'inventario";
     const RECIPE_FILTERS = {
       tutte: ['Tutte', () => true],
+      ...(P && { pronte: ['Puoi farle ora', readyEst, `${ESTIMATE}, hai tutti gli ingredienti`] }),
       ignoto: ['Output ignoto', (r) => !r.output],
       noto: ['Output noto', (r) => !!r.output],
       contese: ['Ingredienti contesi', (r) => contention(r) > 0],
       catena: ['In una catena', (r) => upstream(r).length || downstream(r).length],
     };
-    if (P) RECIPE_FILTERS.pronte = ['Pronte per te (stima)', readyEst];
     function recipeRows(q) {
       const f = RECIPE_FILTERS[state.filter.ricette][1];
       return Object.values(R)
@@ -499,6 +502,13 @@
     // ---- items -------------------------------------------------------------------
     const ITEM_FILTERS = {
       tutti: ['Tutti', () => true],
+      ...(P && {
+        posseduti: [
+          'Posseduti',
+          (i) => (have(i.name)?.qty || 0) > 0,
+          `${ESTIMATE}, ne hai almeno uno`,
+        ],
+      }),
       ingredienti: ['Usati in ricette', (i) => i.used_in.length > 0],
       craftati: ['Craftati', (i) => i.made_by.length || (i.rarity || '')[0] === 'L'],
       esclusivi: ['Esclusivi di un luogo', (i) => i.exclusive],
@@ -928,8 +938,8 @@
     function filtersHtml(kind, defs) {
       return `<div class="filters" role="group" aria-label="Filtri">${Object.entries(defs)
         .map(
-          ([k, [label]]) =>
-            `<button data-filter="${kind}" data-key="${k}" aria-pressed="${state.filter[kind] === k}">${label}</button>`
+          ([k, [label, , title]]) =>
+            `<button data-filter="${kind}" data-key="${k}" aria-pressed="${state.filter[kind] === k}"${title ? ` title="${title}"` : ''}>${label}</button>`
         )
         .join('')}</div>`;
     }
@@ -962,7 +972,7 @@
       const v = $('#view');
       const list = (rows, rowFn) =>
         rows.map(rowFn).join('') ||
-        `<p class="empty" style="padding:12px">Nessun risultato per questa ricerca.</p>`;
+        `<p class="empty" style="padding:12px">Nessun risultato con questa ricerca e questo filtro.</p>`;
       let rows,
         rowFn,
         detail,
@@ -990,6 +1000,8 @@
       if (state.tab === 'catene') {
         rows = recipeRows(q);
         rowFn = recipeRow;
+        // The same recipes as Ricette, with the same filter: shown here too.
+        filters = filtersHtml('ricette', RECIPE_FILTERS);
         const g = chainsSvg(state.sel.catene ?? rows[0]?.name);
         detail = recipeDetail(state.sel.catene ?? rows[0]?.name);
         extra = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
