@@ -18,6 +18,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:05:11-05:00",
+      "observations": 4,
       "use": {
         "observations": 3,
         "outcomes": [
@@ -45,6 +46,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:03:01-05:00",
+      "observations": 8,
       "use": {
         "observations": 5,
         "outcomes": [
@@ -71,6 +73,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:01-05:00",
+      "observations": 1,
       "use": {
         "observations": 4,
         "outcomes": [
@@ -101,6 +104,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:01-05:00",
+      "observations": 1,
       "use": {
         "observations": 1,
         "outcomes": [
@@ -128,6 +132,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:01-05:00",
+      "observations": 1,
       "use": {
         "observations": 2,
         "outcomes": [
@@ -156,6 +161,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:05:51-05:00",
+      "observations": 2,
       "use": {
         "observations": 3,
         "outcomes": [
@@ -190,6 +196,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:01-05:00",
+      "observations": 1,
       "use": {
         "observations": 0,
         "outcomes": [],
@@ -219,6 +226,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:01-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -235,6 +243,7 @@
         "(ricetta senza nome) → un muro"
       ],
       "last_seen": "2025-11-27T19:02:01-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     },
@@ -248,6 +257,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:41-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -264,7 +274,8 @@
       "partial_ingredients": [],
       "output": "un muro",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:02:01-05:00"
+      "last_seen": "2025-11-27T19:02:01-05:00",
+      "observations": 1
     }
   },
   "locations": {}

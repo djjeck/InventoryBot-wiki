@@ -18,6 +18,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T20:13:21-05:00",
+      "observations": 19,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -32,6 +33,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T20:03:21-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -44,6 +46,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T20:06:41-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     },
@@ -55,6 +58,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T20:16:41-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     }

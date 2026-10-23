@@ -18,6 +18,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T22:00:21-05:00",
+      "observations": 38,
       "exclusive": false,
       "locations": []
     },
@@ -29,6 +30,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T21:50:04-05:00",
+      "observations": 3,
       "exclusive": false,
       "locations": []
     },
@@ -42,6 +44,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T22:16:41-05:00",
+      "observations": 1,
       "use": {
         "observations": 2,
         "outcomes": [
@@ -69,6 +72,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T22:16:41-05:00",
+      "observations": 1,
       "use": {
         "observations": 10,
         "outcomes": [
@@ -93,6 +97,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": "nel bosco nebbioso di Valtorbo 🌲",
+      "observations": 1,
       "exits": [
         "la valle ventosa 🏞"
       ],
@@ -106,6 +111,7 @@
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
       "at": "nella valle ventosa 🏞",
+      "observations": 1,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

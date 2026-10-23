@@ -711,6 +711,7 @@ describe('position', () => {
         name: P(FONDALE),
         label: 'Il banco corallino 🐠',
         at: FONDALE,
+        observations: 1,
         exits: [],
         requires_item: true,
         unlock_texts: [],
@@ -1364,6 +1365,31 @@ describe('consumption', () => {
 
 const det = (recipe: string, ingr: T.ItemSpec[], t: number, query?: string): BuildEvent =>
   ev(T.detail(recipe, [], ingr), query ?? `/ricetta ${recipe.toLowerCase()}`, { t });
+
+describe('observations', () => {
+  it('each_event_naming_an_entry_counts_once', () => {
+    const { wiki } = runBuild([
+      // Named twice by one reply, and again by the pass that resolves the drop: one.
+      ev(T.inventory([['un sasso', 'C', 1]]), '/inventario', { t: 0 }),
+      ev(T.drop('nel bosco trovi un sasso', 'C'), null, { t: 10 }),
+      ev(T.recipeList([['Torre', 1, 1]]), '/ricetta', { t: 20 }),
+      ev(T.detail('Torre', [['un sasso', 'C', 4]], []), '/ricetta torre', { t: 30 }),
+      ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 40 }),
+      ev(T.where(PIANURA, [BOSCO]), '/viaggio', { t: 50 }),
+    ]);
+    expect(wiki.items['un sasso']?.observations).toBe(3);
+    expect(wiki.recipes['Torre']?.observations).toBe(2);
+    expect(wiki.locations[P(BOSCO)]?.observations).toBe(2);
+  });
+
+  it('a_renamed_item_counts_the_observations_of_both_names', () => {
+    const { wiki } = runBuild([
+      det('Premiazione', [["un Gufetto d'Argento", 'R', 1]], 10),
+      det('Premiazione', [['un Premio Sgranocchio', 'R', 1]], 1000),
+    ]);
+    expect(wiki.items['un Premio Sgranocchio']?.observations).toBe(2);
+  });
+});
 
 describe('renames', () => {
   it('swap_with_same_rarity_is_rename', () => {

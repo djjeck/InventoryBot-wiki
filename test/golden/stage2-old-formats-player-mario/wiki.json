@@ -23,6 +23,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2017-06-01T02:00:01+02:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -41,6 +42,7 @@
       ],
       "made_by": [],
       "last_seen": "2018-01-02T01:01:11+01:00",
+      "observations": 5,
       "exclusive": false,
       "locations": []
     },
@@ -54,6 +56,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2017-06-01T02:00:41+02:00",
+      "observations": 1,
       "gives_title": true,
       "sources_inferred": true,
       "exclusive": false,
@@ -69,6 +72,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2018-01-02T01:00:11+01:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -83,6 +87,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2018-01-02T01:00:31+01:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -99,6 +104,7 @@
         "Torre"
       ],
       "last_seen": "2018-01-02T01:01:11+01:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     },
@@ -110,6 +116,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2018-01-02T01:01:31+01:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     }
@@ -125,7 +132,8 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2018-01-02T01:00:41+01:00"
+      "last_seen": "2018-01-02T01:00:41+01:00",
+      "observations": 1
     },
     "Torre": {
       "name": "Torre",
@@ -139,7 +147,8 @@
       ],
       "output": "una torre",
       "craft_text": "e costruisci",
-      "last_seen": "2018-01-02T01:01:21+01:00"
+      "last_seen": "2018-01-02T01:01:21+01:00",
+      "observations": 3
     },
     "Gran Torre": {
       "name": "Gran Torre",
@@ -149,7 +158,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2018-01-02T01:01:21+01:00"
+      "last_seen": "2018-01-02T01:01:21+01:00",
+      "observations": 1
     }
   },
   "locations": {
@@ -157,6 +167,7 @@
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
       "at": "in cima al monte Grevolo 🏔",
+      "observations": 1,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

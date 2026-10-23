@@ -411,6 +411,8 @@ export interface WikiItem {
   used_in: string[];
   made_by: string[];
   last_seen: string | null;
+  /** How many observations name it: replies of the bot and channel cards, each once. */
+  observations: number;
   use?: WikiItemUse;
   old_names?: WikiOldName[];
   /** Listed by /titolo among the items that give a title. */
@@ -439,6 +441,8 @@ export interface WikiRecipe {
   /** Craft text of the latest craft that set the output. */
   craft_text: string | null;
   last_seen: string | null;
+  /** How many observations name it: replies of the bot and channel cards, each once. */
+  observations: number;
   /** Present when `level` was deduced from the output's `Ln` rarity. */
   level_inferred?: true;
   /** Present when a channel's card describes the recipe (channels.ts). */
@@ -484,6 +488,8 @@ export interface WikiLocation {
    * nebbioso di Valtorbo 🌲"), from the latest reply naming it; null if none did.
    */
   at: string | null;
+  /** How many observations name it: replies of the bot and channel cards, each once. */
+  observations: number;
   exits: string[];
   requires_item: boolean;
   unlock_texts: string[];

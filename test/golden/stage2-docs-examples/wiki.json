@@ -31,6 +31,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:03:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -47,6 +48,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:03:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -63,6 +65,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:04:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -79,6 +82,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:04:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -95,6 +99,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:04:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -111,6 +116,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:04:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -127,6 +133,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:04:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -143,6 +150,7 @@
         "(ricetta senza nome) → un caffè ristretto"
       ],
       "last_seen": "2025-11-27T19:04:32-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -158,6 +166,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:05:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -174,6 +183,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:05:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -190,6 +200,7 @@
         "(ricetta senza nome) → una manciata di linguette di latta"
       ],
       "last_seen": "2025-11-27T19:05:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -205,6 +216,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:05:32-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -222,6 +234,7 @@
         "Piccola collezione"
       ],
       "last_seen": "2025-11-27T19:06:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -235,6 +248,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:06:32-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -248,6 +262,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:07:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -262,6 +277,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:07:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -276,6 +292,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:07:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -290,6 +307,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:07:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -304,6 +322,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:15:32-05:00",
+      "observations": 4,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -318,6 +337,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:17:32-05:00",
+      "observations": 4,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -332,6 +352,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:07:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -344,6 +365,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:11:32-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -355,6 +377,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:12:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -366,6 +389,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:12:32-05:00",
+      "observations": 2,
       "use": {
         "observations": 4,
         "outcomes": [
@@ -391,6 +415,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:13:32-05:00",
+      "observations": 4,
       "exclusive": false,
       "locations": []
     },
@@ -402,6 +427,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:14:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -415,6 +441,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:16:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -429,6 +456,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:17:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -441,6 +469,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:18:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -452,6 +481,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:21:32-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -463,6 +493,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:22:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -474,6 +505,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:22:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -489,6 +521,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:29:02-05:00",
+      "observations": 4,
       "use": {
         "observations": 2,
         "outcomes": [
@@ -515,6 +548,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:30:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -529,6 +563,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:31:02-05:00",
+      "observations": 2,
       "gives_title": true,
       "sources_inferred": true,
       "exclusive": false,
@@ -544,6 +579,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -558,7 +594,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:32-05:00"
+      "last_seen": "2025-11-27T19:02:32-05:00",
+      "observations": 2
     },
     "Corso di vela": {
       "name": "Corso di vela",
@@ -568,7 +605,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:32-05:00"
+      "last_seen": "2025-11-27T19:02:32-05:00",
+      "observations": 2
     },
     "L'ombra dell'albero": {
       "name": "L'ombra dell'albero",
@@ -578,7 +616,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:32-05:00"
+      "last_seen": "2025-11-27T19:02:32-05:00",
+      "observations": 2
     },
     "Chiodi storti": {
       "name": "Chiodi storti",
@@ -588,7 +627,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:32-05:00"
+      "last_seen": "2025-11-27T19:02:32-05:00",
+      "observations": 2
     },
     "Merenda veloce": {
       "name": "Merenda veloce",
@@ -598,7 +638,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:03:02-05:00"
+      "last_seen": "2025-11-27T19:03:02-05:00",
+      "observations": 2
     },
     "Pizza della nonna": {
       "name": "Pizza della nonna",
@@ -608,7 +649,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:03:02-05:00"
+      "last_seen": "2025-11-27T19:03:02-05:00",
+      "observations": 2
     },
     "Pennello rustico": {
       "name": "Pennello rustico",
@@ -621,7 +663,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:03:32-05:00"
+      "last_seen": "2025-11-27T19:03:32-05:00",
+      "observations": 2
     },
     "L'ancora nel fango": {
       "name": "L'ancora nel fango",
@@ -635,7 +678,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:04:02-05:00"
+      "last_seen": "2025-11-27T19:04:02-05:00",
+      "observations": 2
     },
     "Cera riciclata": {
       "name": "Cera riciclata",
@@ -648,7 +692,8 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:29:02-05:00"
+      "last_seen": "2025-11-27T19:29:02-05:00",
+      "observations": 4
     },
     "Piccola collezione": {
       "name": "Piccola collezione",
@@ -658,7 +703,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:06:02-05:00"
+      "last_seen": "2025-11-27T19:06:02-05:00",
+      "observations": 2
     },
     "Grande collezione": {
       "name": "Grande collezione",
@@ -670,7 +716,8 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:06:02-05:00"
+      "last_seen": "2025-11-27T19:06:02-05:00",
+      "observations": 2
     },
     "(ricetta senza nome) → un caffè ristretto": {
       "name": "(ricetta senza nome) → un caffè ristretto",
@@ -683,7 +730,8 @@
       "partial_ingredients": [],
       "output": "un caffè ristretto",
       "craft_text": "e macini i chicchi con pazienza, li versi nella moka e aspetti il borbottio che annuncia il momento piu' bello della mattina!",
-      "last_seen": "2025-11-27T19:04:32-05:00"
+      "last_seen": "2025-11-27T19:04:32-05:00",
+      "observations": 2
     },
     "(ricetta senza nome) → una manciata di linguette di latta": {
       "name": "(ricetta senza nome) → una manciata di linguette di latta",
@@ -696,7 +744,8 @@
       "partial_ingredients": [],
       "output": "una manciata di linguette di latta",
       "craft_text": "e hai trovato una latta di piselli in offerta al mercato e non vedi l’ora di assaggiarli! Appena arrivi a casa prendi il tuo apriscatole, apri la latta e te li mangi in un attimo!",
-      "last_seen": "2025-11-27T19:05:02-05:00"
+      "last_seen": "2025-11-27T19:05:02-05:00",
+      "observations": 2
     }
   },
   "locations": {
@@ -704,6 +753,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": "nel bosco nebbioso di Valtorbo 🌲",
+      "observations": 6,
       "exits": [
         "l'immenso deserto di Sabbiora 🏜",
         "la palude sussurrante 🌾",
@@ -719,6 +769,7 @@
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
       "at": "nella valle ventosa 🏞",
+      "observations": 6,
       "exits": [
         "i piedi del monte Grevolo ⛰",
         "il banco corallino 🐠",
@@ -735,6 +786,7 @@
       "name": "la palude sussurrante 🌾",
       "label": "La palude sussurrante 🌾",
       "at": "nella palude sussurrante 🌾",
+      "observations": 5,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲",
         "il magnifico Palazzo di Cristallo 🏰",
@@ -752,6 +804,7 @@
       "name": "l'immenso deserto di Sabbiora 🏜",
       "label": "L'immenso deserto di Sabbiora 🏜",
       "at": "nell'immenso deserto di Sabbiora 🏜",
+      "observations": 2,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -763,6 +816,7 @@
       "name": "i piedi del monte Grevolo ⛰",
       "label": "I piedi del monte Grevolo ⛰",
       "at": "ai piedi del monte Grevolo ⛰",
+      "observations": 2,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -774,6 +828,7 @@
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
       "at": "sul banco corallino 🐠",
+      "observations": 6,
       "exits": [
         "in cima al monte Grevolo 🏔",
         "la palude sussurrante 🌾",
@@ -791,6 +846,7 @@
       "name": "il magnifico Palazzo di Cristallo 🏰",
       "label": "Il magnifico Palazzo di Cristallo 🏰",
       "at": "nel magnifico Palazzo di Cristallo 🏰",
+      "observations": 2,
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
@@ -802,6 +858,7 @@
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
       "at": "nelle cripte del monastero 👻",
+      "observations": 2,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],
@@ -813,6 +870,7 @@
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
       "at": "in cima al monte Grevolo 🏔",
+      "observations": 2,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

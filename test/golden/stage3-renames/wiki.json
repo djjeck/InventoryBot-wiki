@@ -24,6 +24,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-02-15T19:00:01-05:00",
+      "observations": 5,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -42,6 +43,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-02-15T19:00:41-05:00",
+      "observations": 8,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -58,6 +60,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:01-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -75,6 +78,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-02-15T19:00:41-05:00",
+      "observations": 8,
       "old_names": [
         {
           "name": "un Gufetto d'Argento",
@@ -99,6 +103,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-01-06T19:00:21-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -115,6 +120,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-02-15T19:00:21-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -131,6 +137,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-02-15T19:00:21-05:00",
+      "observations": 6,
       "old_names": [
         {
           "name": "un B",
@@ -159,6 +166,7 @@
       ],
       "made_by": [],
       "last_seen": "2026-02-15T19:00:31-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -175,6 +183,7 @@
         "Premiazione"
       ],
       "last_seen": "2026-02-15T19:00:41-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     }
@@ -193,7 +202,8 @@
       ],
       "output": "una coppa",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2026-02-15T19:00:41-05:00"
+      "last_seen": "2026-02-15T19:00:41-05:00",
+      "observations": 5
     },
     "Catena": {
       "name": "Catena",
@@ -206,7 +216,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2026-02-15T19:00:01-05:00"
+      "last_seen": "2026-02-15T19:00:01-05:00",
+      "observations": 4
     },
     "Altare": {
       "name": "Altare",
@@ -220,7 +231,8 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:01:21-05:00"
+      "last_seen": "2025-11-27T19:01:21-05:00",
+      "observations": 3
     },
     "Muro": {
       "name": "Muro",
@@ -233,7 +245,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2026-01-06T19:00:21-05:00"
+      "last_seen": "2026-01-06T19:00:21-05:00",
+      "observations": 2
     },
     "Torre": {
       "name": "Torre",
@@ -246,7 +259,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2026-02-15T19:00:31-05:00"
+      "last_seen": "2026-02-15T19:00:31-05:00",
+      "observations": 3
     }
   },
   "locations": {
@@ -254,6 +268,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": "nel bosco nebbioso di Valtorbo 🌲",
+      "observations": 1,
       "exits": [
         "la valle ventosa 🏞"
       ],
@@ -269,6 +284,7 @@
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
       "at": "nella valle ventosa 🏞",
+      "observations": 1,
       "exits": [],
       "requires_item": false,
       "unlock_texts": [],

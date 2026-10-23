@@ -171,6 +171,8 @@ export interface KbItem {
   /** Where it is found: the owner's drops and the channels' place cards; only exported for exclusive items. */
   dropLocations: Set<string>;
   firstSeen: string | null;
+  /** The events that named it (KB.event), each once: its observations. */
+  seenIn: Set<object>;
   dates: Dates;
   use?: WikiItemUse;
   renamedTo?: string;
@@ -194,6 +196,8 @@ export interface KbRecipe {
   craft_text: string | null;
   last_seen: string | null;
   firstSeen: string | null;
+  /** The events that named it (KB.event), each once: its observations. */
+  seenIn: Set<object>;
   dates: Dates;
   levelInferred?: true;
   /** The channel card behind the recipe, and the attributes it still sets. */
@@ -211,6 +215,8 @@ export interface KbLocation {
   /** As the bot writes it ("nel bosco …"), from the latest reply naming it, and that reply's date. */
   at: string | null;
   atDate: string | null;
+  /** The events that named it (KB.event), each once: its observations. */
+  seenIn: Set<object>;
   exits: Set<string>;
   requires_item: boolean;
   unlock_texts: string[];
@@ -281,7 +287,14 @@ export class KB {
     return false;
   }
 
-  touch(obj: { last_seen: string | null; firstSeen: string | null }): void {
+  /**
+   * The event being read, set with `now`: every entity it names counts it once among its
+   * observations, whichever pass names it.
+   */
+  event: object | null = null;
+
+  touch(obj: { last_seen: string | null; firstSeen: string | null; seenIn: Set<object> }): void {
+    if (this.event !== null) obj.seenIn.add(this.event);
     if (truthy(this.now) && (obj.last_seen === null || instant(this.now) > instant(obj.last_seen)))
       obj.last_seen = this.now;
     if (truthy(this.now) && (obj.firstSeen === null || instant(this.now) < instant(obj.firstSeen)))
@@ -301,6 +314,7 @@ export class KB {
         last_seen: null,
         dropLocations: new Set(),
         firstSeen: null,
+        seenIn: new Set(),
         dates: {},
       };
       this.items.set(name, it);
@@ -336,6 +350,7 @@ export class KB {
         craft_text: null,
         last_seen: null,
         firstSeen: null,
+        seenIn: new Set(),
         dates: {},
       };
       this.recipes.set(name, r);
@@ -344,7 +359,8 @@ export class KB {
     return r;
   }
 
-  location(name: string): KbLocation {
+  /** The place, made if new; `named`: the current event names it, an observation. */
+  location(name: string, named = true): KbLocation {
     let l = this.locations.get(name);
     if (l === undefined) {
       l = {
@@ -352,6 +368,7 @@ export class KB {
         label: placeLabel(name),
         at: null,
         atDate: null,
+        seenIn: new Set(),
         exits: new Set(),
         requires_item: false,
         unlock_texts: [],
@@ -360,6 +377,7 @@ export class KB {
       };
       this.locations.set(name, l);
     }
+    if (named && this.event !== null) l.seenIn.add(this.event);
     return l;
   }
 
@@ -732,6 +750,7 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
   const requirements: TravelRequirementEvent[] = [];
   for (const e of events) {
     kb.now = e.date ?? null;
+    kb.event = e;
     const t = e.type;
     // How the bot writes each place a travel reply names: the latest wording wins.
     if ('written' in e)
@@ -852,6 +871,7 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       uses.push(e);
     }
   }
+  kb.event = null;
 
   resolveDrops(kb, drops);
   resolveCrafts(kb, crafts, recipeNames);
@@ -1022,12 +1042,13 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
     if (e.kind === 'adventure') it.sources.add('adventure');
     if (truthy(loc)) {
       it.dropLocations.add(loc);
-      kb.location(loc);
+      kb.location(loc, false); // where the owner was, which the drop does not name
     }
   };
 
   for (const [e, loc] of drops) {
     kb.now = e.date;
+    kb.event = e;
     if (e.kind === 'lucky') {
       record(e, loc, e.item);
       continue;
@@ -1042,15 +1063,18 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
       pending.push([e, loc]);
     }
   }
+  kb.event = null;
   // Unknown items: strip the longest flavour prefix already seen with a known item.
   const tpl = byLength(templates);
   for (const [e, loc] of pending) {
     kb.now = e.date;
+    kb.event = e;
     const raw = (e as Extract<Drop, { kind: 'adventure' }>).raw;
     const pre = tpl.find((p) => raw.startsWith(p) && raw.length > p.length);
     if (truthy(pre)) record(e, loc, itemName(raw.slice(pre.length)));
     else kb.addReport({ kind: 'unresolved_drop', text: raw });
   }
+  kb.event = null;
 }
 
 export const UNNAMED_PREFIX = '(ricetta senza nome) → ';
@@ -1077,6 +1101,7 @@ function resolveCrafts(kb: KB, crafts: readonly Craft[], recipeNames: ReadonlySe
   }
   for (const e of crafts) {
     kb.now = e.date;
+    kb.event = e;
     const ingr = new Map<string, number>();
     for (const x of e.ingredients) addQty(ingr, x.name, x.qty);
     const q = queryArg(e.query, '/ricetta') || '';
@@ -1119,6 +1144,7 @@ function resolveCrafts(kb: KB, crafts: readonly Craft[], recipeNames: ReadonlySe
     }
     if (truthy(e.output)) (kb.items.get(e.output) as KbItem).made_by.add(name);
   }
+  kb.event = null;
 }
 
 /**
@@ -1346,10 +1372,13 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
           items: useItems(text),
           used_item: t,
         }) as unknown as Use;
-        const now = kb.now;
+        const now = kb.now,
+          event = kb.event;
         kb.now = u.date ?? null;
+        kb.event = u;
         for (const x of u.items) kb.item(x.name, x.rarity, x.usable);
         kb.now = now;
+        kb.event = event;
         uses.push(u);
       }
     }
@@ -1650,6 +1679,7 @@ function detectRenames(kb: KB): void {
     for (const x of o.used_in) n.used_in.add(x);
     for (const x of o.made_by) n.made_by.add(x);
     for (const x of o.dropLocations) n.dropLocations.add(x);
+    for (const x of o.seenIn) n.seenIn.add(x);
     if (o.givesTitle) n.givesTitle = true;
     // The old name lives on only inside the new item; toJson() drops its own entry.
     const oldNames = (n.oldNames ??= []);
@@ -1752,6 +1782,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       used_in: sortedStrings(it.used_in),
       made_by: sortedStrings(it.made_by),
       last_seen: it.last_seen,
+      observations: it.seenIn.size,
       ...(it.use !== undefined && { use: it.use }),
       ...(it.oldNames !== undefined && { old_names: it.oldNames }),
       ...(it.givesTitle !== undefined && { gives_title: it.givesTitle }),
@@ -1783,6 +1814,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       output: r.output,
       craft_text: r.craft_text,
       last_seen: r.last_seen,
+      observations: r.seenIn.size,
       ...(r.levelInferred !== undefined && { level_inferred: r.levelInferred }),
       ...(r.channel !== undefined && {
         channel: {
@@ -1810,6 +1842,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       name: l.name,
       label: l.label,
       at: l.at,
+      observations: l.seenIn.size,
       exits: sortedStrings(l.exits),
       requires_item: l.requires_item,
       unlock_texts: [...l.unlock_texts],

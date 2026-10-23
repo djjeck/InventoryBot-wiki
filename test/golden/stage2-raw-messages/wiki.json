@@ -20,6 +20,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:00-05:00",
+      "observations": 4,
       "exclusive": false,
       "locations": []
     },
@@ -33,6 +34,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:51-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -49,7 +51,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T18:59:50-05:00"
+      "last_seen": "2025-11-27T18:59:50-05:00",
+      "observations": 1
     }
   },
   "locations": {}

@@ -23,6 +23,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:10-05:00",
+      "observations": 6,
       "exclusive": false,
       "locations": []
     },
@@ -38,6 +39,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:31-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -54,6 +56,7 @@
         "Torre"
       ],
       "last_seen": "2025-11-27T19:00:31-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     },
@@ -69,6 +72,7 @@
         "Fonduta cosmica"
       ],
       "last_seen": "2025-11-27T19:00:51-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -84,6 +88,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:51-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -102,6 +107,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:21-05:00",
+      "observations": 6,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -119,6 +125,7 @@
         "Pizza"
       ],
       "last_seen": "2025-11-27T19:01:11-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -134,6 +141,7 @@
         "Pizza"
       ],
       "last_seen": "2025-11-27T19:01:21-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     },
@@ -149,6 +157,7 @@
         "Muro"
       ],
       "last_seen": "2025-11-27T19:02:00-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -164,6 +173,7 @@
         "(ricetta senza nome) → una cestina"
       ],
       "last_seen": "2025-11-27T19:02:21-05:00",
+      "observations": 3,
       "exclusive": false,
       "locations": []
     }
@@ -179,7 +189,8 @@
       "partial_ingredients": [],
       "output": "una pizza margherita",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:01:21-05:00"
+      "last_seen": "2025-11-27T19:01:21-05:00",
+      "observations": 3
     },
     "Pizza della nonna": {
       "name": "Pizza della nonna",
@@ -189,7 +200,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:00:01-05:00"
+      "last_seen": "2025-11-27T19:00:01-05:00",
+      "observations": 1
     },
     "Sale, pepe e olio": {
       "name": "Sale, pepe e olio",
@@ -201,7 +213,8 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:00:11-05:00"
+      "last_seen": "2025-11-27T19:00:11-05:00",
+      "observations": 2
     },
     "Muro": {
       "name": "Muro",
@@ -215,7 +228,8 @@
       ],
       "output": "un muro",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:02:00-05:00"
+      "last_seen": "2025-11-27T19:02:00-05:00",
+      "observations": 4
     },
     "Torre": {
       "name": "Torre",
@@ -230,7 +244,8 @@
       ],
       "output": "una torre",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:00:31-05:00"
+      "last_seen": "2025-11-27T19:00:31-05:00",
+      "observations": 3
     },
     "Fonduta cosmica": {
       "name": "Fonduta cosmica",
@@ -243,6 +258,7 @@
       "output": "un vortice",
       "craft_text": "e mescoli tutto con cura...",
       "last_seen": "2025-11-27T19:00:51-05:00",
+      "observations": 2,
       "level_inferred": true
     },
     "(ricetta senza nome) → una pizza": {
@@ -255,7 +271,8 @@
       "partial_ingredients": [],
       "output": "una pizza",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:01:01-05:00"
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "observations": 1
     },
     "(ricetta senza nome) → una cestina": {
       "name": "(ricetta senza nome) → una cestina",
@@ -267,7 +284,8 @@
       "partial_ingredients": [],
       "output": "una cestina",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:02:21-05:00"
+      "last_seen": "2025-11-27T19:02:21-05:00",
+      "observations": 3
     },
     "(ricetta senza nome) → ?": {
       "name": "(ricetta senza nome) → ?",
@@ -279,7 +297,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:10-05:00"
+      "last_seen": "2025-11-27T19:02:10-05:00",
+      "observations": 1
     }
   },
   "locations": {}

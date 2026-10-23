@@ -18,6 +18,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:11-05:00",
+      "observations": 6,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -32,6 +33,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:11-05:00",
+      "observations": 6,
       "sources_inferred": true,
       "exclusive": true,
       "locations": []
@@ -46,6 +48,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:11-05:00",
+      "observations": 6,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -58,6 +61,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:51-05:00",
+      "observations": 5,
       "exclusive": false,
       "locations": []
     },
@@ -71,6 +75,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:51-05:00",
+      "observations": 5,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -85,6 +90,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:51-05:00",
+      "observations": 5,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -101,6 +107,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:03:00-05:00",
+      "observations": 8,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -115,6 +122,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:51-05:00",
+      "observations": 5,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -127,6 +135,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:01:51-05:00",
+      "observations": 6,
       "exclusive": false,
       "locations": []
     },
@@ -142,6 +151,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:31-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -156,6 +166,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:41-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -173,7 +184,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:51-05:00"
+      "last_seen": "2025-11-27T19:02:51-05:00",
+      "observations": 2
     },
     "Muro": {
       "name": "Muro",
@@ -183,7 +195,8 @@
       "partial_ingredients": [],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:02:51-05:00"
+      "last_seen": "2025-11-27T19:02:51-05:00",
+      "observations": 1
     }
   },
   "locations": {}

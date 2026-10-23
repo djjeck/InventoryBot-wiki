@@ -27,6 +27,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:21-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -43,6 +44,7 @@
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:00:21-05:00",
+      "observations": 3,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -59,6 +61,7 @@
         "Torre alta"
       ],
       "last_seen": "2025-11-27T18:59:10-05:00",
+      "observations": 1,
       "gives_title": true,
       "title": "il costruttore",
       "exclusive": false,
@@ -74,6 +77,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T18:59:20-05:00",
+      "observations": 1,
       "exclusive": true,
       "locations": [
         "le cripte del monastero 👻"
@@ -89,6 +93,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T18:59:20-05:00",
+      "observations": 1,
       "exclusive": true,
       "locations": [
         "le cripte del monastero 👻"
@@ -104,6 +109,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T18:59:20-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -118,6 +124,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T18:59:20-05:00",
+      "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -132,6 +139,7 @@
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T18:59:30-05:00",
+      "observations": 1,
       "channel": {
         "name": "Il Grimorio del Golem",
         "date": "2025-11-27T18:59:30-05:00",
@@ -167,6 +175,7 @@
         "Torre alta"
       ],
       "last_seen": "2025-11-27T19:00:21-05:00",
+      "observations": 1,
       "exclusive": false,
       "locations": []
     }
@@ -184,6 +193,7 @@
       "output": "una torre altissima",
       "craft_text": "e mescoli tutto con cura...",
       "last_seen": "2025-11-27T19:00:21-05:00",
+      "observations": 3,
       "channel": {
         "name": "La Cittadella dei Demiurghi",
         "date": "2025-11-27T18:59:10-05:00",
@@ -199,6 +209,7 @@
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
       "at": null,
+      "observations": 1,
       "exits": [],
       "requires_item": true,
       "unlock_texts": [],
@@ -233,6 +244,7 @@
       "name": "il villaggio di Borgoverde 🏡",
       "label": "Il villaggio di Borgoverde 🏡",
       "at": null,
+      "observations": 1,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
       ],
@@ -246,6 +258,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": null,
+      "observations": 1,
       "exits": [
         "le cripte del monastero 👻"
       ],
