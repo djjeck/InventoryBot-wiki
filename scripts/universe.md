@@ -154,6 +154,7 @@ player sees anyway, and says why it is allowed.
 - Premiazione
 - Torre
 - Torre alta
+- Torre alta di pietra
 
 ## Places
 

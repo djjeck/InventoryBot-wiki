@@ -47,6 +47,9 @@ BULLET = "📌" | "-"
   lines.
 - `TITLE` is the title the recipe's output gives its owner; `@username` stands for any player.
 - A `NOTE` is a remark of the curators.
+- `RNAME` is not always the bot's name of the recipe: some cards name it otherwise, beyond spelling.
+  Such a card describes the recipe of the bot with exactly its ingredients and quantities, when only
+  one has them.
 
 Other posts of the channel (a welcome, short stories) are no cards and are skipped.
 

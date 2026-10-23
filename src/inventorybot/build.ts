@@ -518,6 +518,51 @@ function canonicalNames(known: Iterable<string>, caseless = false): (name: strin
     byKey.get(key(name)) ?? stripWs(name.replace(new RegExp(`${WS_CLASS}+`, 'gu'), ' '));
 }
 
+/**
+ * The recipe a channel card describes: the bot's spelling of its name (canonicalNames),
+ * or, for a name the bot never wrote (the curators sometimes name a recipe their own
+ * way), the one recipe of the bot with exactly the card's ingredients and quantities,
+ * from its /ricetta and /esamina details and its crafts named by their command. Else the
+ * card's own name.
+ */
+function cardRecipes(
+  events: readonly BuildEvent[],
+  botNames: ReadonlySet<string>,
+  item: (name: string) => string
+): (name: string) => string {
+  const canon = canonicalNames(botNames, true);
+  const bySig = new Map<string, Set<string>>();
+  const add = (name: string | undefined, ingr: Map<string, number>): void => {
+    if (name === undefined || ingr.size === 0) return;
+    const k = signature(ingr);
+    let names = bySig.get(k);
+    if (names === undefined) bySig.set(k, (names = new Set()));
+    names.add(name);
+  };
+  const cardSig = new Map<string, string>();
+  for (const e of events) {
+    const ingr = new Map<string, number>();
+    if (e.type === 'recipe_detail') {
+      for (const x of [...e.missing, ...e.have]) addQty(ingr, x.name, x.qty);
+      add(e.recipe, ingr);
+    } else if (e.type === 'craft') {
+      for (const x of e.ingredients) addQty(ingr, x.name, x.qty);
+      const named = recipeMatch(queryArg(e.query, '/ricetta') ?? '', botNames);
+      if (named.length === 1) add(named[0], ingr);
+    } else if (e.type === 'recipe_card') {
+      for (const x of e.ingredients) addQty(ingr, item(x.name), x.qty);
+      if (ingr.size > 0) cardSig.set(canon(e.recipe), signature(ingr));
+    }
+  }
+  return (raw) => {
+    const name = canon(raw);
+    if (botNames.has(name)) return name;
+    const k = cardSig.get(name);
+    const same = k === undefined ? undefined : bySig.get(k);
+    return same?.size === 1 ? (same.values().next().value as string) : name;
+  };
+}
+
 /** The item names an event of the bot names (channel cards aside). */
 function itemNamesOf(e: BuildEvent): string[] {
   const lines = (xs: readonly { name: string }[] | undefined): string[] =>
@@ -664,7 +709,7 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
   // A channel card names an item or recipe as its curators typed it: the bot's own name,
   // when one matches it (nameKey), is the one kept.
   const itemCanon = canonicalNames(events.flatMap(itemNamesOf), true);
-  const recipeCanon = canonicalNames(recipeNames, true);
+  const recipeCanon = cardRecipes(events, recipeNames, itemCanon);
   const placeCanon = canonicalNames(knownPlaces(events), true);
   for (const e of events) if (e.type === 'recipe_card') recipeNames.add(recipeCanon(e.recipe));
 

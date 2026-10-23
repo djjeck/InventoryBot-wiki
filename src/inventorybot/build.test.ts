@@ -2070,6 +2070,60 @@ describe('channel cards', () => {
   });
 });
 
+describe('recipe cards named otherwise', () => {
+  const OTHER = TORRE_CARD.replace('RICETTA: Torre alta', 'RICETTA: Torre alta di pietra');
+
+  it('a_card_with_the_ingredients_of_a_recipe_of_the_bot_describes_it', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.detail('Torre alta', [['una trave', 'N', 2]], [['una torre', 'L1', 1]]),
+        '/ricetta torre alta',
+        { t: 0 }
+      ),
+      card(OTHER, 10),
+    ]);
+    expect(Object.keys(wiki.recipes)).toStrictEqual(['Torre alta']);
+    expect(wiki.recipes['Torre alta']?.channel?.name).toBeDefined();
+  });
+
+  it('a_craft_named_by_its_command_counts_too_and_stays_named', () => {
+    const { wiki } = runBuild([
+      ev(T.recipeList([['Torre alta', 2, 0]]), '/ricetta', { t: 0 }),
+      ev(
+        T.craft(
+          [
+            ['una torre', 'L1', 1],
+            ['una trave', 'N', 2],
+          ],
+          'una torre alta'
+        ),
+        '/ricetta torre alta',
+        { t: 5 }
+      ),
+      card(OTHER, 10),
+    ]);
+    expect(Object.keys(wiki.recipes)).toStrictEqual(['Torre alta']);
+    expect(wiki.items['una torre alta']?.made_by).toStrictEqual(['Torre alta']);
+  });
+
+  it('a_card_matching_two_recipes_keeps_its_own_name', () => {
+    const both = [
+      ['una trave', 'N', 2],
+      ['una torre', 'L1', 1],
+    ] as const;
+    const { wiki } = runBuild([
+      ev(T.detail('Torre alta', both, []), '/ricetta torre alta', { t: 0 }),
+      ev(T.detail('Torre', both, []), '/ricetta torre', { t: 1 }),
+      card(OTHER, 10),
+    ]);
+    expect(Object.keys(wiki.recipes).sort()).toStrictEqual([
+      'Torre',
+      'Torre alta',
+      'Torre alta di pietra',
+    ]);
+  });
+});
+
 describe('place cards', () => {
   const CRIPTE = 'le cripte del monastero 👻';
 
