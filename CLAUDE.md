@@ -168,22 +168,33 @@ state in a card beside it (above it when narrow), as the bot would answer them (
 which scrolls as a whole (on a narrow screen the sidebar is a block above it); the tab and the
 selected entry are in the URL's fragment (`#oggetti/l_oro`: a slug of the name, unique within its
 tab), so a reload keeps them and each change is a step of the browser's history; and the report is
-in a collapsed section. The owner is the player the bot addresses most in the DM; without a DM the
-build stops, the records stay kept, and the panel shows a username field, which the page offers
-nowhere else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the
-records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
-counts, in upload order, which is their merge order; the last results (wiki, player state, report,
-options) with the records they were built from, so a returning player sees their wiki at once and
-the worker rebuilds only if they are not current; and the salt of the pseudonyms and sender keys,
-made once. A record is valid only with the salt that made it, so the three live in one database:
-without a salt the records and results are dropped, and a record or results made with another salt
-are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can
-add the export again, but never used, and its payload is dropped. Opening the database of an older
-schema drops what it kept. Without storage the worker keeps the records of the visit in memory.
-"Cancella i miei dati" deletes the whole database and resets the options. `run.ts`, `storage.ts`,
-`labels.ts` and `debounce.ts` use no browser API and are tested in Node (on a fake IndexedDB,
-`test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
-(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
+in a collapsed section. Above a place, Luoghi shows the map of the places (`map-layout.ts`, drawn by
+the view as pixel art, the same in both themes, its rows a little closer than its columns): a grid,
+as in classic role-playing games, running across a wide window and down a tall one, where no two
+roads cross and a road goes at 45° only from a place with more than four roads. It is the tree of
+the shortest routes from the village (the place the bot calls "il villaggio"), drawn in three steps:
+directions by rules alone (a place's straight directions to its biggest branches, along the main
+axis first, a branch linked to a sibling beside it, the rest diagonally), lengths by pushing each
+branch out as one block until it fits, the lines towards the branches still to join kept clear, then
+straight dead-end chains folded at a right angle where that makes the map smaller; a link that no
+length keeps clear may cross a road. Places the village does not reach go on free cells along its
+edge. The selected place is marked, with its shortest route from the village. The owner is the
+player the bot addresses most in the DM; without a DM the build stops, the records stay kept, and
+the panel shows a username field, which the page offers nowhere else. What the worker keeps is in
+IndexedDB, in this browser only (`storage.ts`): the records of the exports (`ExportRecord`, never
+the export pages), each with its folder, dates and counts, in upload order, which is their merge
+order; the last results (wiki, player state, report, options) with the records they were built from,
+so a returning player sees their wiki at once and the worker rebuilds only if they are not current;
+and the salt of the pseudonyms and sender keys, made once. A record is valid only with the salt that
+made it, so the three live in one database: without a salt the records and results are dropped, and
+a record or results made with another salt are refused. A record of an older `RECORD_FORMAT_VERSION`
+is stale: it is listed, so the player can add the export again, but never used, and its payload is
+dropped. Opening the database of an older schema drops what it kept. Without storage the worker
+keeps the records of the visit in memory. "Cancella i miei dati" deletes the whole database and
+resets the options. `run.ts`, `storage.ts`, `labels.ts`, `debounce.ts` and `map-layout.ts` use no
+browser API and are tested in Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and
+`worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
+`tsconfig.web.json`, and left out of coverage).
 
 `npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
 (`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the

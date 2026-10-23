@@ -1,4 +1,6 @@
-/* global window, localStorage, location, history, matchMedia */
+/* global window, document, localStorage, location, history, matchMedia */
+import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
+
 /**
  * The wiki view: renders a wiki and, optionally, the owner's player state into an
  * element, below the page's own header (title and actions). As in Telegram's chat list,
@@ -13,6 +15,8 @@
 (() => {
   /** The history listener of the latest render: a new render replaces it. */
   let onHistory = null;
+  /** The resize listener of the latest render, likewise. */
+  let onResize = null;
   const MARKUP = `<aside class="sidebar" aria-label="Elenco">
   <div class="side-search">
     <input
@@ -792,76 +796,129 @@
 `
       );
     }
-    function mapSvg() {
-      const names = Object.keys(L),
-        idx = new Map(names.map((n, i) => [n, i]));
-      const edges = [];
-      for (const l of Object.values(L))
-        for (const x of l.exits) {
-          const a = idx.get(l.name),
-            b = idx.get(x);
-          if (
-            b !== undefined &&
-            !edges.some(([p, q]) => (p === a && q === b) || (p === b && q === a))
-          )
-            edges.push([a, b]);
-        }
-      const Wd = 760,
-        H = 460,
-        n = names.length;
-      const P = names.map((_, i) => ({
-        x: Wd / 2 + 200 * Math.cos((i / n) * 2 * Math.PI),
-        y: H / 2 + 160 * Math.sin((i / n) * 2 * Math.PI),
-      }));
-      for (let it = 0; it < 500; it++) {
-        // deterministic spring layout
-        const F = P.map(() => ({ x: 0, y: 0 }));
-        for (let i = 0; i < n; i++)
-          for (let j = i + 1; j < n; j++) {
-            const dx = P[i].x - P[j].x,
-              dy = P[i].y - P[j].y,
-              d2 = Math.max(dx * dx + dy * dy, 25),
-              f = 9000 / d2;
-            const d = Math.sqrt(d2);
-            F[i].x += (f * dx) / d;
-            F[i].y += (f * dy) / d;
-            F[j].x -= (f * dx) / d;
-            F[j].y -= (f * dy) / d;
-          }
-        for (const [a, b] of edges) {
-          const dx = P[b].x - P[a].x,
-            dy = P[b].y - P[a].y,
-            d = Math.max(Math.hypot(dx, dy), 1),
-            f = (d - 110) * 0.05;
-          F[a].x += (f * dx) / d;
-          F[a].y += (f * dy) / d;
-          F[b].x -= (f * dx) / d;
-          F[b].y -= (f * dy) / d;
-        }
-        const t = 1 - it / 500;
-        P.forEach((p, i) => {
-          p.x += Math.max(-20, Math.min(20, F[i].x)) * t + (Wd / 2 - p.x) * 0.004;
-          p.y += Math.max(-20, Math.min(20, F[i].y)) * t + (H / 2 - p.y) * 0.004;
+    // ---- the map of the places ---------------------------------------------------
+    // Drawn on a grid as in classic role-playing games (map-layout.ts): its pixel-art field
+    // and dirt roads look the same in both themes. It runs across a wide window and down a
+    // tall one; each layout is made once per wiki, with its labels measured in the map's font.
+    // Rows a little closer than columns, so that the map fits a desktop screen better.
+    const MAP = { cell: 120, row: 96, mark: 7, line: 13, font: "700 11px 'Pixelify Sans'" };
+    const mapPlaces = Object.values(L).map((l) => ({ name: l.name, exits: l.exits }));
+    const mapCache = {};
+    let mapFontAsked = false;
+    /** The axis of the map last drawn. */
+    let mapShown = null;
+    function mapFor(axis) {
+      if (mapCache[axis]) return mapCache[axis];
+      // Labels measured before the font is in would be measured in another: once it is, the
+      // map is drawn again.
+      if (!mapFontAsked && !document.fonts.check(MAP.font)) {
+        mapFontAsked = true;
+        document.fonts.load(MAP.font).then(() => {
+          for (const k of Object.keys(mapCache)) delete mapCache[k];
+          if (root.isConnected && state.tab === 'luoghi') render();
         });
       }
-      const xs = P.map((p) => p.x),
-        ys = P.map((p) => p.y),
-        pad = 90;
-      const minX = Math.min(...xs) - pad,
-        maxX = Math.max(...xs) + pad,
-        minY = Math.min(...ys) - 40,
-        maxY = Math.max(...ys) + 40;
-      const sel = state.sel.luoghi;
-      return `<svg viewBox="${minX} ${minY} ${maxX - minX} ${maxY - minY}" width="${Math.round(maxX - minX)}" style="max-width:100%;height:auto" role="img" aria-label="Mappa dei luoghi">
-    ${edges.map(([a, b]) => `<line class="g-edge${sel && (names[a] === sel || names[b] === sel) ? ' hi' : ''}" x1="${P[a].x}" y1="${P[a].y}" x2="${P[b].x}" y2="${P[b].y}"/>`).join('')}
-    ${names
-      .map((nm, i) => {
-        const l = L[nm];
-        return `<g class="g-node ${visited(nm) ? 'visited' : ''} ${l.requires_item ? 'locked' : ''}${nm === sel ? ' sel' : ''}" data-go="loc" data-name="${esc(nm)}" tabindex="0">
-      <circle cx="${P[i].x}" cy="${P[i].y}" r="9"/>
-      <text x="${P[i].x}" y="${P[i].y - 15}" text-anchor="middle">${esc(l.label)}</text></g>`;
-      })
-      .join('')}
+      const m = layoutMap(mapPlaces, { axis, fold: true });
+      const pts = new Map(
+        [...m.cells].map(([n, [x, y]]) => [n, { x: x * MAP.cell, y: y * MAP.row }])
+      );
+      const segs = m.roads.map((r) => [
+        pts.get(r.a).x,
+        pts.get(r.a).y,
+        pts.get(r.b).x,
+        pts.get(r.b).y,
+      ]);
+      const ctx = document.createElement('canvas').getContext('2d');
+      ctx.font = MAP.font;
+      const labels = placeLabels(
+        pts,
+        new Map(Object.values(L).map((l) => [l.name, l.label])),
+        segs,
+        {
+          measure: (t) => ctx.measureText(t).width,
+          maxWidth: MAP.cell - 14,
+          lineHeight: MAP.line,
+          radius: MAP.mark + 2,
+        }
+      );
+      let x0 = Infinity,
+        y0 = Infinity,
+        x1 = -Infinity,
+        y1 = -Infinity;
+      for (const [n, p] of pts) {
+        const b = labels.get(n);
+        x0 = Math.min(x0, p.x - 12, b?.x0 ?? p.x);
+        x1 = Math.max(x1, p.x + 12, b?.x1 ?? p.x);
+        y0 = Math.min(y0, p.y - 12, b?.y0 ?? p.y);
+        y1 = Math.max(y1, p.y + 12, b?.y1 ?? p.y);
+      }
+      const pad = 24;
+      return (mapCache[axis] = {
+        m,
+        pts,
+        labels,
+        box: { x: x0 - pad, y: y0 - pad, w: x1 - x0 + 2 * pad, h: y1 - y0 + 2 * pad },
+      });
+    }
+    /** The axis of the map: horizontal in a wide window, vertical in a tall one. */
+    const mapAxis = () => (window.innerWidth >= window.innerHeight ? 'h' : 'v');
+    /** The map, with `sel` marked and the shortest route to it from the start highlighted. */
+    function mapSvg(sel) {
+      const axis = (mapShown = mapAxis());
+      const { m, pts, labels, box } = mapFor(axis);
+      const pair = (a, b) => (a < b ? a + '\n' + b : b + '\n' + a);
+      const route = m.route(sel),
+        onRoute = new Set(route.slice(1).map((n, i) => pair(route[i], n)));
+      const road = (r, cls) => {
+        const a = pts.get(r.a),
+          b = pts.get(r.b);
+        if (!r.oneWay)
+          return `<line class="${cls}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
+        // a one-way road has an arrow halfway, towards where it leads
+        const arrow =
+          cls === 'm-road' || cls.startsWith('m-road ') ? ' marker-mid="url(#map-arrow)"' : '';
+        return `<path class="${cls}" d="M${a.x} ${a.y}L${(a.x + b.x) / 2} ${(a.y + b.y) / 2}L${b.x} ${b.y}"${arrow}/>`;
+      };
+      const roads =
+        m.roads.map((r) => road(r, 'm-verge')).join('') +
+        m.roads.map((r) => road(r, `m-road${r.a === sel || r.b === sel ? ' hi' : ''}`)).join('') +
+        m.roads
+          .filter((r) => onRoute.has(pair(r.a, r.b)))
+          .map((r) => road(r, 'm-route'))
+          .join('');
+      const places = [...pts]
+        .map(([n, { x, y }]) => {
+          const l = L[n],
+            b = labels.get(n),
+            k = MAP.mark;
+          const cls = [
+            'g-node',
+            visited(n) && 'visited',
+            l.requires_item && 'locked',
+            n === m.root && 'start',
+            n === sel && 'sel',
+          ]
+            .filter(Boolean)
+            .join(' ');
+          const text = b
+            ? `<text class="m-label" text-anchor="${b.anchor}">${b.lines.map((t, i) => `<tspan x="${b.textX}" y="${b.y0 + 10 + i * MAP.line}">${esc(t)}</tspan>`).join('')}</text>`
+            : '';
+          return `<g class="${cls}" data-go="loc" data-name="${esc(n)}" tabindex="0" role="button" aria-label="${esc(l.label)}">${n === sel ? `<rect class="m-ring" x="${x - k - 5}" y="${y - k - 5}" width="${2 * k + 10}" height="${2 * k + 10}"/>` : ''}<rect class="m-mark" x="${x - k}" y="${y - k}" width="${2 * k}" height="${2 * k}"/>${text}</g>`;
+        })
+        .join('');
+      const { x, y, w, h } = box;
+      // At its own size, or narrower to fit, but never below three quarters: past that the
+      // box scrolls.
+      const width = Math.round(Math.min(w, Math.max($('#view').clientWidth || w, w * 0.75)));
+      return `<svg class="map" viewBox="${x} ${y} ${w} ${h}" width="${width}" role="img" aria-label="Mappa dei luoghi">
+    <defs>
+      <marker id="map-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="2" markerHeight="2" orient="auto"><path class="m-arrow" d="M0 0L10 5L0 10z"/></marker>
+      <pattern id="map-grass" width="16" height="16" patternUnits="userSpaceOnUse">
+        <rect class="m-g0" width="16" height="16"/><rect class="m-g1" width="4" height="4"/><rect class="m-g2" x="8" y="4" width="4" height="4"/>
+        <rect class="m-g1" x="4" y="12" width="4" height="4"/><rect class="m-g3" x="12" y="8" width="4" height="4"/><rect class="m-g4" x="12" width="4" height="4"/>
+      </pattern>
+    </defs>
+    <rect class="m-field" x="${x}" y="${y}" width="${w}" height="${h}"/>${roads}${places}
   </svg>`;
     }
 
@@ -1000,8 +1057,9 @@
       if (state.tab === 'luoghi') {
         rows = locRows(q);
         rowFn = locRow;
-        detail = locDetail(state.sel.luoghi ?? rows[0]?.name);
-        extra = `<div class="graphbox">${mapSvg()}</div><div class="legend"><span>◌ tratteggiato: serve un oggetto per entrare</span>${P ? '<span>● bordo colorato: visitato da te</span>' : ''}</div>`;
+        const shown = state.sel.luoghi ?? rows[0]?.name;
+        detail = locDetail(shown);
+        extra = `<div class="graphbox">${mapSvg(shown)}</div><div class="legend"><span>bordo tratteggiato: serve un oggetto per entrare</span>${P ? "<span>riempito d'oro: visitato da te</span>" : ''}<span>freccia: si va solo in quel verso</span></div>`;
       }
       // The recipes again, in the graph of their chains: a recipe opens below it.
       if (state.tab === 'catene') {
@@ -1108,6 +1166,12 @@
       root.querySelector('.row[aria-current="true"]')?.scrollIntoView({ block: 'nearest' });
     };
     window.addEventListener('popstate', onHistory);
+    // A window that changes shape enough draws the map again, along its other axis.
+    if (onResize) window.removeEventListener('resize', onResize);
+    onResize = () => {
+      if (root.isConnected && state.tab === 'luoghi' && mapAxis() !== mapShown) render();
+    };
+    window.addEventListener('resize', onResize);
 
     // How often the estimate agreed with the bot's /ricetta lists, rounded down: 100% only when always.
     const check = P?.inventory_check;

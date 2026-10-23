@@ -39,6 +39,22 @@
   --font-body:
     'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   --font-mono: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* The map of the places, a pixel-art field with dirt roads, the same in both themes: its
+     labels are dark on a light halo, the selected one in the route's red (5:1 on the halo). */
+  --map-grass: #8cc265;
+  --map-grass-dark: #7db557;
+  --map-grass-mid: #86bd5f;
+  --map-grass-light: #9bcf72;
+  --map-grass-lighter: #a3d47b;
+  --map-road: #c9a26b;
+  --map-road-hi: #e9c890;
+  --map-verge: #7a5630;
+  --map-route: #b03a2e;
+  --map-place: #f3e6c4;
+  --map-place-edge: #3d2812;
+  --map-visited: #e0b23a;
+  --map-label: #2b1d0e;
+  --map-halo: #f6f1dc;
 }
 /* Telegram Web's night theme, whenever the system asks for a dark one. */
 @media (prefers-color-scheme: dark) {
@@ -736,19 +752,10 @@ h4 {
   stroke-opacity: 1;
   stroke-width: 2;
 }
-.g-node rect,
-.g-node circle {
+.g-node rect {
   fill: var(--surface);
   stroke: var(--line);
   stroke-width: 1.2;
-}
-.g-node.visited circle {
-  stroke: var(--accent);
-  stroke-width: 2;
-}
-.g-node.locked circle {
-  stroke-dasharray: 3 3;
-  stroke: var(--muted);
 }
 .g-node text {
   fill: var(--ink);
@@ -762,11 +769,99 @@ h4 {
   cursor: pointer;
 }
 .g-node:hover rect,
-.g-node:hover circle,
-.g-node.sel rect,
-.g-node.sel circle {
+.g-node.sel rect {
   stroke: var(--accent);
   stroke-width: 2;
+}
+/* The map of the places (mapSvg): roads with a darker verge, the route to the selected place
+   over them, each place a square tile. */
+.graphbox .map {
+  margin-inline: auto;
+}
+.map .m-field {
+  fill: url(#map-grass);
+}
+.map .m-g0 {
+  fill: var(--map-grass);
+}
+.map .m-g1 {
+  fill: var(--map-grass-dark);
+}
+.map .m-g2 {
+  fill: var(--map-grass-light);
+}
+.map .m-g3 {
+  fill: var(--map-grass-lighter);
+}
+.map .m-g4 {
+  fill: var(--map-grass-mid);
+}
+.map rect {
+  shape-rendering: crispEdges;
+}
+.map .m-verge,
+.map .m-road,
+.map .m-route {
+  fill: none;
+  stroke-linecap: square;
+}
+.map .m-verge {
+  stroke: var(--map-verge);
+  stroke-width: 11;
+}
+.map .m-road {
+  stroke: var(--map-road);
+  stroke-width: 7;
+}
+.map .m-road.hi {
+  stroke: var(--map-road-hi);
+}
+.map .m-route {
+  stroke: var(--map-route);
+  stroke-width: 4;
+}
+.map .m-arrow {
+  fill: var(--map-place-edge);
+}
+.map .g-node .m-mark {
+  fill: var(--map-place);
+  stroke: var(--map-place-edge);
+  stroke-width: 2;
+}
+.map .g-node.visited .m-mark {
+  fill: var(--map-visited);
+}
+.map .g-node.locked .m-mark {
+  stroke-dasharray: 3 2;
+}
+.map .g-node.start .m-mark {
+  stroke-width: 3;
+}
+.map .g-node:hover .m-mark,
+.map .g-node:focus-visible .m-mark,
+.map .g-node.sel .m-mark {
+  stroke: var(--map-route);
+  stroke-width: 3;
+}
+.map .m-ring {
+  fill: none;
+  stroke: var(--map-route);
+  stroke-width: 2;
+  opacity: 0.6;
+}
+.map .g-node:focus {
+  outline: none;
+}
+.map .m-label {
+  fill: var(--map-label);
+  font: 700 11px var(--font-display);
+  paint-order: stroke;
+  stroke: var(--map-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.map .g-node.sel .m-label {
+  fill: var(--map-route);
 }
 .g-col {
   fill: var(--muted);
