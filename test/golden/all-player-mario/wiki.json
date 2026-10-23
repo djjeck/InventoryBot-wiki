@@ -1402,6 +1402,7 @@
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
       "at": "in cima al monte Grevolo 🏔",
+      "last_seen": "2025-11-27T19:28:02-05:00",
       "observations": 3,
       "exits": [],
       "requires_item": false,
@@ -1414,6 +1415,7 @@
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
       "at": "nelle cripte del monastero 👻",
+      "last_seen": "2025-11-28T11:30:01+09:00",
       "observations": 2,
       "exits": [],
       "requires_item": true,
@@ -1448,6 +1450,7 @@
       "name": "il villaggio di Borgoverde 🏡",
       "label": "Il villaggio di Borgoverde 🏡",
       "at": null,
+      "last_seen": "2025-11-27T18:59:20-05:00",
       "observations": 1,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
@@ -1462,6 +1465,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": "nel bosco nebbioso di Valtorbo 🌲",
+      "last_seen": "2025-11-27T22:00:11-05:00",
       "observations": 9,
       "exits": [
         "l'immenso deserto di Sabbiora 🏜",
@@ -1479,6 +1483,7 @@
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
       "at": "nella valle ventosa 🏞",
+      "last_seen": "2025-11-27T22:00:11-05:00",
       "observations": 10,
       "exits": [
         "i piedi del monte Grevolo ⛰",
@@ -1497,6 +1502,7 @@
       "name": "i piedi del monte Grevolo ⛰",
       "label": "I piedi del monte Grevolo ⛰",
       "at": "ai piedi del monte Grevolo ⛰",
+      "last_seen": "2025-11-27T19:09:32-05:00",
       "observations": 3,
       "exits": [
         "il banco corallino 🐠",
@@ -1512,6 +1518,7 @@
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
       "at": "sul banco corallino 🐠",
+      "last_seen": "2025-11-28T03:16:41+01:00",
       "observations": 4,
       "exits": [
         "la valle ventosa 🏞"
@@ -1528,6 +1535,7 @@
       "name": "la palude sussurrante 🌾",
       "label": "La palude sussurrante 🌾",
       "at": "nella palude sussurrante 🌾",
+      "last_seen": "2025-11-27T19:10:32-05:00",
       "observations": 2,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
@@ -1544,6 +1552,7 @@
       "name": "l'immenso deserto di Sabbiora 🏜",
       "label": "L'immenso deserto di Sabbiora 🏜",
       "at": "nell'immenso deserto di Sabbiora 🏜",
+      "last_seen": "2025-11-27T19:09:02-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": false,
@@ -1556,6 +1565,7 @@
       "name": "il magnifico Palazzo di Cristallo 🏰",
       "label": "Il magnifico Palazzo di Cristallo 🏰",
       "at": "nel magnifico Palazzo di Cristallo 🏰",
+      "last_seen": "2025-11-27T19:11:02-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": true,

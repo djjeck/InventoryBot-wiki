@@ -488,6 +488,8 @@ export interface WikiLocation {
    * nebbioso di Valtorbo 🌲"), from the latest reply naming it; null if none did.
    */
   at: string | null;
+  /** The date of the latest observation naming it. */
+  last_seen: string | null;
   /** How many observations name it: replies of the bot and channel cards, each once. */
   observations: number;
   exits: string[];

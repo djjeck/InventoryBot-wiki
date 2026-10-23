@@ -711,6 +711,7 @@ describe('position', () => {
         name: P(FONDALE),
         label: 'Il banco corallino 🐠',
         at: FONDALE,
+        last_seen: iso(0),
         observations: 1,
         exits: [],
         requires_item: true,
@@ -1380,6 +1381,8 @@ describe('observations', () => {
     expect(wiki.items['un sasso']?.observations).toBe(3);
     expect(wiki.recipes['Torre']?.observations).toBe(2);
     expect(wiki.locations[P(BOSCO)]?.observations).toBe(2);
+    // Named last as an exit; the drop attributed to it does not date it.
+    expect(wiki.locations[P(BOSCO)]?.last_seen).toBe(iso(50));
   });
 
   it('a_renamed_item_counts_the_observations_of_both_names', () => {

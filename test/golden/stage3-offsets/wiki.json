@@ -78,6 +78,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": "nel bosco nebbioso di Valtorbo 🌲",
+      "last_seen": "2025-11-27T21:15:01-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": false,
@@ -90,6 +91,7 @@
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
       "at": "nella valle ventosa 🏞",
+      "last_seen": "2025-11-28T03:16:41+01:00",
       "observations": 1,
       "exits": [
         "il banco corallino 🐠"
@@ -106,6 +108,7 @@
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
       "at": "sul banco corallino 🐠",
+      "last_seen": "2025-11-28T03:16:41+01:00",
       "observations": 1,
       "exits": [],
       "requires_item": false,

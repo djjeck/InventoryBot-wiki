@@ -215,6 +215,8 @@ export interface KbLocation {
   /** As the bot writes it ("nel bosco …"), from the latest reply naming it, and that reply's date. */
   at: string | null;
   atDate: string | null;
+  last_seen: string | null;
+  firstSeen: string | null;
   /** The events that named it (KB.event), each once: its observations. */
   seenIn: Set<object>;
   exits: Set<string>;
@@ -359,7 +361,7 @@ export class KB {
     return r;
   }
 
-  /** The place, made if new; `named`: the current event names it, an observation. */
+  /** The place, made if new; `named`: the current event names it, an observation that dates it. */
   location(name: string, named = true): KbLocation {
     let l = this.locations.get(name);
     if (l === undefined) {
@@ -368,6 +370,8 @@ export class KB {
         label: placeLabel(name),
         at: null,
         atDate: null,
+        last_seen: null,
+        firstSeen: null,
         seenIn: new Set(),
         exits: new Set(),
         requires_item: false,
@@ -377,7 +381,7 @@ export class KB {
       };
       this.locations.set(name, l);
     }
-    if (named && this.event !== null) l.seenIn.add(this.event);
+    if (named) this.touch(l);
     return l;
   }
 
@@ -1842,6 +1846,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       name: l.name,
       label: l.label,
       at: l.at,
+      last_seen: l.last_seen,
       observations: l.seenIn.size,
       exits: sortedStrings(l.exits),
       requires_item: l.requires_item,

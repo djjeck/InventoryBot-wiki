@@ -97,6 +97,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": "nel bosco nebbioso di Valtorbo 🌲",
+      "last_seen": "2025-11-27T22:00:11-05:00",
       "observations": 1,
       "exits": [
         "la valle ventosa 🏞"
@@ -111,6 +112,7 @@
       "name": "la valle ventosa 🏞",
       "label": "La valle ventosa 🏞",
       "at": "nella valle ventosa 🏞",
+      "last_seen": "2025-11-27T22:00:11-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": false,

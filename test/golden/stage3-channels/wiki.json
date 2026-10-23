@@ -209,6 +209,7 @@
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
       "at": null,
+      "last_seen": "2025-11-27T18:59:20-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": true,
@@ -244,6 +245,7 @@
       "name": "il villaggio di Borgoverde 🏡",
       "label": "Il villaggio di Borgoverde 🏡",
       "at": null,
+      "last_seen": "2025-11-27T18:59:20-05:00",
       "observations": 1,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
@@ -258,6 +260,7 @@
       "name": "il bosco nebbioso di Valtorbo 🌲",
       "label": "Il bosco nebbioso di Valtorbo 🌲",
       "at": null,
+      "last_seen": "2025-11-27T18:59:20-05:00",
       "observations": 1,
       "exits": [
         "le cripte del monastero 👻"
