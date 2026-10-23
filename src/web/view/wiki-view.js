@@ -143,7 +143,7 @@
     const freshness = (d) =>
       !d
         ? ''
-        : `<span>· aggiornato al ${fmtDate(d)}${new Date(d) < PREVIOUS_BOT_UNTIL ? ` <span class="stale" role="img" title="${PREVIOUS_BOT_NOTE}" aria-label="${PREVIOUS_BOT_NOTE}">⚠️</span>` : ''}</span>`;
+        : `aggiornato al ${fmtDate(d)}${new Date(d) < PREVIOUS_BOT_UNTIL ? ` <span class="stale" role="img" title="${PREVIOUS_BOT_NOTE}" aria-label="${PREVIOUS_BOT_NOTE}">⚠️</span>` : ''}`;
 
     // ---- small renderers ---------------------------------------------------------
     const tag = (rar) =>
@@ -226,26 +226,30 @@
     const listIt = (xs) =>
       xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} e ${xs.at(-1)}`;
     /**
-     * Where a channel's card stands behind what the page shows: the card's channel and
-     * date, what of it the page still shows (`what`: field -> its name), and its notes.
-     * `dated`: the card's fields give way to what the bot showed later (a recipe's); else
-     * a card only adds (a place's).
+     * The last line of an entry: its sources (the channel card behind it, with what of it
+     * the page still shows, `what`: field -> its name; and the bot, unless the card is
+     * all), how many observations name it, and when it was last confirmed.
      */
-    const channelSec = (card, what, dated = true) => {
-      if (!card) return '';
-      const from = `una scheda di <b>${esc(card.name)}</b>${card.date ? ` del ${fmtDate(card.date)}` : ''}`;
-      const shown = card.fields.map((f) => what[f]).filter(Boolean);
-      // "lo" for one masculine singular field ("il livello"), else "li".
-      const one = shown.length === 1 && !/^(?:gli|le|i) /u.test(shown[0]);
-      const later = dated
-        ? `: il bot non ${one ? 'lo' : 'li'} ha ancora ${one ? 'mostrato' : 'mostrati'} più di recente`
-        : '';
-      const lead = shown.length
-        ? `${listIt(shown).replace(/^./, (c) => c.toUpperCase())} ${shown.length === 1 ? 'viene' : 'vengono'} da ${from}${later}.`
-        : `C'è anche ${from}; ciò che il bot ha mostrato dopo ha la precedenza.`;
-      const notes = card.notes.map((n) => `<p class="note">${esc(n)}</p>`).join('');
-      return sec('Dai canali', `<p class="note">${lead}</p>${notes}`);
+    const sourcesLine = (x, card, what = {}) => {
+      const given = card ? card.fields.map((f) => what[f]).filter(Boolean) : [];
+      const names = [
+        ...(card
+          ? [
+              `${esc(card.name)}${card.date ? ` del ${fmtDate(card.date)}` : ''}${given.length ? ` (${listIt(given)})` : ''}`,
+            ]
+          : []),
+        ...(!card || x.observations > 1 ? ['InventoryBot'] : []),
+      ];
+      const n = x.observations;
+      return `<p class="sources">Fonti: ${[names.join(', '), n ? `${n} ${n === 1 ? 'osservazione' : 'osservazioni'}` : '', freshness(x.last_seen)].filter(Boolean).join(' · ')}</p>`;
     };
+    /** What else is known of an entry, beyond the bot's reply: a channel card's text, trivia. */
+    const moreInfo = (...parts) => {
+      const body = parts.filter(Boolean).join('');
+      return body ? sec('Altre informazioni', body) : '';
+    };
+    const notesOf = (card) =>
+      (card?.notes || []).map((n) => `<p class="note">${esc(n)}</p>`).join('');
     const chips = (xs, f) =>
       xs.length
         ? `<div class="chips">${xs.map(f).join('')}</div>`
@@ -461,7 +465,7 @@
         : `<span class="arrow" aria-hidden="true">→</span> ? <span class="makes-unknown">non ancora osservato</span>`;
       return page(
         personal,
-        `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span>${freshness(r.last_seen)}</div>
+        `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span></div>
     <h2>${esc(name)}</h2>
     <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p></div>
     ${detailBubble}
@@ -475,7 +479,8 @@
     ${craftBubble}
     ${out}
     ${flow}
-    ${channelSec(r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}`
+    ${moreInfo(notesOf(r.channel))}
+    ${sourcesLine(r, r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}`
       );
     }
 
@@ -662,39 +667,38 @@
         : '';
       return page(
         personal,
-        `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${freshness(i.last_seen)}</div>
+        `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}</div>
     <h2>${esc(name)}</h2>
     ${madeBy(i)}
-    ${i.exclusive ? `<p class="note">Il + nella rarità indica un oggetto che esce in un solo luogo.</p>` : ''}
-    ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
-    ${itemBubble(i)}
     ${
+      // A "+" item drops in one place: where, right under its name.
       i.exclusive
-        ? `<p class="note">${i.locations.length ? `Esce solo qui: ${i.locations.map(locLink).join(', ')}.` : 'Esce in un solo luogo, non ancora identificato.'}</p>`
+        ? `<p class="makes">${i.locations.length ? `Esce solo qui: ${i.locations.map((k) => goLink('loc', k, at(k))).join(', ')}` : '<span class="makes-unknown">Esce in un solo luogo, non ancora identificato.</span>'}</p>`
         : ''
     }
+    ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
+    ${itemBubble(i)}
     ${i.sources_inferred ? '<p class="note">Come si ottiene è dedotto dalla rarità: il bot non lo ha ancora detto.</p>' : ''}
-    ${
+    ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
+    ${moreInfo(
+      itemCardText(i.channel),
       i.old_names?.length
-        ? sec(
-            'Nomi precedenti',
+        ? '<h4>Nomi precedenti</h4>' +
             i.old_names
               .map(
                 (o) =>
                   `<p class="note"><b>${esc(o.name)}</b>, visto l'ultima volta il ${fmtDate(o.last_seen)}. Rinomina dedotta: ${esc(o.evidence)}.</p>`
               )
               .join('')
-          )
         : ''
-    }
-    ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
-    ${itemCardSec(i.channel)}
+    )}
+    ${sourcesLine(i, i.channel, { rarity: 'la rarità' })}
 `
       );
     }
 
     /** What an item card says: how the item is obtained, what it is for, what a use does to it. */
-    function itemCardSec(card) {
+    function itemCardText(card) {
       if (!card || !card.obtain) return '';
       const para = (xs) => xs.map((x) => `<p class="note">${esc(x)}</p>`).join('');
       const cooldown =
@@ -706,15 +710,13 @@
       const consumed =
         card.consumed === null ? '' : card.consumed ? 'si consuma' : "resta nell'inventario";
       const facts = [consumed, cooldown].filter(Boolean).join(', ');
-      return sec(
-        'Dai canali',
-        `<p class="note">Da una scheda di <b>${esc(card.name)}</b>${card.date ? ` del ${fmtDate(card.date)}` : ''}${card.fields.includes('rarity') ? '; anche la rarità, che il bot non ha mostrato più di recente' : ''}.</p>` +
-          (card.obtain.length ? `<h4>Come si ottiene</h4>${para(card.obtain)}` : '') +
-          (card.usage.length ? `<h4>A cosa serve</h4>${para(card.usage)}` : '') +
-          (card.effect
-            ? `<h4>Dopo l'uso</h4><p class="note">${esc(card.effect)}${facts ? ` (${facts})` : ''}</p>`
-            : '') +
-          para(card.notes)
+      return (
+        (card.obtain.length ? `<h4>Come si ottiene</h4>${para(card.obtain)}` : '') +
+        (card.usage.length ? `<h4>A cosa serve</h4>${para(card.usage)}` : '') +
+        (card.effect
+          ? `<h4>Dopo l'uso</h4><p class="note">${esc(card.effect)}${facts ? ` (${facts})` : ''}</p>`
+          : '') +
+        para(card.notes)
       );
     }
 
@@ -763,9 +765,16 @@
       return page(
         personal,
         `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}${l.secret ? '<span>· segreto</span>' : ''}</div>
-    <h2>${esc(l.label)}</h2></div>
+    <h2>${esc(l.label)}</h2>
+    ${
+      // What it takes to enter, right under its name.
+      (l.required_items || []).length
+        ? `<p class="makes">Per entrare serve: ${l.required_items.map((n) => `<span class="made">${goLink('item', current(n))} ${tag(I[current(n)]?.rarity)}</span>`).join('<span class="sep">,</span> ')}</p>`
+        : l.requires_item
+          ? '<p class="makes"><span class="makes-unknown">Per entrare serve un oggetto non ancora identificato.</span></p>'
+          : ''
+    }</div>
     ${placeBubble(l, inbound)}
-    ${(l.required_items || []).length ? sec('Oggetti necessari', chips(l.required_items, itemLink)) : ''}
     ${(l.sight_items || []).length ? sec('Per vederlo tra le destinazioni', `<p class="note">Senza questi oggetti il luogo non compare nel pannello di viaggio.</p>` + chips(l.sight_items, itemLink)) : ''}
     ${
       l.unlock_texts.length
@@ -773,15 +782,13 @@
         : l.requires_item
           ? sec(
               'Come si sblocca',
-              bubble([`non puoi andare: ${esc(at(name))}.. Forse ti manca qualcosa!`]) +
-                ((l.required_items || []).length
-                  ? ''
-                  : '<p class="note">Serve un oggetto non ancora identificato.</p>')
+              bubble([`non puoi andare: ${esc(at(name))}.. Forse ti manca qualcosa!`])
             )
           : ''
     }
     ${sec('Oggetti esclusivi', chips(excl, itemLink))}
-    ${channelSec(l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" }, false)}
+    ${moreInfo(notesOf(l.channel))}
+    ${sourcesLine(l, l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" })}
 `
       );
     }

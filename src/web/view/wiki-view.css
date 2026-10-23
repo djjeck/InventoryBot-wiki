@@ -563,6 +563,14 @@ body:has(.sidebar) {
   font-size: 0.85rem;
   margin: 0;
 }
+/* An entry's sources, its last line. */
+.sources {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
 /* The warning of a fact confirmed long ago; its title explains it. */
 .stale {
   cursor: help;
