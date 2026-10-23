@@ -166,10 +166,15 @@
     // Telegram bubble, worded for any player ("serve", not "ti serve"), with links; what
     // the bot does not say follows it.
     const bubble = (lines) =>
-      `<div class="bubble">${lines.map((l) => `<div class="b-line">${l}</div>`).join('')}</div>`;
+      `<div class="bubble">${lines.map((l) => `<div class="b-line${l.startsWith('- ') ? ' b-item' : ''}">${l}</div>`).join('')}</div>`;
     /** A plain link, as a name inside a bot's reply. */
-    const goLink = (kind, n, text = n) =>
-      `<button class="link" data-go="${kind}" data-name="${esc(n)}">${esc(text)}</button>`;
+    // A real link to the entry's address, so that it wraps as text does and opens in a
+    // new tab like any link; a plain click shows the entry in place (see `go`).
+    const goLink = (kind, n, text = n) => {
+      const tab = { item: 'oggetti', recipe: 'ricette', loc: 'luoghi' }[kind];
+      const slug = SLUGS[tab].byName.get(n);
+      return `<a class="link" href="#${tab}${slug ? '/' + slug : ''}" data-go="${kind}" data-name="${esc(n)}">${esc(text)}</a>`;
+    };
     /** An item as the bot writes it: its name, then `[R]` and `[usabile]`. */
     const rarityRef = (i, cls = '') =>
       `<span class="t-${rarityGroup(i?.rarity)}${cls}" title="${esc(rarityName(rarityGroup(i?.rarity)))}">[${esc(i?.rarity || '?')}]</span>`;
@@ -418,31 +423,41 @@
             )
           : '';
       const me = mineR(name);
+      // As /esamina of the recipe would answer the owner: what they lack, what they have.
+      const owned = ingredients.map(([n, q]) => {
+        const h = have(n);
+        return { n, q, own: h?.qty || 0, exact: h ? h.exact : true };
+      });
+      const count = (k, exact) => `x${exact ? '' : '≥'}${k}`;
+      const lacking = owned
+        .filter((o) => (o.q ? o.own < o.q : !o.own))
+        .map((o) => `- ${itemRef(o.n)} ${o.q ? `x${o.q - o.own}` : 'x?'}`);
+      const holding = owned
+        .filter((o) => o.own)
+        .map((o) => `- ${itemRef(o.n)} ${count(o.q ? Math.min(o.own, o.q) : o.own, o.exact)}`);
       const personal = P
-        ? personalSec([
-            me
-              ? `Eseguita ${me.crafted} ${me.crafted === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(me.last_crafted)}.`
-              : 'Mai eseguita.',
-            r.ingredients
-              ? readyEst(r)
-                ? 'Secondo la stima hai tutti gli ingredienti.'
-                : 'Secondo la stima ti mancano degli ingredienti.'
-              : '',
+        ? myCard(
             ingredients.length
-              ? `Ne hai, secondo la stima: ${ingredients
-                  .map(([n, q]) => {
-                    const h = have(n);
-                    return `${goLink('item', current(n))} <span class="mine${(h?.qty || 0) >= (q || 1) ? ' ok' : ''}">${haveTxt(h)}${q ? '/' + q : ''}</span>`;
-                  })
-                  .join(', ')}.`
-              : '',
-          ])
+              ? [
+                  `@${esc(P.player)}, per fare la ricetta <b>${esc(name)}</b> ti manca:`,
+                  ...lacking,
+                  ...(holding.length ? ["Mentre hai gia':", ...holding] : []),
+                ]
+              : [],
+            [
+              me
+                ? `Eseguita ${me.crafted} ${me.crafted === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(me.last_crafted)}.`
+                : 'Mai eseguita.',
+            ]
+          )
         : '';
       // The item it makes is part of the title: a recipe is the way to obtain it.
       const makes = r.output
         ? `<span class="arrow" aria-hidden="true">→</span> ${goLink('item', current(r.output))} ${tag(I[current(r.output)]?.rarity)}`
         : `<span class="arrow" aria-hidden="true">→</span> ? <span class="makes-unknown">non ancora osservato</span>`;
-      return `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span>${freshness(r.last_seen)}</div>
+      return page(
+        personal,
+        `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span>${freshness(r.last_seen)}</div>
     <h2>${esc(name)}</h2>
     <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p></div>
     ${detailBubble}
@@ -456,19 +471,29 @@
     ${craftBubble}
     ${out}
     ${flow}
-    ${channelSec(r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}
-    ${personal}`;
+    ${channelSec(r.channel, { level: 'il livello', ingredients: 'gli ingredienti', output: "l'oggetto ottenuto" })}`
+      );
     }
 
-    function personalSec(lines) {
-      const body = lines
-        .filter(Boolean)
-        .map((l) => `<p class="note">${l}</p>`)
-        .join('');
-      return body
-        ? `<div class="section personal"><h3>I tuoi dati · @${esc(P.player)}</h3>${body}</div>`
-        : '';
+    /**
+     * The owner's own state of an entry, as a card beside it (above it when narrow): what
+     * the bot would reply to them, from the inventory estimate (`lines`, in its words),
+     * then what it would not say (`notes`).
+     */
+    function myCard(lines, notes) {
+      const body =
+        (lines.length ? bubble(lines) : '') +
+        notes
+          .filter(Boolean)
+          .map((l) => `<p class="note">${l}</p>`)
+          .join('');
+      return `<aside class="my-card" aria-label="I tuoi dati">
+    <div class="my-head"><span class="peer" aria-hidden="true">${esc(P.player.charAt(0).toUpperCase())}</span><div><b>@${esc(P.player)}</b><span class="my-asof">stima al ${fmtDate(P.as_of)}</span></div></div>
+    ${body}</aside>`;
     }
+    /** An entry's page: the owner's card, if any, and the entry. */
+    const page = (card, body) =>
+      `<div class="detail-grid">${card}<div class="detail-body">${body}</div></div>`;
 
     // ---- items -------------------------------------------------------------------
     const ITEM_FILTERS = {
@@ -608,15 +633,19 @@
       if (!i) return `<p class="empty">Seleziona un oggetto dall'elenco.</p>`;
       const h = have(name),
         seenAt = P?.items[name]?.first_seen;
+      // As /esamina of the item would answer the owner.
       const personal = P
-        ? personalSec([
-            h
-              ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty} (stima; ultimo riscontro con ${VIA[h.via] || h.via} il ${fmtDate(h.date)}).`
-              : 'Non ne hai, secondo la stima.',
-            seenAt ? `Visto per la prima volta il ${fmtDate(seenAt)}.` : '',
-          ])
+        ? myCard(
+            [h ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty}.` : 'Non ne hai neanche uno.'],
+            [
+              h ? `Ultimo riscontro con ${VIA[h.via] || h.via} il ${fmtDate(h.date)}.` : '',
+              seenAt ? `Visto per la prima volta il ${fmtDate(seenAt)}.` : '',
+            ]
+          )
         : '';
-      return `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${freshness(i.last_seen)}</div>
+      return page(
+        personal,
+        `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}${freshness(i.last_seen)}</div>
     <h2>${esc(name)}</h2>
     ${madeBy(i)}
     ${i.exclusive ? `<p class="note">Il + nella rarità indica un oggetto che esce in un solo luogo.</p>` : ''}
@@ -643,7 +672,8 @@
     }
     ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
     ${itemCardSec(i.channel)}
-    ${personal}`;
+`
+      );
     }
 
     /** What an item card says: how the item is obtained, what it is for, what a use does to it. */
@@ -693,12 +723,17 @@
         .map((o) => o.name);
       const pl = P?.locations[name];
       const personal = P
-        ? personalSec([
-            pl?.visited ? 'Visitato.' : 'Mai visitato.',
-            pl?.adventures ? `${pl.adventures} avventure fatte qui.` : '',
-          ])
+        ? myCard(
+            [],
+            [
+              pl?.visited ? 'Visitato.' : 'Mai visitato.',
+              pl?.adventures ? `${pl.adventures} avventure fatte qui.` : '',
+            ]
+          )
         : '';
-      return `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}${l.secret ? '<span>· segreto</span>' : ''}</div>
+      return page(
+        personal,
+        `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}${l.secret ? '<span>· segreto</span>' : ''}</div>
     <h2>${esc(l.label)}</h2></div>
     ${(l.required_items || []).length ? sec('Oggetti necessari', chips(l.required_items, itemLink)) : ''}
     ${(l.sight_items || []).length ? sec('Per vederlo tra le destinazioni', `<p class="note">Senza questi oggetti il luogo non compare nel pannello di viaggio.</p>` + chips(l.sight_items, itemLink)) : ''}
@@ -724,7 +759,8 @@
     )}
     ${sec('Oggetti esclusivi', chips(excl, itemLink))}
     ${channelSec(l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" }, false)}
-    ${personal}`;
+`
+      );
     }
     function mapSvg() {
       const names = Object.keys(L),
@@ -1014,7 +1050,16 @@
         showDetail();
         return;
       }
-      if (t.dataset.go) go(t.dataset.go, t.dataset.name);
+      if (t.dataset.go) {
+        // A link opened elsewhere (a new tab, a new window) is left to the browser.
+        if (
+          t.tagName === 'A' &&
+          (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+        )
+          return;
+        e.preventDefault();
+        go(t.dataset.go, t.dataset.name);
+      }
     });
     root.addEventListener('keydown', (e) => {
       if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.g-node')) {

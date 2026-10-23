@@ -278,18 +278,6 @@ main:focus {
   font-weight: 500;
   overflow-wrap: anywhere;
 }
-.peer {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(#5caffa, #408acf);
-  color: #fff;
-  font-size: 1.15rem;
-  font-weight: 500;
-}
 .exports {
   list-style: none;
   margin: 0;
