@@ -132,17 +132,18 @@
         (I[n]?.used_in || []).some((o) => o !== r.name && lvl(o) > (r.level || 0))
       ).length;
 
-    // Freshness: groups hold years of history and the game changes, so facts last
-    // confirmed long before the data was generated are flagged as possibly outdated.
-    const OLD_DAYS = 365;
-    const isOld = (d) =>
-      d && W.generated && (new Date(W.generated) - new Date(d)) / 864e5 > OLD_DAYS;
+    // Freshness: until July 2021 the game ran on a previous bot (docs/bot-protocol.md,
+    // "Older formats"). A fact last confirmed only then may belong to the game's early
+    // days, or to a one-off since removed, and is flagged, with the reason on hover; one
+    // confirmed by the current bot is likely still there, however long ago. A fixed date:
+    // the flag does not spread to the current game as time passes.
+    const PREVIOUS_BOT_UNTIL = new Date('2021-08-01T00:00:00Z');
+    const PREVIOUS_BOT_NOTE =
+      'Visto l’ultima volta con il bot precedente, in uso fino a luglio 2021: potrebbe non esistere più.';
     const freshness = (d) =>
       !d
         ? ''
-        : isOld(d)
-          ? `<span class="stale" title="Ultima conferma più di un anno prima della generazione dei dati">· visto l'ultima volta nel ${new Date(d).getFullYear()}: potrebbe essere superato</span>`
-          : `<span>· ultima conferma ${fmtDate(d)}</span>`;
+        : `<span>· aggiornato al ${fmtDate(d)}${new Date(d) < PREVIOUS_BOT_UNTIL ? ` <span class="stale" role="img" title="${PREVIOUS_BOT_NOTE}" aria-label="${PREVIOUS_BOT_NOTE}">⚠️</span>` : ''}</span>`;
 
     // ---- small renderers ---------------------------------------------------------
     const tag = (rar) =>

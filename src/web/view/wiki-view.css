@@ -563,8 +563,9 @@ body:has(.sidebar) {
   font-size: 0.85rem;
   margin: 0;
 }
+/* The warning of a fact confirmed long ago; its title explains it. */
 .stale {
-  color: var(--warn);
+  cursor: help;
 }
 .mine {
   font-family: var(--font-mono);
