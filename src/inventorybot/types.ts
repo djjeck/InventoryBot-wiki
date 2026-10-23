@@ -533,7 +533,8 @@ export interface PlayerState {
   /** Date of the owner's latest event. */
   as_of: string | null;
   recipes: Record<string, { crafted: number; last_crafted: string | null }>;
-  items: Record<string, { first_seen: string | null }>;
+  /** Per item: when first seen; `used` and `last_used` only for an item the owner used successfully. */
+  items: Record<string, { first_seen: string | null; used?: number; last_used?: string | null }>;
   locations: Record<string, { visited: boolean; adventures: number }>;
   /** The latest /ricetta list: recipe -> `pronta` or `manca N`. */
   /** The latest /ricetta list; `truncated`: it was cut, so a recipe missing from it may still be visible. */

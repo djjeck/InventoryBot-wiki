@@ -632,7 +632,8 @@
       const i = I[name];
       if (!i) return `<p class="empty">Seleziona un oggetto dall'elenco.</p>`;
       const h = have(name),
-        seenAt = P?.items[name]?.first_seen;
+        mineI = P?.items[name],
+        seenAt = mineI?.first_seen;
       // As /esamina of the item would answer the owner.
       const personal = P
         ? myCard(
@@ -640,6 +641,11 @@
             [
               h ? `Ultimo riscontro con ${VIA[h.via] || h.via} il ${fmtDate(h.date)}.` : '',
               seenAt ? `Visto per la prima volta il ${fmtDate(seenAt)}.` : '',
+              i.usable
+                ? mineI?.used
+                  ? `Usato ${mineI.used} ${mineI.used === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(mineI.last_used)}.`
+                  : 'Mai usato.'
+                : '',
             ]
           )
         : '';

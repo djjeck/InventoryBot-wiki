@@ -5,7 +5,8 @@
  * "resolved"/"location", craft "recipe", use "used_item"). Produces the player state:
  *
  *   recipes     times crafted and last time, per recipe
- *   items       first time each item was seen
+ *   items       first time each item was seen, and successful /usa of it (times and
+ *               last time)
  *   locations   visited or not, adventures done there
  *   recipe_list the latest /ricetta list (visible recipes and their status; if it was
  *               truncated, the recipes after the cut are unknown)
@@ -193,6 +194,8 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
   const crafted = new Map<string, number>();
   const lastCrafted = new Map<string, string | null>();
   const firstSeen = new Map<string, string | null>();
+  const used = new Map<string, number>();
+  const lastUsed = new Map<string, string | null>();
   const visited = new Set<string>();
   const adventures = new Map<string, number>();
   let lastList: PlayerState['recipe_list'] = null;
@@ -286,11 +289,15 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
         seen(x.name, d);
         hold.delta(x.name, x.qty, d);
       }
-      // A successful use of an item the wiki found to be consumed takes one away;
-      // for items whose consumption is not verified the count is left alone.
-      const used = e.used_item;
-      if (used && kb.items.get(used)?.use?.consumed && !isFailedUse(e.text))
-        hold.delta(used, -1, d);
+      const item = e.used_item;
+      if (item && !isFailedUse(e.text)) {
+        seen(item, d);
+        increment(used, item);
+        lastUsed.set(item, d);
+        // A successful use of an item the wiki found to be consumed takes one away;
+        // for items whose consumption is not verified the count is left alone.
+        if (kb.items.get(item)?.use?.consumed) hold.delta(item, -1, d);
+      }
     } else if (e.type === 'miss' && e.owned !== undefined) {
       // "non ne hai abbastanza, ne possiedi solo N": exact, for the item the /dai named.
       const item = daiItem(e.query, hold, kb);
@@ -313,7 +320,17 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     recipes: Object.fromEntries(
       byKey(crafted).map(([n, c]) => [n, { crafted: c, last_crafted: lastCrafted.get(n) ?? null }])
     ),
-    items: Object.fromEntries(byKey(firstSeen).map(([n, d]) => [n, { first_seen: d }])),
+    items: Object.fromEntries(
+      byKey(firstSeen).map(([n, d]) => {
+        const u = used.get(n);
+        return [
+          n,
+          u === undefined
+            ? { first_seen: d }
+            : { first_seen: d, used: u, last_used: lastUsed.get(n) ?? null },
+        ];
+      })
+    ),
     locations: Object.fromEntries(
       [...kb.locations.keys()]
         .sort(compareCodePoints)

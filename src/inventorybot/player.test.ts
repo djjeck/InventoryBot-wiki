@@ -580,6 +580,21 @@ describe('consumed on use', () => {
     expect(invOf([pozione(3, 0), use(1)])[0]).toStrictEqual({ 'una pozione': 3 });
   });
 
+  it('successful_uses_counted_per_item', () => {
+    const events = [
+      pozione(3, 0),
+      use(1),
+      use(2, '@djjeck, non hai la chiave giusta per aprire questo baule..'),
+      use(3),
+    ];
+    const { state } = runBuild(events);
+    expect(state.items['una pozione']).toStrictEqual({
+      first_seen: events[0]?.date,
+      used: 2,
+      last_used: events[3]?.date,
+    });
+  });
+
   it('failed_use_does_not_consume', () => {
     const [inv] = invOf([
       pozione(3, 0),
