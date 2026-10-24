@@ -846,6 +846,7 @@ describe('uses', () => {
   it('noise_ignored', () => {
     const { kb, wiki } = runUses([
       ['/usa dado a dodici', '@djjeck, non hai niente del genere di usabile.'],
+      ['/usa dado a dodici', "@djjeck, non puoi usare quell'oggetto.."],
     ]);
     expect(wiki.items['un dado a dodici facce']).not.toHaveProperty('use');
     expect(kb.report.has('unresolved_use')).toBe(false);

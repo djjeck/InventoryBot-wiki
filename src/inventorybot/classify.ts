@@ -864,6 +864,12 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
     match: { anywhere: 'non hai niente del genere di usabile' },
     commands: ['/usa'],
   },
+  // An item that is not usable: a refusal, not what a use does.
+  {
+    name: 'use_not_usable',
+    match: { anywhere: "non puoi usare quell'oggetto" },
+    commands: ['/usa'],
+  },
   {
     name: 'item_not_owned',
     match: { anywhere: 'non hai niente del genere' },

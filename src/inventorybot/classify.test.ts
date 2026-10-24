@@ -703,11 +703,13 @@ describe('noise', () => {
         '@djjeck, cosa vuoi esaminare?',
         "@djjeck, troppe ricette trovate, sii piu' preciso",
         '@djjeck, non hai niente del genere di usabile.',
+        "@djjeck, non puoi usare quell'oggetto..",
       ].map((t) => classify(t, null))
     ).toStrictEqual([
       { type: 'miss', reply: 'examine_what', command: '/esamina' },
       { type: 'miss', reply: 'recipe_ambiguous' }, // /ricetta or /esamina
       { type: 'miss', reply: 'use_not_owned', command: '/usa' },
+      { type: 'miss', reply: 'use_not_usable', command: '/usa' },
     ]);
     expect(
       classify('ciao @djjeck, per giocare con me devi prima registrarti!', null)
