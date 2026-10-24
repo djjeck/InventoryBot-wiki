@@ -1191,8 +1191,10 @@ export function useTemplate(text: string): string {
 }
 
 /**
- * Items a /usa query can name. Arguments after the item ("/usa caps # palude")
- * are dropped word by word until something matches; usable items come first.
+ * Items a /usa query can name: those its part before "#" names, the item's argument
+ * following it ("/usa caps # palude", "/usa idea # N <name>"), which may name other
+ * items. Without "#", trailing words are dropped one by one until something matches.
+ * Usable items come first.
  */
 export function useCandidates(
   items: ReadonlyMap<string, unknown>,
@@ -1214,6 +1216,15 @@ const fitting = (pool: NamesWithWords, words: readonly string[]): string[] =>
 
 /** useCandidates, on the items' and usable items' names with their words. */
 function candidatesOf(all: NamesWithWords, usable: NamesWithWords, query: string): string[] {
+  const hash = query.indexOf('#');
+  if (hash > 0) {
+    const qw = norm(query.slice(0, hash));
+    for (const pool of [usable, all]) {
+      const c = fitting(pool, qw);
+      if (c.length > 0) return c;
+    }
+    return [];
+  }
   let qw = norm(query);
   while (qw.length > 0) {
     for (const pool of [usable, all]) {

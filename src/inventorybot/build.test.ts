@@ -889,6 +889,16 @@ describe('uses', () => {
     expect(f(events[1] as BuildEvent)['used_item']).toBe('una caps rossa');
   });
 
+  it('the_argument_after_the_hash_never_names_the_item_used', () => {
+    // "una capsula" has every word of the command, the argument's included: the item
+    // used is still the one before "#".
+    const { events } = runUses(
+      [['/usa caps # una capsula', '@djjeck, lanci il tappo nella palude']],
+      [ev(T.inventory([['una capsula', 'C', 1]]), '/inventario', { t: 1 })]
+    );
+    expect(f(events[1] as BuildEvent)['used_item']).toBe('una caps rossa');
+  });
+
   it('use_candidates_prefer_usable', () => {
     const kb = build(
       [

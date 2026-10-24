@@ -165,7 +165,10 @@ Arguments:
 
 - `/dai` is written `/dai @user [quantity] item` (`/dai @lucia_b 10 moneta`); the `@` is optional
   and the default quantity is 1.
-- The teleport capsule takes its destination after `#`: `/usa capsula # molo`.
+- `/usa` takes the item's argument after `#`, the item before it: the teleport capsule its
+  destination (`/usa capsula # molo`), a Pakkomon the player to fight (`/usa <pakkomon> # @user`) or
+  an item to equip it with, an idea the rarity and name of the item it is to become
+  (`/usa idea # N <name>`).
 - In groups a command may be written `/cmd@InventoryBot args`.
 
 **Name lookup.** Item, recipe and place arguments are matched by words: a name matches when every
