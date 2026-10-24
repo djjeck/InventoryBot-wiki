@@ -726,6 +726,7 @@ describe('noise', () => {
         "@djjeck cervello non e' un utente e non hai oggetti del genere.",
         "@djjeck quello non e' ne un utente ne un oggetto in tuo possesso.",
         '@djjeck Troppo lungo vecchio...',
+        '@djjeck Troppo corto vecchio...',
       ].map((t) => classify(t, null))
     ).toStrictEqual([
       { type: 'miss', reply: 'examine_what', command: '/esamina' },
@@ -734,7 +735,8 @@ describe('noise', () => {
       { type: 'miss', reply: 'use_not_usable', command: '/usa' },
       { type: 'miss', reply: 'use_target_unknown', command: '/usa' },
       { type: 'miss', reply: 'use_target_not_owned', command: '/usa' },
-      { type: 'miss', reply: 'too_long' },
+      { type: 'miss', reply: 'argument_length' },
+      { type: 'miss', reply: 'argument_length' },
     ]);
     expect(
       classify('ciao @djjeck, per giocare con me devi prima registrarti!', null)

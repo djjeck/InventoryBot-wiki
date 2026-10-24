@@ -866,9 +866,24 @@ describe('uses', () => {
       ['/usa dado a dodici', "@djjeck dado non e' un utente e non hai oggetti del genere."],
       ['/usa dado a dodici', "@djjeck quello non e' ne un utente ne un oggetto in tuo possesso."],
       ['/usa dado a dodici', '@djjeck Troppo lungo vecchio...'],
+      ['/usa dado a dodici', '@djjeck, su che Pakkomon vuoi usarlo?'],
+      ['/usa dado a dodici', '@djjeck, troppi luoghi trovati con quel nome(dod)'],
+      ['/usa dado a dodici', "@djjeck, Qualcosa e' andato storto.. inventoryBot.usabili.FN_3"],
     ]);
     expect(wiki.items['un dado a dodici facce']).not.toHaveProperty('use');
     expect(kb.report.has('unresolved_use')).toBe(false);
+  });
+
+  it('a_failure_echoing_its_argument_is_a_requirement', () => {
+    const { wiki } = runUses([
+      ['/usa chiave # 5', '@djjeck, devi introdurre esattamente 5 oggetti in totale.'],
+      ['/usa chiave # @bea', '@djjeck, @bea non ha un walkie talkie..'],
+    ]);
+    const u = wiki.items['una chiave']?.use;
+    expect([u?.observations, u?.requirements]).toStrictEqual([
+      0,
+      ['devi introdurre esattamente 5 oggetti in totale.', '@bea non ha un walkie talkie..'],
+    ]);
   });
 
   it('failed_use_is_a_requirement', () => {

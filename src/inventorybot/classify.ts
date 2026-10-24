@@ -898,10 +898,10 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
     match: { anywhere: "non e' ne un utente ne un oggetto in tuo possesso" },
     commands: ['/usa'],
   },
-  // An argument too long: the whole reply.
+  // An argument too long or too short: the whole reply.
   {
-    name: 'too_long',
-    match: rx(`${ADDR}Troppo lungo vecchio\\.\\.\\.${S}*${END}`),
+    name: 'argument_length',
+    match: rx(`${ADDR}Troppo (?:lungo|corto) vecchio\\.\\.\\.${S}*${END}`),
     commands: 'any',
   },
   {

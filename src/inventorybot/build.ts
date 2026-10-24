@@ -1166,16 +1166,41 @@ const USE_NOISE: readonly (string | RegExp)[] = [
   // The argument, echoed before these, is neither a player nor an item of the player's.
   "non e' un utente e non hai oggetti del genere",
   "non e' ne un utente ne un oggetto in tuo possesso",
-  /^Troppo lungo vecchio\.\.\.\s*$/u,
+  /^Troppo (?:lungo|corto) vecchio\.\.\.\s*$/u,
+  /^Esiste gia\.\.\.\s*$/u,
   'deve raffreddarsi ancora per',
   'non conosci nessun luogo con quel nome',
   'troppi oggetti trovati con quel nome',
+  // The item's argument missing (the bot asks for it), or not found.
+  'su che Pakkomon vuoi usarlo?',
+  'a chi lo vuoi tirare?',
+  'dove vuoi teletrasportarti?',
+  "Non e' un pakkomon!",
+  'non hai nessun oggetto con quel nome',
+  'nessun oggetto trovato con quel nome',
+  'non conosco nessuno con quel nome',
+  'troppi luoghi trovati con quel nome',
+  // The bot's own errors, and a player not registered yet.
+  /^qualcosa e' andato storto\.\./iu,
+  'per giocare con me devi prima registrarti',
 ];
 /** /usa replies where the use failed for a reason worth keeping (a requirement). */
-export const USE_FAILED = [
+export const USE_FAILED: readonly (string | RegExp)[] = [
   'non hai la chiave giusta',
   'non le hai ancora tutte',
   'non puoi teletrasportarti in quei luoghi',
+  // A player named by the argument (echoed before these) lacks what the use needs.
+  ' non ha un walkie talkie',
+  " non e' un nuovo arrivato",
+  // A Pakkomon that cannot take the use.
+  "quel pakkomon ha gia' bevuto",
+  'i pakkomon boss vanno sfidati in Arena',
+  // What the use needs from the player: items, their number or rarity, an ability.
+  'non hai abbastanza ',
+  'devi introdurre esattamente ',
+  "gli oggetti inseriti devono essere tutti della stessa rarita'",
+  /^Rarità ammesse: /u,
+  'non ti senti in grado di ',
 ];
 
 const hasAny = (text: string, keys: readonly (string | RegExp)[]): boolean =>
