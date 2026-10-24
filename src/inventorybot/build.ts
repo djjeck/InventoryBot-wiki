@@ -1425,6 +1425,9 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
     const ok = es.filter((e) => !isFailedUse(e.text)).map((e) => e.text);
     const failed = es.filter((e) => isFailedUse(e.text)).map((e) => e.text);
     const outcomes = [...new Set(ok)];
+    // An item the bot was seen using is usable, tagged "[usabile]" or not (a Pakkomon,
+    // an item a player equips one with): as an item /esamina shows a cooldown for.
+    if (ok.length > 0) (kb.items.get(name) as KbItem).usable = true;
     const ev = consumed.get(name) ?? new Map<string, number>();
     const yes = ev.get('yes') ?? 0;
     const no = ev.get('no') ?? 0;

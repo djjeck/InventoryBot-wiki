@@ -384,7 +384,7 @@
     "una ruota della fortuna 🎡": {
       "name": "una ruota della fortuna 🎡",
       "rarity": null,
-      "usable": false,
+      "usable": true,
       "sources": [],
       "used_in": [],
       "made_by": [],

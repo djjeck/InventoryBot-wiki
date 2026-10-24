@@ -843,6 +843,22 @@ describe('uses', () => {
     expect(it_['un dado truccato']).not.toHaveProperty('use');
   });
 
+  it('an_item_seen_used_is_usable_untagged', () => {
+    const { wiki } = runUses(
+      [['/usa capsula', '@djjeck, apri la capsula e ne esce una nuvola di fumo']],
+      [ev(T.inventory([['una capsula', 'C', 1]]), '/inventario', { t: 1 })]
+    );
+    expect(wiki.items['una capsula']?.usable).toBe(true);
+  });
+
+  it('a_failed_use_alone_does_not_make_an_item_usable', () => {
+    const { wiki } = runUses(
+      [['/usa capsula', '@djjeck, non hai la chiave giusta per aprire questo baule..']],
+      [ev(T.inventory([['una capsula', 'C', 1]]), '/inventario', { t: 1 })]
+    );
+    expect(wiki.items['una capsula']?.usable).toBe(false);
+  });
+
   it('noise_ignored', () => {
     const { kb, wiki } = runUses([
       ['/usa dado a dodici', '@djjeck, non hai niente del genere di usabile.'],
