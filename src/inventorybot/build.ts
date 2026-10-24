@@ -225,6 +225,8 @@ export interface KbLocation {
   exitDates: Map<string, string | null>;
   /** The date of the latest "Puoi andare verso:" listing of the place, which the exits follow. */
   listedAt: string | null;
+  /** Exits a newer listing left out: closed, unless they lead to a secret place (toJson). */
+  dropped: Set<string>;
   requires_item: boolean;
   unlock_texts: string[];
   /** Items named by "<item> ti serve per passare <place>" notices, and by place cards. */
@@ -381,7 +383,8 @@ export class KB {
   /**
    * A place's "Puoi andare verso:" listing, all of its exits at the time: the newest
    * listing replaces the exits seen before it, as the map of the game changes (a road
-   * can close), while an older one changes nothing.
+   * can close), while an older one changes nothing. A secret place is listed only to a
+   * player who holds its item, so a road to one is not closed by a listing without it.
    */
   listExits(from: string, to: readonly string[]): void {
     const l = this.location(from);
@@ -393,10 +396,12 @@ export class KB {
       if (!to.includes(x) && (d === null || this.now === null || instant(d) <= instant(this.now))) {
         l.exits.delete(x);
         l.exitDates.delete(x);
+        l.dropped.add(x);
       }
     for (const x of to) {
       l.exits.add(x);
       l.exitDates.set(x, this.now);
+      l.dropped.delete(x);
     }
     l.listedAt = this.now;
   }
@@ -412,6 +417,7 @@ export class KB {
         atDate: null,
         exitDates: new Map(),
         listedAt: null,
+        dropped: new Set(),
         last_seen: null,
         firstSeen: null,
         seenIn: new Set(),
@@ -1939,7 +1945,11 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       at: l.at,
       last_seen: l.last_seen,
       observations: l.seenIn.size,
-      exits: sortedStrings(l.exits),
+      // A road to a secret place is not closed by a listing without it (KB.listExits).
+      exits: sortedStrings([
+        ...l.exits,
+        ...[...l.dropped].filter((x) => kb.locations.get(x)?.secret),
+      ]),
       requires_item: l.requires_item,
       unlock_texts: [...l.unlock_texts],
       required_items: sortedStrings(l.required_items),

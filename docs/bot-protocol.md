@@ -493,7 +493,8 @@ NEEDED  = NAME " ti serve per passare " LOCATION " sulla via per tornare al vill
 ```
 
 `EXITS` are the places adjacent to `LOCATION`, including those that need an item: all of them, at
-the time of the reply. The roads change over time, so a place's later `EXITS` can lack one of its
+the time of the reply, except a secret place, which is listed only to a player who holds its item
+(`docs/channels.md`). The roads change over time, so a place's later `EXITS` can lack one of its
 earlier ones. After `BLOCKED` the player has not moved; the reply does not name the missing item.
 `UNLOCK` names the required item, which is not consumed. Most places that need an item have their
 own arrival text, written as a sentence that ends with the place itself ("guidato dalla tua bussola

@@ -787,6 +787,19 @@ describe('exits change', () => {
     expect(exits([after, before])).toStrictEqual([P(PIANURA)]);
   });
 
+  it('a_listing_without_a_secret_place_does_not_close_its_road', () => {
+    // The crypts are secret (their card says so): a player without their item does not see them.
+    const { wiki } = runBuild([
+      card(CRIPTE_CARD, -10, ATLANTE),
+      ev(T.where(BOSCO, [PIANURA, 'nelle cripte del monastero 👻']), '/viaggio', { t: 0 }),
+      ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 10 }),
+    ]);
+    expect(wiki.locations[P(BOSCO)]?.exits).toStrictEqual([
+      'la valle ventosa 🏞',
+      'le cripte del monastero 👻',
+    ]);
+  });
+
   it('an_exit_seen_after_the_latest_listing_is_kept_one_before_it_is_not', () => {
     const { wiki } = runBuild([
       ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 10 }),
