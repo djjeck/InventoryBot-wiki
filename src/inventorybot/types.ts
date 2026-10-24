@@ -373,12 +373,33 @@ export type BuildEvent =
   | (Extract<EventRecord, { type: 'use' }> & { used_item?: string })
   | Exclude<EventRecord, { type: 'drop' | 'craft' | 'use' }>;
 
+/**
+ * A slot of a use's reply, by what it held: a number (its range, and its decimals), a
+ * duration (in seconds), the items, places or Pakkomon named (most frequent first), the
+ * symbols of a row like "[🍓🍋💎]"; a player, a text players typed, or a list (the
+ * scanner's Pakkomon) only by kind (use-shapes.ts).
+ */
+export type WikiUseSlot =
+  | { kind: 'number'; min: number; max: number; decimals: number }
+  | { kind: 'duration'; min: number; max: number }
+  | { kind: 'item' | 'place' | 'pakkomon' | 'symbols'; values: string[] }
+  | { kind: 'user' | 'text' | 'list' };
+
+/** Replies of a use with the same shape: their text, with slot numbers in place of what varies. */
+export interface WikiUseShape {
+  /** Fixed text, and the index in `slots` of each varying part. */
+  parts: (string | number)[];
+  /** The replies it covers. */
+  count: number;
+  slots: WikiUseSlot[];
+}
+
 /** What `/usa` of an item does, from the replies seen (`use` in a wiki item). */
 export interface WikiItemUse {
   /** Successful uses seen. */
   observations: number;
-  /** Distinct replies of the successful uses, first seen first. */
-  outcomes: string[];
+  /** The shapes of the successful uses' replies, the most frequent first. */
+  shapes: WikiUseShape[];
   /** single: one use seen; fixed: every use gave the same reply; variable: they differ. */
   result: 'single' | 'fixed' | 'variable' | null;
   /** Whether a use consumes the item, from the owner's counts; null when unknown. */

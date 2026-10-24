@@ -571,6 +571,17 @@ body:has(.sidebar) {
 .bubble .t-q {
   border: 0;
 }
+/* What varies in a use's reply (N, […], @username), and what it held, under the bubble. */
+.bubble .slot {
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+.shape-note {
+  margin-top: -6px;
+}
 .bubble .unknown {
   color: var(--muted);
 }

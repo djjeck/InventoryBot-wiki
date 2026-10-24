@@ -392,9 +392,21 @@
       "observations": 2,
       "use": {
         "observations": 4,
-        "outcomes": [
-          "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!",
-          "osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un piccolo seme. Senza indugio lo cogli con delicatezza. Ottieni: un seme di Zaffirella!"
+        "shapes": [
+          {
+            "parts": [
+              "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!"
+            ],
+            "count": 2,
+            "slots": []
+          },
+          {
+            "parts": [
+              "osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un piccolo seme. Senza indugio lo cogli con delicatezza. Ottieni: un seme di Zaffirella!"
+            ],
+            "count": 2,
+            "slots": []
+          }
         ],
         "result": "variable",
         "consumed": null,
@@ -524,8 +536,14 @@
       "observations": 4,
       "use": {
         "observations": 2,
-        "outcomes": [
-          "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
+        "shapes": [
+          {
+            "parts": [
+              "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
+            ],
+            "count": 2,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": null,

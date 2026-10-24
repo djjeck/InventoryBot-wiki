@@ -836,9 +836,13 @@ describe('uses', () => {
     ]).toStrictEqual(['fixed', 2]);
     expect(it_['una chiave']?.use?.result).toBe('single');
     expect(it_['un dado a dodici facce']?.use?.result).toBe('variable');
-    expect(it_['un dado a dodici facce']?.use?.outcomes).toStrictEqual([
-      'tiri il dado e fai 5!',
-      'tiri il dado e fai 2!',
+    // One shape, its number described by the values seen.
+    expect(it_['un dado a dodici facce']?.use?.shapes).toStrictEqual([
+      {
+        parts: ['tiri il dado e fai ', 0, '!'],
+        count: 2,
+        slots: [{ kind: 'number', min: 2, max: 5, decimals: 0 }],
+      },
     ]);
     expect(it_['un dado truccato']).not.toHaveProperty('use');
   });
@@ -1029,8 +1033,8 @@ describe('dominant item of a use shape', () => {
       wrong,
     ]);
     expect(f(wrong)['used_item']).toBe(CONF);
-    expect(wiki.items[VUVU]?.use?.outcomes).toStrictEqual([
-      'soffi con tutto il fiato e .. 🎺 TUUUU',
+    expect(wiki.items[VUVU]?.use?.shapes.map((s) => s.parts)).toStrictEqual([
+      ['soffi con tutto il fiato e .. 🎺 TUUUU'],
     ]);
     expect(wiki.items[CONF]?.use?.observations).toBe(10);
   });
@@ -1888,11 +1892,7 @@ describe('edge cases', () => {
     ]);
     const slot = wiki.items['una ruota della fortuna 🎡']?.use;
     const caps = wiki.items['una capsula']?.use;
-    expect([slot?.observations, slot?.outcomes.length, slot?.requirements]).toStrictEqual([
-      1,
-      1,
-      [],
-    ]);
+    expect([slot?.observations, slot?.shapes.length, slot?.requirements]).toStrictEqual([1, 1, []]);
     expect([caps?.observations, caps?.requirements]).toStrictEqual([
       0,
       ['non puoi teletrasportarti in quei luoghi, forse ti mancano gli oggetti necessari..'],

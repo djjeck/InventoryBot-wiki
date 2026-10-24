@@ -116,9 +116,10 @@ order:
    the owner's own state (recipes made, items seen and how often each was used, places visited, an
    estimate of the inventory and how often it agreed with the bot's `/ricetta` lists), kept apart so
    that the wiki can be shared. `build` merges the events into a knowledge base, newest observation
-   first; `toJson` writes the wiki, `playerState` the player state. Phase 5 reads plain JSON copies
-   of the events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates them for
-   `playerState`.
+   first, an item's `/usa` replies kept by shape, what varies in them described as the channels'
+   cards do (`use-shapes.ts`: "tiri il dado e fai N!", N from 1 to 6); `toJson` writes the wiki,
+   `playerState` the player state. Phase 5 reads plain JSON copies of the events (`buildFromEvents`
+   in `src/pipeline.ts`), since `build` annotates them for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply

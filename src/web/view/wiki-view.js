@@ -613,13 +613,86 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     ${tag(i.rarity)}<span class="name">${esc(i.name)}</span><span class="meta">${i.usable ? 'usabile' : ''}</span>
     <span class="sub">${esc(bits.join(' · ') || 'nessuna relazione nota')}</span></button>`;
     }
+    /**
+     * A shape of a use's replies (use-shapes.ts) as the channels' cards write one: the
+     * bot's reply, with N, M… for its numbers, […] for an item, @username for a player;
+     * then how many uses it covers, and what each part held.
+     */
+    function shapeHtml(shape) {
+      const NUMS = ['N', 'M', 'P', 'Q', 'R', 'S'];
+      let numbers = 0;
+      const label = shape.slots.map((s) =>
+        s.kind === 'number' || s.kind === 'duration' ? (NUMS[numbers++] ?? '#') : null
+      );
+      const slotText = (i) => {
+        const s = shape.slots[i];
+        // A list (the scanner's Pakkomon) is lines of its own.
+        if (s.kind === 'list') return '<br><span class="slot">- …</span>';
+        const t =
+          label[i] ??
+          {
+            user: '@username',
+            text: '"…"',
+            place: '[luogo]',
+            pakkomon: '[pakkomon]',
+          }[s.kind] ??
+          '[…]';
+        return `<span class="slot">${esc(t)}</span>`;
+      };
+      // The text, line by line, its fixed items linked.
+      const html = shape.parts
+        .map((p) => (typeof p === 'number' ? `\u0000${p}\u0000` : p))
+        .join('')
+        .split('\n')
+        .map((line) =>
+          line
+            .split('\u0000')
+            .map((x, i) => (i % 2 ? slotText(Number(x)) : linkItems(x)))
+            .join('')
+        );
+      const placeLink = (w) => {
+        const l = Object.values(L).find((x) => x.at === w || x.name === w);
+        return l ? goLink('loc', l.name, w) : esc(w);
+      };
+      const list = (xs, f, k = 8) =>
+        xs.slice(0, k).map(f).join(', ') + (xs.length > k ? ` e altri ${xs.length - k}` : '');
+      const notes = shape.slots
+        .map((s, i) => {
+          const name = label[i];
+          switch (s.kind) {
+            case 'number':
+              return `${name}: tra ${s.min.toLocaleString('it-IT')} e ${s.max.toLocaleString('it-IT')}${s.decimals ? `, con ${s.decimals} cifre decimali` : ''}`;
+            case 'duration':
+              return `${name}: da ${duration(s.min)} a ${duration(s.max)}`;
+            case 'item':
+              // Several item parts (a pack's three figurine) are one list of what they held.
+              return shape.slots.findIndex((x) => x.kind === 'item') === i
+                ? `[…]: ${list(
+                    [...new Set(shape.slots.flatMap((x) => (x.kind === 'item' ? x.values : [])))],
+                    (v) => itemRef(v, true)
+                  )}`
+                : '';
+            case 'place':
+              return `[luogo]: ${list(s.values, placeLink)}`;
+            case 'pakkomon':
+              return `[pakkomon]: ${list(s.values, esc)}`;
+            case 'symbols':
+              return `[…]: ${s.values.map(esc).join(' ')}`;
+            default:
+              return '';
+          }
+        })
+        .filter(Boolean);
+      const times = `${shape.count} ${shape.count === 1 ? 'volta' : 'volte'}`;
+      return bubble(html) + `<p class="note shape-note">${[times, ...notes].join(' · ')}</p>`;
+    }
     function useHtml(u) {
       const ev = u.consumed_evidence,
         plural = (k, one, many) => `${k} ${k === 1 ? one : many}`;
       const result =
         {
           fixed: `Risultato sempre uguale (${plural(u.observations, 'uso osservato', 'usi osservati')}).`,
-          variable: `Risultato variabile: ${u.outcomes.length} esiti diversi su ${u.observations} usi.`,
+          variable: `Risultato variabile, su ${u.observations} usi.`,
           single: 'Una sola osservazione: non si sa ancora se il risultato varia.',
         }[u.result] || '';
       const against =
@@ -632,13 +705,10 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           : u.consumed === false
             ? `Non si consuma (${plural(ev.no, 'uso verificato', 'usi verificati')} con i conteggi prima e dopo).`
             : 'Non ancora verificato se si consuma.';
-      const shown = u.outcomes
-        .slice(0, 4)
-        .map((t) => bubble(t.split('\n').map(linkItems)))
-        .join('');
+      const shown = u.shapes.slice(0, 4).map(shapeHtml).join('');
       const more =
-        u.outcomes.length > 4
-          ? `<p class="note">… e altri ${u.outcomes.length - 4} esiti.</p>`
+        u.shapes.length > 4
+          ? `<p class="note">… e altre ${u.shapes.length - 4} risposte diverse.</p>`
           : '';
       const req = u.requirements
         .map((t) => `<p class="note">Uso fallito: «${esc(t)}»</p>`)

@@ -213,7 +213,7 @@ describe('mispaired group uses', () => {
     ]);
     expect([
       wiki.items[VUVU]?.use?.observations,
-      wiki.items[VUVU]?.use?.outcomes.length,
+      wiki.items[VUVU]?.use?.shapes.length,
     ]).toStrictEqual([10, 1]);
     // Read without its command, the reply has the lamp's shape: phase 5 gives it to the lamp.
     expect(wiki.items[LAMP]?.use?.observations).toBe(2);
@@ -223,7 +223,7 @@ describe('mispaired group uses', () => {
     const odd = reply('@mario, la vuvuzela si rompe!', '/usa vuvu', { t: 100, dm: true });
     const { entries, wiki } = run([INV, ...toots(), odd]);
     expect(entries).toStrictEqual([]);
-    expect(wiki.items[VUVU]?.use?.outcomes.length).toBe(2);
+    expect(wiki.items[VUVU]?.use?.shapes.length).toBe(2);
   });
 
   it('quoted_outlier_is_kept', () => {

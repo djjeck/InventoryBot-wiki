@@ -54,6 +54,7 @@ import {
   type WikiRecipe,
   type WikiTrivia,
 } from './types.ts';
+import { useShapes } from './use-shapes.ts';
 
 /** Whether an optional string is present and non-empty. */
 const truthy = (s: string | null | undefined): s is string =>
@@ -1168,6 +1169,8 @@ const USE_NOISE: readonly (string | RegExp)[] = [
   "non e' ne un utente ne un oggetto in tuo possesso",
   /^Troppo (?:lungo|corto) vecchio\.\.\.\s*$/u,
   /^Esiste gia\.\.\.\s*$/u,
+  // How to use the item, when its argument is not understood.
+  /^utilizzo:\s*\n/u,
   'deve raffreddarsi ancora per',
   'non conosci nessun luogo con quel nome',
   'troppi oggetti trovati con quel nome',
@@ -1446,10 +1449,15 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
   }
   const consumed = useConsumption(kb, events);
   const cooldowns = cooldownObservations(events);
+  // What a reply may name: the items, and the places as the bot writes them.
+  const names = {
+    items: [...kb.items.keys()],
+    places: [...kb.locations.values()].flatMap((l) => (l.at === null ? [l.name] : [l.name, l.at])),
+  };
   for (const [name, es] of byItem) {
     const ok = es.filter((e) => !isFailedUse(e.text)).map((e) => e.text);
     const failed = es.filter((e) => isFailedUse(e.text)).map((e) => e.text);
-    const outcomes = [...new Set(ok)];
+    const distinct = new Set(ok).size;
     // An item the bot was seen using is usable, tagged "[usabile]" or not (a Pakkomon,
     // an item a player equips one with): as an item /esamina shows a cooldown for.
     if (ok.length > 0) (kb.items.get(name) as KbItem).usable = true;
@@ -1459,16 +1467,10 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
     if (yes && no) kb.addReport({ kind: 'use_consumption_conflict', item: name, yes, no });
     (kb.items.get(name) as KbItem).use = {
       observations: ok.length,
-      outcomes,
+      shapes: useShapes(ok, names),
       // fixed: every observed use gave the same reply; variable: they differ
       result:
-        ok.length === 0
-          ? null
-          : ok.length === 1
-            ? 'single'
-            : outcomes.length === 1
-              ? 'fixed'
-              : 'variable',
+        ok.length === 0 ? null : ok.length === 1 ? 'single' : distinct === 1 ? 'fixed' : 'variable',
       // On conflicting evidence "consumed" wins: an unseen gain (e.g. a level-up reward
       // received in a group) can hide a consumption, while a false "yes" would need an
       // unseen loss of exactly k items in the same interval.

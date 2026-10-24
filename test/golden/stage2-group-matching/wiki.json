@@ -47,8 +47,14 @@
       "observations": 1,
       "use": {
         "observations": 2,
-        "outcomes": [
-          "cosa desideri?"
+        "shapes": [
+          {
+            "parts": [
+              "cosa desideri?"
+            ],
+            "count": 2,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": null,
@@ -75,8 +81,14 @@
       "observations": 1,
       "use": {
         "observations": 10,
-        "outcomes": [
-          "soffi con tutto il fiato e .. 🎺 TUUUU"
+        "shapes": [
+          {
+            "parts": [
+              "soffi con tutto il fiato e .. 🎺 TUUUU"
+            ],
+            "count": 10,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": null,

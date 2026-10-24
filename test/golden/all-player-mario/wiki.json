@@ -39,11 +39,23 @@
       "observations": 1,
       "use": {
         "observations": 7,
-        "outcomes": [
-          "tiri il dado e fai 5!",
-          "tiri il dado e fai 2!",
-          "tiri il dado e fai 12!",
-          "tiri il dado e fai 3!"
+        "shapes": [
+          {
+            "parts": [
+              "tiri il dado e fai ",
+              0,
+              "!"
+            ],
+            "count": 7,
+            "slots": [
+              {
+                "kind": "number",
+                "min": 2,
+                "max": 12,
+                "decimals": 0
+              }
+            ]
+          }
         ],
         "result": "variable",
         "consumed": null,
@@ -282,8 +294,14 @@
       "observations": 5,
       "use": {
         "observations": 1,
-        "outcomes": [
-          "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
+        "shapes": [
+          {
+            "parts": [
+              "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
+            ],
+            "count": 1,
+            "slots": []
+          }
         ],
         "result": "single",
         "consumed": null,
@@ -424,8 +442,14 @@
       "observations": 2,
       "use": {
         "observations": 1,
-        "outcomes": [
-          "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!"
+        "shapes": [
+          {
+            "parts": [
+              "giri la ruota e si ferma su:\n[🍀🌙🍀]\nHai fatto coppia, vinci 2 gettoni!"
+            ],
+            "count": 1,
+            "slots": []
+          }
         ],
         "result": "single",
         "consumed": null,
@@ -781,7 +805,7 @@
       "observations": 1,
       "use": {
         "observations": 0,
-        "outcomes": [],
+        "shapes": [],
         "result": null,
         "consumed": null,
         "consumed_evidence": {
@@ -1028,8 +1052,14 @@
       "observations": 1,
       "use": {
         "observations": 2,
-        "outcomes": [
-          "cosa desideri?"
+        "shapes": [
+          {
+            "parts": [
+              "cosa desideri?"
+            ],
+            "count": 2,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": null,
@@ -1056,8 +1086,14 @@
       "observations": 1,
       "use": {
         "observations": 10,
-        "outcomes": [
-          "soffi con tutto il fiato e .. 🎺 TUUUU"
+        "shapes": [
+          {
+            "parts": [
+              "soffi con tutto il fiato e .. 🎺 TUUUU"
+            ],
+            "count": 10,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": null,

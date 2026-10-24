@@ -21,8 +21,14 @@
       "observations": 4,
       "use": {
         "observations": 3,
-        "outcomes": [
-          "bevi la pozione e ti senti meglio"
+        "shapes": [
+          {
+            "parts": [
+              "bevi la pozione e ti senti meglio"
+            ],
+            "count": 3,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": true,
@@ -49,8 +55,14 @@
       "observations": 8,
       "use": {
         "observations": 5,
-        "outcomes": [
-          "l'elisir brilla e svanisce"
+        "shapes": [
+          {
+            "parts": [
+              "l'elisir brilla e svanisce"
+            ],
+            "count": 5,
+            "slots": []
+          }
         ],
         "result": "fixed",
         "consumed": true,
@@ -76,11 +88,23 @@
       "observations": 1,
       "use": {
         "observations": 4,
-        "outcomes": [
-          "tiri il dado e fai 5!",
-          "tiri il dado e fai 2!",
-          "tiri il dado e fai 12!",
-          "tiri il dado e fai 3!"
+        "shapes": [
+          {
+            "parts": [
+              "tiri il dado e fai ",
+              0,
+              "!"
+            ],
+            "count": 4,
+            "slots": [
+              {
+                "kind": "number",
+                "min": 2,
+                "max": 12,
+                "decimals": 0
+              }
+            ]
+          }
         ],
         "result": "variable",
         "consumed": null,
@@ -107,8 +131,14 @@
       "observations": 1,
       "use": {
         "observations": 1,
-        "outcomes": [
-          "il dado rotola sotto il tavolo e sparisce, ' \" \\   🧑‍🚀 lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo"
+        "shapes": [
+          {
+            "parts": [
+              "il dado rotola sotto il tavolo e sparisce, ' \" \\   🧑‍🚀 lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo lungo"
+            ],
+            "count": 1,
+            "slots": []
+          }
         ],
         "result": "single",
         "consumed": null,
@@ -135,9 +165,21 @@
       "observations": 1,
       "use": {
         "observations": 2,
-        "outcomes": [
-          "lanci il tappo nella palude",
-          "lanci il tappo lontano"
+        "shapes": [
+          {
+            "parts": [
+              "lanci il tappo nella palude"
+            ],
+            "count": 1,
+            "slots": []
+          },
+          {
+            "parts": [
+              "lanci il tappo lontano"
+            ],
+            "count": 1,
+            "slots": []
+          }
         ],
         "result": "variable",
         "consumed": null,
@@ -164,9 +206,21 @@
       "observations": 2,
       "use": {
         "observations": 3,
-        "outcomes": [
-          "apri il baule e trovi:\n- una moneta d'oro [X] x3\n- un elisir [C] x1",
-          "apri il baule ma è vuoto"
+        "shapes": [
+          {
+            "parts": [
+              "apri il baule ma è vuoto"
+            ],
+            "count": 2,
+            "slots": []
+          },
+          {
+            "parts": [
+              "apri il baule e trovi:\n- una moneta d'oro [X] x3\n- un elisir [C] x1"
+            ],
+            "count": 1,
+            "slots": []
+          }
         ],
         "result": "variable",
         "consumed": null,
@@ -199,7 +253,7 @@
       "observations": 1,
       "use": {
         "observations": 0,
-        "outcomes": [],
+        "shapes": [],
         "result": null,
         "consumed": null,
         "consumed_evidence": {
