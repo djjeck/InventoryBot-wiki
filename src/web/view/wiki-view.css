@@ -827,6 +827,14 @@ h4 {
 .map .m-road.hi {
   stroke: var(--map-road-hi);
 }
+/* A road to a secret place, a hidden trail: dashed, its verge too. */
+.map .m-verge.secret {
+  stroke-dasharray: 9 7;
+}
+.map .m-road.secret {
+  stroke-dasharray: 5 11;
+  stroke-dashoffset: -2;
+}
 .map .m-route {
   stroke: var(--map-route);
   stroke-width: 4;

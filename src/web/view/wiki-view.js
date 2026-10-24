@@ -1055,9 +1055,13 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           cls === 'm-road' || cls.startsWith('m-road ') ? ' marker-mid="url(#map-arrow)"' : '';
         return `<path class="${cls}" d="M${a.x} ${a.y}L${(a.x + b.x) / 2} ${(a.y + b.y) / 2}L${b.x} ${b.y}"${arrow}/>`;
       };
+      // A road to a secret place: its neighbours list it only to a player holding its item.
+      const secret = (r) => (L[r.a]?.secret || L[r.b]?.secret ? ' secret' : '');
       const roads =
-        m.roads.map((r) => road(r, 'm-verge')).join('') +
-        m.roads.map((r) => road(r, `m-road${r.a === sel || r.b === sel ? ' hi' : ''}`)).join('') +
+        m.roads.map((r) => road(r, `m-verge${secret(r)}`)).join('') +
+        m.roads
+          .map((r) => road(r, `m-road${r.a === sel || r.b === sel ? ' hi' : ''}${secret(r)}`))
+          .join('') +
         m.roads
           .filter((r) => onRoute.has(pair(r.a, r.b)))
           .map((r) => road(r, 'm-route'))
@@ -1235,7 +1239,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         rowFn = locRow;
         const shown = state.sel.luoghi ?? rows[0]?.name;
         detail = locDetail(shown);
-        extra = `<div class="graphbox">${mapSvg(shown)}</div><div class="legend"><span>bordo tratteggiato: serve un oggetto per entrare</span>${P ? "<span>riempito d'oro: visitato da te</span>" : ''}<span>freccia: si va solo in quel verso</span></div>`;
+        extra = `<div class="graphbox">${mapSvg(shown)}</div><div class="legend"><span>bordo tratteggiato: serve un oggetto per entrare</span>${P ? "<span>riempito d'oro: visitato da te</span>" : ''}<span>freccia: si va solo in quel verso</span>${Object.values(L).some((l) => l.secret) ? '<span>strada tratteggiata: porta a un luogo segreto, che compare tra le destinazioni solo a chi ha il suo oggetto</span>' : ''}</div>`;
       }
       // The recipes again, in the graph of their chains: a recipe opens below it.
       if (state.tab === 'catene') {
