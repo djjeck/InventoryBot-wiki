@@ -1203,6 +1203,61 @@ describe('use ambiguity reply', () => {
   });
 });
 
+describe('replies naming the item used', () => {
+  it('equipping_is_a_use_of_the_pakkomon_and_examining_one_of_the_scanner', () => {
+    // The commands point elsewhere (a Pakkomon's short name matching another item): the
+    // replies name the item used.
+    const equip = ev(
+      '@djjeck, equipaggi il tuo Brumolo 👻 con una caps rossa [C].',
+      '/usa caps # caps',
+      {
+        t: 1,
+      }
+    );
+    const scan = ev(
+      '@djjeck, esamini i tuoi pakkomon con lo scanner:\n - Brumolo 👻: pronto',
+      '/usa caps',
+      {
+        t: 2,
+      }
+    );
+    runBuild([
+      ev(
+        T.inventory([
+          ['un Pakkomon di nome Brumolo 👻', 'X', 1, true],
+          ['uno scanner da tasca 📟', 'L3', 1, true],
+          ['una caps rossa', 'C', 1, true],
+        ]),
+        '/inventario',
+        { t: 0 }
+      ),
+      equip,
+      scan,
+    ]);
+    expect([f(equip)['used_item'], f(scan)['used_item']]).toStrictEqual([
+      'un Pakkomon di nome Brumolo 👻',
+      'uno scanner da tasca 📟',
+    ]);
+  });
+
+  it('equipping_a_pakkomon_unknown_as_an_item_is_not_guessed_from_the_command', () => {
+    // "caps" also names an item, but the reply says the Pakkomon was used.
+    const equip = ev(
+      '@djjeck, equipaggi il tuo Brumolo 👻 con una caps rossa [C].',
+      '/usa caps # caps',
+      {
+        t: 1,
+      }
+    );
+    const { wiki } = runBuild([
+      ev(T.inventory([['una caps rossa', 'C', 1, true]]), '/inventario', { t: 0 }),
+      equip,
+    ]);
+    expect(f(equip)).not.toHaveProperty('used_item');
+    expect(wiki.items['una caps rossa']).not.toHaveProperty('use');
+  });
+});
+
 describe('Pakkomon sphere', () => {
   it('pakkomon_sphere_use_is_a_use_of_the_sphere', () => {
     const ball = ev(

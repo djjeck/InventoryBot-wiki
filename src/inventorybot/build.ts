@@ -36,7 +36,7 @@ import {
   WORD_BODY,
   WS_CLASS,
 } from '#src/lib/text.ts';
-import { INVENTORY_COMMANDS, parseDuration, useItems } from './classify.ts';
+import { INVENTORY_COMMANDS, pakkomonItem, parseDuration, useItems } from './classify.ts';
 import { itemName, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
@@ -1348,7 +1348,11 @@ export function attributeUses<U extends UseLike>(
       c = fitting(usable, words);
       if (c.length === 0) c = fitting(all, words);
     }
-    if (c.length === 0) c = candidates(q);
+    // A Pakkomon the wiki does not know as an item: the command, which names the
+    // Pakkomon in short ("/usa cesa # ..."), could only point to another item.
+    const unknownPakkomon =
+      truthy(e.named) && e.named.startsWith(pakkomonItem('')) && c.length === 0;
+    if (c.length === 0 && !unknownPakkomon) c = candidates(q);
     if (c.length > 1) {
       // prefer the item named explicitly in, or sharing most words with, the reply
       const named = c.filter((n) => e.text.includes(n));

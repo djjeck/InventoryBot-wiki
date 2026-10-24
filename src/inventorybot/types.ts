@@ -208,7 +208,10 @@ export interface UseEvent {
   /** The reply minus the addressee. */
   text: string;
   items: ItemLine[];
-  /** The item the reply itself names as used (a Pakkomon sphere's reply), for a use without a usable query. */
+  /**
+   * The item the reply itself names as used, stronger evidence than the command: the
+   * sphere a Pakkomon came out of, the Pakkomon equipped, the scanner.
+   */
   named?: string;
 }
 

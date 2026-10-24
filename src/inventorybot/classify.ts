@@ -747,9 +747,25 @@ export function useItems(t: string): ItemLine[] {
   return items;
 }
 
+// Replies that name the item used, stronger evidence than the command: the Pakkomon a
+// player equips ("/usa <pakkomon> # <item>"), as its item is named ("un Pakkomon di nome
+// NAME", as the sphere's reply has it), and the scanner they examine their Pakkomon with.
+const USE_EQUIP = rx(`^equipaggi il tuo (?<name>${DOT}+?) con `);
+const USE_SCAN = rx('^esamini i tuoi pakkomon con lo (?<name>scanner)');
+/** The name of a Pakkomon's item. */
+export const pakkomonItem = (name: string): string => `un Pakkomon di nome ${name}`;
+
 const cUse: Classifier = (t, q) => {
   if (!isUseQuery(q)) return null;
-  return { type: 'use', text: stripAddr(t), items: useItems(t) };
+  const text = stripAddr(t);
+  const equip = USE_EQUIP.exec(text);
+  const scan = USE_SCAN.exec(text);
+  const named = equip
+    ? pakkomonItem(stripWs(groups(equip)['name'] as string))
+    : scan
+      ? (groups(scan)['name'] as string)
+      : null;
+  return { type: 'use', text, items: useItems(t), ...(named ? { named } : {}) };
 };
 
 const LEGEND = rx(`Legenda oggetti\\n([\\s\\S]+?)(?:\\n\\n|${END})`);

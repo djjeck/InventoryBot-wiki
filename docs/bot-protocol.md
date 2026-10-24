@@ -672,9 +672,11 @@ una ruota della fortuna 🎡 deve raffreddarsi ancora per 12 secondi prima di po
 ```
 
 The Pakkomon scanner's reply lists the player's Pakkomon, each with the time left before it can
-fight again or `pronto`; its lines are not items received:
+fight again or `pronto`; its lines are not items received. Equipping a Pakkomon with an item
+(`/usa <pakkomon> # <item>`) answers `@u, equipaggi il tuo NAME con ITEM_LINE.`, the item kept by
+the Pakkomon, not received. Both replies name the item used: the scanner, the Pakkomon.
 
-```bot-reply type=use query="/usa scanner" items=[]
+```bot-reply type=use query="/usa scanner" items=[] named=scanner
 @mario_r, esamini i tuoi pakkomon con lo scanner:
  - Zampirlo 🐯: 5 minuti e 38 secondi
  - Brumolo 👻: pronto

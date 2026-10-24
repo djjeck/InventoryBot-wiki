@@ -469,6 +469,25 @@ describe('travel arrivals without a parsable place', () => {
   });
 });
 
+describe('replies naming the item used', () => {
+  it('equip_names_the_pakkomon_and_the_scanner_itself', () => {
+    expect(
+      classify('@djjeck, equipaggi il tuo Brumolo 👻 con una caps rossa [C].', '/usa brum # caps')
+    ).toStrictEqual({
+      type: 'use',
+      text: 'equipaggi il tuo Brumolo 👻 con una caps rossa [C].',
+      items: [],
+      named: 'un Pakkomon di nome Brumolo 👻',
+    });
+    expect(
+      classify(
+        '@djjeck, esamini i tuoi pakkomon con lo scanner:\n - Brumolo 👻: pronto',
+        '/usa sca'
+      )
+    ).toMatchObject({ type: 'use', items: [], named: 'scanner' });
+  });
+});
+
 describe('travel requirement notice', () => {
   it('item_needed_to_pass_a_place', () => {
     const t =

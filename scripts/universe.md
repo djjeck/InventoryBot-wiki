@@ -130,6 +130,7 @@ player sees anyway, and says why it is allowed.
 - una torre alta
 - una torre altissima
 - una trave
+- uno scanner da tasca 📟
 - uno scudo
 - x
 
