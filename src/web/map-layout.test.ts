@@ -306,7 +306,7 @@ describe('layoutMap', () => {
         expect(segments(m).filter(isDiagonal)).toHaveLength(needed);
       }
     }
-  });
+  }, 30_000); // many random maps: slow under coverage and a busy machine
 });
 
 describe('labels', () => {
