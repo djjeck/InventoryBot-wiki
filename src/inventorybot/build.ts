@@ -221,6 +221,10 @@ export interface KbLocation {
   /** The events that named it (KB.event), each once: its observations. */
   seenIn: Set<object>;
   exits: Set<string>;
+  /** The date each exit was last seen (KB.exit, KB.listExits). */
+  exitDates: Map<string, string | null>;
+  /** The date of the latest "Puoi andare verso:" listing of the place, which the exits follow. */
+  listedAt: string | null;
   requires_item: boolean;
   unlock_texts: string[];
   /** Items named by "<item> ti serve per passare <place>" notices, and by place cards. */
@@ -362,6 +366,41 @@ export class KB {
     return r;
   }
 
+  /**
+   * An exit from a place, seen now (a move, a blocked attempt, a card's route): kept
+   * unless a newer listing of the place's exits left it out.
+   */
+  exit(from: string, to: string): void {
+    const l = this.location(from);
+    this.location(to);
+    if (l.listedAt !== null && this.now !== null && instant(this.now) < instant(l.listedAt)) return;
+    l.exits.add(to);
+    l.exitDates.set(to, this.now);
+  }
+
+  /**
+   * A place's "Puoi andare verso:" listing, all of its exits at the time: the newest
+   * listing replaces the exits seen before it, as the map of the game changes (a road
+   * can close), while an older one changes nothing.
+   */
+  listExits(from: string, to: readonly string[]): void {
+    const l = this.location(from);
+    // The reply names the places, whatever its date.
+    for (const x of to) this.location(x);
+    if (l.listedAt !== null && (this.now === null || instant(this.now) < instant(l.listedAt)))
+      return;
+    for (const [x, d] of l.exitDates)
+      if (!to.includes(x) && (d === null || this.now === null || instant(d) <= instant(this.now))) {
+        l.exits.delete(x);
+        l.exitDates.delete(x);
+      }
+    for (const x of to) {
+      l.exits.add(x);
+      l.exitDates.set(x, this.now);
+    }
+    l.listedAt = this.now;
+  }
+
   /** The place, made if new; `named`: the current event names it, an observation that dates it. */
   location(name: string, named = true): KbLocation {
     let l = this.locations.get(name);
@@ -371,6 +410,8 @@ export class KB {
         label: placeLabel(name),
         at: null,
         atDate: null,
+        exitDates: new Map(),
+        listedAt: null,
         last_seen: null,
         firstSeen: null,
         seenIn: new Set(),
@@ -687,8 +728,7 @@ function mergePlaceCard(
   }
   const route = e.route.map(place);
   for (let i = 1; i < route.length; i++) {
-    kb.location(route[i - 1] as string).exits.add(route[i] as string);
-    kb.location(route[i] as string);
+    kb.exit(route[i - 1] as string, route[i] as string);
     card.fields.add('route');
   }
   if (e.access !== null) {
@@ -837,9 +877,8 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       // Another player's move: where they are is not tracked, but the exits listed
       // from a place and the need for an item to enter it are facts of the game.
       const loc = kb.location(e.location as string);
-      const exits = e.type === 'travel_blocked' ? [] : e.exits;
-      for (const x of exits) loc.exits.add(x);
-      for (const x of exits) kb.location(x);
+      // A reply listing the exits lists them all (an old arrival has none to list).
+      if (e.type !== 'travel_blocked' && e.exits.length > 0) kb.listExits(loc.name, e.exits);
       if (e.type === 'travel_blocked') {
         loc.requires_item = true;
       } else if (e.type === 'travel' && truthy(e.narrative)) {
@@ -848,18 +887,16 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       }
     } else if (e.type === 'travel' || e.type === 'location') {
       const loc = kb.location(e.location as string);
-      for (const x of e.exits) loc.exits.add(x);
-      for (const x of e.exits) kb.location(x);
+      if (e.exits.length > 0) kb.listExits(loc.name, e.exits);
       if (e.type === 'travel' && truthy(e.narrative)) {
         loc.requires_item = true;
         if (!loc.unlock_texts.includes(e.narrative)) loc.unlock_texts.push(e.narrative);
       }
-      if (truthy(curLoc) && e.type === 'travel')
-        kb.location(curLoc).exits.add(e.location as string);
+      if (truthy(curLoc) && e.type === 'travel') kb.exit(curLoc, e.location as string);
       curLoc = e.location;
     } else if (e.type === 'travel_blocked') {
       kb.location(e.location).requires_item = true;
-      if (mine(e) && truthy(curLoc)) kb.location(curLoc).exits.add(e.location);
+      if (mine(e) && truthy(curLoc)) kb.exit(curLoc, e.location);
     } else if (t === 'stats' && truthy(statsField(e, 'luogo')) && mine(e)) {
       curLoc = statsField(e, 'luogo') as string;
       kb.location(curLoc);
@@ -940,7 +977,8 @@ function resolveRequirements(kb: KB, notices: readonly TravelRequirementEvent[])
       });
       continue;
     }
-    const needing = way.filter((n) => n !== village && kb.location(n).requires_item);
+    // Looking the places up observes nothing: it neither counts nor dates them.
+    const needing = way.filter((n) => n !== village && kb.location(n, false).requires_item);
     if (needing.length > 1) {
       kb.addReport({
         kind: 'unresolved_requirement',
@@ -950,7 +988,7 @@ function resolveRequirements(kb: KB, notices: readonly TravelRequirementEvent[])
       });
       continue;
     }
-    const loc = kb.location(needing[0] ?? e.location);
+    const loc = kb.location(needing[0] ?? e.location, false);
     loc.requires_item = true;
     loc.required_items.add(e.item);
   }

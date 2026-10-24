@@ -492,14 +492,15 @@ UNLOCK  = LINE                    (* arrival text of a place that needs an item 
 NEEDED  = NAME " ti serve per passare " LOCATION " sulla via per tornare al villaggio." EOT
 ```
 
-`EXITS` are the places adjacent to `LOCATION`, including those that need an item. After `BLOCKED`
-the player has not moved; the reply does not name the missing item. `UNLOCK` names the required
-item, which is not consumed. Most places that need an item have their own arrival text, written as a
-sentence that ends with the place itself ("guidato dalla tua bussola fatata … finalmente ti trovi
-nella palude sussurrante 🌾"), without "arrivi"; only the exits block marks it as an arrival, and
-nothing but the known place names delimits the place. Neither does "arrivi" without the colon, which
-may be followed by more words or a full stop ("arrivi esausto nella baia di Scogliola 🦀", "arrivi
-(stremato) nell'immenso deserto di Sabbiora 🏜.").
+`EXITS` are the places adjacent to `LOCATION`, including those that need an item: all of them, at
+the time of the reply. The roads change over time, so a place's later `EXITS` can lack one of its
+earlier ones. After `BLOCKED` the player has not moved; the reply does not name the missing item.
+`UNLOCK` names the required item, which is not consumed. Most places that need an item have their
+own arrival text, written as a sentence that ends with the place itself ("guidato dalla tua bussola
+fatata … finalmente ti trovi nella palude sussurrante 🌾"), without "arrivi"; only the exits block
+marks it as an arrival, and nothing but the known place names delimits the place. Neither does
+"arrivi" without the colon, which may be followed by more words or a full stop ("arrivi esausto
+nella baia di Scogliola 🦀", "arrivi (stremato) nell'immenso deserto di Sabbiora 🏜.").
 
 `NEEDED` is a separate, unaddressed notice that is not the answer to a command: it follows a `/dai`
 of the item by a player at `LOCATION`, and names an item that `LOCATION` itself or another place on

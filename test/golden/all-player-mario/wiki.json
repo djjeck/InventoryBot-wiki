@@ -1451,7 +1451,7 @@
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
       "at": "nelle cripte del monastero 👻",
-      "last_seen": "2025-11-28T11:30:01+09:00",
+      "last_seen": "2025-11-27T19:11:32-05:00",
       "observations": 2,
       "exits": [],
       "requires_item": true,
@@ -1504,10 +1504,7 @@
       "last_seen": "2025-11-27T22:00:11-05:00",
       "observations": 9,
       "exits": [
-        "l'immenso deserto di Sabbiora 🏜",
-        "la palude sussurrante 🌾",
-        "la valle ventosa 🏞",
-        "le cripte del monastero 👻"
+        "la valle ventosa 🏞"
       ],
       "requires_item": false,
       "unlock_texts": [],
@@ -1522,9 +1519,7 @@
       "last_seen": "2025-11-27T22:00:11-05:00",
       "observations": 10,
       "exits": [
-        "i piedi del monte Grevolo ⛰",
-        "il banco corallino 🐠",
-        "il bosco nebbioso di Valtorbo 🌲"
+        "il banco corallino 🐠"
       ],
       "requires_item": true,
       "unlock_texts": [

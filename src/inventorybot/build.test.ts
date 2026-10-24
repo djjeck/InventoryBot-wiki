@@ -775,6 +775,35 @@ describe('position', () => {
   });
 });
 
+describe('exits change', () => {
+  it('a_newer_listing_of_a_place_replaces_its_exits', () => {
+    const exits = (events: BuildEvent[]): string[] | undefined =>
+      runBuild(events).wiki.locations[P(BOSCO)]?.exits;
+    const before = ev(T.where(BOSCO, [PIANURA, MONTE]), '/viaggio', { t: 0 });
+    const after = ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 10 });
+    // The road to the mountain closed.
+    expect(exits([before, after])).toStrictEqual([P(PIANURA)]);
+    // An older listing, read after the newer one, changes nothing.
+    expect(exits([after, before])).toStrictEqual([P(PIANURA)]);
+  });
+
+  it('an_exit_seen_after_the_latest_listing_is_kept_one_before_it_is_not', () => {
+    const { wiki } = runBuild([
+      ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 10 }),
+      // A move after the listing: the road is new, kept.
+      ev(T.travel(MONTE, [BOSCO]), '/viaggio monte', { t: 20 }),
+    ]);
+    expect(wiki.locations[P(BOSCO)]?.exits).toStrictEqual([P(MONTE), P(PIANURA)].sort());
+    const { wiki: w2 } = runBuild([
+      ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 0 }),
+      // A move before the latest listing, which does not list the road: it closed.
+      ev(T.travel(MONTE, [BOSCO]), '/viaggio monte', { t: 5 }),
+      ev(T.where(BOSCO, [PIANURA]), '/viaggio', { t: 10 }),
+    ]);
+    expect(w2.locations[P(BOSCO)]?.exits).toStrictEqual([P(PIANURA)]);
+  });
+});
+
 describe('is mine', () => {
   it('cases', () => {
     const cases: [Parameters<typeof isMine>[0], boolean][] = [
