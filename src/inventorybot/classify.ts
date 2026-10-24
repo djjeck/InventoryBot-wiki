@@ -870,6 +870,24 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
     match: { anywhere: "non puoi usare quell'oggetto" },
     commands: ['/usa'],
   },
+  // An argument that is neither a player nor an item of the player's, echoed before the
+  // fixed wording ("cervello non e' un utente e non hai oggetti del genere.").
+  {
+    name: 'use_target_unknown',
+    match: { anywhere: "non e' un utente e non hai oggetti del genere" },
+    commands: ['/usa'],
+  },
+  {
+    name: 'use_target_not_owned',
+    match: { anywhere: "non e' ne un utente ne un oggetto in tuo possesso" },
+    commands: ['/usa'],
+  },
+  // An argument too long: the whole reply.
+  {
+    name: 'too_long',
+    match: rx(`${ADDR}Troppo lungo vecchio\\.\\.\\.${S}*${END}`),
+    commands: 'any',
+  },
   {
     name: 'item_not_owned',
     match: { anywhere: 'non hai niente del genere' },

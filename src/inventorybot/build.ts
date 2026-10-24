@@ -1154,14 +1154,19 @@ function resolveCrafts(kb: KB, crafts: readonly Craft[], recipeNames: ReadonlySe
 /**
  * /usa replies dropped before resolving uses: the item was not found, not named or
  * ambiguous ("troppi oggetti trovati con quel nome(ARG)"), or not usable at all ("non
- * puoi usare quell'oggetto.."), or the use was refused without saying anything about the
+ * puoi usare quell'oggetto.."), the argument was no player nor item of the player's, or
+ * too long, or the use was refused without saying anything about the
  * item (still cooling down, any duration; the capsule's destination is not a known place).
  * None of them is what a use does.
  */
-const USE_NOISE = [
+const USE_NOISE: readonly (string | RegExp)[] = [
   'non hai niente del genere',
   'si ma cosa vuoi usare',
   "non puoi usare quell'oggetto",
+  // The argument, echoed before these, is neither a player nor an item of the player's.
+  "non e' un utente e non hai oggetti del genere",
+  "non e' ne un utente ne un oggetto in tuo possesso",
+  /^Troppo lungo vecchio\.\.\.\s*$/u,
   'deve raffreddarsi ancora per',
   'non conosci nessun luogo con quel nome',
   'troppi oggetti trovati con quel nome',
@@ -1173,8 +1178,8 @@ export const USE_FAILED = [
   'non puoi teletrasportarti in quei luoghi',
 ];
 
-const hasAny = (text: string, keys: readonly string[]): boolean =>
-  keys.some((k) => text.includes(k));
+const hasAny = (text: string, keys: readonly (string | RegExp)[]): boolean =>
+  keys.some((k) => (typeof k === 'string' ? text.includes(k) : k.test(text)));
 export const isFailedUse = (text: string): boolean => hasAny(text, USE_FAILED);
 
 const DIGITS = /\p{Nd}+/gu;

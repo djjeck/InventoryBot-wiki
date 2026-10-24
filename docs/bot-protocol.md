@@ -626,6 +626,7 @@ Items received are either listed as `ITEM_LINE`s after the first line, or named 
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | item not found / not named    | `non hai niente del genere di usabile.`, `si ma cosa vuoi usare?`                                                                                                            |
 | item not usable               | `non puoi usare quell'oggetto..`                                                                                                                                             |
+| argument not understood       | `<arg> non e' un utente e non hai oggetti del genere.`, `quello non e' ne un utente ne un oggetto in tuo possesso.`, `Troppo lungo vecchio...`                               |
 | failure stating a requirement | `non hai la chiave giusta per aprire questo baule..`, `… ma non le hai ancora tutte..`, `non puoi teletrasportarti in quei luoghi, forse ti mancano gli oggetti necessari..` |
 | other failures                | the item cooldown (below), `non conosci nessun luogo con quel nome..` (capsule destination)                                                                                  |
 | success                       | anything else                                                                                                                                                                |

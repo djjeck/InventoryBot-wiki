@@ -704,12 +704,18 @@ describe('noise', () => {
         "@djjeck, troppe ricette trovate, sii piu' preciso",
         '@djjeck, non hai niente del genere di usabile.',
         "@djjeck, non puoi usare quell'oggetto..",
+        "@djjeck cervello non e' un utente e non hai oggetti del genere.",
+        "@djjeck quello non e' ne un utente ne un oggetto in tuo possesso.",
+        '@djjeck Troppo lungo vecchio...',
       ].map((t) => classify(t, null))
     ).toStrictEqual([
       { type: 'miss', reply: 'examine_what', command: '/esamina' },
       { type: 'miss', reply: 'recipe_ambiguous' }, // /ricetta or /esamina
       { type: 'miss', reply: 'use_not_owned', command: '/usa' },
       { type: 'miss', reply: 'use_not_usable', command: '/usa' },
+      { type: 'miss', reply: 'use_target_unknown', command: '/usa' },
+      { type: 'miss', reply: 'use_target_not_owned', command: '/usa' },
+      { type: 'miss', reply: 'too_long' },
     ]);
     expect(
       classify('ciao @djjeck, per giocare con me devi prima registrarti!', null)
