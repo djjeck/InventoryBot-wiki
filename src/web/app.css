@@ -200,7 +200,10 @@ main:focus {
    padding, so that a click on it is a click on the backdrop; its body holds the rest. */
 .panel {
   position: fixed;
-  inset: var(--panel-top, 72px) var(--panel-right, 16px) auto auto;
+  /* Right-aligned with the button, but never past the window's left edge (narrow
+     windows put the button on the left). */
+  inset: var(--panel-top, 72px)
+    min(var(--panel-right, 16px), calc(100vw - 16px - min(440px, calc(100vw - 32px)))) auto auto;
   margin: 0;
   width: min(440px, calc(100vw - 32px));
   max-height: min(78vh, 720px, calc(100dvh - var(--panel-top, 72px) - 16px));
