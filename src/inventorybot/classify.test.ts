@@ -979,6 +979,59 @@ describe('edge cases', () => {
     ]);
   });
 
+  it('items_a_use_gives_in_other_wordings_are_read', () => {
+    const items = (text: string): unknown => {
+      const e = classify(text, '/usa x');
+      return e.type === 'use' ? e.items.map((x) => [x.qty, x.name, x.rarity]) : e.type;
+    };
+    expect([
+      items('@mario_r, la pietra ti si sbriciola tra le mani. Ottieni un sasso [C] x3.'),
+      items('@mario_r, lo arrotoli per bene et voilá, ottieni: una perla [R] x1'),
+      items('@mario_r, dopo pochi minuti sputa fuori dal retro un sasso!'),
+      items(
+        '@mario_r, lui salta via e atterra sulla testa di @lucia_b, lasciandoti addosso una perla!'
+      ),
+      items(
+        "@mario_r, lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumolo 👻 [X]!"
+      ),
+      items("@mario_r, apri lo scrigno rivelando.. un tesoro! Trovi 101 monete d'oro!"),
+    ]).toStrictEqual([
+      [[3, 'un sasso', 'C']],
+      [[1, 'una perla', 'R']],
+      [[1, 'un sasso', null]],
+      [[1, 'una perla', null]],
+      [[1, 'un Pakkomon di nome Brumolo 👻', 'X']],
+      [[101, "una moneta d'oro", null]],
+    ]);
+  });
+
+  it('an_item_in_a_message_players_wrote_is_not_received', () => {
+    const e = classify(
+      '@mario_r, accendi un walkie-talkie e mandi a @lucia_b il seguente messaggio: "Ottieni una perla.".',
+      '/usa walkie'
+    );
+    expect(e.type === 'use' && e.items).toStrictEqual([]);
+  });
+
+  it('items_a_quest_asks_for_or_a_listing_shows_are_not_received', () => {
+    const items = (text: string): unknown => {
+      const e = classify(text, '/usa x');
+      return e.type === 'use' ? e.items.map((x) => x.name) : e.type;
+    };
+    expect([
+      items(
+        '@mario_r, un contadino ti si avvicina per chiederti aiuto! Puoi aiutarlo?\nGli serve:\n- un sasso [C] x1\n- una perla [R] x1\n\nHai 2 ore a disposizione!'
+      ),
+      items(
+        '@mario_r, ecco i tuoi oggetti in ordine di quantità:\n- un sasso [C] x618\n- una perla [R] x4'
+      ),
+      // A list after the one not received is received.
+      items(
+        '@mario_r, ecco cosa ti serve e cosa trovi:\nGli serve:\n- un sasso [C] x1\nTrovi:\n- una perla [R] x1'
+      ),
+    ]).toStrictEqual([[], [], ['una perla']]);
+  });
+
   it('truncated_recipe_list_is_marked_truncated', () => {
     const e = classify(
       '@mario_r, ecco le ricette a tua disposizione:\n- Torre L1 [*]\n- Muro L2 [manca 1]\n- Gara di cucina L3 [manca TRONCATO!',

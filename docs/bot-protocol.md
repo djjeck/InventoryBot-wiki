@@ -624,8 +624,14 @@ SHOW = ADDR "mostri orgogliosamente di possedere " INT "x " NAME SP RARITY [ SP 
 ### 6.13 Use
 
 `/usa <item>`. Each usable item has its own texts, so there is no common grammar beyond `ADDR TEXT`.
-Items received are either listed as `ITEM_LINE`s after the first line, or named in the text
-("Ottieni: un seme di Zaffirella!", "ci trovi dentro 22 monete d'oro!").
+Items received are either listed as `ITEM_LINE`s after the first line, or named at the end of a line
+of the text: after "Ottieni", with or without the colon and in either case ("Ottieni: un seme di
+Zaffirella!", "ottieni: una perla [R] x1", "Ottieni un sasso [C] x3."), as what a machine "sputa
+fuori dal retro" or a use leaves "addosso", as the Pakkomon that "esce" from a sphere, and as gold
+coins ("ci trovi dentro 22 monete d'oro!", "Trovi 22 monete d'oro!"). A name inside quotes is a
+message players wrote (the walkie-talkie's), not an item received. Two lists of `ITEM_LINE`s are not
+items received either: the items a quest asks for, under `Gli serve:`, and a machine's listing of
+the player's items, under `ecco i tuoi oggetti in ordine di quantità:`.
 
 | Kind                          | Replies                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

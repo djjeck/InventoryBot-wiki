@@ -709,30 +709,55 @@ const cDrop: Classifier = (t) => {
   };
 };
 
-// Items a /usa reply names inline: "… Ottieni: un seme di Zaffirella!" (one), and
-// "… ci trovi dentro 22 monete d'oro!" (gold coins, the only counted form).
-const USE_OTTIENI = rx(
-  `Ottieni:${S}*(?<name>${DOT}+?)(?: \\[(?<rarity>${RARITY})\\])?(?<usable> \\[usabile\\])?!?${S}*${END}`
-);
-const USE_COINS = rx(`ci trovi dentro (?<qty>${D}+) monet[ae] d'oro!?${S}*${END}`);
+// Items a /usa reply names inline, each at the end of its line: "… Ottieni: un seme di
+// Zaffirella!" (with or without the colon, and possibly with tags and a quantity: "ottieni:
+// una perla [R] x1", "Ottieni un sasso [C] x3."), what a machine "sputa fuori dal retro",
+// what a use leaves "addosso", the Pakkomon that "esce" from a sphere, and "… ci trovi
+// dentro 22 monete d'oro!" or "Trovi 22 monete d'oro!" (gold coins, the only counted
+// form). A name never holds a quote: such a text is a message players wrote.
+const ITEM_END = `(?<name>[^\\n"]+?)(?: \\[(?<rarity>${RARITY})\\])?(?<usable> \\[usabile\\])?(?: x(?<qty>${D}+))?[!.]?${S}*${END}`;
+const USE_INLINE = [
+  rx(`(?:^|[,.!] )[Oo]ttieni:?${S}*${ITEM_END}`),
+  rx(`sputa fuori dal retro ${ITEM_END}`),
+  rx(`lasciandoti addosso ${ITEM_END}`),
+  rx(`ed esce (?=un Pakkomon di nome )${ITEM_END}`),
+];
+const USE_COINS = rx(`(?:ci )?[Tt]rovi (?:dentro )?(?<qty>${D}+) monet[ae] d'oro!?${S}*${END}`);
 const COIN = "una moneta d'oro";
 
-/** The Pakkomon scanner's reply: its `- ` lines are the player's Pakkomon and their readiness. */
-const PAKKOMON_SCAN = rx(`esamini i tuoi pakkomon con lo scanner:${S}*${END}`);
+// Lines that head `- ` lines of items not received: the Pakkomon scanner's (the player's
+// Pakkomon and their readiness), what a quest asks for, and a machine's listing of the
+// player's items.
+const NOT_RECEIVED = [
+  rx(`esamini i tuoi pakkomon con lo scanner:${S}*${END}`),
+  rx(`^Gli serve:${S}*${END}`),
+  rx(`ecco i tuoi oggetti in ordine di quantità:${S}*${END}`),
+];
 
-/** Items received in a /usa reply: `- item` lines after the first line, then items named inline. */
+/**
+ * Items received in a /usa reply: `- item` lines after the first line, but for those a
+ * NOT_RECEIVED line heads, then items named inline.
+ */
 export function useItems(t: string): ItemLine[] {
   const lines = t.split('\n');
-  const items = PAKKOMON_SCAN.test(lines[0] ?? '') ? [] : itemLines(lines.slice(1));
+  let skip = false;
+  const received = lines.filter((l) => {
+    if (NOT_RECEIVED.some((p) => p.test(l))) return !(skip = true);
+    if (skip && stripStartWs(l).startsWith('-')) return false;
+    skip = false;
+    return true;
+  });
+  const items = itemLines(received.slice(1));
   for (const l of lines) {
-    let m: RegExpExecArray | null;
-    if ((m = USE_OTTIENI.exec(l))) {
+    let m: RegExpExecArray | null = null;
+    for (const p of USE_INLINE) if ((m = p.exec(l))) break;
+    if (m) {
       const g = groups(m);
       items.push({
         name: itemName(g['name'] as string),
         rarity: g['rarity'] ?? null,
         usable: Boolean(g['usable']),
-        qty: 1,
+        qty: g['qty'] === undefined ? 1 : parseDecimalInt(g['qty']),
       });
     } else if ((m = USE_COINS.exec(l))) {
       items.push({
