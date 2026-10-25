@@ -34,6 +34,7 @@ player sees anyway, and says why it is allowed.
 - un barattolo di miele
 - un barattolo di vetro con qualche conchiglia dentro
 - un baule
+- un baule di ebano 📦
 - un biscotto
 - un biscotto Lunetta
 - un biscotto Stellina
@@ -89,6 +90,7 @@ player sees anyway, and says why it is allowed.
 - un tappetino con scritto Benvenuti
 - un tesoro
 - un torroncino al pistacchio
+- un tostapane incantato 🍞
 - un trifoglio di latta
 - un tubetto di colla verde
 - un uovo di quaglia
@@ -101,6 +103,7 @@ player sees anyway, and says why it is allowed.
 - una caps rossa
 - una capsula
 - una chiave
+- una chiave di ebano 🔑
 - una conchiglia
 - una corda di canapa
 - una cosa
@@ -124,6 +127,7 @@ player sees anyway, and says why it is allowed.
 - una spada
 - una spada di cartone
 - una spada di legno
+- una spada di legno, piccola ma robusta
 - una splendida statuetta di Torosco di quelle con la coda a spirale 🐲
 - una tazzina vuota
 - una torre

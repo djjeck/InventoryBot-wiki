@@ -771,6 +771,29 @@ export function useItems(t: string): ItemLine[] {
   return items;
 }
 
+// The items a /usa reply says the use takes besides the item used: the key put in a
+// chest's lock, the items put into a machine ("A, B e infine C") or opened into it, and
+// the item a Pakkomon is equipped with. Only the machine's list holds several, as an
+// item's own name may hold ", ".
+const USE_TAKES = [
+  rx(`^infili (?<name>${DOT}+?) nella serratura di `),
+  rx(`^inserisci (?<list>${DOT}+?) in uno sportello`),
+  rx(`^apri ${D}+x (?<name>${DOT}+?) e `),
+  rx(`^equipaggi il tuo ${DOT}+? con (?<name>${DOT}+?)${S}+\\[${RARITY}\\]`),
+];
+const TAKES_SEPARATOR = rx(', | e infine ');
+
+/** The items a /usa reply (without its addressee) says the use takes, besides the item used. */
+export function useTakes(text: string): string[] {
+  for (const p of USE_TAKES) {
+    const m = p.exec(text);
+    if (!m) continue;
+    const { list, name } = groups(m);
+    return (list !== undefined ? list.split(TAKES_SEPARATOR) : [name as string]).map(itemName);
+  }
+  return [];
+}
+
 // Replies that name the item used, stronger evidence than the command: the Pakkomon a
 // player equips ("/usa <pakkomon> # <item>"), as its item is named ("un Pakkomon di nome
 // NAME", as the sphere's reply has it), and the scanner they examine their Pakkomon with.
@@ -789,7 +812,14 @@ const cUse: Classifier = (t, q) => {
     : scan
       ? (groups(scan)['name'] as string)
       : null;
-  return { type: 'use', text, items: useItems(t), ...(named ? { named } : {}) };
+  const takes = useTakes(text);
+  return {
+    type: 'use',
+    text,
+    items: useItems(t),
+    ...(named ? { named } : {}),
+    ...(takes.length > 0 ? { takes } : {}),
+  };
 };
 
 interface KnownReply {

@@ -521,7 +521,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         `<div class="head"><div class="kicker">${lvlTag(r)}<span>Ricetta</span></div>
     <h2>${esc(name)}</h2>
     <p class="makes"><span class="visually-hidden">Ottieni: </span>${makes}</p>
-    ${opensLines(r.output)}</div>
+    ${opensLines(r.output)}${usedWithLine(r.output)}</div>
     ${detailBubble}
     ${ingNote}
     ${craftBubble}
@@ -570,7 +570,11 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ingredienti: ['Usati in ricette', (i) => i.used_in.length > 0],
       craftati: ['Craftati', (i) => i.made_by.length || (i.rarity || '')[0] === 'L'],
       esclusivi: ['Esclusivi di un luogo', (i) => i.exclusive],
-      inutili: ['Non usati', (i) => !i.used_in.length],
+      // Nor to open a place, nor with another item: a key is far from useless.
+      inutili: [
+        'Non usati',
+        (i) => !i.used_in.length && !i.used_with?.length && !OPENS.has(i.name),
+      ],
     };
     const RARITY_ORDER = ['X', 'U', 'M', 'S', 'R', 'N', 'C', 'L', 'q'];
     function itemRows(q) {
@@ -602,6 +606,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         bits.push(`per passare: ${opens.pass.map((w) => L[w]?.label || w).join(', ')}`);
       if (opens?.see.length)
         bits.push(`per vedere: ${opens.see.map((w) => L[w]?.label || w).join(', ')}`);
+      if (i.used_with?.length) bits.push(`si usa con: ${few(i.used_with.map(current), esc)}`);
       if (i.exclusive)
         bits.push(
           i.locations.length
@@ -790,6 +795,24 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         line('Serve per passare', o.pass) + line('Serve per vedere tra le destinazioni', o.see)
       );
     }
+    /** The first names of a list, and how many more ("e altri 3"). */
+    function few(names, f, k = 5) {
+      const shown = [...new Set(names)];
+      return (
+        shown.slice(0, k).map(f).join(', ') +
+        (shown.length > k ? ` e altri ${shown.length - k}` : '')
+      );
+    }
+    /**
+     * The items an item is used with (the chest a key opens, the machine it goes in, the
+     * Pakkomon it equips), under the title of its page and of its recipes' pages.
+     */
+    function usedWithLine(item) {
+      const w = item ? I[current(item)]?.used_with : undefined;
+      return w?.length
+        ? `<p class="makes">Si usa con: ${few(w.map(current), (n) => goLink('item', n))}</p>`
+        : '';
+    }
     function madeBy(i) {
       const arrow = '<span class="arrow" aria-hidden="true">←</span>';
       if (i.made_by.length)
@@ -831,6 +854,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     <h2>${esc(name)}</h2>
     ${madeBy(i)}
     ${opensLines(name)}
+    ${usedWithLine(name)}
     ${
       // A "+" item drops in one place: where, right under its name.
       i.exclusive

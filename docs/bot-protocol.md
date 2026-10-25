@@ -664,7 +664,7 @@ ITEM_COOLDOWN = [ ADDR ] NAME " deve raffreddarsi ancora per " DURATION " prima 
 Hai fatto coppia, vinci 2 gettoni!
 ```
 
-```bot-reply type=use query="/usa baule ebano" items.0.name="una moneta d'oro" items.0.qty=41 items.1.usable=true
+```bot-reply type=use query="/usa baule ebano" items.0.name="una moneta d'oro" items.0.qty=41 items.1.usable=true takes.0="una chiave di ebano 🔑"
 @mario_r, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:
 -una moneta d'oro [X] x41
 -un cartoccio di caldarroste🌰 [X] [usabile] x1
@@ -686,6 +686,12 @@ The Pakkomon scanner's reply lists the player's Pakkomon, each with the time lef
 fight again or `pronto`; its lines are not items received. Equipping a Pakkomon with an item
 (`/usa <pakkomon> # <item>`) answers `@u, equipaggi il tuo NAME con ITEM_LINE.`, the item kept by
 the Pakkomon, not received. Both replies name the item used: the scanner, the Pakkomon.
+
+Some uses take other items besides the item used, and the reply names them in fixed wordings: the
+key that opens a chest (`infili KEY nella serratura di CHEST, …`), the items put into a machine
+(`inserisci A, B e infine C in uno sportello …`) or opened into it (`apri 2x A e …`), and the item a
+Pakkomon is equipped with. A machine's list is the only one with several names. Other items a reply
+names are what it gives, or mere mentions.
 
 ```bot-reply type=use query="/usa scanner" items=[] named=scanner
 @mario_r, esamini i tuoi pakkomon con lo scanner:

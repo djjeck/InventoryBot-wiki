@@ -1334,6 +1334,43 @@ describe('replies naming the item used', () => {
   });
 });
 
+describe('items used with another', () => {
+  it('a_key_is_used_with_its_chest_and_an_equipment_with_its_pakkomon', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.inventory([
+          ['un baule di ebano 📦', 'S', 1, true],
+          ['una chiave di ebano 🔑', 'X', 1, false],
+          ['un Pakkomon di nome Brumolo 👻', 'X', 1, true],
+          ['una caps rossa', 'C', 1, false],
+        ]),
+        '/inventario',
+        { t: 0 }
+      ),
+      ev(
+        "@djjeck, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41",
+        '/usa baule',
+        { t: 1 }
+      ),
+      ev('@djjeck, equipaggi il tuo Brumolo 👻 con una caps rossa [C].', '/usa brum # caps', {
+        t: 2,
+      }),
+    ]);
+    expect([
+      wiki.items['una chiave di ebano 🔑']?.used_with,
+      wiki.items['una caps rossa']?.used_with,
+      // Neither the item used nor what a use gives.
+      wiki.items['un baule di ebano 📦']?.used_with,
+      wiki.items["una moneta d'oro"]?.used_with,
+    ]).toStrictEqual([
+      ['un baule di ebano 📦'],
+      ['un Pakkomon di nome Brumolo 👻'],
+      undefined,
+      undefined,
+    ]);
+  });
+});
+
 describe('Pakkomon sphere', () => {
   it('pakkomon_sphere_use_is_a_use_of_the_sphere', () => {
     const ball = ev(

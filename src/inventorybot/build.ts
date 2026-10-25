@@ -36,7 +36,7 @@ import {
   WORD_BODY,
   WS_CLASS,
 } from '#src/lib/text.ts';
-import { INVENTORY_COMMANDS, pakkomonItem, parseDuration, useItems } from './classify.ts';
+import { INVENTORY_COMMANDS, pakkomonItem, parseDuration, useItems, useTakes } from './classify.ts';
 import { itemName, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
@@ -208,6 +208,8 @@ export interface KbItem {
   sources: Set<string>;
   used_in: Set<string>;
   made_by: Set<string>;
+  /** The items a use of which takes it (UseEvent.takes): the chest a key opens, the machine it goes in. */
+  usedWith: Set<string>;
   last_seen: string | null;
   /** Where it is found: the owner's drops and the channels' place cards; only exported for exclusive items. */
   dropLocations: Set<string>;
@@ -359,6 +361,7 @@ export class KB {
         sources: new Set(),
         used_in: new Set(),
         made_by: new Set(),
+        usedWith: new Set(),
         last_seen: null,
         dropLocations: new Set(),
         firstSeen: null,
@@ -1501,11 +1504,13 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
       const text = stripAddr(e.text);
       const t = dominantItem(templates.get(useTemplate(text)));
       if (t !== null) {
-        // In place: "type" and "text" keep their key positions, "items" and "used_item" are added.
+        const takes = useTakes(text);
+        // In place: "type" and "text" keep their key positions, "items", "takes" and "used_item" are added.
         const u = Object.assign(e, {
           type: 'use',
           text,
           items: useItems(text),
+          ...(takes.length > 0 && { takes }),
           used_item: t,
         }) as unknown as Use;
         const now = kb.now,
@@ -1535,6 +1540,15 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
     items: [...kb.items.keys()],
     places: [...kb.locations.values()].flatMap((l) => (l.at === null ? [l.name] : [l.name, l.at])),
   };
+  // What a use takes besides the item used (a key, a machine's inputs, a Pakkomon's
+  // equipment) is used with that item, when the wiki knows it otherwise: a name read from
+  // a reply's wording alone could make another use's command ambiguous.
+  for (const e of uses)
+    if (truthy(e.used_item))
+      for (const x of e.takes ?? []) {
+        const it = kb.items.get(x);
+        if (it !== undefined && x !== e.used_item) it.usedWith.add(e.used_item);
+      }
   for (const [name, es] of byItem) {
     const ok = es.filter((e) => !isFailedUse(e.text)).map((e) => e.text);
     const failed = es.filter((e) => isFailedUse(e.text)).map((e) => e.text);
@@ -1791,6 +1805,7 @@ function detectRenames(kb: KB): void {
     for (const x of o.sources) n.sources.add(x);
     for (const x of o.used_in) n.used_in.add(x);
     for (const x of o.made_by) n.made_by.add(x);
+    for (const x of o.usedWith) n.usedWith.add(x);
     for (const x of o.dropLocations) n.dropLocations.add(x);
     for (const x of o.seenIn) n.seenIn.add(x);
     if (o.givesTitle) n.givesTitle = true;
@@ -1894,6 +1909,7 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       sources: sortedStrings(it.sources),
       used_in: sortedStrings(it.used_in),
       made_by: sortedStrings(it.made_by),
+      ...(it.usedWith.size > 0 && { used_with: sortedStrings(it.usedWith) }),
       last_seen: it.last_seen,
       observations: it.seenIn.size,
       ...(it.use !== undefined && { use: it.use }),

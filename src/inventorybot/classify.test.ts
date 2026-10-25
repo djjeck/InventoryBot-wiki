@@ -478,6 +478,7 @@ describe('replies naming the item used', () => {
       text: 'equipaggi il tuo Brumolo 👻 con una caps rossa [C].',
       items: [],
       named: 'un Pakkomon di nome Brumolo 👻',
+      takes: ['una caps rossa'],
     });
     expect(
       classify(
@@ -957,6 +958,47 @@ describe('old formats', () => {
         null
       )
     ).toMatchObject({ type: 'use', named: 'Super Sfera Lampo ⚡️' });
+  });
+});
+
+describe('items a use takes', () => {
+  const takes = (text: string, query: string): unknown => {
+    const e = classify(text, query);
+    return e.type === 'use' ? e.takes : e.type;
+  };
+
+  it('a_key_a_machine_s_inputs_and_a_pakkomon_s_equipment_are_taken', () => {
+    expect([
+      takes(
+        "@mario_r, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41",
+        '/usa baule'
+      ),
+      takes(
+        '@mario_r, inserisci un pomodoro, una mozzarella e infine una mela in uno sportello sul lato del tostapane.',
+        '/usa tostapane'
+      ),
+      takes(
+        '@mario_r, apri 2x una latta di piselli e inizi a versarli dentro un tostapane incantato 🍞.',
+        '/usa tostapane'
+      ),
+    ]).toStrictEqual([
+      ['una chiave di ebano 🔑'],
+      ['un pomodoro', 'una mozzarella', 'una mela'],
+      ['una latta di piselli'],
+    ]);
+  });
+
+  it('an_equipment_named_with_a_comma_is_one_item', () => {
+    expect(
+      takes(
+        '@djjeck, equipaggi il tuo Brumolo 👻 con una spada di legno, piccola ma robusta [L2].',
+        '/usa brum # spada'
+      )
+    ).toStrictEqual(['una spada di legno, piccola ma robusta']);
+  });
+
+  it('a_use_that_takes_nothing_has_no_takes', () => {
+    expect(takes('@mario_r, tiri il dado e fai 5!', '/usa dado')).toBeUndefined();
   });
 });
 

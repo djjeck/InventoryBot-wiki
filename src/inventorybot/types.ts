@@ -213,6 +213,11 @@ export interface UseEvent {
    * sphere a Pakkomon came out of, the Pakkomon equipped, the scanner.
    */
   named?: string;
+  /**
+   * The items the reply says the use takes besides the item used: the key put in a chest's
+   * lock, the items put into a machine, the item a Pakkomon is equipped with.
+   */
+  takes?: string[];
 }
 
 /** A format of an earlier period, recognised without reading facts (quest offers, parcels, Pakkomon fights...). */
@@ -426,6 +431,11 @@ export interface WikiItem {
   /** Recipe names, sorted. */
   used_in: string[];
   made_by: string[];
+  /**
+   * The items whose /usa replies name it without giving it (the chest a key opens, the
+   * machine it goes in, the Pakkomon it equips), sorted; only when there are some.
+   */
+  used_with?: string[];
   last_seen: string | null;
   /** How many observations name it: replies of the bot and channel cards, each once. */
   observations: number;
