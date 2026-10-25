@@ -1,7 +1,8 @@
 /**
  * The web app's page: the wiki, the only view, under a header whose "Importa" button
  * opens a modal panel below it with the owner whose wiki it is, the list of exports (each removed by its bin button),
- * how to export a chat, "Aggiungi esportazione", which opens the folder picker, the options and "Cancella i
+ * how to export a chat, "Aggiungi esportazione", which opens the folder picker, "Prova con
+ * un esempio" while no export is listed, the options and "Cancella i
  * miei dati"; the panel closes on Escape or on a click outside it. Each folder
  * picked is sent at once to the worker, which reads it, keeps it and builds the wiki
  * again; a change of the options (the time zone, the username once a build asked for it)
@@ -11,11 +12,17 @@
  * objects of the picked folders; nothing is sent over the network (the built page's
  * Content-Security-Policy forbids it).
  *
+ * "Prova con un esempio" opens the example's page in place of the wiki: the chat of
+ * demo-chat.ts, as Telegram draws it, and a button that sends it to the worker (which
+ * writes it as an export, demo.ts); once it is built the wiki shows, with a line above it
+ * that opens the chat again.
+ *
  * Browser-only wiring, checked in a browser; the logic it relies on (run.ts, storage.ts,
  * labels.ts, debounce.ts, the adapters) has its own tests.
  */
 import { type Phase } from '#src/pipeline.ts';
 import { debounce } from './debounce.ts';
+import { DEMO_FOLDER, demoMessages } from './demo.ts';
 import { accountLabel, activityText, entryLabel } from './labels.ts';
 import {
   type BuildOptions,
@@ -43,6 +50,15 @@ const ui = {
   activityText: $('activity-text'),
   folders: $<HTMLInputElement>('folders'),
   add: $<HTMLButtonElement>('add'),
+  demo: $<HTMLButtonElement>('demo'),
+  demoHint: $('demo-hint'),
+  demoView: $('demo-view'),
+  demoTitle: $('demo-title'),
+  demoChat: $<HTMLOListElement>('demo-chat'),
+  demoBuild: $<HTMLButtonElement>('demo-build'),
+  demoBack: $<HTMLButtonElement>('demo-back'),
+  demoNote: $('demo-note'),
+  demoShow: $<HTMLButtonElement>('demo-show'),
   toggle: $<HTMLButtonElement>('panel-toggle'),
   count: $('export-count'),
   panel: $<HTMLDialogElement>('panel'),
@@ -255,6 +271,8 @@ function renderExports(): void {
     })
   );
   ui.exportsNone.hidden = exportList.length > 0;
+  ui.demo.hidden = ui.demoHint.hidden = exportList.length > 0;
+  updateDemo();
   ui.count.textContent = exportList.length ? String(exportList.length) : '';
   ui.toggle.setAttribute(
     'aria-label',
@@ -275,6 +293,76 @@ function renderExports(): void {
 }
 
 ui.add.addEventListener('click', () => ui.folders.click());
+
+// ---- the example ---------------------------------------------------------------------
+
+/** Whether the example's page is shown in place of the wiki. */
+let demoOpen = false;
+/** Whether the example was sent and its wiki is awaited: then the page gives way to it. */
+let demoPending = false;
+
+const demoListed = (): boolean => exportList.some((e) => e.folder === DEMO_FOLDER);
+
+function renderDemoChat(): void {
+  ui.demoChat.replaceChildren(
+    ...demoMessages().map((m) => {
+      const li = document.createElement('li');
+      li.className = `chat-row ${m.fromBot ? 'in' : 'out'}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.textContent = m.text;
+      const time = document.createElement('span');
+      time.className = 'chat-time';
+      time.textContent = m.time.slice(0, 5);
+      bubble.append(time);
+      li.append(bubble);
+      return li;
+    })
+  );
+}
+
+/** The example's page and the line above its wiki, as the list of exports and the state say. */
+function updateDemo(): void {
+  ui.main.dataset['view'] = demoOpen ? 'demo' : 'wiki';
+  ui.demoView.hidden = !demoOpen;
+  ui.demoNote.hidden = demoOpen || !demoListed() || ui.wiki.childElementCount === 0;
+  ui.demoBuild.disabled = demoPending;
+  ui.demoBuild.textContent = demoPending
+    ? 'Creazione della wiki…'
+    : demoListed()
+      ? 'Torna alla wiki'
+      : 'Crea la wiki da questa chat';
+}
+
+function openDemo(): void {
+  if (ui.demoChat.childElementCount === 0) renderDemoChat();
+  demoOpen = true;
+  updateDemo();
+  window.scrollTo({ top: 0 });
+  ui.demoTitle.focus({ preventScroll: true });
+}
+
+function closeDemo(): void {
+  demoOpen = false;
+  updateDemo();
+  ui.main.focus({ preventScroll: true });
+}
+
+ui.demo.addEventListener('click', () => {
+  closePanel();
+  openDemo();
+});
+ui.demoShow.addEventListener('click', openDemo);
+ui.demoBack.addEventListener('click', closeDemo);
+ui.demoBuild.addEventListener('click', () => {
+  if (demoListed()) return closeDemo();
+  hideError();
+  hideNotice();
+  demoPending = true;
+  updateDemo();
+  send({ type: 'demo' });
+  announce('Creazione della wiki dalla chat d’esempio.');
+});
 
 ui.folders.addEventListener('change', () => {
   const files = [...(ui.folders.files ?? [])];
@@ -481,9 +569,15 @@ function onMessage(m: WorkerMessage): void {
   phase = null;
   updateActivity();
   const o = m.outcome;
+  if (m.current && o.status !== 'done') demoPending = false;
   if (o.status === 'done') {
     showResult(o.result);
     updateStorageNote(o.savedAt);
+    if (demoPending && m.current) {
+      demoPending = false;
+      closeDemo();
+    }
+    updateDemo();
     if (m.current && o.savedAt === undefined)
       announce(
         `Wiki aggiornata: ${Object.keys(o.result.wiki.recipes).length} ricette, ${Object.keys(o.result.wiki.items).length} oggetti.`
@@ -520,7 +614,9 @@ ui.clear.addEventListener('click', () => {
   dropLegacySalt();
   typed.cancel();
   errorsShown.clear();
+  demoOpen = demoPending = false;
   showEmpty();
+  updateDemo();
   hideError();
   hideNotice();
   closePanel();
@@ -539,7 +635,9 @@ if (!('webkitdirectory' in ui.folders)) {
 } else if (worker === null) {
   showError('<p>Il browser non ha potuto avviare l’elaborazione.</p>');
   ui.add.disabled = true;
-} else {
+}
+if (worker === null) ui.demo.disabled = true;
+else {
   worker.onmessage = (ev: MessageEvent<WorkerMessage>) => onMessage(ev.data);
   worker.onerror = (ev) => {
     showError(`<p>L’elaborazione si è interrotta: ${esc(ev.message || 'errore sconosciuto')}</p>`);

@@ -7,6 +7,11 @@ dall'export della propria chat Telegram, e li mostra in una piccola webapp stati
 
 ## Come si usa
 
+Per vedere com'è prima di esportare qualcosa, premi **Importa** e poi **Prova con un esempio**: la
+pagina mostra la chat con il bot di un giocatore inventato, appena arrivato, e ne ricava la wiki.
+Oggetti, ricette e luoghi sono quelli del gioco, limitati ai primi passi. L'esempio sparisce appena
+aggiungi una tua esportazione.
+
 1. In **Telegram Desktop** apri la chat con il bot (o un gruppo in cui si gioca), menu **⋮** →
    **Esporta cronologia chat**, formato **HTML**; foto e altri allegati non servono.
 2. Apri la pagina, premi **Importa** in alto a destra, poi **Aggiungi esportazione**, e scegli la

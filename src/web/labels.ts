@@ -1,12 +1,13 @@
 /**
  * What the page (main.ts) writes about the exports and the work in progress, in Italian:
- * an export's chat name, the days of its first and last message, its status, the owner
+ * an export's chat name (or that it is the example), the days of its first and last message, its status, the owner
  * whose wiki it is, and the header's progress line. Pure functions, tested in Node.
  */
 import { INVENTORY_BOT } from '#src/inventorybot/bot.ts';
 import { type PlayerState } from '#src/inventorybot/types.ts';
 import { parseMacDate, parseWindowsDate, type WallClock } from '#src/lib/dates.ts';
 import { type Phase } from '#src/pipeline.ts';
+import { DEMO_FOLDER } from './demo.ts';
 import { type ExportEntry } from './protocol.ts';
 import { type RecordInfo } from './storage.ts';
 
@@ -78,7 +79,7 @@ export function accountLabel(
 
 /** What the list shows of an export. */
 export interface EntryLabel {
-  /** The chat's name; the folder's while the export has no record (queued, reading, failed). */
+  /** The chat's name; the folder's while the export has no record (queued, reading, failed); the example's. */
   name: string;
   /** The days of its messages (exports with a record), else null. */
   days: string | null;
@@ -91,7 +92,13 @@ export interface EntryLabel {
 export function entryLabel(e: ExportEntry): EntryLabel {
   const recorded = e.info !== undefined && (e.status === 'ready' || e.status === 'stale');
   const label: EntryLabel = {
-    name: recorded ? chatName(e.info as RecordInfo, e.folder) : e.folder,
+    // The example is a chat with the bot too: named for what it is.
+    name:
+      e.folder === DEMO_FOLDER
+        ? 'Esempio: un giocatore inventato'
+        : recorded
+          ? chatName(e.info as RecordInfo, e.folder)
+          : e.folder,
     days: recorded ? exportDays(e.info as RecordInfo) : null,
     status: 'pronta',
     detail: null,

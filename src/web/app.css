@@ -393,6 +393,7 @@ main:focus {
   box-shadow: var(--shadow);
   padding: 20px;
   max-width: 68ch;
+  margin-inline: auto;
   display: grid;
   gap: 10px;
 }
@@ -404,4 +405,98 @@ main:focus {
 }
 .result-info:empty {
   display: none;
+}
+
+/* The example's page: in place of the wiki, its chat as Telegram draws one, the player's
+   messages on the right, the bot's on the left. */
+main[data-view='demo'] > :not(#demo-view) {
+  display: none;
+}
+.demo-view {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+}
+.demo-intro {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: grid;
+  gap: 10px;
+}
+.demo-intro h2,
+.demo-intro p {
+  margin: 0;
+}
+.chat {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.chat-head p {
+  margin: 0;
+}
+.chat-title {
+  font-weight: 500;
+}
+.chat-avatar {
+  border-radius: 50%;
+  image-rendering: pixelated;
+  background: var(--bg);
+}
+.chat-history {
+  list-style: none;
+  margin: 0;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  background: var(--chat-bg);
+}
+.chat-row {
+  display: flex;
+}
+.chat-row.out {
+  justify-content: flex-end;
+}
+.chat-bubble {
+  max-width: min(520px, 85%);
+  padding: 6px 10px 6px 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.chat-row.out .chat-bubble {
+  border-radius: 14px 14px 4px 14px;
+  background: var(--accent-soft);
+}
+.chat-time {
+  float: right;
+  margin: 6px 0 -4px 10px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.demo-note {
+  margin: 0;
+}
+.link-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--accent-ink);
+  text-decoration: underline;
+  cursor: pointer;
 }

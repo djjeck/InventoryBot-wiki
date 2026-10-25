@@ -31,6 +31,8 @@
   --shadow-pop: 0 4px 16px #00000026;
   --hover: #7075791a;
   --search-bg: #f3f3f4;
+  /* A chat's background (the example's chat): a plain tint of the accent, not Telegram's picture. */
+  --chat-bg: #cfe2f3;
   --radius: 12px;
   --radius-sm: 8px;
   --sidebar-w: 420px;
@@ -81,6 +83,7 @@
     --shadow-pop: 0 4px 16px #00000080;
     --hover: #aaaaaa14;
     --search-bg: #181818;
+    --chat-bg: #0e1621;
     color-scheme: dark;
   }
   .sidebar {

@@ -191,6 +191,7 @@ invented names.
 - carlo
 - d
 - djjeck
+- esempio <!-- the player of the web app's example, src/web/demo.ts -->
 - gif <!-- public: Telegram's own GIF search bot, in "via @gif" -->
 - gino_x
 - guardiano

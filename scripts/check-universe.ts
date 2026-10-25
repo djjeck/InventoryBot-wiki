@@ -23,6 +23,8 @@ export function scannedFiles(root: string): string[] {
       /\.(ts|js|md|html|json|ya?ml)$/u.test(f) &&
       f !== 'package-lock.json' &&
       !f.startsWith('scripts/universe.') &&
+      // Real game content, the example's chat: the one exception (CLAUDE.md).
+      f !== 'src/web/demo-chat.ts' &&
       fs.existsSync(path.join(root, f)) // listed but deleted in the working tree
   );
 }

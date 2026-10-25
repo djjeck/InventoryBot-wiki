@@ -81,7 +81,14 @@
             </p>
             <div class="row-actions">
               <button type="button" class="btn primary" id="add">Aggiungi esportazione</button>
+              <button type="button" class="btn" id="demo" aria-describedby="demo-hint">
+                Prova con un esempio
+              </button>
             </div>
+            <p class="hint" id="demo-hint">
+              Mostra la chat con il bot di un giocatore inventato, appena arrivato, e la wiki che se
+              ne ricava.
+            </p>
             <form id="options" class="options" novalidate>
               <div class="field" id="player-field" hidden>
                 <label for="player">Il tuo nome utente Telegram</label>
@@ -131,6 +138,42 @@
       </div>
 
       <main id="main" tabindex="-1">
+        <section id="demo-view" class="demo-view" aria-labelledby="demo-title" hidden>
+          <div class="demo-intro">
+            <h2 id="demo-title" tabindex="-1">Una chat d’esempio</h2>
+            <p>
+              Questa è la chat privata con il bot di <b>@esempio</b>, un giocatore inventato appena
+              arrivato: fa qualche avventura lungo la strada dal villaggio alla pianura, poi guarda
+              i suoi oggetti e le ricette che può vedere. Telegram Desktop esporta così una chat, e
+              da un’esportazione come questa la pagina ricava la wiki.
+            </p>
+            <p class="hint">
+              Oggetti, ricette e luoghi sono quelli del gioco, limitati ai primi passi: quattro
+              oggetti comuni, le ricette che se ne vedono e i luoghi della strada. L’esempio
+              sparisce quando aggiungi una tua esportazione.
+            </p>
+            <div class="row-actions">
+              <button type="button" class="btn primary" id="demo-build">
+                Crea la wiki da questa chat
+              </button>
+              <button type="button" class="btn" id="demo-back">Torna indietro</button>
+            </div>
+          </div>
+          <div class="chat" role="log" aria-label="La chat d’esempio con InventoryBot">
+            <div class="chat-head">
+              <img class="chat-avatar" src="./avatar.png" alt="" width="36" height="36" />
+              <div>
+                <p class="chat-title">InventoryBot</p>
+                <p class="hint">bot</p>
+              </div>
+            </div>
+            <ol id="demo-chat" class="chat-history"></ol>
+          </div>
+        </section>
+        <p id="demo-note" class="hint demo-note" hidden>
+          Questa è la wiki dell’esempio, un giocatore inventato appena arrivato.
+          <button type="button" class="link-btn" id="demo-show">Guarda la chat da cui viene</button>
+        </p>
         <section id="empty" class="empty-state" aria-labelledby="empty-title">
           <h2 id="empty-title">La tua wiki è ancora vuota</h2>
           <p>
@@ -143,6 +186,11 @@
             gioca), menu <b>⋮</b> → <b>Esporta cronologia chat</b>, formato <b>HTML</b>, senza foto
             né altri allegati. Puoi aggiungere più cartelle, una alla volta, o una cartella che le
             contiene tutte.
+          </p>
+          <p>
+            Vuoi prima vedere com’è? In <b>Importa</b> premi <b>Prova con un esempio</b>: la wiki di
+            un giocatore inventato, appena arrivato, con quello che si scopre nei primi giorni di
+            gioco.
           </p>
           <p class="hint">
             Tutto avviene in questo browser: le chat non vengono inviate da nessuna parte.

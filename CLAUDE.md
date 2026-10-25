@@ -145,60 +145,67 @@ is one), under a header whose "Importa" button (with the number of exports) open
 below it, closed by Escape or a click outside it, with the owner whose wiki it is (with the
 inventory estimate's agreement, `accountLabel` in `labels.ts`), the list of exports (each with its
 chat, the days of its first and last message and its status, worded by `labels.ts`, and a bin button
-to remove it), how to export a chat, "Aggiungi esportazione", which opens the folder picker, the
-options and "Cancella i miei dati". It sends each folder picked at once to a Web Worker
-(`worker.ts`, `run.ts`; the messages are in `protocol.ts`), so the page stays responsive, and every
-change of the options (the time zone, the username once typing pauses, `debounce.ts`); there is no
-button to build. The worker owns the storage and runs the pipeline: it reads each folder into
-records (`processExport`) and keeps them, then builds the wiki again from every kept record
-(`buildWiki`) and saves the results. It loads the stored records once, at start, and keeps them in
-memory, so a build loads nothing again unless another tab stored one. Its queue runs one step at a
-time: the folders added, in order, then one build once none is left to read, however many were
-added. A build is never abandoned: a folder added or removed while it runs, or new options, make its
-results not current, and one more build follows. A folder whose exports are all kept already builds
-nothing, and one that cannot be read is listed with the error while the queue goes on. Removing an
-export rebuilds from the rest, and options equal to the current ones build nothing. The header shows
-the reading and the build's phase while the current wiki stays usable; each build's wiki replaces it
-in place, without moving the focus. The wiki and the player state are drawn by the wiki view
-(`view/wiki-view.js` and `.css`, plain JavaScript that defines `window.renderWiki`): as in
-Telegram's chat list, the search, the categories (as tabs, each with how many entries it lists, with
-the search if any, as unread counts) and their list are in a sidebar fixed to the left of the
-window, whose list scrolls on its own, while the selected entry is in the page, shown first as the
-bot's own reply that describes it (`/esamina`, a recipe's craft, `/viaggio` for a place), worded for
-any player, in a Telegram bubble with links, then what the bot does not say, with the owner's own
-state in a card beside it (above it when narrow), as the bot would answer them ("ti manca: …"),
-which scrolls as a whole (on a narrow screen the sidebar is a block above it); the tab and the
-selected entry are in the URL's fragment (`#oggetti/l_oro`: a slug of the name, unique within its
-tab; a recipe whose item is known is shown on the item's page, which also holds its recipes, at the
-item's address with the list it was opened from, `#oggetti/una_torre?lista=ricette`, and
-`#ricette/<slug>` leads there), so a reload keeps them and each change is a step of the browser's
-history; and the report is in a collapsed section. Above a place, Luoghi shows the map of the places
-(`map-layout.ts`, drawn by the view as pixel art, the same in both themes, its rows a little closer
-than its columns): a grid, as in classic role-playing games, running across a wide window and down a
-tall one, where no two roads cross and a road goes at 45° only from a place with more than four
-roads. It is the tree of the shortest routes from the village (the place the bot calls "il
-villaggio"), drawn in three steps: directions by rules alone (a place's straight directions to its
-biggest branches, along the main axis first, a branch linked to a sibling beside it, the rest
-diagonally), lengths by pushing each branch out as one block until it fits, the lines towards the
-branches still to join kept clear, then straight dead-end chains folded at a right angle where that
-makes the map smaller; a link that no length keeps clear may cross a road. Places the village does
-not reach go on free cells along its edge. The selected place is marked, with its shortest route
-from the village. The owner is the player the bot addresses most in the DM; without a DM the build
-stops, the records stay kept, and the panel shows a username field, which the page offers nowhere
-else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the records of the
-exports (`ExportRecord`, never the export pages), each with its folder, dates and counts, in upload
-order, which is their merge order; the last results (wiki, player state, report, options) with the
-records they were built from, so a returning player sees their wiki at once and the worker rebuilds
-only if they are not current; and the salt of the pseudonyms and sender keys, made once. A record is
-valid only with the salt that made it, so the three live in one database: without a salt the records
-and results are dropped, and a record or results made with another salt are refused. A record of an
-older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can add the export again, but
-never used, and its payload is dropped. Opening the database of an older schema drops what it kept.
-Without storage the worker keeps the records of the visit in memory. "Cancella i miei dati" deletes
-the whole database and resets the options. `run.ts`, `storage.ts`, `labels.ts`, `debounce.ts` and
-`map-layout.ts` use no browser API and are tested in Node (on a fake IndexedDB,
-`test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
-(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
+to remove it), how to export a chat, "Aggiungi esportazione", which opens the folder picker, "Prova
+con un esempio" while no export is listed, the options and "Cancella i miei dati". The example is a
+short chat with the bot, written by hand in `demo-chat.ts`: an invented player who has just started
+walks from the village to the plain, finds one each of four common items, lists and examines their
+items and recipes. "Prova con un esempio" opens its page in place of the wiki: the chat as Telegram
+draws it, and a button that builds the wiki from it; the worker writes it as an export (`demo.ts`)
+and reads it like a folder picked, and above its wiki a line opens the chat again. Adding an export
+of the player's own drops it (`run.ts`), as its chat with the bot would mix with theirs. It sends
+each folder picked at once to a Web Worker (`worker.ts`, `run.ts`; the messages are in
+`protocol.ts`), so the page stays responsive, and every change of the options (the time zone, the
+username once typing pauses, `debounce.ts`); there is no button to build. The worker owns the
+storage and runs the pipeline: it reads each folder into records (`processExport`) and keeps them,
+then builds the wiki again from every kept record (`buildWiki`) and saves the results. It loads the
+stored records once, at start, and keeps them in memory, so a build loads nothing again unless
+another tab stored one. Its queue runs one step at a time: the folders added, in order, then one
+build once none is left to read, however many were added. A build is never abandoned: a folder added
+or removed while it runs, or new options, make its results not current, and one more build follows.
+A folder whose exports are all kept already builds nothing, and one that cannot be read is listed
+with the error while the queue goes on. Removing an export rebuilds from the rest, and options equal
+to the current ones build nothing. The header shows the reading and the build's phase while the
+current wiki stays usable; each build's wiki replaces it in place, without moving the focus. The
+wiki and the player state are drawn by the wiki view (`view/wiki-view.js` and `.css`, plain
+JavaScript that defines `window.renderWiki`): as in Telegram's chat list, the search, the categories
+(as tabs, each with how many entries it lists, with the search if any, as unread counts) and their
+list are in a sidebar fixed to the left of the window, whose list scrolls on its own, while the
+selected entry is in the page, shown first as the bot's own reply that describes it (`/esamina`, a
+recipe's craft, `/viaggio` for a place), worded for any player, in a Telegram bubble with links,
+then what the bot does not say, with the owner's own state in a card beside it (above it when
+narrow), as the bot would answer them ("ti manca: …"), which scrolls as a whole (on a narrow screen
+the sidebar is a block above it); the tab and the selected entry are in the URL's fragment
+(`#oggetti/l_oro`: a slug of the name, unique within its tab; a recipe whose item is known is shown
+on the item's page, which also holds its recipes, at the item's address with the list it was opened
+from, `#oggetti/una_torre?lista=ricette`, and `#ricette/<slug>` leads there), so a reload keeps them
+and each change is a step of the browser's history; and the report is in a collapsed section. Above
+a place, Luoghi shows the map of the places (`map-layout.ts`, drawn by the view as pixel art, the
+same in both themes, its rows a little closer than its columns): a grid, as in classic role-playing
+games, running across a wide window and down a tall one, where no two roads cross and a road goes at
+45° only from a place with more than four roads. It is the tree of the shortest routes from the
+village (the place the bot calls "il villaggio"), drawn in three steps: directions by rules alone (a
+place's straight directions to its biggest branches, along the main axis first, a branch linked to a
+sibling beside it, the rest diagonally), lengths by pushing each branch out as one block until it
+fits, the lines towards the branches still to join kept clear, then straight dead-end chains folded
+at a right angle where that makes the map smaller; a link that no length keeps clear may cross a
+road. Places the village does not reach go on free cells along its edge. The selected place is
+marked, with its shortest route from the village. The owner is the player the bot addresses most in
+the DM; without a DM the build stops, the records stay kept, and the panel shows a username field,
+which the page offers nowhere else. What the worker keeps is in IndexedDB, in this browser only
+(`storage.ts`): the records of the exports (`ExportRecord`, never the export pages), each with its
+folder, dates and counts, in upload order, which is their merge order; the last results (wiki,
+player state, report, options) with the records they were built from, so a returning player sees
+their wiki at once and the worker rebuilds only if they are not current; and the salt of the
+pseudonyms and sender keys, made once. A record is valid only with the salt that made it, so the
+three live in one database: without a salt the records and results are dropped, and a record or
+results made with another salt are refused. A record of an older `RECORD_FORMAT_VERSION` is stale:
+it is listed, so the player can add the export again, but never used, and its payload is dropped.
+Opening the database of an older schema drops what it kept. Without storage the worker keeps the
+records of the visit in memory. "Cancella i miei dati" deletes the whole database and resets the
+options. `run.ts`, `storage.ts`, `labels.ts`, `debounce.ts`, `demo.ts` and `map-layout.ts` use no
+browser API and are tested in Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and
+`worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
+`tsconfig.web.json`, and left out of coverage).
 
 `npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
 (`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the
@@ -256,6 +263,11 @@ This project must stay on the right side of that.
   their ingredients or outputs, which item unlocks which place, where exclusive items drop, real
   item, recipe and place names. Public facts the bot itself tells every player (the `/faq` legend
   and rules, command names, fixed reply texts) are fine.
+  - **One exception:** `src/web/demo-chat.ts`, the web app's example, holds real game content, which
+    `check:universe` skips: what a player who has just started learns in an evening, a few level-1
+    recipes of common items that drop everywhere (none made, so no output), one of each item, and
+    the places a new player's `/viaggio` lists on the road from the village to the plain (no secret
+    place). Nothing else holds real game content.
   - Examples use the invented world of [scripts/universe.md](scripts/universe.md), in the real
     format: take names from it, and when a new test case or example needs a new item, recipe, place
     or Telegram username, invent one and add it there in the same change. Real usernames are worse

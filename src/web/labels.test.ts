@@ -1,5 +1,6 @@
 /** What the page writes about the exports (labels.ts). Synthetic data only. */
 import { describe, expect, it } from 'vitest';
+import { DEMO_FOLDER } from './demo.ts';
 import {
   accountLabel,
   activityText,
@@ -78,6 +79,12 @@ describe('entries', () => {
       status: 'pronta',
       detail: null,
     });
+  });
+
+  it('the_example_is_named_for_what_it_is', () => {
+    const e = entry({ id: 'h', info: info({ folder: DEMO_FOLDER }), folder: DEMO_FOLDER });
+    expect(entryLabel(e).name).toBe('Esempio: un giocatore inventato');
+    expect(entryLabel({ ...e, status: 'reading' }).name).toBe('Esempio: un giocatore inventato');
   });
 
   it('a_stale_export_asks_for_its_folder_again', () => {

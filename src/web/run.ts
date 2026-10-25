@@ -11,6 +11,8 @@
  * added or removed while it runs (or new options) makes it not current, and one more build
  * follows. An export whose records are all stored already changes nothing and builds
  * nothing. An export that cannot be read is listed with the error, and the queue goes on.
+ * The example (demo.ts) is an export like the others, until the player adds one of their
+ * own: then it is dropped.
  *
  * The records are loaded from storage once, at start, and kept in memory: a build reads
  * the list of stored records (small) and loads the payloads again only when storage holds
@@ -30,6 +32,7 @@ import {
 } from '#src/telegram/export/browser-files.ts';
 import { type ExportRecord, splitExports } from '#src/telegram/export/record.ts';
 import { type Page } from '#src/telegram/messages.ts';
+import { DEMO_FOLDER, demoFiles } from './demo.ts';
 import {
   type BuildOptions,
   type BuildOutcome,
@@ -330,8 +333,24 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     post({ type: 'results', current: !pending(), outcome });
   }
 
+  /**
+   * Drops the example (demo.ts), kept or queued: the player's own exports replace it, as
+   * its invented chat with the bot would mix with theirs.
+   */
+  async function dropDemo(): Promise<void> {
+    for (const j of jobs.filter((j) => j.folder.name === DEMO_FOLDER))
+      jobs.splice(jobs.indexOf(j), 1);
+    const kept = [...listed, ...[...memory.values()].map((m) => m.info)];
+    for (const { hash } of kept.filter((i) => i.folder === DEMO_FOLDER)) {
+      loaded.delete(hash);
+      if (memory.delete(hash) || (await store.removeRecord(hash))) buildWanted = true;
+    }
+  }
+
   async function add(picks: readonly (readonly FileLike[])[]): Promise<void> {
-    for (const folder of inputFolders(picks)) {
+    const folders = inputFolders(picks);
+    if (folders.some((f) => f.name !== DEMO_FOLDER)) await dropDemo();
+    for (const folder of folders) {
       const { pages, warnings } = listFolder(folder);
       const job: Job = {
         id: `job-${nextJob++}`,
@@ -391,6 +410,7 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     }
     await ensureStarted();
     if (m.type === 'add') return add(m.picks);
+    if (m.type === 'demo') return add([demoFiles()]);
     if (m.type === 'remove') return remove(m.id);
     if (m.type === 'clear') return clear();
     if (sameOptions(m.options, options)) return;
