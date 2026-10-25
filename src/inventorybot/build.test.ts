@@ -109,7 +109,6 @@ describe('common build', () => {
       [
         'generated',
         'rarities',
-        'rules',
         'trivia',
         'renames',
         'rarity_hypotheses',
@@ -1690,30 +1689,21 @@ describe('renames', () => {
   });
 });
 
-describe('rarity hypotheses', () => {
-  it('m_hypothesis_without_faq', () => {
+describe('rarity system', () => {
+  it('legend_and_m_hypothesis_without_events', () => {
     const { wiki } = runBuild([ev(T.inventory([['un drago', 'M', 1]]), null, { t: 0 })]);
+    expect(Object.keys(wiki.rarities)).toStrictEqual(['C', 'N', 'R', 'S', 'U', 'Ln', 'X']);
     expect(Object.keys(wiki.rarity_hypotheses)).toStrictEqual(['M']);
-    expect(wiki.rarities).toStrictEqual({});
   });
 
-  it('m_hypothesis_when_faq_does_not_define_it', () => {
+  it('faq_reply_changes_nothing', () => {
+    const base = runBuild([]).wiki;
     const { wiki } = runBuild([ev(T.FAQ, '/faq', { t: 0 })]);
-    expect(Object.keys(wiki.rarity_hypotheses)).toStrictEqual(['M']);
-    expect(wiki.rules).toStrictEqual(['Ogni ricetta di livello N richiede il livello N.']);
-  });
-
-  it('no_hypothesis_when_faq_defines_m', () => {
-    const faq = T.FAQ.replace('S = super raro,', 'S = super raro, M = mitico,');
-    const { wiki } = runBuild([ev(faq, '/faq', { t: 0 })]);
-    expect(wiki.rarity_hypotheses).toStrictEqual({});
-    expect(wiki.rarities['M']).toBe('mitico');
-  });
-
-  it('latest_faq_wins', () => {
-    const newer = T.FAQ.replace('C = comune', 'C = comunissimo');
-    const { wiki } = runBuild([ev(T.FAQ, '/faq', { t: 0 }), ev(newer, '/faq', { t: 10 })]);
-    expect(wiki.rarities['C']).toBe('comunissimo');
+    expect([wiki.rarities, wiki.rarity_hypotheses, wiki.items]).toStrictEqual([
+      base.rarities,
+      base.rarity_hypotheses,
+      {},
+    ]);
   });
 });
 

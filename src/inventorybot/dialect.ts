@@ -31,7 +31,6 @@ export const COMPATIBLE: Readonly<Partial<Record<EventType, ReadonlySet<string>>
   location: new Set(['/viaggio']),
   travel_blocked: new Set(['/viaggio']),
   stats: new Set(['/stats']),
-  faq: new Set(['/faq', '/start', '/help']),
   give: new Set(['/dai']),
   show: new Set(['/mostra']),
   title: new Set(['/titolo']),

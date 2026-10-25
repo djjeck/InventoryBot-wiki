@@ -680,27 +680,9 @@ describe('lucky, gift, give, show', () => {
 });
 
 describe('faq', () => {
-  it('legend_and_rules', () => {
-    const e = fields(FAQ, '/faq');
-    expect(e['type']).toBe('faq');
-    expect(e['rarities']).toStrictEqual({
-      C: 'comune',
-      N: 'non comune',
-      R: 'raro',
-      S: 'super raro',
-      U: 'unico (ne esiste uno solo)',
-      Ln: 'ottenibile da ricette',
-      X: 'oggetti speciali',
-    });
-    expect(e['rules']).toStrictEqual([
-      'Il + indica un oggetto che si trova in un solo luogo.',
-      'Ogni ricetta di livello N richiede il livello N.',
-    ]);
-  });
-
-  it('faq_without_levels', () => {
-    const e = fields('Ciao, sono InventoryBot!\n\nLegenda oggetti\nC = comune, M = mitico.', null);
-    expect([e['rarities'], e['rules']]).toStrictEqual([{ C: 'comune', M: 'mitico' }, []]);
+  it('faq_is_a_known_reply', () => {
+    expect(classify(FAQ, '/faq')).toStrictEqual({ type: 'miss', reply: 'faq' });
+    expect(compatibleCommands(FAQ)).toStrictEqual(new Set(['/faq', '/start', '/help']));
   });
 });
 
@@ -1245,7 +1227,7 @@ describe('through phases 2 and 4', () => {
       'recipe_list',
       'inventory',
       'travel',
-      'faq',
+      'miss',
       'give',
       'show',
       'use',

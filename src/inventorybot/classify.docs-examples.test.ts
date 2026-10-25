@@ -57,7 +57,6 @@ describe('docs examples', () => {
       'give',
       'show',
       'use',
-      'faq',
       'miss',
       'title',
       'item_cooldown',

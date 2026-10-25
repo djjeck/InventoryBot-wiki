@@ -5,6 +5,6 @@ risposte del bot: 19
   InventoryBot: risposte del bot abbinate a un comando: dm=11
   Gruppo ArmadilloSocievole: risposte del bot abbinate a un comando: user=5, reply=1
 nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 0
-eventi: drop=5 inventory=2 travel=2 give=2 faq=1 location=1 recipe_list=1 recipe_detail=1 craft=1 item_info=1 gift=1 travel_blocked=1
+eventi: drop=5 inventory=2 travel=2 give=2 miss=1 location=1 recipe_list=1 recipe_detail=1 craft=1 item_info=1 gift=1 travel_blocked=1
   coppie nei gruppi verificate dalla risposta: confermate=5, sciolte=0
 oggetti: 10; ricette: 2 (con tutti gli ingredienti: 2, con il risultato noto: 1); luoghi: 4

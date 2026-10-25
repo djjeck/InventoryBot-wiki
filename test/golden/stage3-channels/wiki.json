@@ -1,7 +1,14 @@
 {
   "generated": "<generated>",
-  "rarities": {},
-  "rules": [],
+  "rarities": {
+    "C": "comune",
+    "N": "non comune",
+    "R": "raro",
+    "S": "super raro",
+    "U": "unico (esiste un solo oggetto di questo tipo)",
+    "Ln": "ottenibile da ricette",
+    "X": "oggetti speciali"
+  },
   "trivia": [
     {
       "channel": "Il Grimorio del Golem",
@@ -12,7 +19,7 @@
   ],
   "renames": {},
   "rarity_hypotheses": {
-    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dal bot"
   },
   "items": {
     "una torre": {

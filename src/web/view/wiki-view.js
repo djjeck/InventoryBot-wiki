@@ -38,7 +38,6 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
 </aside>
 <div class="wrap content">
   <div id="view"></div>
-  <details id="rules" class="rules"></details>
   <details id="trivia" class="rules"></details>
   <footer id="foot"></footer>
 </div>`;
@@ -95,7 +94,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
 
     // ---- derived relations -------------------------------------------------------
     const rarityGroup = (r) => (!r ? 'q' : r[0] === 'L' ? 'L' : r[0]);
-    // Rarity names come from the bot's /faq legend (wiki.json "rarities"); "Ln" covers L1, L2, ...
+    // Rarity names come from the wiki's legend (wiki.json "rarities"); "Ln" covers L1, L2, ...
     const RARITY_NAMES = {
       ...Object.fromEntries(
         Object.entries(W.rarities || {}).map(([k, v]) => [k === 'Ln' ? 'L' : k, v])
@@ -106,7 +105,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       RARITY_NAMES[g] ||
       (W.rarity_hypotheses?.[g]
         ? W.rarity_hypotheses[g].split(':')[0] + ' (ipotesi)'
-        : `rarità ${g}, non spiegata nella /faq`);
+        : `rarità ${g}, non spiegata dal bot`);
     const ingredientsOf = (r) =>
       r.ingredients ? Object.entries(r.ingredients) : r.partial_ingredients.map((n) => [n, null]);
     for (const r of Object.values(R)) {
@@ -1361,9 +1360,6 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       check && check.compared > 0
         ? (Math.floor((check.agreed * 1000) / check.compared) / 10).toLocaleString('it-IT')
         : null;
-    if (W.rules?.length)
-      $('#rules').innerHTML =
-        `<summary>Regole del gioco (dalla /faq del bot)</summary>${W.rules.map((r) => `<p class="note">${esc(r)}</p>`).join('')}`;
     if (W.trivia?.length)
       $('#trivia').innerHTML = `<summary>Curiosità dai canali</summary>${W.trivia
         .map(

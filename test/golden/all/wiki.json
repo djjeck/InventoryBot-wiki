@@ -9,10 +9,6 @@
     "Ln": "ottenibile da ricette",
     "X": "oggetti speciali"
   },
-  "rules": [
-    "Se un oggetto ha un + nel nome, significa che c'e' un solo luogo dove quell'oggetto esce. Scoprite quale!",
-    "Per raggiungere il nuovo livello devi fare una ricetta del livello corrispondente. Ad esempio se sei livello 2, per passare al 3 devi fare una ricetta di livello 3. Puoi vedere i livelli delle ricette col comando /ricetta. Ricchi premi e cotillons al passaggio di livello!"
-  ],
   "trivia": [
     {
       "channel": "Il Grimorio del Golem",
@@ -23,7 +19,7 @@
   ],
   "renames": {},
   "rarity_hypotheses": {
-    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dal bot"
   },
   "items": {
     "un dado": {

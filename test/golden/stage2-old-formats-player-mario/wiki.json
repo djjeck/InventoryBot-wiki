@@ -1,16 +1,18 @@
 {
   "generated": "<generated>",
   "rarities": {
-    "N": "non comune (davvero)",
-    "Ln": "ricette"
+    "C": "comune",
+    "N": "non comune",
+    "R": "raro",
+    "S": "super raro",
+    "U": "unico (esiste un solo oggetto di questo tipo)",
+    "Ln": "ottenibile da ricette",
+    "X": "oggetti speciali"
   },
-  "rules": [
-    "regola"
-  ],
   "trivia": [],
   "renames": {},
   "rarity_hypotheses": {
-    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dalla /faq"
+    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dal bot"
   },
   "items": {
     "un dado": {

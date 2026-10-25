@@ -222,13 +222,6 @@ export interface OldFormatEvent {
   format: string;
 }
 
-export interface FaqEvent {
-  type: 'faq';
-  /** Rarity code -> meaning, in legend order. */
-  rarities: Record<string, string>;
-  rules: string[];
-}
-
 /** Help, listings, refusals, not-found replies. */
 export interface MissEvent {
   type: 'miss';
@@ -335,7 +328,6 @@ export type Event =
   | GiveEvent
   | ShowEvent
   | UseEvent
-  | FaqEvent
   | MissEvent
   | OldFormatEvent
   | UnknownEvent;
@@ -534,14 +526,13 @@ export interface WikiLocation {
 export interface Wiki {
   /** Local time of the run, `2026-10-17T12:00:00+02:00`. */
   generated: string;
-  /** Rarity code -> meaning, from the latest /faq. */
+  /** Rarity code -> meaning (the rarity system of build.ts). */
   rarities: Record<string, string>;
-  rules: string[];
   /** The channels' stories and guides, in post order. */
   trivia: WikiTrivia[];
   /** Old item name -> current name. */
   renames: Record<string, string>;
-  /** Rarity codes the /faq does not explain -> assumed meaning. */
+  /** Rarity codes the bot does not explain -> assumed meaning. */
   rarity_hypotheses: Record<string, string>;
   items: Record<string, WikiItem>;
   recipes: Record<string, WikiRecipe>;

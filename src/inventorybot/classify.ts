@@ -36,7 +36,6 @@ import { placeName } from './places.ts';
 import {
   type CraftEvent,
   type Event,
-  type FaqEvent,
   type ItemInfoEvent,
   type ItemLine,
   type MissEvent,
@@ -768,34 +767,6 @@ const cUse: Classifier = (t, q) => {
   return { type: 'use', text, items: useItems(t), ...(named ? { named } : {}) };
 };
 
-const LEGEND = rx(`Legenda oggetti\\n([\\s\\S]+?)(?:\\n\\n|${END})`);
-// A word boundary before a word character: the previous character is not one.
-const LEGEND_ENTRY = rx(
-  `(?<![${WORD_BODY}])([A-Z]n?) = ([^,.:(]+?)(?: \\(([^)]*)\\))?(?=[,.]|${S}*:\\)|\\n?$)`,
-  'g'
-);
-const LEVELS = rx(`\\nLivelli\\n\\n?([\\s\\S]+?)\\n\\n`);
-
-/** /faq: the rarity legend and the levelling rule, so the wiki does not hardcode them. */
-const cFaq: Classifier = (t) => {
-  if (!t.startsWith('Ciao, sono InventoryBot!')) return null;
-  const ev: FaqEvent = { type: 'faq', rarities: {}, rules: [] };
-  let m = LEGEND.exec(t);
-  if (m) {
-    const legend = m[1] as string;
-    // "C = comune, N = non comune, ..., Ln = ottenibile da ricette. X = oggetti speciali :)"
-    for (const [, code, desc, note] of legend.matchAll(LEGEND_ENTRY)) {
-      ev.rarities[code as string] = stripWs(desc as string) + (note ? ` (${note})` : '');
-    }
-    for (const line of legend.split('\n').slice(1)) {
-      if (stripWs(line)) ev.rules.push(stripWs(line));
-    }
-  }
-  m = LEVELS.exec(t);
-  if (m) ev.rules.push(stripWs(m[1] as string));
-  return ev;
-};
-
 interface KnownReply {
   /** Name of the reply, kept in the `miss` event. */
   name: string;
@@ -820,6 +791,12 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
   },
   { name: 'leaderboards', match: { head: 'Eroi di Sempre:' }, commands: ['/stats'] },
   { name: 'groups', match: { head: 'Gruppi di InventoryBot' }, commands: ['/gruppi'] },
+  // The help text with the rarity legend, which the rarity system of build.ts states instead.
+  {
+    name: 'faq',
+    match: { head: 'Ciao, sono InventoryBot!' },
+    commands: ['/faq', '/start', '/help'],
+  },
   { name: 'welcome', match: { head: 'Benvenuto!' }, commands: ['/start', '/registrami'] },
   { name: 'commands', match: { head: 'I comandi:' }, commands: ['/faqcomandi'] },
   {
@@ -1085,7 +1062,6 @@ const CLASSIFIERS: readonly Classifier[] = [
   cShow,
   cUse,
   cDrop,
-  cFaq,
   cNoise,
   cNarratedArrival,
 ];

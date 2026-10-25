@@ -5,7 +5,7 @@ risposte del bot: 126
   InventoryBot: risposte del bot abbinate a un comando: dm=63
   Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=35, user=21, single=4
 nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 3
-eventi: miss=23 use=10 travel=9 drop=8 item_info=8 inventory=8 give=6 unknown=6 stats=6 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 old_format=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2 faq=2
+eventi: miss=25 use=10 travel=9 drop=8 item_info=8 inventory=8 give=6 unknown=6 stats=6 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 old_format=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2
   coppie nei gruppi verificate dalla risposta: confermate=25, sciolte=0
   risposte del bot non riconosciute, per anno: 2025=6
 oggetti: 36; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2); luoghi: 9

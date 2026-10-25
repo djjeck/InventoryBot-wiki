@@ -2,7 +2,7 @@
  * Phase 5: game events -> objective game wiki; player.ts adds the personal state.
  *
  * The wiki holds only facts about the game, the same for every player:
- *   rarities   rarity legend and game rules, from /faq
+ *   rarities   rarity legend (the rarity system, stated in this file)
  *   items      name, rarity, sources, recipes it is used in / made by, exclusive location
  *   recipes    name, level, ingredients (with quantities), output
  *   locations  exits, whether entry needs an item, unlock texts, exclusive items
@@ -151,7 +151,47 @@ export function inventoryScope(
   };
 }
 
-/** "+" rarity (C+, N+, R+): the item drops in a single location (per the bot's /faq). */
+// ---- the rarity system ----------------------------------------------------------------
+// Every item carries a rarity code (docs/bot-protocol.md §2.2). The game's rules for it are
+// stated here rather than read from the bot's /faq, whose wording would change with them.
+
+/** Rarity code -> meaning, in the bot's words and order ("Ln" stands for L1, L2, ...). */
+const RARITIES: Readonly<Record<string, string>> = {
+  C: 'comune',
+  N: 'non comune',
+  R: 'raro',
+  S: 'super raro',
+  U: 'unico (esiste un solo oggetto di questo tipo)',
+  Ln: 'ottenibile da ricette',
+  X: 'oggetti speciali',
+};
+
+/** Rarity codes the bot does not explain -> the meaning assumed for them. */
+const RARITY_HYPOTHESES: Readonly<Record<string, string>> = {
+  M:
+    'mitico: più raro di super raro ma non unico, per analogia con altri giochi ' +
+    '(es. il mythic rare di Magic). Non confermato dal bot',
+};
+
+/**
+ * Source implied by the rarity class. Ln and X come from the legend; C/N/R/S being
+ * adventure drops is observed (no counter-example in the data).
+ */
+const SOURCE_BY_CLASS: Readonly<Record<string, string>> = {
+  C: 'adventure',
+  N: 'adventure',
+  R: 'adventure',
+  S: 'adventure',
+  L: 'recipe',
+  X: 'special',
+};
+
+function rarityClass(rarity: string | null): string {
+  const r = stripEndChars(rarity || '', '+');
+  return r.startsWith('L') ? 'L' : r;
+}
+
+/** "+" rarity (C+, N+, R+): the item drops in a single location. */
 export function isExclusive(rarity: string | null): boolean {
   return truthy(rarity) && rarity.endsWith('+');
 }
@@ -261,7 +301,6 @@ export class KB {
   readonly locations = new Map<string, KbLocation>();
   /** Report entries by kind, in order of the first entry of each kind (shown in the report). */
   readonly report = new Map<ReportKind, ReportEntry[]>();
-  faq: Extract<BuildEvent, { type: 'faq' }> | null = null;
   readonly trivia: WikiTrivia[] = [];
   player: string | null = null;
   /** Ingredient swaps (old item, new item, recipe, date), see detectRenames(). */
@@ -912,8 +951,6 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       kb.item(e.item);
     } else if (e.type === 'show') {
       kb.item(e.item, e.rarity, e.usable);
-    } else if (e.type === 'faq') {
-      kb.faq = e; // the latest /faq wins
     } else if (e.type === 'use') {
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable);
       uses.push(e);
@@ -1716,31 +1753,6 @@ function useConsumption(kb: KB, events: readonly BuildEvent[]): Map<string, Map<
   return out;
 }
 
-/** Rarity codes the /faq does not explain, with the meaning assumed until it does. */
-const RARITY_HYPOTHESES: Readonly<Record<string, string>> = {
-  M:
-    'mitico: più raro di super raro ma non unico, per analogia con altri giochi ' +
-    '(es. il mythic rare di Magic). Non confermato dalla /faq',
-};
-
-/**
- * Source implied by the rarity class. Ln and X come from the /faq legend; C/N/R/S
- * being adventure drops is observed (no counter-example in the data).
- */
-const SOURCE_BY_CLASS: Readonly<Record<string, string>> = {
-  C: 'adventure',
-  N: 'adventure',
-  R: 'adventure',
-  S: 'adventure',
-  L: 'recipe',
-  X: 'special',
-};
-
-function rarityClass(rarity: string | null): string {
-  const r = stripEndChars(rarity || '', '+');
-  return r.startsWith('L') ? 'L' : r;
-}
-
 /**
  * Turn ingredient swaps into renames when the evidence agrees.
  *
@@ -1968,20 +1980,14 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       }),
     },
   ]);
-  const faqRarities = kb.faq ? kb.faq.rarities : null;
   return {
     generated,
-    // From the bot's /faq: rarity codes ("Ln" stands for L1, L2, ...) and game rules.
-    rarities: faqRarities ?? {},
-    rules: kb.faq ? kb.faq.rules : [],
+    // The rarity system: rarity codes ("Ln" stands for L1, L2, ...).
+    rarities: { ...RARITIES },
     trivia: [...kb.trivia],
     // Old item name -> current name, for links and searches by an old name.
     renames: record([...kb.renames].sort((a, b) => compareCodePoints(a[0], b[0]))),
-    rarity_hypotheses: record(
-      Object.entries(RARITY_HYPOTHESES).filter(
-        ([k]) => !faqRarities || !Object.hasOwn(faqRarities, k)
-      )
-    ),
+    rarity_hypotheses: { ...RARITY_HYPOTHESES },
     items: record(items),
     recipes: record(recipes),
     locations: record(locations),

@@ -508,10 +508,7 @@ export function writeStage2Scenarios(root: string): Scenario[] {
     h.bot('🍕'.repeat(70) + 'Benvenuto!', 51); // "Benvenuto!" ends at code point 80
     h.bot('🍕'.repeat(71) + 'Benvenuto!', 52);
     h.user('Mario', '/faq', 60);
-    h.bot(
-      'Ciao, sono InventoryBot!\n\nLegenda oggetti\nàC = comune, N = non comune (davvero), Ln = ricette.\n\nLivelli\n\nregola\n\nfine',
-      61
-    );
+    h.bot('Ciao, sono InventoryBot!\n\nLegenda oggetti\nC = comune, N = non comune.', 61);
     h.user('Mario', '/ricetta torre', 70);
     h.bot(
       "@mario, prendi in mano:\n- un sasso [C] x2\ne costruisci\nOttieni: una torre!\n\nHai raggiunto il livello ٢! Per te 20x una moneta d'oro",

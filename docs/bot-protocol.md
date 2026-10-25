@@ -764,7 +764,7 @@ FAQ    = "Ciao, sono InventoryBot!" ANY NL "Livelli" NL NL RULE NL NL "Legenda o
 LEGEND = LINE        (* "…: C = comune, N = non comune, …, Ln = ottenibile da ricette. X = oggetti speciali :)" *)
 ```
 
-```bot-reply type=faq query="/faq" rarities.C=comune rarities.U="unico (esiste un solo oggetto di questo tipo)" rarities.Ln="ottenibile da ricette" rarities.X="oggetti speciali" addressee=null
+```bot-reply type=miss query="/faq" reply=faq addressee=null
 Ciao, sono InventoryBot! Gioca con me, vivi incredibili avventure, colleziona tantissimi oggetti e combinali per formarne di nuovi! E se sei veramente molto molto bravo, potrai sconfiggere il malvagio Arcibaldo! Chi e' il malvagio Arcibaldo? Scoprilo nel gioco!
 
 Livelli
