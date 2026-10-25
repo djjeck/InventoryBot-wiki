@@ -818,7 +818,7 @@ ticket with `/biglietto` (a `[N] @u, prendi un biglietto!` notice follows), then
 `ABBIAMO N PARTECIPANTI! PRONTI ALL'ESTRAZIONE!`, `RULLO DI TAMBURI!!!`, and the draw:
 `IL FORTUNATO E': @u ! Evviva! Vince il fantastico Primo Premio della lotteria!` and
 `PREMIO DI CONSOLAZIONE: @u vince un pacchettino di consolazione 🎁!` for the others. The prizes are
-usable items (their `/usa` replies list what they contain).
+usable items (their `/usa` replies list what they contain); the draw names each after `vince`.
 
 ```bot-reply type=miss reply=lottery_drumroll addressee=null
 RULLO DI TAMBURI!!!

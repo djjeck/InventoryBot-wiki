@@ -332,6 +332,12 @@
       ],
       "used_in": [],
       "made_by": [],
+      "from_use": [
+        "un baule di ebano 📦"
+      ],
+      "rewards": [
+        "level_up"
+      ],
       "last_seen": "2025-11-27T19:17:32-05:00",
       "observations": 4,
       "sources_inferred": true,
@@ -463,6 +469,9 @@
       ],
       "used_in": [],
       "made_by": [],
+      "from_use": [
+        "un baule di ebano 📦"
+      ],
       "last_seen": "2025-11-27T19:17:32-05:00",
       "observations": 2,
       "sources_inferred": true,
@@ -476,6 +485,9 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
+      "from_use": [
+        "una ruota della fortuna 🎡"
+      ],
       "last_seen": "2025-11-27T19:18:02-05:00",
       "observations": 2,
       "exclusive": false,

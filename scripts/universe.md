@@ -18,6 +18,8 @@ player sees anyway, and says why it is allowed.
 
 ## Items
 
+- il fantastico Primo Premio della lotteria
+  <!-- public: named in the bot's fixed lottery announcement -->
 - il primo numero di Topo Detective
 - il Sigillo Antico
 - l'oro

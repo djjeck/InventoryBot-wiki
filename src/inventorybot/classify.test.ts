@@ -1074,6 +1074,22 @@ describe('edge cases', () => {
     ]).toStrictEqual([[], [], ['una perla']]);
   });
 
+  it('a_lottery_draw_names_its_prize', () => {
+    const prize = (t: string): unknown => {
+      const e = classify(t, null);
+      return e.type === 'miss' ? e.prize : e.type;
+    };
+    expect([
+      prize("IL FORTUNATO E': @lucia_b ! Evviva! Vince il fantastico Primo Premio della lotteria!"),
+      prize('PREMIO DI CONSOLAZIONE: @lucia_b vince un pacchettino di consolazione 🎁!'),
+      prize('RULLO DI TAMBURI!!!'),
+    ]).toStrictEqual([
+      'il fantastico Primo Premio della lotteria',
+      'un pacchettino di consolazione 🎁',
+      undefined,
+    ]);
+  });
+
   it('truncated_recipe_list_is_marked_truncated', () => {
     const e = classify(
       '@mario_r, ecco le ricette a tua disposizione:\n- Torre L1 [*]\n- Muro L2 [manca 1]\n- Gara di cucina L3 [manca TRONCATO!',

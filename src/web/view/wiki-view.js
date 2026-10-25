@@ -607,6 +607,9 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       if (opens?.see.length)
         bits.push(`per vedere: ${opens.see.map((w) => L[w]?.label || w).join(', ')}`);
       if (i.used_with?.length) bits.push(`si usa con: ${few(i.used_with.map(current), esc)}`);
+      if (i.from_use?.length) bits.push(`usando: ${few(i.from_use.map(current), esc)}`);
+      if (i.rewards?.includes('level_up')) bits.push('salendo di livello');
+      if (i.rewards?.includes('lottery')) bits.push('alla lotteria');
       if (i.exclusive)
         bits.push(
           i.locations.length
@@ -753,6 +756,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         );
       else if (i.sources.includes('recipe'))
         lines.push("E' un oggetto che si ottiene con una ricetta, non ancora identificata.");
+      if (i.from_use?.length)
+        lines.push(
+          `E' un oggetto che si ottiene usando ${few(i.from_use.map(current), (n) => goLink('item', n))}.`
+        );
+      if (i.rewards?.includes('level_up')) lines.push('Si riceve in omaggio salendo di livello.');
+      if (i.rewards?.includes('lottery')) lines.push('Si vince alla lotteria.');
       if (i.sources.includes('special')) lines.push("E' un oggetto speciale.");
       if (!lines.length)
         lines.push('<span class="unknown">Non si sa ancora come si ottiene.</span>');
@@ -802,6 +811,13 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         shown.slice(0, k).map(f).join(', ') +
         (shown.length > k ? ` e altri ${shown.length - k}` : '')
       );
+    }
+    /** The items whose use gives an item, under its name, beside the recipes that make it. */
+    function fromUseLine(i) {
+      const arrow = '<span class="arrow" aria-hidden="true">←</span>';
+      return i.from_use?.length
+        ? `<p class="makes"><span class="visually-hidden">Si ottiene usando: </span>${arrow} usando ${few(i.from_use.map(current), (n) => goLink('item', n))}</p>`
+        : '';
     }
     /**
      * The items an item is used with (the chest a key opens, the machine it goes in, the
@@ -853,6 +869,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         `<div class="head"><div class="kicker">${tag(i.rarity)}<span>${esc(rarityName(rarityGroup(i.rarity)))}</span>${i.usable ? '<span>· usabile</span>' : ''}${i.gives_title ? `<span>· dà ${i.title ? `il titolo «${esc(i.title)}»` : 'un titolo'}</span>` : ''}</div>
     <h2>${esc(name)}</h2>
     ${madeBy(i)}
+    ${fromUseLine(i)}
     ${opensLines(name)}
     ${usedWithLine(name)}
     ${

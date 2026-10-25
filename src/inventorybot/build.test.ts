@@ -1371,6 +1371,66 @@ describe('items used with another', () => {
   });
 });
 
+describe('where an item comes from', () => {
+  it('what_a_use_gives_comes_from_the_item_used', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.inventory([
+          ['un baule di ebano 📦', 'S', 1, true],
+          ['una chiave di ebano 🔑', 'X', 1, false],
+        ]),
+        '/inventario',
+        { t: 0 }
+      ),
+      ev(
+        "@djjeck, infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-una perla [R] x1",
+        '/usa baule',
+        { t: 1 }
+      ),
+    ]);
+    expect([
+      wiki.items['una perla']?.from_use,
+      wiki.items["una moneta d'oro"]?.from_use,
+      // What the use takes does not come from it.
+      wiki.items['una chiave di ebano 🔑']?.from_use,
+    ]).toStrictEqual([['un baule di ebano 📦'], ['un baule di ebano 📦'], undefined]);
+  });
+
+  it('a_level_up_and_a_lottery_draw_give_their_items', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.inventory([
+          ["una moneta d'oro", 'X', 5, false],
+          ['il fantastico Primo Premio della lotteria', 'X', 1, true],
+          ['un sasso', 'C', 2, false],
+        ]),
+        '/inventario',
+        { t: 0 }
+      ),
+      ev(
+        T.craft([['un sasso', 'C', 2]], 'una torre', 'djjeck', [
+          1,
+          "Per te 10x una moneta d'oro e un bel pacchettino regalo 🎁 in omaggio!",
+        ]),
+        '/ricetta torre',
+        { t: 1 }
+      ),
+      ev(
+        "IL FORTUNATO E': @djjeck ! Evviva! Vince il fantastico Primo Premio della lotteria!",
+        null,
+        { t: 2 }
+      ),
+    ]);
+    expect([
+      wiki.items["una moneta d'oro"]?.rewards,
+      wiki.items['il fantastico Primo Premio della lotteria']?.rewards,
+      wiki.items['un sasso']?.rewards,
+      // Named by the level-up alone: not added.
+      Object.hasOwn(wiki.items, 'un bel pacchettino regalo 🎁'),
+    ]).toStrictEqual([['level_up'], ['lottery'], undefined, false]);
+  });
+});
+
 describe('Pakkomon sphere', () => {
   it('pakkomon_sphere_use_is_a_use_of_the_sphere', () => {
     const ball = ev(

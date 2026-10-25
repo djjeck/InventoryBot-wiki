@@ -236,6 +236,8 @@ export interface MissEvent {
   command?: string;
   /** `dai_not_enough`: "ne possiedi solo N", the exact count the player owns of the item named by /dai. */
   owned?: number;
+  /** `lottery_winner`, `lottery_consolation`: what the draw gives ("il fantastico Primo Premio della lotteria"). */
+  prize?: string;
 }
 
 export interface UnknownEvent {
@@ -414,6 +416,9 @@ export interface WikiItemUse {
   cooldown?: { seconds?: number; min: number; max: number | null; observations: number };
 }
 
+/** An event of the game that gives items: reaching a level, a lottery draw. */
+export type WikiReward = 'level_up' | 'lottery';
+
 /** A name the item had before the game renamed it. */
 export interface WikiOldName {
   name: string;
@@ -436,6 +441,10 @@ export interface WikiItem {
    * machine it goes in, the Pakkomon it equips), sorted; only when there are some.
    */
   used_with?: string[];
+  /** The items whose /usa gave it (the chest it was in, the machine that made it), sorted; only when there are some. */
+  from_use?: string[];
+  /** The events of the game that give it: a level-up, a lottery draw; only when there are some. */
+  rewards?: WikiReward[];
   last_seen: string | null;
   /** How many observations name it: replies of the bot and channel cards, each once. */
   observations: number;

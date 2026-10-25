@@ -120,9 +120,10 @@ order:
    newest observation first, an item's `/usa` replies kept by shape, what varies in them described
    as the channels' cards do (`use-shapes.ts`: "tiri il dado e fai N!", N from 1 to 6), and an item
    a use takes (a chest's key, a machine's inputs, a Pakkomon's equipment, `takes` in the use event)
-   used with the item used (`used_with`); `toJson` writes the wiki, `playerState` the player state.
-   Phase 5 reads plain JSON copies of the events (`buildFromEvents` in `src/pipeline.ts`), since
-   `build` annotates them for `playerState`.
+   used with the item used (`used_with`), and where an item comes from besides adventures and
+   recipes: the items whose use gave it (`from_use`), a level-up or a lottery draw (`rewards`);
+   `toJson` writes the wiki, `playerState` the player state. Phase 5 reads plain JSON copies of the
+   events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates them for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply

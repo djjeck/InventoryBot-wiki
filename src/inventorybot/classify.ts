@@ -830,6 +830,9 @@ interface KnownReply {
   commands: Producers;
 }
 
+const LOTTERY_REPLIES = new Set(['lottery_winner', 'lottery_consolation']);
+const LOTTERY_PRIZE = rx(`[Vv]ince (?<prize>${DOT}+?)!?${S}*${END}`);
+
 const DAI_NOT_ENOUGH = rx(`^non ne hai abbastanza, ne possiedi solo (?<n>${D}+)\\.${S}*${END}`);
 
 /**
@@ -1063,6 +1066,9 @@ const cNoise: Classifier = (t) => {
   // "ne possiedi solo N": for the player who tried, an exact count of the item named by the /dai command.
   const m = k.name === 'dai_not_enough' ? DAI_NOT_ENOUGH.exec(t) : null;
   if (m) ev.owned = parseDecimalInt(groups(m)['n'] as string);
+  // "… Vince il fantastico Primo Premio della lotteria!": the prize of a draw.
+  const p = LOTTERY_REPLIES.has(k.name) ? LOTTERY_PRIZE.exec(t) : null;
+  if (p) ev.prize = itemName(groups(p)['prize'] as string);
   return ev;
 };
 
