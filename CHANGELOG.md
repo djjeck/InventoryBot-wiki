@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.2 (2026-10-26)
+
+- The file `/esporta` sends, which lists every item you own, sets the inventory estimate exactly:
+  every count, and every item not in it goes to zero. An export holds the file when made with
+  **File** selected; the page and the README now say to send `/esporta` and select it before
+  exporting the chat.
+- `/collezioni` replies and `/inv2` pages update the inventory estimate like `/inventario` does, and
+  each count says which of these commands last confirmed it.
+
 ## 0.9.1 (2026-10-26)
 
 - Pakkomon fights, records, challenges, stuns, bosses and the uses of items on a Pakkomon are read
