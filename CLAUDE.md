@@ -46,6 +46,8 @@ proceeding. Do not chain changes without an explicit instruction to continue.
 
 ### Documentation
 
+- [CHANGELOG.md](CHANGELOG.md) lists the versions, as set in `package.json` (`npm version`), each
+  with its date and a short summary; a version gets its entry in the commit that sets it.
 - Docs state the result, not the investigation: they describe the format or rule for a reader who
   does not know it, with no account of how it was found out, no references to the exports examined
   and no counts. Each input doc says once at the top the date it describes ("documented as of");
