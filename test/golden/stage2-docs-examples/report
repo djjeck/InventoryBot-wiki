@@ -1,15 +1,16 @@
 cartelle di esportazione: 2; chat: Gruppo NibbioEsuberante, InventoryBot
-messaggi: 236 (dal bot: 126)
+messaggi: 282 (dal bot: 150)
 giocatore: @mario_r
-risposte del bot: 126
-  InventoryBot: risposte del bot abbinate a un comando: dm=63
-  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=35, user=21, single=4
+risposte del bot: 150
+  InventoryBot: risposte del bot abbinate a un comando: dm=75
+  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=42, user=26, single=3
 nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 3
-eventi: miss=25 use=10 travel=9 drop=8 item_info=8 inventory=8 give=6 unknown=6 stats=6 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 old_format=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2
-  coppie nei gruppi verificate dalla risposta: confermate=25, sciolte=0
-  risposte del bot non riconosciute, per anno: 2025=6
+eventi: miss=26 old_format=20 use=14 travel=10 drop=8 item_info=8 inventory=8 unknown=8 give=6 stats=6 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2
+  coppie nei gruppi verificate dalla risposta: confermate=29, sciolte=0
+  risposte del bot non riconosciute, per anno: 2025=8
 oggetti: 36; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2); luoghi: 9
--- unresolved_travel: 1
+-- unresolved_travel: 2
+  unresolved_travel: query="/viaggio baia" text="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare"
   unresolved_travel: query="/viaggio baia" text="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare"
 -- unresolved_drop: 4
   unresolved_drop: text="ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio"
@@ -24,9 +25,14 @@ oggetti: 36; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2
 -- unresolved_requirement: 2
   unresolved_requirement: item="una lanterna cieca" location="le cripte del monastero 👻" reason="no_way_back"
   unresolved_requirement: item="una lanterna cieca" location="le cripte del monastero 👻" reason="no_way_back"
--- unresolved_use: 5
+-- unresolved_use: 10
   unresolved_use: query="/usa dado" text="tiri il dado e fai 5!"
-  unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "
-  unresolved_use: query="/usa scanner" text="tiri il dado e fai 5!"
   unresolved_use: query="/quest" text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
   unresolved_use: query=null text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
+  unresolved_use: query="/usa zamp # @InventoryBot" text="📣 Attenzione!Un Pakkomon Boss 🧂 sta sfidando l'arena! Accorrete a sconfiggerlo! "
+  unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "
+  unresolved_use: query="/usa zamp # spada" text="equipaggi il tuo Zampirlo 🐯 con una spada di cartone [S]."
+  unresolved_use: query="/usa zamp # spada" text="equipaggi il tuo Zampirlo 🐯 con una spada di cartone [S]."
+  unresolved_use: query="/usa unguento # zamp" text="spalmi un Pakkomon di nome Zampirlo 🐯 con un unguento di menta e dopo pochi ista"
+  unresolved_use: query="/usa sonda # zamp" text="inserisci Zampirlo 🐯 nella sonda e sul display appare una scritta: \"Decente\"!"
+  unresolved_use: query="/usa sonda # zamp" text="inserisci Zampirlo 🐯 nella sonda e sul display appare una scritta: \"Decente\"!"

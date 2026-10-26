@@ -93,7 +93,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:31:02-05:00",
+      "last_seen": "2025-11-27T19:37:02-05:00",
       "observations": 3,
       "gives_title": true,
       "sources_inferred": true,
@@ -286,7 +286,7 @@
         "Cera riciclata"
       ],
       "made_by": [],
-      "last_seen": "2025-11-27T19:29:02-05:00",
+      "last_seen": "2025-11-27T19:35:32-05:00",
       "observations": 5,
       "use": {
         "observations": 1,
@@ -483,8 +483,7 @@
         "adventure"
       ],
       "used_in": [
-        "(ricetta senza nome) → una cestina",
-        "Pratica cestina"
+        "(ricetta senza nome) → una cestina"
       ],
       "made_by": [],
       "last_seen": "2025-11-27T19:02:21-05:00",
@@ -502,8 +501,7 @@
       ],
       "used_in": [],
       "made_by": [
-        "(ricetta senza nome) → una cestina",
-        "Pratica cestina"
+        "(ricetta senza nome) → una cestina"
       ],
       "last_seen": "2025-11-27T19:02:21-05:00",
       "observations": 3,
@@ -988,7 +986,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:32-05:00",
+      "last_seen": "2025-11-27T19:21:02-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -1000,7 +998,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:22:02-05:00",
+      "last_seen": "2025-11-27T19:21:32-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -1012,7 +1010,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:22:02-05:00",
+      "last_seen": "2025-11-27T19:21:32-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -1026,7 +1024,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:30:02-05:00",
+      "last_seen": "2025-11-27T19:27:32-05:00",
       "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
@@ -1055,25 +1053,6 @@
       "made_by": [],
       "last_seen": "2025-11-27T22:16:41-05:00",
       "observations": 1,
-      "use": {
-        "observations": 2,
-        "shapes": [
-          {
-            "parts": [
-              "cosa desideri?"
-            ],
-            "count": 2,
-            "slots": []
-          }
-        ],
-        "result": "fixed",
-        "consumed": null,
-        "consumed_evidence": {
-          "yes": 0,
-          "no": 0
-        },
-        "requirements": []
-      },
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -1090,7 +1069,7 @@
       "last_seen": "2025-11-27T22:16:41-05:00",
       "observations": 1,
       "use": {
-        "observations": 10,
+        "observations": 12,
         "shapes": [
           {
             "parts": [
@@ -1098,9 +1077,16 @@
             ],
             "count": 10,
             "slots": []
+          },
+          {
+            "parts": [
+              "cosa desideri?"
+            ],
+            "count": 2,
+            "slots": []
           }
         ],
-        "result": "fixed",
+        "result": "variable",
         "consumed": null,
         "consumed_evidence": {
           "yes": 0,
@@ -1226,14 +1212,15 @@
       "name": "Pratica cestina",
       "level": 2,
       "ingredients": {
-        "un laccio": 2
+        "un paio di mollette": 1,
+        "un nastro da pacchi": 1
       },
-      "ingredients_source": "craft",
+      "ingredients_source": "detail",
       "partial_ingredients": [],
-      "output": "una cestina",
-      "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:02:21-05:00",
-      "observations": 3
+      "output": null,
+      "craft_text": null,
+      "last_seen": "2025-11-27T19:01:01-05:00",
+      "observations": 2
     },
     "Orto in vaso": {
       "name": "Orto in vaso",
@@ -1356,7 +1343,7 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:29:02-05:00",
+      "last_seen": "2025-11-27T19:35:32-05:00",
       "observations": 3
     },
     "Piccola collezione": {
@@ -1387,14 +1374,14 @@
       "name": "(ricetta senza nome) → una cestina",
       "level": null,
       "ingredients": {
-        "un laccio": 1
+        "un laccio": 2
       },
       "ingredients_source": "craft",
       "partial_ingredients": [],
       "output": "una cestina",
       "craft_text": "e mescoli tutto con cura...",
-      "last_seen": "2025-11-27T19:01:50-05:00",
-      "observations": 2
+      "last_seen": "2025-11-27T19:02:21-05:00",
+      "observations": 3
     },
     "(ricetta senza nome) → ?": {
       "name": "(ricetta senza nome) → ?",
@@ -1443,7 +1430,7 @@
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
       "at": "in cima al monte Grevolo 🏔",
-      "last_seen": "2025-11-27T19:28:02-05:00",
+      "last_seen": "2025-11-27T19:34:32-05:00",
       "observations": 3,
       "exits": [],
       "requires_item": false,

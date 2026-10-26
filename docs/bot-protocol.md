@@ -1,6 +1,6 @@
 # InventoryBot protocol
 
-Documented as of 2026-10-18. If the bot changes, update this document.
+Documented as of 2026-10-26. If the bot changes, update this document.
 
 [@InventoryBot](https://t.me/InventoryBot) is an Italian-language Telegram game: players go on
 adventures that yield items, combine items through recipes, travel between places and trade with
@@ -136,6 +136,36 @@ Some items give a title ("il fornaio", "il cartografo", "l'incappellato", "il Lu
 Cartomante", "il capitano"). The bot prints it after the username wherever it names that player.
 `/preferito <item>` sets the favourite item shown by `/stats` (6.17).
 
+### 2.9 Pakkomon
+
+A Pakkomon is a creature that fights other players' Pakkomon. Using a sphere hatches one, which
+enters the inventory as a usable item, `un Pakkomon di nome NAME [X] [usabile]`, but each is an
+individual: its name (a random name and an emoji, which a customisation item can change) belongs to
+that one creature, which keeps its own record of wins and losses, its equipment and its power-ups. A
+player can give a Pakkomon away with `/dai`, record included. Pakkomon names are unique: the bot
+refuses a new name that already exists (`Esiste gia...`).
+
+- **Strength.** Each Pakkomon has a strength that the game never shows. Some items measure it
+  roughly (a probe, which answers with a word, and a scale, which compares two Pakkomon).
+- **Equipment.** `/usa <pakkomon> # <item>` equips a Pakkomon with an item the player owns, which
+  stays in the inventory: one item can equip several Pakkomon. The equipment adds a bonus to its
+  strength in fights (which bonus is not shown; some items give none, some lower it). A Pakkomon has
+  at most one equipment; equipping another replaces it.
+- **Power-ups.** Some usable items, used on a Pakkomon, make it stronger for good; each can be given
+  to a Pakkomon only once, and the record shows an icon for each one received.
+- **Fights.** A fight compares one roll of each Pakkomon, up to its strength plus its equipment's
+  bonus; the higher roll wins, and on a tie the player who started the fight wins. The loser is
+  stunned ("rintronato") for as many minutes as the difference between the rolls, and cannot fight
+  until it recovers; the fight's ending phrase states that difference in bands (6.18). A winner may
+  learn something ("ha imparato qualcosa di nuovo"), which makes it stronger. Healing items end a
+  stun at once.
+- **The bot's Pakkomon.** `@InventoryBot` and a few other bots keep Pakkomon of their own, much
+  stronger than the players'. A bot fights with its weakest Pakkomon that is not stunned, so beating
+  one brings out the next; beating the strongest ones gives the winner an item.
+- **Bosses.** From time to time a Pakkomon Boss is announced in groups and fought in the arena
+  groups as the bot's Pakkomon. Each hit on a boss gives the player an item, and the boss's wounds
+  grow until it is defeated; its defeat lists the players who fought it.
+
 ## 3. Commands
 
 The bot's own list (`/faqcomandi`):
@@ -166,9 +196,11 @@ Arguments:
 - `/dai` is written `/dai @user [quantity] item` (`/dai @lucia_b 10 moneta`); the `@` is optional
   and the default quantity is 1.
 - `/usa` takes the item's argument after `#`, the item before it: the teleport capsule its
-  destination (`/usa capsula # molo`), a Pakkomon the player to fight (`/usa <pakkomon> # @user`) or
-  an item to equip it with, an idea the rarity and name of the item it is to become
-  (`/usa idea # N <name>`).
+  destination (`/usa capsula # molo`), a Pakkomon the player to fight (`/usa <pakkomon> # @user`,
+  the `@` optional), `?` or `qualsiasi` to wait for any challenger, or an item to equip it with, an
+  item used on a Pakkomon the Pakkomon (`/usa unguento # <pakkomon>`), an idea the rarity and name
+  of the item it is to become (`/usa idea # N <name>`). `/usa <pakkomon>` alone shows its record
+  (6.18).
 - In groups a command may be written `/cmd@InventoryBot args`.
 
 **Name lookup.** Item, recipe and place arguments are matched by words: a name matches when every
@@ -682,22 +714,13 @@ Hai fatto coppia, vinci 2 gettoni!
 una ruota della fortuna 🎡 deve raffreddarsi ancora per 12 secondi prima di poterlo dare in giro.
 ```
 
-The Pakkomon scanner's reply lists the player's Pakkomon, each with the time left before it can
-fight again or `pronto`; its lines are not items received. Equipping a Pakkomon with an item
-(`/usa <pakkomon> # <item>`) answers `@u, equipaggi il tuo NAME con ITEM_LINE.`, the item kept by
-the Pakkomon, not received. Both replies name the item used: the scanner, the Pakkomon.
+The replies about Pakkomon, among them the scanner's and equipping, are in 6.18.
 
 Some uses take other items besides the item used, and the reply names them in fixed wordings: the
 key that opens a chest (`infili KEY nella serratura di CHEST, …`), the items put into a machine
 (`inserisci A, B e infine C in uno sportello …`) or opened into it (`apri 2x A e …`), and the item a
 Pakkomon is equipped with. A machine's list is the only one with several names. Other items a reply
 names are what it gives, or mere mentions.
-
-```bot-reply type=use query="/usa scanner" items=[] named=scanner
-@mario_r, esamini i tuoi pakkomon con lo scanner:
- - Zampirlo 🐯: 5 minuti e 38 secondi
- - Brumolo 👻: pronto
-```
 
 The same texts without a known `/usa` command:
 
@@ -889,6 +912,187 @@ nessuna
 @mario_r non hai nessuna quest al momento.
 ```
 
+### 6.18 Pakkomon
+
+`/usa <pakkomon> [# <argument>]`, `/usa <item> # <pakkomon>`, and the use of a sphere. The concepts
+are in 2.9. A Pakkomon is named by its name and emoji (`PK`), the player who owns it by `@username`:
+
+```text
+PK        = LINE                                    (* "Zampirlo 🐯" *)
+OWNER     = "@" USERNAME
+HATCH     = ADDR "lanci la tua " NAME ", si apre a mezz'aria ed esce un Pakkomon di nome " PK
+            SP RARITY [ SP USABLE ] "!" EOT
+READY     = ADDR "sei pronto a sfidare chiunque col tuo " PK " !" EOT
+CHALLENGE = ADDR "sfidi @" USERNAME [ SP TITLE ] " a combattere contro il tuo " PK EOT
+STOP      = ADDR "smetti di sfidare chicchessia." EOT
+FIGHT     = ADDR "i due pakkomon iniziano a combattere furiosamente. " [ MOVE SP ] "Alla fine " PK
+            " di " OWNER ( " sconfigge " | " colpisce " ) PK " di " OWNER SP ENDING "!"
+            [ NL "@" USERNAME " ottiene " NAME SP RARITY [ SP USABLE ] "!" ]
+            [ NL PK " ha imparato qualcosa di nuovo.." ]
+            [ NL PK SP WOUND "!" | NL NL DEFEAT ] EOT
+MOVE      = LINE "!"                                (* a special move, may name a player *)
+DEFEAT    = "Lanciando un ultimo grido rabbioso, " PK " si accascia a terra con un tonfo e giace"
+            " immobile! Un silenzo totale aleggia per qualche secondo, poi i guerrieri prorompono in"
+            " grida di vittoria. Il boss e' sconfitto!" NL "Divisione delle spoglie:"
+            { NL "• @" USERNAME ": " INT }
+RECORD    = ADDR PK " ha vinto " INT " battaglie e ne ha perse " INT "." NL
+            ( "E' equipaggiato con " NAME SP RARITY [ SP USABLE ] "." | "Non ha nulla equipaggiato." )
+            NL ( "E' pronto a combattere." | STUN )
+            [ NL ( "E' nato il giorno " INT "-" INT "-" INT " dalle mani di @" USERNAME "."
+                 | "Non si sa niente del suo passato, deve essere molto vecchio..." ) ]
+            [ NL ICONS ] EOT
+STUN      = "E' ancora rintronato dall'ultimo combattimento. Si rimettera' tra " DURATION "."
+STUNNED   = ADDR PK " e' ancora rintronato dall'ultimo combattimento. Si rimettera' tra " DURATION
+            "." EOT
+SCANNER   = ADDR "esamini i tuoi pakkomon con lo scanner:" { NL " - " PK ": " ( DURATION | "pronto" ) }
+            EOT
+EQUIP     = ADDR "equipaggi il tuo " PK " con " NAME SP RARITY [ SP USABLE ] "." EOT
+ANNOUNCE  = "📣 Attenzione!Un Pakkomon Boss " LINE " sta sfidando l'arena! Accorrete a sconfiggerlo! 🥊" EOT
+```
+
+- **Challenges.** `/usa <pakkomon> # ?` (or `# qualsiasi`) makes the Pakkomon wait for any
+  challenger (`READY`). `/usa <pakkomon> # @user` fights at once if that player's Pakkomon is
+  waiting or has challenged this player, and otherwise challenges it (`CHALLENGE`), to be fought
+  when that player answers in the same way. `STOP` withdraws a Pakkomon from waiting. A Pakkomon
+  still stunned cannot fight (`STUNNED`, naming it, or
+  `il pakkomon del tuo avversario e' ancora rintronato per DURATION` for the opponent's).
+- **Fights.** `FIGHT` is addressed to the player whose command started the fight, winner or loser,
+  and names the winner first. Against a boss, a hit by a player's Pakkomon reads `colpisce`: the
+  player gets the item of the next line, and the boss's `WOUND` follows, or its `DEFEAT` on the last
+  hit, whose `Divisione delle spoglie` gives a number to each player who fought it. A win over one
+  of the bot's strongest Pakkomon also gives an item (`ottiene`). `MOVE` is a special move of either
+  Pakkomon (a boss's, or an ability a Pakkomon has acquired), and may name the player it strikes.
+- **Ending phrases.** The ending phrase states the loser's stun, in minutes; a bot's strongest
+  Pakkomon can stun for days:
+
+  | `ENDING`                                 | Stun (minutes) |
+  | ---------------------------------------- | -------------- |
+  | `per un soffio`                          | 0-9            |
+  | `di stretta misura`                      | 10-19          |
+  | `con discreto margine`                   | 20-29          |
+  | `senza difficolta'`                      | 30-39          |
+  | `con ampio margine`                      | 40-49          |
+  | `accartocciandolo`                       | 50-59          |
+  | `riducendolo in piccolissimi pezzettini` | 60-69          |
+  | `come se fosse di burro`                 | 70-79          |
+  | `annientandolo totalmente`               | 80-89          |
+  | `distruggendolo di botte`                | 90-99          |
+  | `demolendolo malamente`                  | 100-109        |
+  | `spalmandolo sul terreno`                | 110-119        |
+  | `sparpagliandone le membra`              | 120-129        |
+  | `annichilendolo senza pieta'`            | 130-139        |
+  | `disintegrandone ogni singolo atomo`     | 140-199        |
+  | `annullandone l'esistenza`               | 200-249        |
+  | `annullandone il ricordo`                | 250-349        |
+  | `rimuovendolo dall'universo`             | 350 or more    |
+
+- **Bosses.** `ANNOUNCE` is a broadcast to groups. While a boss is out, it is the bot's Pakkomon:
+  players fight it with `/usa <pakkomon> # @InventoryBot`, in the arena groups only (elsewhere
+  `i pakkomon boss vanno sfidati in Arena!`). `WOUND` grows with the hits: `e' appena scalfito`,
+  `ha qualche graffio`, `ha qualche ferita`, `ha diverse ferite`, `e' ferito superficialmente`,
+  `e' ferito seriamente`, `e' gravemente ferito`, `sanguina abbondantemente`, `e' in fin di vita`,
+  `e' a un passo dalla morte`.
+- **Records.** `/usa <pakkomon>` answers `RECORD`: wins and losses, the equipment, whether it can
+  fight, who hatched it and when (or that its past is unknown, for one hatched before the birth date
+  was kept), and `ICONS`, one emoji per power-up received.
+- **The scanner** lists the player's Pakkomon, each with the time left before it can fight again or
+  `pronto`; its lines are not items received.
+- **Equipping** (`/usa <pakkomon> # <item>`, `EQUIP`) names the item, kept in the inventory, not
+  received. Equipping and the scanner name the item used: the Pakkomon, the scanner.
+- **Items used on a Pakkomon** (`/usa <item> # <pakkomon>`) name it `un Pakkomon di nome PK`, each
+  in a fixed text:
+
+  | Use        | Reply after `ADDR`                                                                                                                                             |
+  | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | healing    | `dai da mangiare ITEM a un Pakkomon di nome PK che lo mastica con fatica, ma appena lo inghiottisce BAM, torna immediatamente in forma e pronto a combattere!` |
+  | healing    | `spalmi un Pakkomon di nome PK con ITEM e dopo pochi istanti torna in perfetta forma e pronto a combattere!`                                                   |
+  | power-up   | `fai bere ITEM a un Pakkomon di nome PK.. Poi lo scruti attentamente per alcuni minuti.. Si, ti sembra leggermente piu' muscoloso.` (or `fai mangiare`, `!`)   |
+  | probe      | `inserisci PK nella sonda e sul display appare una scritta: "WORD"!`                                                                                           |
+  | scale      | `metti i due pakkomon PK e PK sulla bilancia: il primo e' piu' forte!` (or `il secondo`)                                                                       |
+  | extractor  | `punti ITEM contro un Pakkomon di nome PK e premi il grilletto: … Ottieni ITEM.`                                                                               |
+  | admin heal | `tutti i Pakkomon di @u sono stati curati.`                                                                                                                    |
+
+  The probe's `WORD` is one of `Scarso`, `Debole`, `Decente`, `Forte`, `Impressionante`, `Potente`,
+  `Formidabile`, `Travolgente`, `Inarrestabile`, from the weakest. The extractor destroys the
+  Pakkomon and gives the item it names last. The customisation item answers that the player will be
+  contacted to choose a new name and emoji: the rename happens outside the chat.
+
+- **Refusals**: `Non e' un pakkomon!`, `su che Pakkomon vuoi usarlo?`,
+  `quel pakkomon ha gia' bevuto ITEM..` (a power-up given twice),
+  `@x non ha piu' il pakkomon con cui ti ha sfidato!`, and those of section 6.13.
+
+```bot-reply type=use items.0.name="un Pakkomon di nome Brumolo 👻" items.0.rarity=X named="Sfera Frullo"
+@mario_r, lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumolo 👻 [X]!
+```
+
+```bot-reply type=old_format query="/usa zamp # ?" format=pakkomon_ready
+@mario_r, sei pronto a sfidare chiunque col tuo Zampirlo 🐯 !
+```
+
+```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_challenge
+@mario_r, sfidi @lucia_b a combattere contro il tuo Zampirlo 🐯
+```
+
+```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_fight
+@mario_r, i due pakkomon iniziano a combattere furiosamente. Alla fine Tibolah 🐸 di @lucia_b sconfigge Zampirlo 🐯 di @mario_r con discreto margine!
+Tibolah 🐸 ha imparato qualcosa di nuovo..
+```
+
+```bot-reply type=old_format query="/usa zamp # @InventoryBot" format=pakkomon_fight
+@mario_r, i due pakkomon iniziano a combattere furiosamente. Alla fine Zampirlo 🐯 di @mario_r sconfigge Codicillo 💾 di @InventoryBot di stretta misura!
+@mario_r ottiene un floppy disk incrinato [X]!
+```
+
+```bot-reply type=old_format query="/usa zamp # @InventoryBot" format=pakkomon_fight
+@mario_r, i due pakkomon iniziano a combattere furiosamente. Di colpo Gigante di Sale 🧂 ti getta negli occhi una manciata di sale! Alla fine Zampirlo 🐯 di @mario_r colpisce Gigante di Sale 🧂 di @InventoryBot per un soffio!
+@mario_r ottiene un granello di sale grosso [R]!
+Gigante di Sale 🧂 ha qualche graffio!
+```
+
+```bot-reply type=old_format query="/usa zamp # @InventoryBot" format=pakkomon_fight
+@mario_r, i due pakkomon iniziano a combattere furiosamente. Alla fine Zampirlo 🐯 di @mario_r colpisce Gigante di Sale 🧂 di @InventoryBot accartocciandolo!
+@mario_r ottiene un granello di sale grosso [R]!
+
+Lanciando un ultimo grido rabbioso, Gigante di Sale 🧂 si accascia a terra con un tonfo e giace immobile! Un silenzo totale aleggia per qualche secondo, poi i guerrieri prorompono in grida di vittoria. Il boss e' sconfitto!
+Divisione delle spoglie:
+• @lucia_b: 12
+• @mario_r: 7
+```
+
+```bot-reply type=unknown addressee=null
+📣 Attenzione!Un Pakkomon Boss 🧂 sta sfidando l'arena! Accorrete a sconfiggerlo! 🥊
+```
+
+```bot-reply type=old_format query="/usa zamp" format=pakkomon_record
+@mario_r, Zampirlo 🐯 ha vinto 54 battaglie e ne ha perse 44.
+E' equipaggiato con una spada di cartone [S].
+E' ancora rintronato dall'ultimo combattimento. Si rimettera' tra 12 minuti e 5 secondi.
+E' nato il giorno 18-04-2025 dalle mani di @mario_r.
+🏆💧
+```
+
+```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_stunned
+@mario_r, Zampirlo 🐯 e' ancora rintronato dall'ultimo combattimento. Si rimettera' tra 2 minuti.
+```
+
+```bot-reply type=use query="/usa scanner" items=[] named=scanner
+@mario_r, esamini i tuoi pakkomon con lo scanner:
+ - Zampirlo 🐯: 5 minuti e 38 secondi
+ - Brumolo 👻: pronto
+```
+
+```bot-reply type=use query="/usa zamp # spada" items=[] named="un Pakkomon di nome Zampirlo 🐯" takes.0="una spada di cartone"
+@mario_r, equipaggi il tuo Zampirlo 🐯 con una spada di cartone [S].
+```
+
+```bot-reply type=use query="/usa unguento # zamp" items=[]
+@mario_r, spalmi un Pakkomon di nome Zampirlo 🐯 con un unguento di menta e dopo pochi istanti torna in perfetta forma e pronto a combattere!
+```
+
+```bot-reply type=use query="/usa sonda # zamp" items=[]
+@mario_r, inserisci Zampirlo 🐯 nella sonda e sul display appare una scritta: "Decente"!
+```
+
 ## 7. Older formats
 
 Group histories reach back to 2017. These formats belong to earlier periods:
@@ -904,6 +1108,10 @@ Group histories reach back to 2017. These formats belong to earlier periods:
   `[usabile]` listed the usable items, and an invalid argument got
   `@u puoi usare solo i seguenti parametri: C, N, R, S, L, X, U, M.`
 - **Until 2025**, some adventure narratives ended without the final `!`.
+- **Until March 2025**, a Pakkomon fight read
+  `… i due pakkomon iniziano a combattere furiosamente e alla fine PK di @x sconfigge PK di @y ENDING!`,
+  with no special moves, sometimes as a `[N]` notice; there were no bosses, and until April 2025 a
+  record had no birth line.
 - **Until July 2021** the game ran on a previous bot; afterwards that bot answered every command
   with a notice that the game had moved to `@InventoryBot`.
 - **In 2017-2018** groups also saw:
@@ -921,16 +1129,6 @@ Group histories reach back to 2017. These formats belong to earlier periods:
   - parcels: `@u bravissimo, hai trovato un pacchetto! Tutto contento lo apri e dentro ci trovi:` +
     item lines + a pointer to `/faq`, and the gift parcel opened with `/usa`
     (`@u, ti accingi ad aprire il tuo pacco eccitato come un bambino a natale, …` + item lines);
-  - Pakkomon, creatures obtained by using a sphere
-    (`@u, lanci la tua ITEM, si apre a mezz'aria ed esce un Pakkomon di nome NAME RARITY!`) and used
-    to fight other players' Pakkomon (`/usa <pakkomon> # @user`):
-    `@u, sfidi @x a combattere contro il tuo NAME`,
-    `@u, sei pronto a sfidare chiunque col tuo NAME !`, the fight
-    `[N] i due pakkomon iniziano a combattere furiosamente e alla fine NAME di @x sconfigge NAME di @y …`,
-    a Pakkomon's record `@u, NAME ha vinto N battaglie e ne ha perse N.` + its equipment and
-    readiness, and the refusals
-    `@u, il pakkomon del tuo avversario e' ancora rintronato per DURATION.` and
-    `@u, NAME e' ancora rintronato dall'ultimo combattimento. …`;
   - bans (`[BAN] Sei stato bannato per: N ore. Motivazione: …`) and the inventory header
     `Inventario di @u, al YYYY/MM/DD HH:MM:SS`.
 - **In 2017**, `/nascondi` with a recipe not found answered
@@ -960,14 +1158,8 @@ Ti ricompensa donandoti:
 - una moneta d'oro [X] x7
 ```
 
-```bot-reply type=use items.0.name="un Pakkomon di nome Brumolo 👻" items.0.rarity=X named="Sfera Frullo"
-@mario_r, lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumolo 👻 [X]!
-```
-
-```bot-reply type=old_format query="/usa zamp" format=pakkomon_record
-@mario_r, Zampirlo 🐯 ha vinto 54 battaglie e ne ha perse 44.
-E' equipaggiato con una spada di cartone [S].
-E' pronto a combattere.
+```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_fight
+[N] @mario_r, i due pakkomon iniziano a combattere furiosamente e alla fine Zampirlo 🐯 di @mario_r sconfigge Tibolah 🐸 di @lucia_b per un soffio!
 ```
 
 ```bot-reply type=title query="/titolo" items.0.name="un astrolabio da cartografo" items.0.rarity=L1
@@ -1002,3 +1194,7 @@ Every reply example above is a block with the info string `bot-reply` and attrib
   replies.
 - Where a hidden recipe is left out (the `/ricetta` list, `/esamina`), and the current replies of
   `/nascondi *` and of `/quest` while a quest is open.
+- Pakkomon: the range of their strength, each equipment's bonus, the strength each probe word stands
+  for, when a winner learns and how much stronger it gets, and what the numbers of a boss's
+  `Divisione delle spoglie` count. A rename leaves no trace in the chat, so a renamed Pakkomon looks
+  like a new one.

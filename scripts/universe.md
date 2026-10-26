@@ -63,7 +63,9 @@ player sees anyway, and says why it is allowed.
 - un fischietto
 - un fischietto di quelli da carnevale
 - un fischietto di quelli da carnevale che fanno le trombette
+- un floppy disk incrinato
 - un gigantesco forziere da 3 tonnellate di monete d'oro 🏷
+- un granello di sale grosso
 - un grembiule da cuoco
 - un Gufetto
 - un Gufetto d'Argento
@@ -76,6 +78,8 @@ player sees anyway, and says why it is allowed.
 - un oro falso
 - un paio di mollette
 - un Pakkomon di nome Brumolo 👻
+- un Pakkomon di nome Tibolah 🐸
+- un Pakkomon di nome Zampirlo 🐯
 - un Papa Bergoglio
 - un Papa Ratzinger
 - un piccolo annaffiatoio
@@ -95,6 +99,7 @@ player sees anyway, and says why it is allowed.
 - un tostapane incantato 🍞
 - un trifoglio di latta
 - un tubetto di colla verde
+- un unguento di menta
 - un uovo di quaglia
 - un Vecchio
 - un vecchio alberello parlante 🌱

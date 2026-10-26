@@ -15,25 +15,10 @@ and tests and docs use the invented world of `scripts/universe.md`.
 
 Delete this file in the closing commit.
 
-## Phase 1: the protocol, documented ⬜
+## Phase 1: the protocol, documented ✅
 
-Goal: `docs/bot-protocol.md` describes Pakkomon as they are today.
-
-### 1.1 A current Pakkomon section ⬜
-
-- ⬜ Move Pakkomon out of "In 2017-2018 groups also saw" into a section of their own: hatching,
-  challenges (`# @user`, `#?`, ready, stop), fights and their two wordings (before and after March
-  2025), the ending phrases and the stun range each implies, learning, records (with the birth line
-  and the power-up icons), stuns (up to days), the scanner, equipping, the uses on a Pakkomon
-  (healing, power-ups, probe, scale, extractor, kit), refusals, gifts.
-- ⬜ Bosses: the announcement, hits (`colpisce`), the special moves, the item each hit gives, the
-  wound states, the defeat and the division of the spoils; prizes for beating the bot's Pakkomon.
-- ⬜ The fight rules stated as the game's mechanics, and what stays unknown in "Unknowns" (whether a
-  rename can be seen, equipment bonuses).
-- ⬜ `bot-reply` examples for the new formats, with names added to `scripts/universe.md`, marked
-  `old_format` (or whatever the classifier gives today) until phase 2 types them.
-
-Acceptance: `npm run validate` passes (the docs examples are checked against the classifier).
+`docs/bot-protocol.md` describes Pakkomon as they are today (2.9, 6.18), with the stun range of each
+ending phrase.
 
 ## Phase 2: the replies, read ⬜
 

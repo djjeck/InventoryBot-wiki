@@ -500,7 +500,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:32-05:00",
+      "last_seen": "2025-11-27T19:21:02-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -512,7 +512,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:22:02-05:00",
+      "last_seen": "2025-11-27T19:21:32-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -524,8 +524,23 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:22:02-05:00",
+      "last_seen": "2025-11-27T19:21:32-05:00",
       "observations": 2,
+      "exclusive": false,
+      "locations": []
+    },
+    "un Pakkomon di nome Brumolo 👻": {
+      "name": "un Pakkomon di nome Brumolo 👻",
+      "rarity": "X",
+      "usable": false,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:27:32-05:00",
+      "observations": 2,
+      "sources_inferred": true,
       "exclusive": false,
       "locations": []
     },
@@ -540,7 +555,7 @@
         "Cera riciclata"
       ],
       "made_by": [],
-      "last_seen": "2025-11-27T19:29:02-05:00",
+      "last_seen": "2025-11-27T19:35:32-05:00",
       "observations": 4,
       "use": {
         "observations": 2,
@@ -564,21 +579,6 @@
       "exclusive": false,
       "locations": []
     },
-    "un Pakkomon di nome Brumolo 👻": {
-      "name": "un Pakkomon di nome Brumolo 👻",
-      "rarity": "X",
-      "usable": false,
-      "sources": [
-        "special"
-      ],
-      "used_in": [],
-      "made_by": [],
-      "last_seen": "2025-11-27T19:30:02-05:00",
-      "observations": 2,
-      "sources_inferred": true,
-      "exclusive": false,
-      "locations": []
-    },
     "un astrolabio da cartografo": {
       "name": "un astrolabio da cartografo",
       "rarity": "L1",
@@ -588,7 +588,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:31:02-05:00",
+      "last_seen": "2025-11-27T19:37:02-05:00",
       "observations": 2,
       "gives_title": true,
       "sources_inferred": true,
@@ -718,7 +718,7 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:29:02-05:00",
+      "last_seen": "2025-11-27T19:35:32-05:00",
       "observations": 4
     },
     "Piccola collezione": {
@@ -859,7 +859,7 @@
       "name": "il banco corallino 🐠",
       "label": "Il banco corallino 🐠",
       "at": "sul banco corallino 🐠",
-      "last_seen": "2025-11-27T19:28:01-05:00",
+      "last_seen": "2025-11-27T19:34:31-05:00",
       "observations": 6,
       "exits": [
         "in cima al monte Grevolo 🏔",
@@ -904,9 +904,11 @@
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
       "at": "in cima al monte Grevolo 🏔",
-      "last_seen": "2025-11-27T19:28:02-05:00",
+      "last_seen": "2025-11-27T19:34:32-05:00",
       "observations": 2,
-      "exits": [],
+      "exits": [
+        "in cima al monte Grevolo 🏔"
+      ],
       "requires_item": false,
       "unlock_texts": [],
       "required_items": [],
