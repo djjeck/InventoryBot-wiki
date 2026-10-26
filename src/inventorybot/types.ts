@@ -218,9 +218,101 @@ export interface UseEvent {
    * lock, the items put into a machine, the item a Pakkomon is equipped with.
    */
   takes?: string[];
+  /** What the use does to a Pakkomon (docs/bot-protocol.md 6.18), for a use on one. */
+  pakkomon_use?: PakkomonUse;
+  /** The Pakkomon the use acts on, each by its name and emoji (two for the scale). */
+  pakkomon?: string[];
+  /** What the use reads: the probe's word, or the scale's verdict (`il primo`, `il secondo`). */
+  reading?: string;
+  /** The scanner's list: each of the player's Pakkomon and the seconds before it can fight. */
+  scan?: PakkomonReadiness[];
 }
 
-/** A format of an earlier period, recognised without reading facts (quest offers, parcels, Pakkomon fights...). */
+/** What a use does to a Pakkomon. */
+export type PakkomonUse =
+  'hatch' | 'equip' | 'scan' | 'heal' | 'power_up' | 'probe' | 'scale' | 'extract' | 'customise';
+
+/** A Pakkomon of the scanner's list, and the seconds before it can fight (0: ready). */
+export interface PakkomonReadiness {
+  pakkomon: string;
+  remaining: number;
+}
+
+/** A Pakkomon in a fight: its name and emoji, and its owner's username. */
+export interface PakkomonSide {
+  pakkomon: string;
+  owner: string;
+}
+
+/** A fight's reply (6.18): the winner first, the stun its ending phrase states, and what follows. */
+export interface PakkomonFightEvent {
+  type: 'pakkomon_fight';
+  winner: PakkomonSide;
+  loser: PakkomonSide;
+  /** "colpisce": the winner hit a boss, which stays out until defeated. */
+  hit: boolean;
+  /** The ending phrase; null when the reply has none. */
+  ending: string | null;
+  /** The loser's stun, in minutes, that the ending states; null for a phrase not known. */
+  stun_min: number | null;
+  /** Null without an upper bound, or for a phrase not known. */
+  stun_max: number | null;
+  /** A special move, as the reply words it ("Di colpo …!"). */
+  move: string | null;
+  /** The item the winner's owner gets (a hit on a boss, a win over a bot's strongest Pakkomon). */
+  prize: ItemLine | null;
+  /** The winner learned something. */
+  learned: boolean;
+  /** The boss's wound after a hit. */
+  wound: string | null;
+  /** The boss is defeated: each player who fought it, and their number. */
+  spoils: { player: string; points: number }[] | null;
+}
+
+/** `/usa <pakkomon>`: its record. */
+export interface PakkomonRecordEvent {
+  type: 'pakkomon_record';
+  pakkomon: string;
+  wins: number;
+  losses: number;
+  equipment: ItemLine | null;
+  /** Seconds before it can fight (0: ready). */
+  stunned_for: number;
+  /** The day it was hatched (`YYYY-MM-DD`), and by whom; null when the record does not say. */
+  born: string | null;
+  maker: string | null;
+  /** One icon per power-up received. */
+  power_ups: string[];
+}
+
+/** `/usa <pakkomon> # ?`: the Pakkomon waits for any challenger. */
+export interface PakkomonReadyEvent {
+  type: 'pakkomon_ready';
+  pakkomon: string;
+}
+
+/** `/usa <pakkomon> # @user`: a challenge, to be fought when the other player answers. */
+export interface PakkomonChallengeEvent {
+  type: 'pakkomon_challenge';
+  pakkomon: string;
+  opponent: string;
+}
+
+/** A fight refused because a Pakkomon is still stunned: the player's, or (null) the opponent's. */
+export interface PakkomonStunnedEvent {
+  type: 'pakkomon_stunned';
+  pakkomon: string | null;
+  /** Seconds before it recovers. */
+  remaining: number;
+}
+
+/** A boss announced to the groups (a broadcast). */
+export interface PakkomonBossEvent {
+  type: 'pakkomon_boss';
+  emoji: string;
+}
+
+/** A format of an earlier period, recognised without reading facts (quest offers, parcels...). */
 export interface OldFormatEvent {
   type: 'old_format';
   /** Which format (`OLD_FORMATS` in classify.ts), e.g. `quest_completed`, `pakkomon_fight`. */
@@ -335,6 +427,12 @@ export type Event =
   | GiveEvent
   | ShowEvent
   | UseEvent
+  | PakkomonFightEvent
+  | PakkomonRecordEvent
+  | PakkomonReadyEvent
+  | PakkomonChallengeEvent
+  | PakkomonStunnedEvent
+  | PakkomonBossEvent
   | MissEvent
   | OldFormatEvent
   | UnknownEvent;

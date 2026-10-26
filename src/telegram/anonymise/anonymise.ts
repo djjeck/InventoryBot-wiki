@@ -1,22 +1,22 @@
 /**
  * Phase 3: the conversation of phase 2 -> the same conversation with the identity of
  * every other player who acts or is designated replaced by a pseudonym. Generic: what a
- * reply designates comes from its BotDialect (`userSpans`, `userCommands`,
+ * reply designates comes from its BotDialect (`userSpans`, `userArguments`,
  * `publicNames`). Pure logic, no Node APIs.
  *
  * Replaced, with one mapping per run:
  * - `player`, the player a reply belongs to;
  * - in the text, the usernames the dialect designates (userSpans: the addressee, the
  *   other party of an action), and nothing else;
- * - in `query`, for the dialect's `userCommands` only, the @usernames among the arguments
- *   and the known usernames written there without `@` (whole words, ignoring case);
+ * - in `query`, in the arguments the dialect says may name a player (`userArguments`), the
+ *   @usernames and the known usernames written without `@` (whole words, ignoring case);
  * - `chat` for a group: `Gruppo <pseudonym>`. The DM keeps its title.
  * Every other username in a text (leaderboards, item names, announcements, group names
  * the bot lists) is part of what the bot says and stays as written.
  *
  * The mapping is built before anything is rewritten, in order of first appearance: in
  * reply order, for each reply its group chat, its `player`, the @usernames of its query's
- * arguments (userCommands), its designated usernames; then the usernames phase 2 mapped
+ * arguments (userArguments), its designated usernames; then the usernames phase 2 mapped
  * display names to; then the groups without replies. Each takes the pseudonym of its
  * salted hash (PseudonymSource), except the owner, the bot and the dialect's public
  * names; the order only decides who keeps a pseudonym two names hash to. Usernames
@@ -24,13 +24,13 @@
  * the run is skipped. The display-name map of phase 2 keeps only its size: its keys
  * become opaque.
  */
-import { WORD_BODY, WS_BODY } from '#src/lib/text.ts';
+import { WORD_BODY } from '#src/lib/text.ts';
 import { type BotReply, type Conversation } from '#src/telegram/conversation/conversation.ts';
 import { type BotDialect } from '#src/telegram/conversation/dialect.ts';
 import { PseudonymSource } from './pseudonyms.ts';
 
 /** What phase 3 needs from the dialect. */
-export type AnonymiseDialect = Pick<BotDialect, 'publicNames' | 'userSpans' | 'userCommands'>;
+export type AnonymiseDialect = Pick<BotDialect, 'publicNames' | 'userSpans' | 'userArguments'>;
 
 export interface AnonymiseOptions {
   /** The export owner's @username (without `@`), kept as written; null when unknown. */
@@ -62,7 +62,6 @@ export const GROUP_PREFIX = 'Gruppo ';
 const AT_NAME = new RegExp(`(?<![${WORD_BODY}])@([${WORD_BODY}]+)`, 'gu');
 /** A word, or an @username, not inside another word. */
 const WORD_OR_AT_NAME = new RegExp(`(?<![${WORD_BODY}@])(@?)([${WORD_BODY}]+)`, 'gu');
-const COMMAND_WORD = new RegExp(`^[^${WS_BODY}]*`, 'u');
 
 const key = (name: string): string => name.toLowerCase();
 
@@ -72,13 +71,11 @@ export function anonymise(conversation: Conversation, options: AnonymiseOptions)
   const kept = new Set<string>([key(options.botName), ...[...dialect.publicNames].map(key)]);
   if (options.owner) kept.add(key(options.owner));
   const spans = conversation.replies.map((r) => dialect.userSpans(r.text));
-  /** The command word and its arguments, when the command takes a user. */
+  /** The command split where its arguments may name a player, when they may. */
   const userArgs = (query: string | null): [string, string] | null => {
     if (query === null) return null;
-    const command = (COMMAND_WORD.exec(query) as RegExpExecArray)[0];
-    return dialect.userCommands.has(command.toLowerCase())
-      ? [command, query.slice(command.length)]
-      : null;
+    const at = dialect.userArguments(query);
+    return at === null ? null : [query.slice(0, at), query.slice(at)];
   };
 
   // Everything to replace, in order of first appearance: [kind, name].

@@ -9,7 +9,7 @@
  * Unicode decimal digit (`\p{Nd}`), `.` is DOT (anything but `\n`) and the end of a
  * reply is END (the end, or before a final newline). Grammars: docs/bot-protocol.md.
  */
-import { WORD_CLASS, WS_CLASS } from '#src/lib/text.ts';
+import { parseDecimalInt, stripWs, WORD_CLASS, WS_CLASS } from '#src/lib/text.ts';
 
 export const W = WORD_CLASS;
 export const S = WS_CLASS;
@@ -20,6 +20,34 @@ export const DOT = '[^\\n]';
 export const END = '(?=\\n?$)';
 
 export const rx = (src: string, flags = ''): RegExp => new RegExp(src, 'u' + flags);
+
+/** A rarity code: `C`, `N+`, `L3`, `X`. */
+export const RARITY = `[A-Z]${D}*\\+?`;
+
+const DURATION_PART = rx(`^(${D}+) (giorn[oi]|or[ae]|minut[oi]|second[oi])$`);
+const UNIT_SECONDS: Readonly<Record<string, number>> = {
+  giorn: 86400,
+  or: 3600,
+  minut: 60,
+  second: 1,
+};
+
+/**
+ * A bot duration ("4 ore e 6 minuti", "2 giorni e 3 ore", "12 secondi") in seconds,
+ * with the seconds of its smallest unit (`precision`); null if it is not one.
+ */
+export function parseDuration(text: string): { seconds: number; precision: number } | null {
+  let seconds = 0;
+  let precision = Infinity;
+  for (const part of stripWs(text).split(/ e |, /u)) {
+    const m = DURATION_PART.exec(part);
+    if (!m) return null;
+    const unit = UNIT_SECONDS[(m[2] as string).slice(0, -1)] as number;
+    seconds += parseDecimalInt(m[1] as string) * unit;
+    precision = Math.min(precision, unit);
+  }
+  return { seconds, precision };
+}
 
 // Bot messages address the player as "@username, ..." or "@username ...", or a player
 // without a visible username as "[.. una presenza indistinta..], ...".

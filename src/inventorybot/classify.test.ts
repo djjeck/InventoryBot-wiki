@@ -479,6 +479,8 @@ describe('replies naming the item used', () => {
       items: [],
       named: 'un Pakkomon di nome Brumolo 👻',
       takes: ['una caps rossa'],
+      pakkomon_use: 'equip',
+      pakkomon: ['Brumolo 👻'],
     });
     expect(
       classify(
@@ -893,13 +895,6 @@ describe('old formats', () => {
         '@mario_r, un uovo di quaglia [C] non da nessun titolo..',
         "@mario_r, ti fregi del titolo che si confa' al possessore di un astrolabio da cartografo [L1].",
         'Inventario di @mario_r, al 2017/10/15 13:11:45',
-        '@mario_r, i due pakkomon iniziano a combattere furiosamente e alla fine Zampirlo 🐯 di @mario_r sconfigge Frullino 🐰 di @lucia_b per un soffio!',
-        '[N] i due pakkomon iniziano a combattere furiosamente. Alla fine Ruzzolo 🐹 di @lucia_b sconfigge Squittino 🐭 di @mario_r!',
-        "@mario_r, Zampirlo 🐯 ha vinto 54 battaglie e ne ha perse 44.\nE' equipaggiato con una spada di cartone [S].\nE' pronto a combattere.",
-        '@mario_r, sei pronto a sfidare chiunque col tuo Zampirlo 🐯 !',
-        '@mario_r, sfidi @lucia_b a combattere contro il tuo Zampirlo 🐯',
-        "@mario_r, il pakkomon del tuo avversario e' ancora rintronato per 33 minuti e 20 secondi.",
-        "@mario_r, Zampirlo 🐯 e' ancora rintronato dall'ultimo combattimento. Si rimettera' tra 2 ore.",
       ].map((t) => fmt(t))
     ).toStrictEqual([
       ['old_format', 'quest_offer', null],
@@ -911,20 +906,13 @@ describe('old formats', () => {
       ['old_format', 'title_none', ['/titolo']],
       ['old_format', 'title_choice', ['/titolo']],
       ['old_format', 'inventory_header', ['/i', '/inventario', '/inventory']],
-      ['old_format', 'pakkomon_fight', ['/usa']],
-      ['old_format', 'pakkomon_fight', ['/usa']],
-      ['old_format', 'pakkomon_record', ['/usa']],
-      ['old_format', 'pakkomon_ready', ['/usa']],
-      ['old_format', 'pakkomon_challenge', ['/usa']],
-      ['old_format', 'pakkomon_stunned', ['/usa']],
-      ['old_format', 'pakkomon_stunned', ['/usa']],
     ]);
   });
 
   it('pakkomon_reply_to_usa_is_not_a_use_but_a_parcel_is', () => {
     expect(
       classify('@mario_r, sei pronto a sfidare chiunque col tuo Zampirlo 🐯 !', '/usa zamp')
-    ).toStrictEqual({ type: 'old_format', format: 'pakkomon_ready' });
+    ).toStrictEqual({ type: 'pakkomon_ready', pakkomon: 'Zampirlo 🐯' });
     expect(
       classify(
         '@mario_r, ti accingi ad aprire il tuo pacco eccitato come un bambino a natale, ed ecco che trovi:\n-un colino di plastica [N]',
@@ -950,6 +938,8 @@ describe('old formats', () => {
       text: "lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumolo 👻 [X]!",
       items: [{ name: 'un Pakkomon di nome Brumolo 👻', rarity: 'X', usable: false, qty: 1 }],
       named: 'Sfera Frullo',
+      pakkomon_use: 'hatch',
+      pakkomon: ['Brumolo 👻'],
     });
     // Any sphere name: the item is read from the reply.
     expect(

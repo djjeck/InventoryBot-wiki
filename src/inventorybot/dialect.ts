@@ -10,11 +10,13 @@
  * - which commands can produce each reply (COMPATIBLE, compatibleCommands), from the
  *   reply type classify() gives without a command;
  * - for anonymisation: the admin's public username (PUBLIC_NAMES), the usernames a reply
- *   designates (userSpans) and the commands that take a username (USER_COMMANDS).
+ *   designates (userSpans) and the arguments of commands that may name one (userArguments).
  */
 import { codePointLength, escapeRegex, WS_BODY } from '#src/lib/text.ts';
+import { firstWord } from '#src/telegram/conversation/commands.ts';
 import { type BotDialect, type Compatible } from '#src/telegram/conversation/dialect.ts';
 import { classify, producersOf } from './classify.ts';
+import { pakkomonUserSpans } from './pakkomon.ts';
 import { ANONYMOUS_RE, D, GIFT, GIVE, rx, W } from './patterns.ts';
 import { type Event, type EventType } from './types.ts';
 
@@ -37,6 +39,13 @@ export const COMPATIBLE: Readonly<Partial<Record<EventType, ReadonlySet<string>>
   // A side notice after another reply: it never takes a command.
   travel_requirement: new Set(),
   use: new Set(['/usa', '/use']),
+  pakkomon_fight: new Set(['/usa', '/use']),
+  pakkomon_record: new Set(['/usa', '/use']),
+  pakkomon_ready: new Set(['/usa', '/use']),
+  pakkomon_challenge: new Set(['/usa', '/use']),
+  pakkomon_stunned: new Set(['/usa', '/use']),
+  // A broadcast: it never takes a command.
+  pakkomon_boss: new Set(),
 };
 
 const USE_COMMANDS: ReadonlySet<string> = new Set(['/usa', '/use']);
@@ -147,6 +156,20 @@ export const PUBLIC_NAMES: ReadonlySet<string> = new Set(['msx80']);
 
 /** Commands whose arguments may name a player without `@`: `/stats mario`, `/dai mario 2 sasso`. */
 export const USER_COMMANDS: ReadonlySet<string> = new Set(['/stats', '/dai']);
+/** Commands whose argument after `#` may name one: `/usa zamp # @mario`, `/usa zamp # mario`. */
+const HASH_COMMANDS: ReadonlySet<string> = new Set(['/usa', '/use']);
+
+/**
+ * Where a command's arguments may name a player: after the command word of USER_COMMANDS,
+ * after the `#` of a /usa (the player a Pakkomon fights, 6.18); null otherwise.
+ */
+export function userArguments(query: string): number | null {
+  const command = firstWord(query);
+  if (USER_COMMANDS.has(command)) return query.indexOf(' ') < 0 ? query.length : query.indexOf(' ');
+  if (!HASH_COMMANDS.has(command)) return null;
+  const hash = query.indexOf('#');
+  return hash < 0 ? null : hash + 1;
+}
 
 /** The receiver a `/dai` is refused for (6.11). */
 const GIVE_REFUSED = rx(
@@ -168,16 +191,21 @@ const DESIGNATED: readonly [RegExp, string][] = [
  * The usernames a reply designates, as spans of the text (without `@`): the addressee at
  * the start ("@u, ...", "Complimenti @u", "Avventuriero @u", "ciao @u"), the receiver of a
  * `/dai` ("dai 1x ... a @y", "meglio non dare niente a @y", "sicuro che vuoi dare cose a @y?")
- * and the giver of a gift notice
- * ("[N] @x ti ha dato ..."). Every other username in the text is part of what the bot
- * says (leaderboards, item names, announcements) and stays.
+ * the giver of a gift notice ("[N] @x ti ha dato ..."), and every player a Pakkomon
+ * reply names (owners, challengers, makers, fighters of a boss: pakkomonUserSpans).
+ * Every other username in the text is part of what the bot says (leaderboards, item
+ * names, announcements) and stays.
  */
 export function userSpans(text: string): [number, number][] {
   const out: [number, number][] = [];
+  const add = (span: [number, number]): void => {
+    if (!out.some(([a]) => a === span[0])) out.push([span[0], span[1]]);
+  };
   for (const [re, group] of DESIGNATED) {
     const span = re.exec(text)?.indices?.groups?.[group];
-    if (span !== undefined && !out.some(([a]) => a === span[0])) out.push([span[0], span[1]]);
+    if (span !== undefined) add(span);
   }
+  for (const span of pakkomonUserSpans(text)) add(span);
   return out.sort((x, y) => x[0] - y[0]);
 }
 
@@ -193,6 +221,6 @@ export function inventoryBotDialect(titles: readonly string[]): BotDialect {
     groupWindow: GROUP_WINDOW,
     publicNames: PUBLIC_NAMES,
     userSpans,
-    userCommands: USER_COMMANDS,
+    userArguments,
   };
 }

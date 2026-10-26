@@ -20,37 +20,10 @@ Delete this file in the closing commit.
 `docs/bot-protocol.md` describes Pakkomon as they are today (2.9, 6.18), with the stun range of each
 ending phrase.
 
-## Phase 2: the replies, read ⬜
+## Phase 2: the replies, read ✅
 
-Goal: every Pakkomon reply is a typed event that names its Pakkomon, owners and outcome, with every
-username anonymised.
-
-### 2.1 Fights ⬜
-
-- ⬜ A `pakkomon_fight` event (both wordings): winner and loser with their owners, the ending phrase
-  and its stun range, who learned something, the prize (`@u ottiene ITEM!`).
-- ⬜ Boss hits as the same event marked as a boss: special move, wound state, defeat and spoils.
-- ⬜ The dialect designates the usernames of fights, spoils and boss moves (`userSpans`), so
-  anonymisation replaces them.
-- ⬜ The boss announcement is a broadcast, not an unknown reply.
-
-### 2.2 Records, challenges, stuns ⬜
-
-- ⬜ Typed events for the record (wins, losses, equipment, readiness or stun, birth date and maker,
-  power-up icons), the challenge, the ready and stop replies, and the stun refusal (with its
-  duration).
-- ⬜ The birth line's maker anonymised.
-- ⬜ The `pakkomon_*` old formats removed from `OLD_FORMATS`.
-
-### 2.3 Uses on a Pakkomon ⬜
-
-- ⬜ Recognise the uses that name a Pakkomon (healing, power-ups, probe and its result, scale,
-  extractor, heal-all) as uses, the Pakkomon kept apart from the item used.
-- ⬜ The scanner's list read as the owner's Pakkomon and their readiness.
-
-Acceptance for each: `classify.docs-examples.test.ts` covers the new formats; golden outputs change
-only where Pakkomon replies were `old_format` or `unknown`; on the real exports the count of
-unrecognised Pakkomon replies drops to about zero (`npm run inspect`).
+Every Pakkomon reply is a typed event (`pakkomon.ts`), and every player it names, in its text or
+after a `/usa`'s `#`, is anonymised.
 
 ## Phase 3: the wiki without Pakkomon ⬜
 

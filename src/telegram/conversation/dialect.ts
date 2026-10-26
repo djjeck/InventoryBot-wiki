@@ -62,8 +62,9 @@ export interface BotDialect {
    */
   userSpans(text: string): readonly (readonly [number, number])[];
   /**
-   * Command words (`/cmd`, lower case) whose arguments may name a player without `@`:
-   * phase 3 also replaces the known usernames written there as plain words.
+   * Where the arguments of a command (its text, `@Bot` removed) may name a player: the
+   * offset from which phase 3 replaces the @usernames and the known usernames written as
+   * plain words; null when no argument names a player.
    */
-  userCommands: ReadonlySet<string>;
+  userArguments(query: string): number | null;
 }

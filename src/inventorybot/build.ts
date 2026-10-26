@@ -36,8 +36,9 @@ import {
   WORD_BODY,
   WS_CLASS,
 } from '#src/lib/text.ts';
-import { INVENTORY_COMMANDS, pakkomonItem, parseDuration, useItems, useTakes } from './classify.ts';
-import { itemName, stripAddr } from './patterns.ts';
+import { INVENTORY_COMMANDS, useItems, useTakes } from './classify.ts';
+import { pakkomonItem } from './pakkomon.ts';
+import { itemName, parseDuration, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
 import {

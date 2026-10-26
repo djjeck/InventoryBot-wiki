@@ -17,6 +17,7 @@ import {
   stripWs,
   WORD_BODY,
 } from '#src/lib/text.ts';
+import { pakkomonFight, pakkomonRecord, pakkomonStatus, pakkomonUse } from './pakkomon.ts';
 import {
   A,
   ADDR,
@@ -27,6 +28,8 @@ import {
   GIFT,
   GIVE,
   itemName,
+  parseDuration,
+  RARITY,
   rx,
   S,
   stripAddr,
@@ -42,12 +45,12 @@ import {
   type OldFormatEvent,
   type RecipeListEntry,
   type StatsEvent,
+  type UseEvent,
 } from './types.ts';
 
 /** /inventario and its other names (dialect.ts ALIASES). */
 export const INVENTORY_COMMANDS: readonly string[] = ['/inventario', '/inventory', '/i'];
 
-const RARITY = `[A-Z]${D}*\\+?`;
 // "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space; any
 // whitespace may stand before the tags)
 const ITEM_LINE = rx(
@@ -119,31 +122,6 @@ type Classifier = (t: string, q: Query) => Event | null;
 
 const cTooEarly: Classifier = (t) => (t.startsWith('Troppo presto') ? { type: 'cooldown' } : null);
 
-const DURATION_PART = rx(`^(${D}+) (giorn[oi]|or[ae]|minut[oi]|second[oi])$`);
-const UNIT_SECONDS: Readonly<Record<string, number>> = {
-  giorn: 86400,
-  or: 3600,
-  minut: 60,
-  second: 1,
-};
-
-/**
- * A bot duration ("4 ore e 6 minuti", "2 giorni e 3 ore", "12 secondi") in seconds,
- * with the seconds of its smallest unit (`precision`); null if it is not one.
- */
-export function parseDuration(text: string): { seconds: number; precision: number } | null {
-  let seconds = 0;
-  let precision = Infinity;
-  for (const part of stripWs(text).split(/ e |, /u)) {
-    const m = DURATION_PART.exec(part);
-    if (!m) return null;
-    const unit = UNIT_SECONDS[(m[2] as string).slice(0, -1)] as number;
-    seconds += parseDecimalInt(m[1] as string) * unit;
-    precision = Math.min(precision, unit);
-  }
-  return { seconds, precision };
-}
-
 // Addressed for /usa, not addressed for /dai.
 const ITEM_COOLDOWN = rx(
   `^(?:${ADDR.slice(1)})?(?<name>${DOT}+?) deve raffreddarsi ancora per (?<d>${DOT}+?) prima di poterl[oaie] (?<act>usare|dare in giro)(?: di nuovo)?\\.?${S}*${END}`
@@ -179,7 +157,7 @@ interface OldFormat {
 /**
  * Formats of earlier periods recognised as such, without reading facts from them:
  * quest offers, progress and completion, parcels, the 2017 /nascondi "not found", old
- * /titolo replies, the old inventory header, Pakkomon fights. (The current /preferito,
+ * /titolo replies, the old inventory header. (The current /preferito,
  * /nascondi and "no quest" replies are in KNOWN_REPLIES.) Before the other classifiers (a quest's "ti manca:" is not a recipe).
  */
 const OLD_FORMATS: readonly OldFormat[] = [
@@ -232,33 +210,6 @@ const OLD_FORMATS: readonly OldFormat[] = [
     match: rx(`^Inventario di @${W}+, al ${D}{4}/${D}{2}/${D}{2} ${D}{2}:${D}{2}:${D}{2}`),
     commands: ['/inventario'],
   },
-  {
-    format: 'pakkomon_fight',
-    match: rx(`^(?:\\[N\\] )?(?:${A})?i due pakkomon iniziano a combattere furiosamente`),
-    commands: ['/usa'],
-  },
-  {
-    format: 'pakkomon_record',
-    match: rx(`^(?:${A})?${DOT}+ ha vinto ${D}+ battaglie e ne ha perse ${D}+\\.`),
-    commands: ['/usa'],
-  },
-  {
-    format: 'pakkomon_ready',
-    match: rx(`^${A}sei pronto a sfidare chiunque col tuo ${DOT}+ !`),
-    commands: ['/usa'],
-  },
-  {
-    format: 'pakkomon_challenge',
-    match: rx(`^${A}sfidi @${W}+ a combattere contro il tuo `),
-    commands: ['/usa'],
-  },
-  {
-    format: 'pakkomon_stunned',
-    match: rx(
-      `^${A}(?:il pakkomon del tuo avversario e' ancora rintronato per |${DOT}+ e' ancora rintronato dall'ultimo combattimento)`
-    ),
-    commands: ['/usa'],
-  },
 ];
 
 const OLD_BY_FORMAT: ReadonlyMap<string, OldFormat> = new Map(
@@ -299,8 +250,26 @@ const cPakkomonSphere: Classifier = (t) => {
       },
     ],
     named: stripWs(g['item'] as string),
+    ...pakkomonFields(t),
   };
 };
+
+/** A use's Pakkomon fields (pakkomon.ts), without `named`, in the key order of UseEvent. */
+function pakkomonFields(
+  t: string
+): Pick<UseEvent, 'pakkomon_use' | 'pakkomon' | 'reading' | 'scan'> {
+  const p = pakkomonUse(t);
+  if (p === null) return {};
+  return {
+    ...(p.pakkomon_use === undefined ? {} : { pakkomon_use: p.pakkomon_use }),
+    ...(p.pakkomon === undefined ? {} : { pakkomon: p.pakkomon }),
+    ...(p.reading === undefined ? {} : { reading: p.reading }),
+    ...(p.scan === undefined ? {} : { scan: p.scan }),
+  };
+}
+
+/** A Pakkomon fight, record, challenge, stun or boss, by the text alone (pakkomon.ts). */
+const cPakkomon: Classifier = (t) => pakkomonFight(t) ?? pakkomonRecord(t) ?? pakkomonStatus(t);
 
 const RECIPE_LINE = rx(
   `^- (?<name>${DOT}+?) L(?<lvl>${D}+) \\[(?<st>\\*|manca (?<miss>${D}+))\\]${S}*${END}`
@@ -794,33 +763,28 @@ export function useTakes(text: string): string[] {
   return [];
 }
 
-// Replies that name the item used, stronger evidence than the command: the Pakkomon a
-// player equips ("/usa <pakkomon> # <item>"), as its item is named ("un Pakkomon di nome
-// NAME", as the sphere's reply has it), and the scanner they examine their Pakkomon with.
-const USE_EQUIP = rx(`^equipaggi il tuo (?<name>${DOT}+?) con `);
-const USE_SCAN = rx('^esamini i tuoi pakkomon con lo (?<name>scanner)');
-/** The name of a Pakkomon's item. */
-export const pakkomonItem = (name: string): string => `un Pakkomon di nome ${name}`;
-
-const cUse: Classifier = (t, q) => {
-  if (!isUseQuery(q)) return null;
+// A use on a Pakkomon names the item used, stronger evidence than the command (pakkomon.ts):
+// the Pakkomon a player equips ("/usa <pakkomon> # <item>"), as its item is named ("un
+// Pakkomon di nome NAME", as the sphere's reply has it), the scanner, a power-up, an
+// extractor.
+function useEvent(t: string): UseEvent {
   const text = stripAddr(t);
-  const equip = USE_EQUIP.exec(text);
-  const scan = USE_SCAN.exec(text);
-  const named = equip
-    ? pakkomonItem(stripWs(groups(equip)['name'] as string))
-    : scan
-      ? (groups(scan)['name'] as string)
-      : null;
+  const named = pakkomonUse(t)?.named;
   const takes = useTakes(text);
   return {
     type: 'use',
     text,
     items: useItems(t),
-    ...(named ? { named } : {}),
+    ...(named === undefined ? {} : { named }),
     ...(takes.length > 0 ? { takes } : {}),
+    ...pakkomonFields(t),
   };
-};
+}
+
+const cUse: Classifier = (t, q) => (isUseQuery(q) ? useEvent(t) : null);
+
+/** A use on a Pakkomon, recognised from its text alone, without a /usa command. */
+const cPakkomonUse: Classifier = (t) => (pakkomonUse(t) === null ? null : useEvent(t));
 
 interface KnownReply {
   /** Name of the reply, kept in the `miss` event. */
@@ -1024,6 +988,19 @@ const KNOWN_REPLIES: readonly KnownReply[] = [
     match: rx('^troppi luoghi trovati con quel nome\\('),
     commands: ['/viaggio'],
   },
+  // Pakkomon (6.18): a Pakkomon withdrawn from waiting, a challenger's Pakkomon given
+  // away, the admin's healing.
+  { name: 'pakkomon_stop', match: rx(`^${A}smetti di sfidare chicchessia\\.`), commands: ['/usa'] },
+  {
+    name: 'pakkomon_gone',
+    match: rx(`^${A}@${W}+ non ha piu' il pakkomon con cui ti ha sfidato!`),
+    commands: ['/usa'],
+  },
+  {
+    name: 'pakkomon_heal_all',
+    match: rx(`^${A}tutti i Pakkomon di @${W}+ sono stati curati\\.`),
+    commands: 'any',
+  },
   {
     name: 'inventory_bad_filter',
     match: rx(`${ADDR}puoi usare solo i seguenti parametri: `),
@@ -1107,6 +1084,7 @@ const CLASSIFIERS: readonly Classifier[] = [
   cTooEarly,
   cItemCooldown,
   cOldFormat,
+  cPakkomon,
   cPakkomonSphere,
   cRecipeList,
   cRecipeDetail,
@@ -1122,6 +1100,7 @@ const CLASSIFIERS: readonly Classifier[] = [
   cGive,
   cShow,
   cUse,
+  cPakkomonUse,
   cDrop,
   cNoise,
   cNarratedArrival,

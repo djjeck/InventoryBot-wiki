@@ -115,7 +115,17 @@ describe('anonymisation', () => {
     expect(d.compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
       new Set(['/inventario', '/i', '/inventory'])
     );
-    expect([...d.publicNames, ...d.userCommands]).toStrictEqual(['msx80', '/stats', '/dai']);
+    expect([...d.publicNames]).toStrictEqual(['msx80']);
+    expect(
+      [
+        '/stats mario',
+        '/dai',
+        '/usa zamp # @mario',
+        '/usa@x zamp',
+        '/usa zamp',
+        '/viaggio mario',
+      ].map((q) => d.userArguments(q))
+    ).toStrictEqual([6, 4, 11, null, null, null]);
     expect(d.groupWindow).toBe(120);
   });
 });

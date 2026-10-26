@@ -112,24 +112,28 @@ order:
    a secret salt that the caller keeps (the web app keeps one per browser): the same person keeps
    the same pseudonym from run to run, and nobody without the salt can work back to the name, as
    they could from a hash of the name alone. Replaced are the player of each reply, the usernames
-   the dialect designates in its text (`userSpans`), usernames in the arguments of commands that
-   take a player (`userCommands`), and group titles; every other name in a text is what the bot says
-   and stays. The owner, decided just before (`src/telegram/conversation/owner.ts`: the given
-   username, else the player the bot addresses most in the DM), the bot and the dialect's
-   `publicNames` are kept. Display names never leave this phase.
+   the dialect designates in its text (`userSpans`), usernames in the arguments of commands that may
+   name a player (`userArguments`: those of `/dai` and `/stats`, a `/usa`'s after `#`), and group
+   titles; every other name in a text is what the bot says and stays. The owner, decided just before
+   (`src/telegram/conversation/owner.ts`: the given username, else the player the bot addresses most
+   in the DM), the bot and the dialect's `publicNames` are kept. Display names never leave this
+   phase.
 
 4. **Interpretation** (`src/inventorybot/extract.ts`, `interpretReplies`): every reply becomes a
    typed event (`src/inventorybot/types.ts`): the classifier (`classify.ts`) reads it with the
    command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
-   `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). A place is named
-   in its article form (`places.ts`: "nella valle" is "la valle"), whatever preposition the reply
-   used, so that every source names it the same way; a travel event also keeps the words its reply
-   wrote each place with (`written`), from which the wiki keeps how the bot writes a place (`at`,
-   the latest wording). The posts of the bot's channels become events too (`channels.ts`,
-   `docs/channels.md`): each card, with the date of its post, merged with the replies' events in
-   date order. The phase ends by verifying the group pairs (`verify.ts`): a reply that, read with
-   its command, is not of that command's family is read again without it, and so is a group `/usa`
-   reply that does not fit the item its query names (which uses phase 5's item catalogue).
+   `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). The Pakkomon
+   replies are read by `pakkomon.ts`: fights and boss hits (with the loser's stun their ending
+   phrase states, `ENDINGS`, and every player they name designated for phase 3), records,
+   challenges, stuns, bosses, and the uses of an item on a Pakkomon. A place is named in its article
+   form (`places.ts`: "nella valle" is "la valle"), whatever preposition the reply used, so that
+   every source names it the same way; a travel event also keeps the words its reply wrote each
+   place with (`written`), from which the wiki keeps how the bot writes a place (`at`, the latest
+   wording). The posts of the bot's channels become events too (`channels.ts`, `docs/channels.md`):
+   each card, with the date of its post, merged with the replies' events in date order. The phase
+   ends by verifying the group pairs (`verify.ts`): a reply that, read with its command, is not of
+   that command's family is read again without it, and so is a group `/usa` reply that does not fit
+   the item its query names (which uses phase 5's item catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, and the rarity legend,

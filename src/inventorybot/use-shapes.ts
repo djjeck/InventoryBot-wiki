@@ -6,7 +6,7 @@
  * described by what it held, as the channels' cards describe a reply ("dove N è un numero
  * compreso tra 1 e 6"); players and the text players typed are not kept. Pure logic.
  */
-import { parseDuration } from './classify.ts';
+import { parseDuration } from './patterns.ts';
 import { type WikiUseShape, type WikiUseSlot } from './types.ts';
 
 /** What the replies may name, known from the wiki: items, and places as the bot writes them. */

@@ -1008,6 +1008,7 @@ ANNOUNCE  = "📣 Attenzione!Un Pakkomon Boss " LINE " sta sfidando l'arena! Acc
   | healing    | `spalmi un Pakkomon di nome PK con ITEM e dopo pochi istanti torna in perfetta forma e pronto a combattere!`                                                   |
   | power-up   | `fai bere ITEM a un Pakkomon di nome PK.. Poi lo scruti attentamente per alcuni minuti.. Si, ti sembra leggermente piu' muscoloso.` (or `fai mangiare`, `!`)   |
   | probe      | `inserisci PK nella sonda e sul display appare una scritta: "WORD"!`                                                                                           |
+  | probe      | `attivi la sonda su un Pakkomon di nome PK e leggi il display: indica INT.` (another probe, which reads its strength)                                          |
   | scale      | `metti i due pakkomon PK e PK sulla bilancia: il primo e' piu' forte!` (or `il secondo`)                                                                       |
   | extractor  | `punti ITEM contro un Pakkomon di nome PK e premi il grilletto: … Ottieni ITEM.`                                                                               |
   | admin heal | `tutti i Pakkomon di @u sono stati curati.`                                                                                                                    |
@@ -1021,35 +1022,35 @@ ANNOUNCE  = "📣 Attenzione!Un Pakkomon Boss " LINE " sta sfidando l'arena! Acc
   `quel pakkomon ha gia' bevuto ITEM..` (a power-up given twice),
   `@x non ha piu' il pakkomon con cui ti ha sfidato!`, and those of section 6.13.
 
-```bot-reply type=use items.0.name="un Pakkomon di nome Brumolo 👻" items.0.rarity=X named="Sfera Frullo"
+```bot-reply type=use items.0.name="un Pakkomon di nome Brumolo 👻" items.0.rarity=X named="Sfera Frullo" pakkomon_use=hatch pakkomon.0="Brumolo 👻"
 @mario_r, lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumolo 👻 [X]!
 ```
 
-```bot-reply type=old_format query="/usa zamp # ?" format=pakkomon_ready
+```bot-reply type=pakkomon_ready query="/usa zamp # ?" pakkomon="Zampirlo 🐯"
 @mario_r, sei pronto a sfidare chiunque col tuo Zampirlo 🐯 !
 ```
 
-```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_challenge
+```bot-reply type=pakkomon_challenge query="/usa zamp # @lucia_b" opponent=lucia_b
 @mario_r, sfidi @lucia_b a combattere contro il tuo Zampirlo 🐯
 ```
 
-```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_fight
+```bot-reply type=pakkomon_fight query="/usa zamp # @lucia_b" winner.owner=lucia_b loser.pakkomon="Zampirlo 🐯" stun_min=20 stun_max=29 learned=true
 @mario_r, i due pakkomon iniziano a combattere furiosamente. Alla fine Tibolah 🐸 di @lucia_b sconfigge Zampirlo 🐯 di @mario_r con discreto margine!
 Tibolah 🐸 ha imparato qualcosa di nuovo..
 ```
 
-```bot-reply type=old_format query="/usa zamp # @InventoryBot" format=pakkomon_fight
+```bot-reply type=pakkomon_fight query="/usa zamp # @InventoryBot" hit=false prize.name="un floppy disk incrinato" prize.rarity=X
 @mario_r, i due pakkomon iniziano a combattere furiosamente. Alla fine Zampirlo 🐯 di @mario_r sconfigge Codicillo 💾 di @InventoryBot di stretta misura!
 @mario_r ottiene un floppy disk incrinato [X]!
 ```
 
-```bot-reply type=old_format query="/usa zamp # @InventoryBot" format=pakkomon_fight
+```bot-reply type=pakkomon_fight query="/usa zamp # @InventoryBot" hit=true move="Di colpo Gigante di Sale 🧂 ti getta negli occhi una manciata di sale!" prize.name="un granello di sale grosso" wound="ha qualche graffio"
 @mario_r, i due pakkomon iniziano a combattere furiosamente. Di colpo Gigante di Sale 🧂 ti getta negli occhi una manciata di sale! Alla fine Zampirlo 🐯 di @mario_r colpisce Gigante di Sale 🧂 di @InventoryBot per un soffio!
 @mario_r ottiene un granello di sale grosso [R]!
 Gigante di Sale 🧂 ha qualche graffio!
 ```
 
-```bot-reply type=old_format query="/usa zamp # @InventoryBot" format=pakkomon_fight
+```bot-reply type=pakkomon_fight query="/usa zamp # @InventoryBot" hit=true wound=null spoils.0.player=lucia_b spoils.1.points=7
 @mario_r, i due pakkomon iniziano a combattere furiosamente. Alla fine Zampirlo 🐯 di @mario_r colpisce Gigante di Sale 🧂 di @InventoryBot accartocciandolo!
 @mario_r ottiene un granello di sale grosso [R]!
 
@@ -1059,11 +1060,11 @@ Divisione delle spoglie:
 • @mario_r: 7
 ```
 
-```bot-reply type=unknown addressee=null
+```bot-reply type=pakkomon_boss addressee=null emoji=🧂
 📣 Attenzione!Un Pakkomon Boss 🧂 sta sfidando l'arena! Accorrete a sconfiggerlo! 🥊
 ```
 
-```bot-reply type=old_format query="/usa zamp" format=pakkomon_record
+```bot-reply type=pakkomon_record query="/usa zamp" wins=54 losses=44 equipment.name="una spada di cartone" stunned_for=725 born=2025-04-18 maker=mario_r power_ups=["🏆","💧"]
 @mario_r, Zampirlo 🐯 ha vinto 54 battaglie e ne ha perse 44.
 E' equipaggiato con una spada di cartone [S].
 E' ancora rintronato dall'ultimo combattimento. Si rimettera' tra 12 minuti e 5 secondi.
@@ -1071,25 +1072,25 @@ E' nato il giorno 18-04-2025 dalle mani di @mario_r.
 🏆💧
 ```
 
-```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_stunned
+```bot-reply type=pakkomon_stunned query="/usa zamp # @lucia_b" pakkomon="Zampirlo 🐯" remaining=120
 @mario_r, Zampirlo 🐯 e' ancora rintronato dall'ultimo combattimento. Si rimettera' tra 2 minuti.
 ```
 
-```bot-reply type=use query="/usa scanner" items=[] named=scanner
+```bot-reply type=use query="/usa scanner" items=[] named=scanner pakkomon_use=scan scan.1.remaining=0
 @mario_r, esamini i tuoi pakkomon con lo scanner:
  - Zampirlo 🐯: 5 minuti e 38 secondi
  - Brumolo 👻: pronto
 ```
 
-```bot-reply type=use query="/usa zamp # spada" items=[] named="un Pakkomon di nome Zampirlo 🐯" takes.0="una spada di cartone"
+```bot-reply type=use query="/usa zamp # spada" items=[] named="un Pakkomon di nome Zampirlo 🐯" takes.0="una spada di cartone" pakkomon_use=equip
 @mario_r, equipaggi il tuo Zampirlo 🐯 con una spada di cartone [S].
 ```
 
-```bot-reply type=use query="/usa unguento # zamp" items=[]
+```bot-reply type=use items=[] pakkomon_use=heal pakkomon.0="Zampirlo 🐯"
 @mario_r, spalmi un Pakkomon di nome Zampirlo 🐯 con un unguento di menta e dopo pochi istanti torna in perfetta forma e pronto a combattere!
 ```
 
-```bot-reply type=use query="/usa sonda # zamp" items=[]
+```bot-reply type=use query="/usa sonda # zamp" items=[] pakkomon_use=probe reading=Decente
 @mario_r, inserisci Zampirlo 🐯 nella sonda e sul display appare una scritta: "Decente"!
 ```
 
@@ -1158,7 +1159,7 @@ Ti ricompensa donandoti:
 - una moneta d'oro [X] x7
 ```
 
-```bot-reply type=old_format query="/usa zamp # @lucia_b" format=pakkomon_fight
+```bot-reply type=pakkomon_fight query="/usa zamp # @lucia_b" winner.pakkomon="Zampirlo 🐯" ending="per un soffio"
 [N] @mario_r, i due pakkomon iniziano a combattere furiosamente e alla fine Zampirlo 🐯 di @mario_r sconfigge Tibolah 🐸 di @lucia_b per un soffio!
 ```
 

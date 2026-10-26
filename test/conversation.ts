@@ -58,7 +58,8 @@ export const TEST_DIALECT: BotDialect = {
       const span = re.exec(text)?.indices?.[1];
       return span ? [span] : [];
     }),
-  userCommands: new Set(['/dai', '/stats']),
+  userArguments: (query) =>
+    /^\/(?:dai|stats)(?=\s|$)/iu.test(query) ? query.search(/\s|$/u) : null,
 };
 
 /** `n` commands from `sender`, each answered with a reply addressed to `user`, 300 s apart. */
