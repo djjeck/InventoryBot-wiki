@@ -143,11 +143,12 @@ follows Telegram Web's default themes, light, or night when the system prefers a
 switch of its own (colours, Roboto, radii and shadows, as tokens at the top of `view/wiki-view.css`,
 with any colour used as text adjusted to 4.5:1 contrast), and the header shows the bot's profile
 picture (`avatar.png`, redrawn as clean 26×26 pixel art and drawn at whole multiples) beside a title
-in a pixel font. The page (`main.ts`) has one view, the wiki (empty, with how to export and, while
-no export is listed, "Prova con un esempio", until there is one), under a header whose "Importa"
-button (with the number of exports) opens a modal panel below it, closed by Escape or a click
-outside it, with the owner whose wiki it is (with the inventory estimate's agreement, `accountLabel`
-in `labels.ts`), the list of exports (each with its chat, the days of its first and last message and
+in a pixel font. The page (`main.ts`) has one view, the wiki (empty, with how to export, a link to
+the repository on GitHub and, while no export is listed, "Prova con un esempio", until there is
+one), under a header with a GitHub icon that links to the repository and whose "Importa" button
+(with the number of exports) opens a modal panel below it, closed by Escape or a click outside it,
+with the owner whose wiki it is (with the inventory estimate's agreement, `accountLabel` in
+`labels.ts`), the list of exports (each with its chat, the days of its first and last message and
 its status, worded by `labels.ts`, and a bin button to remove it), how to export a chat, "Aggiungi
 esportazione", which opens the folder picker, the options and "Cancella i miei dati". The example is
 a short chat with the bot, written by hand in `demo-chat.ts`: an invented player who has just

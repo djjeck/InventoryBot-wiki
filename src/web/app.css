@@ -411,6 +411,25 @@ main:focus {
 .demo-offer[hidden] {
   display: none;
 }
+/* GitHub's mark (#github-mark in index.html), in the empty wiki's text and in the header,
+   unaltered and in black or white as GitHub's logo guidelines ask. */
+.repo-link {
+  color: var(--accent-ink);
+  white-space: nowrap;
+}
+.repo-link svg {
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.25em;
+  vertical-align: -0.125em;
+  fill: var(--ink);
+}
+.repo-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--ink);
+  stroke: none;
+}
 .result-info {
   margin: 8px 0 0;
 }
