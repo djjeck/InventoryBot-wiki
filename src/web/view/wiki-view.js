@@ -1,4 +1,4 @@
-/* global window, document, localStorage, location, history, matchMedia, URLSearchParams */
+/* global window, document, localStorage, location, history, matchMedia, URLSearchParams, getComputedStyle */
 import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
 
 /**
@@ -31,7 +31,6 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     <button role="tab" data-tab="oggetti"><span class="tab-name">Oggetti</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="ricette"><span class="tab-name">Ricette</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="luoghi"><span class="tab-name">Luoghi</span><span class="badge" aria-hidden="true"></span></button>
-    <button role="tab" data-tab="catene"><span class="tab-name">Catene</span><span class="badge" aria-hidden="true"></span></button>
   </div>
   <div class="side-tools" id="side-tools"></div>
   <div class="list" id="list"></div>
@@ -160,8 +159,6 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       n = current(n);
       return `<span class="chip">${tag(I[n]?.rarity)} <button class="link" data-go="item" data-name="${esc(n)}">${esc(n)}</button></span>`;
     };
-    const recipeLink = (n) =>
-      `<span class="chip">${lvlTag(R[n])} <button class="link" data-go="recipe" data-name="${esc(n)}">${esc(n)}</button></span>`;
     const locLink = (n) =>
       `<button class="link" data-go="loc" data-name="${esc(n)}">${esc(L[n]?.label || n)}</button>`;
     const sec = (title, body) => `<div class="section"><h3>${title}</h3>${body}</div>`;
@@ -268,7 +265,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // ---- state -------------------------------------------------------------------
     const state = {
       tab: 'oggetti',
-      sel: { ricette: null, oggetti: null, luoghi: null, catene: null },
+      sel: { ricette: null, oggetti: null, luoghi: null },
       filter: { ricette: 'tutte', oggetti: 'tutti' },
     };
     const store = {
@@ -287,12 +284,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         }
       },
     };
-    const TABS = ['oggetti', 'ricette', 'luoghi', 'catene'];
+    const TABS = ['oggetti', 'ricette', 'luoghi'];
     // ---- the URL -------------------------------------------------------------------
     // `#tab` or `#tab/slug`. A slug is the name folded to lower-case ASCII letters and
     // digits, with `_` in place of everything else (`l'oro` is `l_oro`); names with the
     // same slug take `_2`, `_3`, ... in the order of their names, so each is one entry.
-    const ENTRIES = { ricette: R, oggetti: I, luoghi: L, catene: R };
+    const ENTRIES = { ricette: R, oggetti: I, luoghi: L };
     const slugify = (s) =>
       fold(s)
         .replace(/[^a-z0-9]+/gu, '_')
@@ -309,10 +306,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       }
       return { bySlug, byName };
     }
-    const recipeSlugs = slugTable(Object.keys(R));
     const SLUGS = {
-      ricette: recipeSlugs,
-      catene: recipeSlugs,
+      ricette: slugTable(Object.keys(R)),
       oggetti: slugTable(Object.keys(I)),
       luoghi: slugTable(Object.keys(L)),
     };
@@ -324,7 +319,6 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // item's, with the list it was opened from: `#oggetti/una_torre?lista=ricette`, and
     // `&ricetta=<slug>` when several recipes make the item. `#ricette/<slug>` stays the
     // address of a recipe whose item is not known, and leads to the item's otherwise.
-    const LISTS = ['ricette', 'catene'];
     /** The item a recipe makes, when the wiki has it. */
     const madeItem = (recipe) => {
       const o = R[recipe]?.output;
@@ -341,7 +335,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const found = name !== null && ENTRIES[tab][name] ? name : null;
       const params = new URLSearchParams(query);
       const list = params.get('lista');
-      if (tab === 'oggetti' && LISTS.includes(list)) {
+      if (tab === 'oggetti' && list === 'ricette') {
         const made = found ? I[found].made_by.filter((n) => R[n]) : [];
         const named = SLUGS.ricette.bySlug.get(params.get('ricetta') ?? '');
         return { tab: list, name: made.includes(named) ? named : (made[0] ?? null) };
@@ -350,7 +344,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     }
     /** The address of an entry of a tab (its first entry when `name` is null). */
     function hashOf(tab, name) {
-      const item = LISTS.includes(tab) && name ? madeItem(name) : null;
+      const item = tab === 'ricette' && name ? madeItem(name) : null;
       if (item) {
         const several = I[item].made_by.filter((n) => R[n]).length > 1;
         return `#oggetti/${SLUGS.oggetti.byName.get(item)}?lista=${tab}${several ? `&ricetta=${SLUGS.ricette.byName.get(name)}` : ''}`;
@@ -411,7 +405,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     }
     /**
      * A recipe's parts, for its own page (while its output is unknown) and for the page of
-     * the item it makes: its bubbles, notes, chain, and the owner's lines.
+     * the item it makes: its bubbles, notes, tree, and the owner's lines.
      */
     function recipeParts(name) {
       const r = R[name];
@@ -450,26 +444,14 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         : ingredients.length
           ? '<p class="note">Lista parziale: ricavata da /esamina sugli oggetti, quantità ignote.</p>'
           : `<p class="note">Vista solo nell'elenco di /ricetta. Usa /esamina ${esc(name)} per vederne gli ingredienti.</p>`;
-      const up = upstream(r),
-        down = downstream(r),
-        cand = candidates(r);
+      const cand = candidates(r);
       const out = r.output
         ? ''
         : `<p class="note">L'oggetto che si ottiene compare solo dopo aver eseguito la ricetta.</p>` +
           (cand.length
             ? `<details class="cand"><summary>${cand.length} oggetti L${r.level} senza ricetta nota: possibili candidati</summary>${chips(cand, itemLink)}</details>`
             : '');
-      const flow =
-        up.length || down.length
-          ? sec(
-              'Catena',
-              `<div class="flow">
-      <div class="col">${up.length ? up.map((n) => `<div class="box">${recipeLink(n)}</div>`).join('') : `<span class="empty">solo oggetti base</span>`}</div>
-      <span class="arrow">→</span><div class="me">${esc(name)}</div><span class="arrow">→</span>
-      <div class="col">${down.length ? down.map((n) => `<div class="box">${recipeLink(n)}</div>`).join('') : `<span class="empty">${r.output ? 'output non usato altrove' : '?'}</span>`}</div>
-    </div>`
-            )
-          : '';
+      const tree = recipeTree(name);
       const me = mineR(name);
       // As /esamina of the recipe would answer the owner: what they lack, what they have.
       const owned = ingredients.map(([n, q]) => {
@@ -496,7 +478,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         : me
           ? `${esc(name)}: eseguita ${me.crafted} ${me.crafted === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(me.last_crafted)}.`
           : `${esc(name)}: mai eseguita.`;
-      return { r, detailBubble, craftBubble, ingNote, out, flow, myLines, myNote };
+      return { r, detailBubble, craftBubble, ingNote, out, tree, myLines, myNote };
     }
     /** The fields a recipe card may give, by name. */
     const RECIPE_FIELDS = {
@@ -509,7 +491,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     /** A recipe's own page, while the item it makes is not known. */
     function recipeDetail(name) {
       if (!R[name]) return `<p class="empty">Seleziona una ricetta dall'elenco.</p>`;
-      const { r, detailBubble, craftBubble, ingNote, out, flow, myLines, myNote } =
+      const { r, detailBubble, craftBubble, ingNote, out, tree, myLines, myNote } =
         recipeParts(name);
       const personal = P ? myCard(myLines, [myNote]) : '';
       // The item it makes is part of the title: a recipe is the way to obtain it.
@@ -526,7 +508,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     ${ingNote}
     ${craftBubble}
     ${out}
-    ${flow}
+    ${tree}
     ${moreInfo(notesOf(r.channel))}
     ${sourcesLine(r, r.channel, RECIPE_FIELDS)}`
       );
@@ -885,7 +867,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       .map(
         ([n, p]) =>
           sec(`Ricetta · ${esc(n)} ${lvlTag(p.r)}`, (p.craftBubble || p.detailBubble) + p.ingNote) +
-          p.flow
+          p.tree
       )
       .join('')}
     ${i.use ? sec('Effetto di /usa', useHtml(i.use)) : ''}
@@ -1142,80 +1124,226 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
   </svg>`;
     }
 
-    // ---- chains graph: recipes linked when one's output is another's ingredient ----
-    function chainsSvg(sel) {
-      const linked = new Set(),
-        edges = [];
-      for (const r of Object.values(R))
-        for (const d of downstream(r)) {
-          edges.push([r.name, d]);
-          linked.add(r.name);
-          linked.add(d);
-        }
-      const levels = [...new Set([...linked].map(lvl))].sort((a, b) => a - b);
-      const cols = levels.map((lv) =>
-        [...linked].filter((n) => lvl(n) === lv).sort((a, b) => a.localeCompare(b, 'it'))
+    // ---- the tree of a recipe ------------------------------------------------------
+    // Everything a recipe takes, down to the items to find: each ingredient made by a
+    // recipe opens into that recipe's ingredients, and so on. An item that several of its
+    // recipes take is one node, with an edge from each, so the tree may be a graph: each
+    // node says how many times to craft it, or how many to find, in all, to make the
+    // recipe once (a craft gives one item).
+    /** The recipe to craft an item with, or null for an item to find (or of no known recipe). */
+    function recipeFor(n) {
+      const i = I[n];
+      // An item found in adventures is found, even if a recipe also makes it.
+      if (!i || i.sources.includes('adventure') || i.exclusive) return null;
+      const made = i.made_by.filter((r) => R[r]);
+      return (
+        made.find((r) => R[r].ingredients) ??
+        made.find((r) => R[r].partial_ingredients.length) ??
+        made[0] ??
+        null
       );
-      // barycentre ordering, a few sweeps
+    }
+    /** The level of an item a recipe makes, by its rarity (L2: 2, 0 if not given), else null. */
+    function craftedLevel(n) {
+      const r = I[n]?.rarity;
+      return r?.[0] === 'L' ? Number(r.slice(1)) || 0 : null;
+    }
+    /** The tree of a recipe, as a graph in columns, or '' when it takes only items to find. */
+    function recipeTree(name) {
+      const nodes = new Map();
+      // Depth first from the recipe, each item once; an item that leads back to itself
+      // (a cycle) is not followed again.
+      const visit = (key, recipe, path) => {
+        if (nodes.has(key)) return;
+        const node = { key, recipe, kids: [], parents: [], order: nodes.size };
+        nodes.set(key, node);
+        if (recipe)
+          for (const [n, q] of ingredientsOf(R[recipe])) {
+            const c = current(n);
+            if (path.includes(c) || node.kids.some(([k]) => k === c)) continue;
+            visit(c, recipeFor(c), [...path, c]);
+            node.kids.push([c, q]);
+          }
+        post.push(node);
+      };
+      const post = [];
+      const rootKey = madeItem(name) ?? '';
+      visit(rootKey, name, [rootKey]);
+      const top = nodes.get(rootKey);
+      const found = (n) => n !== top && !n.recipe && craftedLevel(n.key) === null;
+      if (top.kids.every(([k]) => found(nodes.get(k)))) return '';
+      // Parents before children; the counts flow down. An unknown quantity (a partial list
+      // of ingredients) makes unknown all that is below it.
+      const topo = post.reverse();
+      for (const n of nodes.values()) n.need = 0;
+      top.need = 1;
+      for (const n of topo)
+        for (const [k, q] of n.kids) {
+          const kid = nodes.get(k);
+          const add = n.need === null || q === null ? null : n.need * q;
+          kid.need = kid.need === null || add === null ? null : kid.need + add;
+          kid.parents.push([n.key, add]);
+        }
+      // Columns: a level each, from the recipe's on the left (an item of level k is N - k
+      // columns from it), always right of the recipes that take it, the items to find last.
+      const N = lvl(name);
+      const levelOf = (n) =>
+        (n.recipe ? lvl(n.recipe) : found(n) ? 0 : craftedLevel(n.key)) || null;
+      for (const n of topo) {
+        const after = Math.max(-1, ...n.parents.map(([p]) => nodes.get(p).col)) + 1;
+        const level = levelOf(n);
+        n.col = N && level !== null ? Math.max(after, N - level) : after;
+      }
+      const last = Math.max(0, ...topo.filter((n) => !found(n)).map((n) => n.col)) + 1;
+      for (const n of topo) if (found(n)) n.col = Math.max(n.col, last);
+      const cols = [];
+      for (const n of [...nodes.values()].sort((a, b) => a.order - b.order))
+        (cols[n.col] ??= []).push(n);
+      for (let c = 0; c < cols.length; c++) cols[c] ??= [];
+      // Fewer crossings: each column sorted a few times by where its parents are, then
+      // by where its children are.
       const pos = new Map();
-      const place = () => cols.forEach((c) => c.forEach((n, i) => pos.set(n, i)));
+      const place = () => cols.forEach((c) => c.forEach((n, i) => pos.set(n.key, i)));
+      const mean = (xs, own) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : own);
       place();
-      for (let s = 0; s < 6; s++) {
+      for (let s = 0; s < 4; s++) {
         for (const c of cols.slice(1)) {
-          c.sort((a, b) => bary(a, true) - bary(b, true));
+          c.sort(
+            (a, b) =>
+              mean(
+                a.parents.map(([p]) => pos.get(p)),
+                pos.get(a.key)
+              ) -
+              mean(
+                b.parents.map(([p]) => pos.get(p)),
+                pos.get(b.key)
+              )
+          );
           place();
         }
         for (const c of cols.slice(0, -1).reverse()) {
-          c.sort((a, b) => bary(a, false) - bary(b, false));
+          c.sort(
+            (a, b) =>
+              mean(
+                a.kids.map(([k]) => pos.get(k)),
+                pos.get(a.key)
+              ) -
+              mean(
+                b.kids.map(([k]) => pos.get(k)),
+                pos.get(b.key)
+              )
+          );
           place();
         }
       }
-      function bary(n, fromLeft) {
-        const nb = edges
-          .filter(([a, b]) => (fromLeft ? b === n : a === n))
-          .map(([a, b]) => pos.get(fromLeft ? a : b));
-        return nb.length ? nb.reduce((x, y) => x + y, 0) / nb.length : pos.get(n);
-      }
-      const colW = 250,
-        nodeW = 200,
-        rowH = 34,
-        top = 40;
-      const maxRows = Math.max(...cols.map((c) => c.length), 1);
-      const xy = new Map();
-      cols.forEach((c, ci) => {
-        const off = ((maxRows - c.length) * rowH) / 2;
-        c.forEach((n, ri) => xy.set(n, { x: 16 + ci * colW, y: top + off + ri * rowH }));
-      });
-      const Wd = 16 + cols.length * colW,
-        H = top + maxRows * rowH + 10;
-      const short = (s) => (s.length > 26 ? s.slice(0, 25) + '…' : s);
-      return {
-        count: linked.size,
-        edges: edges.length,
-        svg: `<svg viewBox="0 0 ${Wd} ${H}" width="${Wd}" height="${H}" role="img" aria-label="Catene di ricette">
-    ${levels.map((lv, ci) => `<text class="g-col" x="${16 + ci * colW}" y="20">LIVELLO ${lv || '?'}</text>`).join('')}
-    ${edges
-      .map(([a, b]) => {
-        const p = xy.get(a),
-          q = xy.get(b),
-          x1 = p.x + nodeW,
-          y1 = p.y + 13,
-          x2 = q.x,
-          y2 = q.y + 13,
-          mx = (x1 + x2) / 2;
-        return `<path class="g-edge" data-a="${esc(a)}" data-b="${esc(b)}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
-      })
-      .join('')}
-    ${[...linked]
-      .map((n) => {
-        const p = xy.get(n);
-        return `<g class="g-node${n === sel ? ' sel' : ''}" data-go="recipe" data-name="${esc(n)}" tabindex="0"><title>${esc(n)}${R[n]?.output ? ' → ' + esc(R[n].output) : ''}</title>
-      <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="26" rx="5"/>
-      <text x="${p.x + 8}" y="${p.y + 17}">${esc(short(n))}</text></g>`;
-      })
-      .join('')}
-  </svg>`,
+      // Each node is as wide as its text: the item's rarity (or the recipe's level), its
+      // name, and how many of it are needed when not one.
+      const ctx = document.createElement('canvas').getContext('2d');
+      const fonts = getComputedStyle(root);
+      const width = (t, font) => {
+        ctx.font = font;
+        return Math.ceil(ctx.measureText(t).width);
       };
+      const F = {
+        tag: `11px ${fonts.getPropertyValue('--font-mono')}`,
+        name: `12px ${fonts.getPropertyValue('--font-body')}`,
+        n: `600 12px ${fonts.getPropertyValue('--font-body')}`,
+      };
+      const short = (t) => (t.length > 24 ? t.slice(0, 23) + '…' : t);
+      for (const n of nodes.values()) {
+        const item = n.key ? I[n.key] : null;
+        n.tag = item ? `[${item.rarity || '?'}]` : R[name].level ? `[L${R[name].level}]` : '';
+        n.label = short(n.key || name);
+        n.count = n === top ? '' : n.need === null ? '×?' : n.need === 1 ? '' : `×${n.need}`;
+        n.w =
+          8 +
+          (n.tag ? width(n.tag, F.tag) + 6 : 0) +
+          width(n.label, F.name) +
+          (n.count ? 6 + width(n.count, F.n) : 0) +
+          10;
+      }
+      const rowH = 34,
+        nodeH = 26,
+        gap = 36,
+        head = 26;
+      const colW = cols.map((c) => Math.max(0, ...c.map((n) => n.w)));
+      const colX = colW.map((_, c) => 1 + colW.slice(0, c).reduce((a, w) => a + w + gap, 0));
+      const rows = Math.max(...cols.map((c) => c.length));
+      cols.forEach((c, ci) =>
+        c.forEach((n, ri) => {
+          n.x = colX[ci];
+          n.y = head + ((rows - c.length) * rowH) / 2 + ri * rowH;
+        })
+      );
+      const Wd = colX.at(-1) + colW.at(-1) + 1,
+        H = head + rows * rowH;
+      // Each column's heading: the level of its items, if they share one.
+      const heading = (c) => {
+        if (c.length && c.every(found)) return 'DA TROVARE';
+        const levels = new Set(c.map(levelOf));
+        const [k] = levels;
+        return levels.size === 1 && k ? `LIVELLO ${k}` : '';
+      };
+      const times = (k) => (k === null ? '? volte' : k === 1 ? 'una volta' : `${k} volte`);
+      const titleOf = (n) => {
+        if (n === top) return n.key ? `${n.key}, con la ricetta ${name}` : `Ricetta ${name}`;
+        const split =
+          n.parents.length > 1
+            ? ` (${n.parents.map(([p, k]) => `${k ?? '?'} per ${p || name}`).join(', ')})`
+            : '';
+        if (found(n)) return `${n.key}: da trovare ${n.need === null ? '?' : n.need}${split}`;
+        if (!n.recipe)
+          return `${n.key}: da craftare ${times(n.need)}, ricetta non ancora identificata${split}`;
+        const open = R[n.recipe].ingredients ? '' : ', ingredienti non ancora tutti noti';
+        return `${n.key}: da craftare ${times(n.need)} con la ricetta ${n.recipe}${open}${split}`;
+      };
+      const edges = topo.flatMap((n) =>
+        n.kids.map(([k]) => {
+          const kid = nodes.get(k),
+            x1 = n.x + n.w,
+            y1 = n.y + nodeH / 2,
+            x2 = kid.x,
+            y2 = kid.y + nodeH / 2,
+            mx = (x1 + x2) / 2;
+          return `<path class="g-edge" data-a="${esc(n.key)}" data-b="${esc(k)}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+        })
+      );
+      const svgNodes = topo.map((n) => {
+        // Where the tree stops before reaching items to find: dashed.
+        const open = n !== top && !found(n) && (!n.recipe || !R[n.recipe].ingredients);
+        const cls = ['g-node', n === top && 'root sel', found(n) && 'found', open && 'open']
+          .filter(Boolean)
+          .join(' ');
+        const go =
+          n !== top && I[n.key]
+            ? ` data-go="item" data-name="${esc(n.key)}" tabindex="0" role="button" aria-label="${esc(titleOf(n))}"`
+            : '';
+        const tagW = n.tag ? width(n.tag, F.tag) + 6 : 0;
+        return `<g class="${cls}" data-key="${esc(n.key)}"${go}><title>${esc(titleOf(n))}</title>
+      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${nodeH}" rx="5"/>
+      ${n.tag ? `<text class="lv" x="${n.x + 8}" y="${n.y + 17}">${esc(n.tag)}</text>` : ''}
+      <text x="${n.x + 8 + tagW}" y="${n.y + 17}">${esc(n.label)}</text>
+      ${n.count ? `<text class="n" x="${n.x + n.w - 10}" y="${n.y + 17}" text-anchor="end">${esc(n.count)}</text>` : ''}</g>`;
+      });
+      const partial = topo.some((n) => n.need === null);
+      const stops = topo.some(
+        (n) => n !== top && !found(n) && (!n.recipe || !R[n.recipe].ingredients)
+      );
+      const notes = [
+        `Per ${madeItem(name) ? `fare ${esc(madeItem(name))}` : 'eseguire la ricetta'} una volta: ogni oggetto, quante volte va craftato o, nell'ultima colonna, quanti vanno trovati. Tocca un oggetto per aprirlo.`,
+        stops
+          ? "Dove una ricetta, o parte dei suoi ingredienti, non è ancora nota (bordo tratteggiato), l'albero si ferma."
+          : '',
+        partial ? 'Con ×? la quantità non è ancora nota.' : '',
+      ].filter(Boolean);
+      return sec(
+        'Albero della ricetta',
+        `${notes.map((t) => `<p class="note">${t}</p>`).join('')}<div class="tree-box"><svg class="tree" viewBox="0 0 ${Wd} ${H}" width="${Wd}" height="${H}" role="img" aria-label="Albero della ricetta ${esc(name)}">
+    ${cols.map((c, ci) => `<text class="g-col" x="${colX[ci]}" y="14">${heading(c)}</text>`).join('')}
+    ${edges.join('')}
+    ${svgNodes.join('')}
+  </svg></div>`
+      );
     }
 
     // ---- view --------------------------------------------------------------------
@@ -1235,7 +1363,6 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ricette: recipeRows,
       oggetti: itemRows,
       luoghi: locRows,
-      catene: recipeRows,
     };
     function renderTabs(q) {
       root.querySelectorAll('#tabs button').forEach((b) => {
@@ -1281,24 +1408,15 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         detail = locDetail(shown);
         extra = `<div class="graphbox">${mapSvg(shown)}</div><div class="legend"><span>bordo tratteggiato: serve un oggetto per entrare</span>${P ? "<span>riempito d'oro: visitato da te</span>" : ''}<span>freccia: si va solo in quel verso</span>${Object.values(L).some((l) => l.secret) ? '<span>strada tratteggiata: porta a un luogo segreto, che compare tra le destinazioni solo a chi ha il suo oggetto</span>' : ''}</div>`;
       }
-      // The recipes again, in the graph of their chains: a recipe opens below it.
-      if (state.tab === 'catene') {
-        rows = recipeRows(q);
-        rowFn = recipeRow;
-        // The same recipes as Ricette, with the same filter: shown here too.
-        filters = filtersHtml('ricette', RECIPE_FILTERS);
-        const g = chainsSvg(state.sel.catene ?? rows[0]?.name);
-        detail = recipePage(state.sel.catene ?? rows[0]?.name);
-        extra = `<div class="section"><p class="note">${g.count} ricette collegate da ${g.edges} passaggi: una freccia va da una ricetta a quella che usa il suo output. Tocca una ricetta per aprirla. Le catene crescono man mano che si scoprono gli output.</p>
-      <div class="graphbox">${g.svg}</div></div>`;
-      }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
       $('#side-tools').innerHTML = filters;
       $('#list').innerHTML = list(rows, rowFn);
       v.innerHTML = `${extra}<section class="detail" aria-live="polite">${detail}</section>`;
-      v.querySelectorAll('.g-node[data-go="recipe"]').forEach((el) => {
+      // In a recipe's tree, an item's edges stand out while it is pointed at.
+      v.querySelectorAll('.tree .g-node').forEach((el) => {
         const hi = (on) =>
-          v
+          el
+            .closest('svg')
             .querySelectorAll('.g-edge')
             .forEach((e) =>
               e.classList.toggle(
@@ -1315,11 +1433,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     }
     function go(kind, name) {
       if (kind === 'item' && !I[name] && W.renames?.[name]) name = W.renames[name]; // old name of a renamed item
-      // A recipe opened from Catene stays there, in the graph.
-      const tab =
-        kind === 'recipe' && state.tab === 'catene'
-          ? 'catene'
-          : { recipe: 'ricette', item: 'oggetti', loc: 'luoghi' }[kind];
+      const tab = { recipe: 'ricette', item: 'oggetti', loc: 'luoghi' }[kind];
       state.sel[tab] = name;
       if (state.tab !== tab) {
         state.tab = tab;
@@ -1372,7 +1486,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       }
     });
     root.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.g-node')) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('.g-node[data-go]')) {
         e.preventDefault();
         go(e.target.dataset.go, e.target.dataset.name);
       }

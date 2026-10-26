@@ -707,45 +707,6 @@ h4 {
   align-items: baseline;
 }
 
-.flow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-}
-.flow .col {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
-.flow .arrow {
-  color: var(--muted);
-  font-family: var(--font-mono);
-}
-.flow .me {
-  font-weight: 500;
-  padding: 8px 10px;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  overflow-wrap: anywhere;
-}
-.flow .box {
-  font-size: 0.85rem;
-  padding: 6px 8px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-}
-@media (max-width: 520px) {
-  .flow {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .flow .arrow {
-    transform: rotate(90deg);
-    justify-self: center;
-  }
-}
-
 .graphbox {
   background: var(--surface);
   border-radius: var(--radius);
@@ -784,6 +745,37 @@ h4 {
 }
 .g-node:hover rect,
 .g-node.sel rect {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+/* The tree of a recipe (recipeTree): the recipe's item on the left, then what it takes,
+   column by column, down to the items to find. */
+.tree-box {
+  overflow-x: auto;
+}
+.tree-box svg {
+  display: block;
+}
+.g-node .n {
+  fill: var(--accent-ink);
+  font: 600 12px var(--font-body);
+}
+.tree .g-node.root {
+  cursor: default;
+}
+.tree .g-node.root rect {
+  fill: var(--accent-soft);
+}
+.tree .g-node.found rect {
+  fill: var(--bg);
+}
+.tree .g-node.open rect {
+  stroke-dasharray: 4 3;
+}
+.tree .g-node:focus {
+  outline: none;
+}
+.tree .g-node:focus-visible rect {
   stroke: var(--accent);
   stroke-width: 2;
 }

@@ -32,7 +32,8 @@ cartelle.
 
 Il gioco dimentica le ricette già eseguite e non dice cosa producono: qui ogni osservazione fatta in
 passato resta, così si può vedere a colpo d'occhio cosa produce una ricetta, quali ricette si
-contendono lo stesso ingrediente e quali catene portano agli oggetti di livello alto.
+contendono lo stesso ingrediente e, per un oggetto di livello alto, l'albero delle ricette che
+portano fin lì, con quante volte va craftato o trovato ogni oggetto.
 
 ## Limiti
 
