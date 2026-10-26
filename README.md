@@ -12,11 +12,14 @@ vuota: la pagina mostra la chat con il bot di un giocatore inventato, appena arr
 la wiki. Oggetti, ricette e luoghi sono quelli del gioco, limitati ai primi passi. L'esempio
 sparisce appena aggiungi una tua esportazione.
 
-1. In **Telegram Desktop** apri la chat con il bot, menu **⋮** → **Esporta cronologia chat**,
-   formato **HTML**; foto e altri allegati non servono.
-2. Apri la pagina, premi **Importa** in alto a destra, poi **Aggiungi esportazione**, e scegli la
+1. Manda `/esporta` al bot: risponde con un file che elenca tutto il tuo inventario. Non c'è bisogno
+   di scaricarlo.
+2. In **Telegram Desktop**, apri la chat con il bot, menu **⋮** → **Esporta cronologia chat**,
+   formato **HTML**. Seleziona **File**, perché l'esportazione contenga il file dell'inventario;
+   foto e altri allegati non servono.
+3. Apri la pagina, premi **Importa** in alto a destra, poi **Aggiungi esportazione**, e scegli la
    cartella creata dall'esportazione (o una cartella che ne contiene più d'una).
-3. Facoltativo: esporta allo stesso modo i tre canali enciclopedici che il bot indica in `/gruppi`
+4. Facoltativo: esporta allo stesso modo i tre canali enciclopedici che il bot indica in `/gruppi`
    (**La Cittadella dei Demiurghi**, **Il Grimorio del Golem**, **L'Atlante di Barbabeige**) e
    aggiungili: la wiki ne prende ricette, oggetti e luoghi. Le loro schede sono per lo più del 2017,
    e ciò che il bot ti ha mostrato dopo ha la precedenza; la pagina dice da quale scheda viene ogni
@@ -46,9 +49,10 @@ Elenca anche i tuoi Pakkomon, ognuno con la sua scheda, la sua storia e i suoi c
   possiedi metà degli ingredienti, e cosa produce solo dopo averla eseguita. I canali colmano molti
   vuoti, ma si fermano per lo più al 2017.
 - L'inventario è una stima: il bot tronca gli inventari lunghi, e quello che fai fuori dalle chat
-  esportate non si vede. La pagina dice quante volte la stima ha dato gli stessi ingredienti
-  mancanti che il bot indicava in `/ricetta`: se non è il 100%, qualcosa è successo fuori dalle chat
-  aggiunte.
+  esportate non si vede. Il file di `/esporta` invece elenca tutto: mandalo prima di ogni
+  esportazione e la stima riparte esatta da lì. La pagina dice quante volte la stima ha dato gli
+  stessi ingredienti mancanti che il bot indicava in `/ricetta`: se non è il 100%, qualcosa è
+  successo fuori dalle chat aggiunte.
 - Si leggono solo le esportazioni HTML di Telegram Desktop.
 
 ## No spoiler!!
