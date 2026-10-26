@@ -4,7 +4,10 @@
  * `npm run web:preview` serves the build. The tests run the TypeScript sources directly,
  * without Vite.
  */
+import { readFileSync } from 'node:fs';
 import { defineConfig, type Plugin } from 'vite';
+
+const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
 
 /**
  * The built page may load only its own files, and Google Fonts' stylesheet and font files,
@@ -39,8 +42,14 @@ function contentSecurityPolicy(): Plugin {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   root: 'src/web',
+  // The build of the page, with which the worker saves its results: those of another
+  // build are built again. A release's version; under the dev server, a new value at
+  // each start, as the code may have changed with the same version.
+  define: {
+    __BUILD__: JSON.stringify(command === 'build' ? version : `${version}+dev.${Date.now()}`),
+  },
   // Relative URLs: the page works from any folder, as GitHub Pages serves it under the
   // repository's name.
   base: './',
@@ -52,4 +61,4 @@ export default defineConfig({
   },
   worker: { format: 'es' },
   plugins: [contentSecurityPolicy()],
-});
+}));

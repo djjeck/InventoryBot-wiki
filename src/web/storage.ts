@@ -104,12 +104,17 @@ export interface SavedResults {
   savedAt: string;
   /** Hashes of the records the results were built from, in merge order. */
   sources: string[];
+  /** The build of the page that made them (openStore's `build`); absent before it was kept. */
+  build?: string;
   result: RunResult;
 }
 
 export interface LoadedResults {
   saved: SavedResults;
-  /** Whether `sources` are exactly the usable records, in upload order. */
+  /**
+   * Whether `sources` are exactly the usable records, in upload order, and the results
+   * were made by this build of the page: another build may read the records otherwise.
+   */
   current: boolean;
 }
 
@@ -213,8 +218,11 @@ interface Stores {
 const bySeq = (a: RecordInfo, b: RecordInfo): number => a.seq - b.seq;
 const isStale = (i: RecordInfo): boolean => i.formatVersion !== RECORD_FORMAT_VERSION;
 
-/** A store on `factory` (the page's or the worker's `indexedDB`; undefined: no storage). */
-export function openStore(factory: DatabaseFactory | undefined): Store {
+/**
+ * A store on `factory` (the page's or the worker's `indexedDB`; undefined: no storage),
+ * for the page's `build`: results saved by another build are not current.
+ */
+export function openStore(factory: DatabaseFactory | undefined, build = ''): Store {
   let available = factory !== undefined;
   /** The salt last read or stored, or the one of this visit when storage is unavailable. */
   let known: string | null = null;
@@ -364,14 +372,21 @@ export function openStore(factory: DatabaseFactory | undefined): Store {
         if (saved === undefined || !Array.isArray(saved.sources)) return null;
         const usable = (await entries(s)).filter((i) => !isStale(i)).map((i) => i.hash);
         const current =
-          usable.length === saved.sources.length && usable.every((h, i) => h === saved.sources[i]);
+          (saved.build ?? '') === build &&
+          usable.length === saved.sources.length &&
+          usable.every((h, i) => h === saved.sources[i]);
         return { saved, current };
       }, null),
 
     saveResults: (result, { sources, salt, now = new Date() }) =>
       run(async (s) => {
         if ((await storedSalt(s)) !== salt) return false;
-        const saved: SavedResults = { savedAt: now.toISOString(), sources: [...sources], result };
+        const saved: SavedResults = {
+          savedAt: now.toISOString(),
+          sources: [...sources],
+          build,
+          result,
+        };
         await settle(s.results.put(saved, RESULTS_KEY));
         return true;
       }, false),

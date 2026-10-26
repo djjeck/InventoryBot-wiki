@@ -22,7 +22,8 @@ const store = openStore(
     } catch {
       return undefined; // reading indexedDB itself can throw where storage is blocked
     }
-  })()
+  })(),
+  __BUILD__
 );
 const worker = startWorker(store, (m) => scope.postMessage(m));
 scope.onmessage = (e) => void worker.handle(e.data);

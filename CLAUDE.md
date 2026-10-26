@@ -240,8 +240,10 @@ DM the build stops, the records stay kept, and the panel shows a username field,
 offers nowhere else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the
 records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
 counts, in upload order, which is their merge order; the last results (wiki, player state, report,
-options) with the records they were built from, so a returning player sees their wiki at once and
-the worker rebuilds only if they are not current; and the salt of the pseudonyms and sender keys,
+options) with the records they were built from and the build of the page that made them
+(`__BUILD__`, from `vite.config.ts`: a release's version, a new value at each start of the dev
+server), so a returning player sees their wiki at once and the worker rebuilds only if they are not
+current, from other records or by another build; and the salt of the pseudonyms and sender keys,
 made once. A record is valid only with the salt that made it, so the three live in one database:
 without a salt the records and results are dropped, and a record or results made with another salt
 are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can

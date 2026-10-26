@@ -177,7 +177,7 @@ describe('openStore: results', () => {
     await store.addRecord(record('h1'), { salt: SALT });
     expect(await store.saveResults(RESULT, { sources: ['h1'], salt: SALT, now: NOW })).toBe(true);
     expect(await store.loadResults()).toStrictEqual({
-      saved: { savedAt: '2026-01-02T03:04:05.000Z', sources: ['h1'], result: RESULT },
+      saved: { savedAt: '2026-01-02T03:04:05.000Z', sources: ['h1'], build: '', result: RESULT },
       current: true,
     });
   });
@@ -198,6 +198,18 @@ describe('openStore: results', () => {
     info.formatVersion = RECORD_FORMAT_VERSION + 1;
     expect(await current(['h1', 'h2'])).toBe(false); // h2 is stale
     expect(await current(['h1'])).toBe(true);
+  });
+
+  it('results_of_another_build_of_the_page_are_not_current', async () => {
+    const fake = fakeIndexedDb();
+    const older = openStore(fake.factory, '0.9.0');
+    await older.salt(SALT);
+    await older.addRecord(record('h1'), { salt: SALT });
+    await older.saveResults(RESULT, { sources: ['h1'], salt: SALT });
+    expect((await older.loadResults())?.current).toBe(true);
+    const newer = openStore(fake.factory, '0.10.0');
+    // Shown at once, and built again.
+    expect(await newer.loadResults()).toMatchObject({ saved: { result: RESULT }, current: false });
   });
 
   it('results_from_no_records_are_current_without_records', async () => {
