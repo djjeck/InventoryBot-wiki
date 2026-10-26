@@ -1,9 +1,9 @@
 /**
  * The web app's page: the wiki, the only view, under a header whose "Importa" button
  * opens a modal panel below it with the owner whose wiki it is, the list of exports (each removed by its bin button),
- * how to export a chat, "Aggiungi esportazione", which opens the folder picker, "Prova con
- * un esempio" while no export is listed, the options and "Cancella i
- * miei dati"; the panel closes on Escape or on a click outside it. Each folder
+ * how to export a chat, "Aggiungi esportazione", which opens the folder picker, the
+ * options and "Cancella i miei dati"; the panel closes on Escape or on a click outside it.
+ * While no export is listed, the empty wiki offers "Prova con un esempio". Each folder
  * picked is sent at once to the worker, which reads it, keeps it and builds the wiki
  * again; a change of the options (the time zone, the username once a build asked for it)
  * builds again too. The saved wiki shows at once, and each build's wiki replaces it in
@@ -51,7 +51,7 @@ const ui = {
   folders: $<HTMLInputElement>('folders'),
   add: $<HTMLButtonElement>('add'),
   demo: $<HTMLButtonElement>('demo'),
-  demoHint: $('demo-hint'),
+  demoOffer: $('demo-offer'),
   demoView: $('demo-view'),
   demoTitle: $('demo-title'),
   demoChat: $<HTMLOListElement>('demo-chat'),
@@ -69,7 +69,6 @@ const ui = {
   accountMeta: $('account-meta'),
   accountEstimate: $('account-estimate'),
   exports: $<HTMLUListElement>('exports'),
-  exportsNone: $('exports-none'),
   form: $<HTMLFormElement>('options'),
   playerField: $('player-field'),
   player: $<HTMLInputElement>('player'),
@@ -270,8 +269,7 @@ function renderExports(): void {
       return li;
     })
   );
-  ui.exportsNone.hidden = exportList.length > 0;
-  ui.demo.hidden = ui.demoHint.hidden = exportList.length > 0;
+  ui.demoOffer.hidden = exportList.length > 0;
   updateDemo();
   ui.count.textContent = exportList.length ? String(exportList.length) : '';
   ui.toggle.setAttribute(
@@ -348,10 +346,7 @@ function closeDemo(): void {
   ui.main.focus({ preventScroll: true });
 }
 
-ui.demo.addEventListener('click', () => {
-  closePanel();
-  openDemo();
-});
+ui.demo.addEventListener('click', openDemo);
 ui.demoShow.addEventListener('click', openDemo);
 ui.demoBack.addEventListener('click', closeDemo);
 ui.demoBuild.addEventListener('click', () => {

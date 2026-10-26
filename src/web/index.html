@@ -62,9 +62,6 @@
               </div>
             </section>
             <ul id="exports" class="exports" aria-label="Esportazioni importate"></ul>
-            <p class="hint" id="exports-none">
-              Nessuna esportazione: aggiungine una con «Aggiungi esportazione».
-            </p>
             <input
               id="folders"
               class="visually-hidden"
@@ -75,20 +72,14 @@
               aria-hidden="true"
             />
             <p class="hint">
-              In <b>Telegram Desktop</b> apri la chat con il bot o un gruppo in cui si gioca, menu
-              <b>⋮</b> → <b>Esporta cronologia chat</b>, formato <b>HTML</b>, senza allegati; poi
-              aggiungi qui la cartella.
+              In <b>Telegram Desktop</b> apri la chat con il bot, menu <b>⋮</b> →
+              <b>Esporta cronologia chat</b>, formato <b>HTML</b>, senza allegati; poi aggiungi qui
+              la cartella. Se continui a giocare, poi puoi esportare solo gli ultimi giorni e
+              aggiungere la nuova esportazione.
             </p>
             <div class="row-actions">
               <button type="button" class="btn primary" id="add">Aggiungi esportazione</button>
-              <button type="button" class="btn" id="demo" aria-describedby="demo-hint">
-                Prova con un esempio
-              </button>
             </div>
-            <p class="hint" id="demo-hint">
-              Mostra la chat con il bot di un giocatore inventato, appena arrivato, e la wiki che se
-              ne ricava.
-            </p>
             <form id="options" class="options" novalidate>
               <div class="field" id="player-field" hidden>
                 <label for="player">Il tuo nome utente Telegram</label>
@@ -177,21 +168,16 @@
         <section id="empty" class="empty-state" aria-labelledby="empty-title">
           <h2 id="empty-title">La tua wiki è ancora vuota</h2>
           <p>
-            Premi <b>Importa</b>, qui in alto, poi <b>Aggiungi esportazione</b>, e scegli la
-            cartella di un’esportazione di Telegram Desktop: la wiki si crea da sola, e si aggiorna
-            a ogni esportazione che aggiungi o togli.
+            Premi <b>Importa</b>, qui in alto, e carica una esportazione della tua chat con
+            InventoryBot. La wiki si crea da sola, e si aggiorna a ogni nuova esportazione che
+            aggiungi.
           </p>
-          <p>
-            Per esportare, in <b>Telegram Desktop</b> apri la chat con il bot (o un gruppo in cui si
-            gioca), menu <b>⋮</b> → <b>Esporta cronologia chat</b>, formato <b>HTML</b>, senza foto
-            né altri allegati. Puoi aggiungere più cartelle, una alla volta, o una cartella che le
-            contiene tutte.
-          </p>
-          <p>
-            Vuoi prima vedere com’è? In <b>Importa</b> premi <b>Prova con un esempio</b>: la wiki di
-            un giocatore inventato, appena arrivato, con quello che si scopre nei primi giorni di
-            gioco.
-          </p>
+          <div class="demo-offer" id="demo-offer">
+            <p id="demo-hint">Vuoi prima vedere com’è?</p>
+            <button type="button" class="btn" id="demo" aria-describedby="demo-hint">
+              Prova con un esempio
+            </button>
+          </div>
           <p class="hint">
             Tutto avviene in questo browser: le chat non vengono inviate da nessuna parte.
           </p>

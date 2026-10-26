@@ -403,6 +403,14 @@ main:focus {
 .empty-state p {
   margin: 0;
 }
+.demo-offer {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.demo-offer[hidden] {
+  display: none;
+}
 .result-info {
   margin: 8px 0 0;
 }
