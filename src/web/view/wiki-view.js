@@ -831,14 +831,14 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         ? `<p class="makes">Si usa con: ${few(w.map(current), (n) => goLink('item', n))}</p>`
         : '';
     }
-    /** What an item is for, with Pakkomon; the one Pakkomon leads to the tab. */
+    /** What an item is for, with Pakkomon; the one Pakkomon leads to the owner's. */
     function pakkomonLine(i) {
       if (i.name === PAKKOMON)
         return pakkomonTab
-          ? `<p class="makes">Ogni Pakkomon è unico: ${goLink('pakkomon', GUIDE, 'come funzionano')} · ${goLink('pakkomon', MY_PK[0].name, 'i tuoi Pakkomon')}</p>`
+          ? `<p class="makes">Ogni Pakkomon è unico: ${goLink('pakkomon', MY_PK[0].name, 'i tuoi Pakkomon')}</p>`
           : '';
       return i.pakkomon_roles?.length
-        ? `<p class="makes">Per i Pakkomon: ${i.pakkomon_roles.map((r) => esc(ROLE_NAMES[r])).join(', ')}${pakkomonTab ? ` (${goLink('pakkomon', GUIDE, 'come funzionano')})` : ''}.</p>`
+        ? `<p class="makes">Per i Pakkomon: ${i.pakkomon_roles.map((r) => esc(ROLE_NAMES[r])).join(', ')}.</p>`
         : '';
     }
     function madeBy(i) {
