@@ -57,6 +57,11 @@ export interface Item {
   _fwd_date?: string | null;
   /** macOS export: the sender's (invented) Telegram user id, shown as its avatar file name. */
   _user_id?: number;
+  /**
+   * An attached file shown above the text (its caption): linked from `href`
+   * (`files/file.txt`), or, with a null `href`, left out of the export.
+   */
+  _file?: { href: string | null };
 }
 
 /** A day separator: `["day", "27 November 2025"]`. */
@@ -64,7 +69,7 @@ export type DayItem = readonly ['day', string];
 
 export type BuiltMessage = Omit<Message, 'date'> & { date: string } & Pick<
     Item,
-    '_joined' | '_reply_href' | '_fwd_date' | '_user_id'
+    '_joined' | '_reply_href' | '_fwd_date' | '_user_id' | '_file'
   >;
 
 interface AddOptions {
@@ -72,6 +77,8 @@ interface AddOptions {
   forwarded_from?: string;
   msg_id?: number;
   fwd_date?: string;
+  /** An attached file (Item._file): its link, or null for one left out of the export. */
+  file?: string | null;
 }
 
 /** A synthetic chat. Messages are phase-1 messages (`/cmd@Bot` as written). */
@@ -110,6 +117,7 @@ export class Chat {
       text,
     };
     m._fwd_date = o.fwd_date ?? null;
+    if (o.file !== undefined) m._file = { href: o.file };
     this.messages.push(m);
     return m;
   }
@@ -159,6 +167,19 @@ export function htmlEscape(s: string, quote = true): string {
   return r;
 }
 
+/** An attached file's block (docs/telegram-export.md §5.6): linked, or left out of the export. */
+function fileHtml(href: string | null): string {
+  const body =
+    '<div class="fill pull_left"></div><div class="body"><div class="title bold">file.txt</div>' +
+    (href === null
+      ? '<div class="description">Not included, change data exporting settings to download.</div>'
+      : '') +
+    '<div class="status details">14.7 KB</div></div>';
+  return href === null
+    ? `  <div class="media_wrap clearfix"><div class="media clearfix pull_left media_file">${body}</div></div>`
+    : `  <div class="media_wrap clearfix"><a class="media clearfix pull_left block_link media_file" href="${htmlEscape(href)}">${body}</a></div>`;
+}
+
 export function messageHtml(m: Item, joined: boolean): string {
   const text = m.text === null ? null : htmlEscape(m.text, false).replaceAll('\n', '<br>');
   const parts = [
@@ -199,6 +220,7 @@ export function messageHtml(m: Item, joined: boolean): string {
     parts.push(`   <div class="text">${text}</div>`);
     parts.push('  </div>');
   } else if (text !== null) {
+    if (m._file) parts.push(fileHtml(m._file.href));
     parts.push(`  <div class="text">${text}</div>`);
   } else {
     parts.push(
@@ -251,14 +273,22 @@ export function pageName(n: number): string {
   return n === 1 ? 'messages.html' : `messages${n}.html`;
 }
 
-/** Writes pages (lists of items) as messages.html, messages2.html, ... in folder. */
+/**
+ * Writes pages (lists of items) as messages.html, messages2.html, ... in folder, and
+ * `files`, other files of the export by path in it (`files/file.txt`).
+ */
 export function writeExport(
   folder: string,
   title: string,
   pages: readonly (readonly (Item | DayItem)[])[],
-  firstJoined?: ReadonlySet<number>
+  firstJoined?: ReadonlySet<number>,
+  files: Readonly<Record<string, string | Uint8Array>> = {}
 ): string {
   fs.mkdirSync(folder, { recursive: true });
+  for (const [name, content] of Object.entries(files)) {
+    fs.mkdirSync(path.dirname(path.join(folder, name)), { recursive: true });
+    fs.writeFileSync(path.join(folder, name), content);
+  }
   pages.forEach((items, i) => {
     const n = i + 1;
     fs.writeFileSync(

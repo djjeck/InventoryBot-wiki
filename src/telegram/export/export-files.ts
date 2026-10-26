@@ -1,6 +1,7 @@
 /**
  * Node adapter for phase 1 (export parsing): lists the entries of input folders on disk
- * and reads their pages; which entries are pages, and the warnings, are decided by
+ * and reads their pages and the text files they link to; which entries are pages, which
+ * files a page links to, and the warnings, are decided by
  * export-listing.ts. Folders only: zip input is not supported.
  *
  * Directory walks are depth-first, take the entries of every folder sorted by name (code
@@ -16,6 +17,7 @@ import {
   type ExportEntry,
   listExport,
   notAFolderWarning,
+  withTextFiles,
   zipWarning,
 } from './export-listing.ts';
 import { type ParseOptions, parsePages, type ParseResult, summaryLine } from './record.ts';
@@ -64,13 +66,16 @@ function readText(p: string): string {
   return decodeText(fs.readFileSync(p));
 }
 
-/** Every export page under a folder, in (folder, page number) order. */
+/** Every export page under a folder, in (folder, page number) order, with its text files. */
 export function* iterPages(path: string, log: Log): Generator<Page> {
   const p = normalizePath(path);
   if (isDir(p)) {
     const { pages, warnings } = listExport([...walkEntries(p)]);
     for (const w of warnings) log(w);
-    for (const f of pages) yield { label: f, html: readText(f) };
+    for (const f of pages)
+      yield withTextFiles({ label: f, html: readText(f) }, (t) =>
+        isFile(t) ? fs.readFileSync(t) : null
+      );
   } else if (isFile(p) && pathSuffix(p).toLowerCase() === '.zip') {
     log(zipWarning(p));
   } else {

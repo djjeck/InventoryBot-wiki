@@ -2,7 +2,8 @@
  * Browser adapter for phase 1 (export parsing): the files a folder picker gives
  * (`<input type="file" webkitdirectory>`, one `File` per file of the picked folder, its
  * path in `webkitRelativePath`) become input folders like the folders export-files.ts
- * reads on disk, and their pages are read. Which files are pages, and the warnings, are decided by
+ * reads on disk, and their pages are read, with the text files they link to. Which files
+ * are pages, which files a page links to, and the warnings, are decided by
  * export-listing.ts, as on disk.
  *
  * No DOM types: a file is anything with a relative path and its bytes (FileLike), so the
@@ -10,7 +11,13 @@
  */
 import { normalizePath } from '#src/lib/paths.ts';
 import { type Page } from '#src/telegram/messages.ts';
-import { decodeText, type ExportEntry, listExport } from './export-listing.ts';
+import {
+  decodeText,
+  type ExportEntry,
+  linkedTextFiles,
+  listExport,
+  withTextFiles,
+} from './export-listing.ts';
 
 /** What the adapter needs of a browser `File`. */
 export interface FileLike {
@@ -85,8 +92,9 @@ export function listFolder(folder: InputFolder): { pages: string[]; warnings: st
 }
 
 /**
- * Reads the pages of an input folder, in order, as export-files.ts reads them from disk
- * (decodeText); `onPage` is called after each page. Throws on a page that is not UTF-8.
+ * Reads the pages of an input folder, in order, with the text files they link to, as
+ * export-files.ts reads them from disk (decodeText, withTextFiles); `onPage` is called
+ * after each page. Throws on a page that is not UTF-8.
  */
 export async function readFolderPages(
   folder: InputFolder,
@@ -96,7 +104,13 @@ export async function readFolderPages(
   const out: Page[] = [];
   for (const label of pages) {
     const file = folder.files.get(label) as FileLike;
-    out.push({ label, html: decodeText(new Uint8Array(await file.arrayBuffer())) });
+    const html = decodeText(new Uint8Array(await file.arrayBuffer()));
+    const bytes = new Map<string, Uint8Array>();
+    for (const { path } of linkedTextFiles(label, html)) {
+      const f = folder.files.get(path);
+      if (f !== undefined) bytes.set(path, new Uint8Array(await f.arrayBuffer()));
+    }
+    out.push(withTextFiles({ label, html }, (p) => bytes.get(p) ?? null));
     onPage(label);
   }
   return out;

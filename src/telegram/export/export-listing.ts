@@ -1,17 +1,20 @@
 /**
  * Phase 1, the part of finding export pages that needs no file system: given every entry
  * under an input folder, which are Telegram pages and in which order, and which warnings
- * to print (JSON exports, zip files). Pure functions, no Node or browser APIs; the
- * adapters list the entries (export-files.ts on disk, browser-files.ts for the files a
- * browser folder picker gives) and read the pages.
+ * to print (JSON exports, zip files); given a page, which text files it links to as
+ * attachments. Pure functions, no Node or browser APIs; the adapters list the entries
+ * (export-files.ts on disk, browser-files.ts for the files a browser folder picker gives)
+ * and read the pages and their text files.
  *
  * The order of the pages and of the warnings is that of a depth-first walk with the
  * entries of every folder sorted by name (comparePaths): a folder before its subfolders,
  * siblings by name. It decides the output, so it is the same on every OS, file system and
  * browser.
  */
-import { comparePaths, pathName, pathParent } from '#src/lib/paths.ts';
-import { PAGE, pageKey } from './parse-export.ts';
+import { comparePaths, normalizePath, pathName, pathParent } from '#src/lib/paths.ts';
+import { type Page } from '#src/telegram/messages.ts';
+import { feedHtml } from './html-events.ts';
+import { MEDIA_FILE, PAGE, pageKey } from './parse-export.ts';
 
 /** One entry (file, folder or anything else) under an input folder. */
 export interface ExportEntry {
@@ -85,4 +88,48 @@ export function listExport(entries: readonly ExportEntry[]): ExportListing {
     .sort((a, b) => comparePaths(a.parent, b.parent) || a.page - b.page)
     .map(({ p }) => p);
   return { pages, warnings };
+}
+
+/** A link to a text file attached to a message, as Telegram writes it: `files/file (1).txt`. */
+const TEXT_FILE_LINK = /^files\/[^/]+\.txt$/iu;
+
+/**
+ * The text files a page links to as attachments (`a.media_file` whose `href` is
+ * `files/<name>.txt`), in page order and once each: the link as written, and the path of
+ * the file beside the page (`<page folder>/files/<name>.txt`). An adapter reads those
+ * that the export holds into Page.files.
+ */
+export function linkedTextFiles(label: string, html: string): { link: string; path: string }[] {
+  if (!html.includes('media_file')) return [];
+  const links = new Set<string>();
+  feedHtml(html, {
+    starttag(tag, attrs) {
+      const href = attrs.get('href');
+      if (tag === 'a' && MEDIA_FILE.test(attrs.get('class') ?? '') && href)
+        if (TEXT_FILE_LINK.test(href)) links.add(href);
+    },
+    startendtag() {},
+    endtag() {},
+    data() {},
+  });
+  const folder = pathParent(label);
+  return [...links].map((link) => ({ link, path: normalizePath(`${folder}/${link}`) }));
+}
+
+/**
+ * A page with the linked text files that `read` gives (null for one the export does not
+ * hold). A file that is not UTF-8 is left out, like one the export does not hold.
+ */
+export function withTextFiles(page: Page, read: (path: string) => Uint8Array | null): Page {
+  const files = new Map<string, string>();
+  for (const { link, path } of linkedTextFiles(page.label, page.html)) {
+    const bytes = read(path);
+    if (bytes === null) continue;
+    try {
+      files.set(link, decodeText(bytes));
+    } catch {
+      // Not UTF-8: not a file the pipeline reads.
+    }
+  }
+  return files.size === 0 ? page : { ...page, files };
 }

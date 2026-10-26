@@ -1,7 +1,8 @@
 # Telegram Desktop HTML chat export
 
-Documented as of 2026-10-17 (Telegram Desktop); [§11](#11-the-macos-export) as of 2026-10-18. If the
-export format changes, update this document.
+Documented as of 2026-10-17 (Telegram Desktop); [§11](#11-the-macos-export) as of 2026-10-18;
+attached files ([§5.6](#56-media-placeholders)) as of 2026-10-26. If the export format changes,
+update this document.
 
 This is the input of phase 1 of the pipeline, export parsing
 ([`src/telegram/export/parse-export.ts`](../src/telegram/export/parse-export.ts), with
@@ -58,7 +59,8 @@ the format.
 - **Format**: HTML or machine-readable JSON (or both). HTML writes `messages*.html` pages; JSON
   writes a single `result.json`. Only HTML is supported; a JSON-only export is reported and skipped.
 - **Media** can all be deselected. Media messages then still appear in the HTML as placeholders
-  ([§5.6](#56-media-placeholders)).
+  ([§5.6](#56-media-placeholders)). With _Files_ selected, attached files are copied into the export
+  and linked from their messages.
 - **Date range**: an export can cover part of the history, so two exports of the same chat may
   overlap or leave a gap.
 
@@ -73,6 +75,7 @@ ChatExport_2025-11-28/       one export = one folder
   css/style.css              viewer assets
   js/script.js               viewer JS (GoToMessage, ShowBotCommand, ShowSpoiler, ...)
   images/                    UI icons only
+  files/                     attached files, with Files selected: file.txt, file (1).txt, ...
 ```
 
 - The folder is named `ChatExport_YYYY-MM-DD` after the export date. It carries no information about
@@ -84,7 +87,9 @@ ChatExport_2025-11-28/       one export = one folder
 - Every page but the last holds 1000 history entries (messages and service events; day separators
   are extra).
 - Pages are UTF-8 (`<meta charset="utf-8"/>`).
-- With media deselected there are no media folders.
+- With media deselected there are no media folders. With _Files_ selected, `files/` holds the
+  attached files under their own names, those after the first of a name numbered before the
+  extension: `file.txt`, `file (1).txt`, `file (2).txt`.
 
 ## 3. Page skeleton
 
@@ -330,8 +335,42 @@ stripped. A `div.text` is never empty.
 | `block_link media_location`, `media_live_location`, `media_venue`, `media_game` |                                            |
 | `media_poll` (with `question bold`, `answer`, `details`, `total details`)       |                                            |
 
-A captioned media message has a `div.text` after the `media_wrap`. The bot sends no media. A media
-block contains its own `div.body` and `div.title bold`.
+A captioned media message has a `div.text` after the `media_wrap`. A media block contains its own
+`div.body` and `div.title bold`.
+
+An **attached file** (`media_file`) has the file's name as its `title bold` and its size as its
+`status details`. Left out of the export, it is a `div` whose `description` says so; included, the
+block is a link to the file, with no `description`:
+
+```html
+<div class="media_wrap clearfix">
+  <div class="media clearfix pull_left media_file">
+    <div class="fill pull_left"></div>
+    <div class="body">
+      <div class="title bold">file.txt</div>
+      <div class="description">Not included, change data exporting settings to download.</div>
+      <div class="status details">14.7 KB</div>
+    </div>
+  </div>
+</div>
+```
+
+```html
+<div class="media_wrap clearfix">
+  <a class="media clearfix pull_left block_link media_file" href="files/file (1).txt">
+    <div class="fill pull_left"></div>
+    <div class="body">
+      <div class="title bold">file.txt</div>
+      <div class="status details">14.8 KB</div>
+    </div>
+  </a>
+</div>
+```
+
+The `href` is the path of the file in the export, relative to the page, as written on disk (spaces
+included, not percent-encoded); the title keeps the name the file was sent with, so only the link
+tells two files of one name apart. The bot's one kind of media is a text file with a caption
+([`bot-protocol.md`](bot-protocol.md) §6.8).
 
 ### 5.7 Other blocks
 
@@ -415,31 +454,33 @@ block contains its own `div.body` and `div.title bold`.
 | `div.reply_to` → `<a href=…go_to_message(-?\d+)>`                      | `ExportParser.starttag`                                                                                              | `reply_to`, negative ids included.                                                                                                                                                                                                                                                      |
 | `div.forwarded body` → `div.from_name` (its `date` span skipped)       | `ExportParser.starttag`, `endtag`, `flush`                                                                           | `forwarded_from` (trailing `via @bot` removed); a joined forward without it takes the previous forward's.                                                                                                                                                                               |
 | `div.text` (`<br>` → `\n`, entities decoded, tags dropped)             | `ExportParser.starttag`, `startendtag`, `data`, `endtag`                                                             | `text`; messages without it are not emitted but still set the sender.                                                                                                                                                                                                                   |
+| `a.media_file` whose `href` is `files/<name>.txt`                      | [`linkedTextFiles`](../src/telegram/export/export-listing.ts), `withTextFiles`, `ExportParser.starttag`, `flush`     | `file_text`: the content of the file beside the page, read like a page (UTF-8, line ends as `\n`); nothing for a file the export does not hold or that is not UTF-8.                                                                                                                    |
 | Original author (`forwarded_from`, else `sender`)                      | `ExportParser.flush`                                                                                                 | `from_bot` = author stripped equals the bot's name, `InventoryBot`.                                                                                                                                                                                                                     |
-| (chat, id)                                                             | `mergeExports`                                                                                                       | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` is kept.                                                                                                                           |
+| (chat, id)                                                             | `mergeExports`                                                                                                       | De-duplication; the copy read last wins, but a date converted from a macOS export gives way to one written with its offset, and a known `sender_key` and `file_text` are kept.                                                                                                          |
 | Date title                                                             | [`parseWindowsDate`](../src/lib/dates.ts), [`sortMessages`](../src/telegram/export/parse-export.ts)                  | Output sorted by instant, then chat, then id; a date not in the exact form of [§5.1](#51-date) counts as missing, and an undated message takes its chat neighbour's instant (by id).                                                                                                    |
 
-Media, reactions, inline keyboards, avatars (except the macOS sender id), pagination links and
-service entries are ignored. A leading `/cmd@BotName` is kept as written; phase 2, the conversation,
-resolves it ([`resolveCommand`](../src/telegram/conversation/commands.ts)). Output: one `Message`
+Media (except attached text files), reactions, inline keyboards, avatars (except the macOS sender
+id), pagination links and service entries are ignored. A leading `/cmd@BotName` is kept as written;
+phase 2, the conversation, resolves it
+([`resolveCommand`](../src/telegram/conversation/commands.ts)). Output: one `Message`
 ([`src/telegram/messages.ts`](../src/telegram/messages.ts)) per message, kept in memory, with keys
 `chat`, `dm`, `id`, `date`, `from_bot`, `sender`, `forwarded_from`, `reply_to`, `text`, then
-`sender_key` when applicable.
+`file_text` and `sender_key` when applicable.
 
 Each export is parsed once, into an `ExportRecord`
 ([`readExport`](../src/telegram/export/record.ts)): plain JSON data that can be kept and merged
 again with other records without reading the pages again. A record holds the export's folder, a
-SHA-256 of its pages (file names and HTML), its page and message counts, its chat titles, its first
-and last date, and its messages in page order. The bot's messages, the commands for the bot (not
-forwarded) and the posts of the channels that publish about the bot are kept in full; every other
-message (ordinary chat, commands for other bots, forwarded commands) only as a stub of chat, id,
-date, display name and `sender_key`, the parts of it that the conversation phase reads. Dates stay
-as written, since the offset of a macOS date depends on the other exports of the run
-([§11.3](#113-dates-without-an-offset)). Merging the records of a run
-([`mergeExports`](../src/telegram/export/record.ts)) converts the dates, de-duplicates and sorts as
-above, and turns each stub into a message with an empty text; the result is the same as from the
-whole chat. A record's shape has a version (`formatVersion`): a record of another version is read
-again from its pages.
+SHA-256 of its pages (file names and HTML, and the text files they link to), its page and message
+counts, its chat titles, its first and last date, and its messages in page order. The bot's
+messages, the commands for the bot (not forwarded) and the posts of the channels that publish about
+the bot are kept in full, with their `file_text`; every other message (ordinary chat, commands for
+other bots, forwarded commands) only as a stub of chat, id, date, display name and `sender_key`, the
+parts of it that the conversation phase reads. Dates stay as written, since the offset of a macOS
+date depends on the other exports of the run ([§11.3](#113-dates-without-an-offset)). Merging the
+records of a run ([`mergeExports`](../src/telegram/export/record.ts)) converts the dates,
+de-duplicates and sorts as above, and turns each stub into a message with an empty text; the result
+is the same as from the whole chat. A record's shape has a version (`formatVersion`): a record of
+another version is read again from its pages.
 
 ## 10. Annotated sample page
 
@@ -732,5 +773,5 @@ phase 2 carries a sender.
 - Whether day-separator month names and fixed strings (`In reply to`, `Previous messages`) depend on
   the app language.
 - How `userpicN` is chosen.
-- The layout of media folders when media are included.
+- The layout of media folders other than `files/` when media are included.
 - Markup of features not covered here (forum topics, channel signatures, stories).

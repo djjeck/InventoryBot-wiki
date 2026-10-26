@@ -113,6 +113,24 @@ describe('readExport', () => {
     expect(renamed.hash).not.toBe(a.hash);
   });
 
+  it('keeps_a_message_s_file_text_and_hashes_the_files', async () => {
+    const dm = new Chat(BOT, 10);
+    dm.bot('Inventario di @djjeck, al 2025/11/28 00:00:00', 0, { file: 'files/file.txt' });
+    const html = pageHtml(BOT, dm.messages);
+    const plain = await readExport([page('E/messages.html', html)], READ);
+    const withFile = {
+      ...page('E/messages.html', html),
+      files: new Map([['files/file.txt', 'x']]),
+    };
+    const r = await readExport([withFile], READ);
+    expect(r.entries.map((e) => (e as Message).file_text)).toStrictEqual(['x']);
+    expect(plain.entries.map((e) => (e as Message).file_text)).toStrictEqual([undefined]);
+    expect(r.hash).not.toBe(plain.hash);
+    expect(await exportHash([withFile])).toBe(r.hash);
+    const other = { ...withFile, files: new Map([['files/file.txt', 'y']]) };
+    expect((await readExport([other], READ)).hash).not.toBe(r.hash);
+  });
+
   it('export_hash_is_the_record_hash_without_parsing', async () => {
     const pages = [
       page('A/messages.html', pageHtml('G', group().messages)),
@@ -175,6 +193,20 @@ describe('mergeExports', () => {
     expect(r.warnings).toStrictEqual([
       'M: date senza fuso orario, lette nel fuso orario America/New_York',
     ]);
+  });
+
+  it('a_copy_without_its_file_keeps_the_file_text_of_another', async () => {
+    const dm = new Chat(BOT, 10);
+    dm.bot('Inventario di @djjeck, al 2025/11/28 00:00:00', 0, { file: 'files/file.txt' });
+    const html = pageHtml(BOT, dm.messages);
+    const files = new Map([['files/file.txt', 'x']]);
+    const withFile = await readExport([{ ...page('A/messages.html', html), files }], READ);
+    const without = await readExport([page('B/messages.html', html)], READ);
+    for (const records of [
+      [withFile, without],
+      [without, withFile],
+    ])
+      expect(mergeExports(records, MERGE).messages.map((m) => m.file_text)).toStrictEqual(['x']);
   });
 
   it('parse_pages_is_read_then_merge', async () => {

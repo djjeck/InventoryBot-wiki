@@ -6,8 +6,8 @@
  * APIs; the hashes are the platform's Web Crypto (`crypto.subtle`, in browsers, workers
  * and Node), which is asynchronous, so readExport() is too. The merge is synchronous.
  *
- * A record keeps in full only what phase 2 reads the text of: the bot's messages and the
- * commands for the bot (not forwarded). Every other message (ordinary chat, commands for
+ * A record keeps in full only what phase 2 reads the text of: the bot's messages (with
+ * the text file one has attached, file_text) and the commands for the bot (not forwarded). Every other message (ordinary chat, commands for
  * other bots, forwarded commands) keeps no text, only what phase 2 still reads of it: its
  * chat, id, date, display name and sender key. The merge gives such a message an empty
  * text, so that phases 2 to 5 give the same results as with the whole chat.
@@ -109,12 +109,19 @@ function concat(parts: readonly Uint8Array[]): Uint8Array<ArrayBuffer> {
   return out;
 }
 
-/** The bytes of a page that its export's hash covers: its file name, length and HTML. */
+/**
+ * The bytes of a page that its export's hash covers: its file name, length and HTML, then
+ * each of its text files (Page.files), by link: an export read again with its files is
+ * another export.
+ */
 function hashedBytes(page: Page): Uint8Array[] {
-  return [
+  const out = [
     encoder.encode(`${pathName(page.label)}\n${page.html.length}\n`),
     encoder.encode(page.html),
   ];
+  for (const [link, text] of [...(page.files ?? [])].sort((a, b) => compareCodePoints(a[0], b[0])))
+    out.push(encoder.encode(`${link}\n${text.length}\n`), encoder.encode(text));
+  return out;
 }
 
 /**
@@ -202,7 +209,7 @@ export async function readExport(
     hashed.push(...hashedBytes(page));
     // Pages of one export are consecutive: carry the sender across page breaks.
     const p: ExportParser = new ExportParser(options.bot, lastSender, lastSenderId);
-    p.feed(page.html);
+    p.feed(page.html, page.files);
     p.close();
     lastSender = p.lastSender;
     lastSenderId = p.lastSenderId;
@@ -267,8 +274,8 @@ export interface MergeOptions {
 export interface ParseResult {
   /**
    * De-duplicated by (chat, id), the copy read last winning, except that a date read with
-   * its UTC offset is kept over one converted from a macOS export and a known sender key
-   * is kept; sorted by sortKey. A stub's message has an empty text and no forward or reply.
+   * its UTC offset is kept over one converted from a macOS export, and a known sender key
+   * and a known file text are kept; sorted by sortKey. A stub's message has an empty text and no forward or reply.
    */
   messages: Message[];
   /** Number of exports (records). */
@@ -334,6 +341,9 @@ export function mergeExports(records: readonly ExportRecord[], options: MergeOpt
       }
       if (m.sender_key === undefined && prev.m.sender_key !== undefined)
         m.sender_key = prev.m.sender_key;
+      // An export made without its files keeps no file text: another copy's is the message's.
+      if (m.file_text === undefined && prev.m.file_text !== undefined)
+        m.file_text = prev.m.file_text;
     }
     byKey.set(k, { m, local });
   }

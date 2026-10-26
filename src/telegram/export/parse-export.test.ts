@@ -325,6 +325,68 @@ describe('discovery', () => {
   );
 });
 
+describe('attached text files', () => {
+  const caption = 'Inventario di @djjeck, al 2025/11/28 00:00:02';
+  const dm = (file: string | null): Chat => {
+    const c = new Chat();
+    c.user('Daniele', '/esporta', 0);
+    c.bot(caption, 2, { file });
+    return c;
+  };
+
+  it('a_message_takes_the_text_of_the_file_it_links_to', () => {
+    const p = new ExportParser(BOT_IDENTITY);
+    p.feed(
+      pageHtml(BOT, dm('files/file (1).txt').messages),
+      new Map([['files/file (1).txt', 'x']])
+    );
+    p.close();
+    expect(p.messages.map((m) => [m.text, m.file_text])).toStrictEqual([
+      ['/esporta', undefined],
+      [caption, 'x'],
+    ]);
+  });
+
+  it('a_file_left_out_or_not_given_adds_nothing', () => {
+    for (const [file, files] of [
+      [null, new Map([['files/file.txt', 'x']])],
+      ['files/file.txt', new Map<string, string>()],
+    ] as const) {
+      const p = new ExportParser(BOT_IDENTITY);
+      p.feed(pageHtml(BOT, dm(file).messages), files);
+      p.close();
+      expect(p.messages[1]).toStrictEqual(dm(file).clean()[1]);
+      expect(p.messages[1]).not.toHaveProperty('file_text');
+    }
+  });
+
+  it('the_disk_adapter_reads_the_linked_text_files', async () => {
+    const dir = tempDir();
+    const c = dm('files/file.txt');
+    c.bot(caption, 4, { file: 'files/file (1).txt' });
+    c.bot(caption, 6, { file: 'files/missing.txt' });
+    c.bot(caption, 8, { file: 'files/latin1.txt' });
+    const folder = writeExport(path.join(dir, 'E'), BOT, [c.messages], undefined, {
+      'files/file.txt': 'riga 1\r\n',
+      'files/file (1).txt': 'riga 2\r\n',
+      'files/latin1.txt': new Uint8Array([0xe8]),
+    });
+    const { msgs } = await runParse([folder]);
+    expect(msgs.map((m) => m.file_text)).toStrictEqual([
+      undefined,
+      'riga 1\n',
+      'riga 2\n',
+      undefined,
+      undefined,
+    ]);
+    const [page] = [...iterPages(folder, () => {})];
+    expect([...(page?.files?.keys() ?? [])]).toStrictEqual([
+      'files/file.txt',
+      'files/file (1).txt',
+    ]);
+  });
+});
+
 describe('JSON exports', () => {
   it('json_export_folder_warned_and_skipped', async () => {
     const dir = tempDir();

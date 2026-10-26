@@ -31,6 +31,12 @@ export interface Message {
   /** Visible text: `<br>` as `\n`, entities decoded, tags dropped, stripped; `/cmd@Bot` as written. */
   text: string;
   /**
+   * Present only for a message with a text file attached that the export holds (`files/*.txt`,
+   * docs/telegram-export.md §5.6): the file's content, read like a page (decodeText). The
+   * text above is the file's caption.
+   */
+  file_text?: string;
+  /**
    * Present only when the export identifies the sender (macOS export avatars): an opaque
    * key, a salted hash of the user id (senderKey, telegram/export/record.ts), the same for
    * one user in every export and run with the same salt. Never the Telegram user id
@@ -44,4 +50,9 @@ export interface Page {
   /** Path of the page file: `path/to/messagesN.html`. */
   label: string;
   html: string;
+  /**
+   * The text files the page links to as attachments that the export holds (linkedTextFiles,
+   * export-listing.ts): link as written (`files/file (1).txt`) -> content. Absent for none.
+   */
+  files?: ReadonlyMap<string, string>;
 }

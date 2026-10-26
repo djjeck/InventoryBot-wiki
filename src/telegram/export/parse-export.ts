@@ -42,6 +42,8 @@ const PAGE_KEY = /messages((?:[2-9]|[1-9][0-9]+)?)\.html(?=\n?$)/u;
 const GO_TO_MESSAGE = /go_to_message(-?\p{Nd}+)/u;
 /** `Mario Rossi via @gif`: a message sent through an inline bot; the suffix is not part of the name. */
 const VIA_BOT = new RegExp(`${WS_CLASS}+via${WS_CLASS}+@${WORD_CLASS}+$`, 'u');
+/** The class of a message's attached file, linked or not (docs/telegram-export.md §5.6). */
+export const MEDIA_FILE = /(?:^|\s)media_file(?:\s|$)/u;
 /** macOS export avatar: `photos/author_<numeric Telegram user id>.jpg`. */
 const AUTHOR_PHOTO = /(?:^|\/)author_(-?[0-9]+)\.[A-Za-z0-9]+$/u;
 
@@ -58,13 +60,16 @@ interface Current {
   forwarded?: boolean;
   /** Telegram user id from the sender's avatar file (macOS export). Never output. */
   authorId?: string;
+  /** Link of the attached file (`a.media_file`), as written. */
+  file?: string;
 }
 
 /**
  * Extracts messages from one messagesN.html page.
  *
- * Per message: id, timestamp, sender, text, the id it replies to and, for
- * forwarded messages, the original author (the inner from_name). The state machine
+ * Per message: id, timestamp, sender, text, the id it replies to, for forwarded
+ * messages the original author (the inner from_name), and the content of an attached
+ * text file that the export holds (the files given to feed). The state machine
  * also handles the markup's irregular cases: joined messages and joined forwards, which
  * inherit their sender or original author; a trailing `via @bot` in a name; negative ids
  * in reply links; and service entries (day separators, pins), which close the current
@@ -116,7 +121,12 @@ export class ExportParser implements HtmlEvents {
     this.lastSenderId = lastSenderId;
   }
 
-  feed(html: string): void {
+  /** The text files of the page being fed, by link (Page.files). */
+  private files: ReadonlyMap<string, string> = new Map();
+
+  /** Feeds one page, with the text files it links to that the export holds (Page.files). */
+  feed(html: string, files: ReadonlyMap<string, string> = new Map()): void {
+    this.files = files;
     feedHtml(html, this);
   }
 
@@ -169,6 +179,7 @@ export class ExportParser implements HtmlEvents {
       this.skipSpan++;
       return;
     }
+    if (tag === 'a' && MEDIA_FILE.test(cls) && a.get('href')) cur.file = a.get('href') as string;
     if (tag === 'a' && cur.ctx.includes('reply_to')) {
       const m = GO_TO_MESSAGE.exec(a.get('href') || '');
       if (m) cur.reply_to = parseDecimalInt(m[1] as string);
@@ -274,6 +285,8 @@ export class ExportParser implements HtmlEvents {
         reply_to: cur.reply_to ?? null,
         text: cur.text,
       };
+      const fileText = cur.file === undefined ? undefined : this.files.get(cur.file);
+      if (fileText !== undefined) m.file_text = fileText;
       this.messages.push(m);
       if (senderId !== null) this.authorIds.set(m, senderId);
     }

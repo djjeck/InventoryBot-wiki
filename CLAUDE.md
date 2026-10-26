@@ -83,7 +83,8 @@ order:
 1. **Export parsing** (`src/telegram/export/`): Telegram Desktop HTML export pages become `Message`s
    (`src/telegram/messages.ts`), in two steps, so that each export is parsed once. `readExport`
    (`record.ts`) reads the pages of one export into an `ExportRecord`, plain JSON data that can be
-   kept: the bot's messages, the commands for the bot and the posts of the bot's channels
+   kept: the bot's messages (with the text file one has attached, when the export holds it,
+   `file_text`), the commands for the bot and the posts of the bot's channels
    (`BotIdentity.channels`) in full, every other message as a stub without text (chat, id, date,
    display name, sender key), which is all phase 2 reads of it, plus the export's metadata (folder,
    a SHA-256 of the pages, counts, chats, first and last date) and a `formatVersion`. `mergeExports`
@@ -93,9 +94,10 @@ order:
    export's Telegram user ids become sender keys there and nowhere else: a salted SHA-256 of the id
    (`senderKey`), with the pseudonyms' salt, so a person has the same key in every record and every
    run, and nobody without the salt can work back to the id. `parsePages` is the two steps in a row.
-   All of it is pure and takes the pages as strings. Which files of an export folder are pages is
-   decided by `export-listing.ts`, also pure; two adapters list and read them: `browser-files.ts`
-   for the files of a browser folder picker, `export-files.ts` on disk (used by the tests).
+   All of it is pure and takes the pages as strings. Which files of an export folder are pages, and
+   which text files a page links to, is decided by `export-listing.ts`, also pure; two adapters list
+   and read them: `browser-files.ts` for the files of a browser folder picker, `export-files.ts` on
+   disk (used by the tests).
 
 2. **Conversation** (`src/telegram/conversation/`, `readConversation`): the messages become the
    bot's replies, each paired with the command it answers and the player it concerns. In the DM a

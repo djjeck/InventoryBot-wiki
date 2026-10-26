@@ -51,4 +51,15 @@ describe('readFolderPages', () => {
     ]);
     expect(read).toStrictEqual(['E/messages.html', 'E/messages2.html']);
   });
+
+  it('reads_the_text_files_a_page_links_to', async () => {
+    const html = '<a class="media media_file" href="files/file (1).txt">f</a>';
+    const [folder] = inputFolders([
+      [fileLike('E/messages.html', html), fileLike('E/files/file (1).txt', '3x\r\n')],
+    ]);
+    if (folder === undefined) throw new Error('no folder');
+    expect(await readFolderPages(folder, listFolder(folder).pages)).toStrictEqual([
+      { label: 'E/messages.html', html, files: new Map([['files/file (1).txt', '3x\n']]) },
+    ]);
+  });
 });
