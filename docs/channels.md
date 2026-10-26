@@ -1,6 +1,7 @@
 # InventoryBot's encyclopedia channels
 
-Documented as of 2026-10-21.
+Documented as of 2026-10-21. Since 2026-10-26 the channels do not allow exporting their history:
+only exports made before then can be read.
 
 The bot's `/gruppi` lists three Telegram channels that describe the game as an encyclopedia, one
 card per post: _La Cittadella dei Demiurghi_ (recipes), _Il Grimorio del Golem_ (items) and

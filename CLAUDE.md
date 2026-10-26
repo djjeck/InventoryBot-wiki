@@ -306,9 +306,10 @@ This project must stay on the right side of that.
   that player. Nothing generated from an export is ever committed, published or shared; each player
   builds their own.
 - **The encyclopedia channels are the game's own help.** The bot's `/gruppi` points every player to
-  three channels that describe recipes, items and places (`docs/channels.md`). A player may add
-  their exports like any chat of theirs: the project reads what the player can already read there,
-  and changes how fast they find it, not what they may know. Their cards stay apart from the bot's
+  three channels that describe recipes, items and places (`docs/channels.md`). They no longer allow
+  exporting, so nothing a player sees suggests it any more; a player may still add an export made
+  before, like any chat of theirs: the project reads what the player can already read there, and
+  changes how fast they find it, not what they may know. Their cards stay apart from the bot's
   observations (each with its channel and date), and the same rules hold: nothing generated from
   them is committed or published, and the repository holds none of their content.
 - **Read-only.** Nothing in this project sends messages to the bot or automates play. Do not add
@@ -336,8 +337,8 @@ This project must stay on the right side of that.
   can do by scrolling the group; publishing it is not. Keep it out of anything shared.
 - **Group exports are supported, never suggested.** The pipeline reads them, but nothing a player
   sees (the web app, `README.md`) mentions, encourages or explains exporting a group: they export
-  their chat with the bot and, optionally, the encyclopedia channels. This holds until the game's
-  author says otherwise. Developer docs (`CLAUDE.md`, `docs/`) still describe group exports.
+  their chat with the bot. This holds until the game's author says otherwise. Developer docs
+  (`CLAUDE.md`, `docs/`) still describe group exports.
 - **The published page is the tool, never data.** GitHub Pages serves the web app, published from
   the release tags of `main` by the CI workflow; the repository and the page contain no game
   content, other than the bot's own profile picture (`src/web/avatar.png`), its public branding,
