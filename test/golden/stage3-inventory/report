@@ -1,9 +1,9 @@
 cartelle di esportazione: 2; chat: Gruppo GazzellaCortese, InventoryBot
-messaggi: 37 (dal bot: 19)
+messaggi: 41 (dal bot: 21)
 giocatore: @djjeck
-risposte del bot: 19
-  InventoryBot: risposte del bot abbinate a un comando: dm=18
+risposte del bot: 21
+  InventoryBot: risposte del bot abbinate a un comando: dm=20
   Gruppo GazzellaCortese: risposte del bot abbinate a un comando: unmatched=1
 nomi visualizzati abbinati a un giocatore: 1; titoli dei giocatori riconosciuti: 0
-eventi: inventory=16 recipe_detail=1 show=1 recipe_list=1
+eventi: inventory=17 recipe_detail=1 show=1 recipe_list=1 miss=1
 oggetti: 11; ricette: 2 (con tutti gli ingredienti: 1, con il risultato noto: 0); luoghi: 0

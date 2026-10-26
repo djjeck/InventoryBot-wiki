@@ -173,6 +173,30 @@ describe('collezioni and inv2', () => {
   });
 });
 
+describe('the /esporta file', () => {
+  const CAPTION = 'Inventario di @djjeck, al 2025/11/28 00:00:02';
+  const base = (): BuildEvent[] => [info('un sasso', 2, 0), info('un paio di mollette', 1, 1)];
+  const file = T.inventoryFile([['un sasso', 'C', 3]]);
+
+  it('every_item_is_exact_and_unlisted_ones_go_to_zero', () => {
+    const [inv, state] = invOf([...base(), ev(CAPTION, '/esporta', { t: 2, file })]);
+    expect(inv).toStrictEqual({ 'un sasso': 3 });
+    expect(state.inventory['un sasso']).toMatchObject({ exact: true, via: 'esporta' });
+  });
+
+  it('even_an_unmatched_group_copy_lists_everything', () => {
+    const copy = ev(CAPTION, null, { t: 2, file, dm: false, chat: 'Gruppo', match: null });
+    expect(invOf([...base(), copy])[0]).toStrictEqual({ 'un sasso': 3 });
+  });
+
+  it('without_its_file_it_changes_nothing', () => {
+    expect(invOf([...base(), ev(CAPTION, '/esporta', { t: 2 })])[0]).toStrictEqual({
+      'un sasso': 2,
+      'un paio di mollette': 1,
+    });
+  });
+});
+
 describe('filtered inventory', () => {
   const base = (): BuildEvent[] => [
     info("una moneta d'Oro", 3, 0, 'X'),

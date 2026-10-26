@@ -137,6 +137,15 @@ describe('only designated players', () => {
   });
 });
 
+describe('attached files', () => {
+  it('stay_as_written', () => {
+    const r = { ...reply(DROP('luigi'), { player: 'luigi' }), file_text: 'scritto da @luigi\n' };
+    const out = run([r, reply(DROP('anna'), { player: 'anna' })]).replies;
+    expect(out.map((x) => x.file_text)).toStrictEqual(['scritto da @luigi\n', undefined]);
+    expect(out[1]).not.toHaveProperty('file_text');
+  });
+});
+
 describe('group titles', () => {
   it('groups_get_pseudonym_titles_dm_keeps_its_own', () => {
     const conversation: Conversation = {

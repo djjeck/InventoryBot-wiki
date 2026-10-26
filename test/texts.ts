@@ -68,6 +68,16 @@ export function inventoryPage(
   );
 }
 
+/** The /esporta file: `Nx<TAB>name<TAB>[R]` lines, as phase 1 reads them (`\n` line ends). */
+export function inventoryFile(items: readonly ItemSpec[]): string {
+  return items
+    .map(
+      ([name, rarity, qty, usable]) =>
+        `${qty}x\t${name}\t[${rarity ?? ''}]` + (usable ? ' [usabile]' : '') + '\n'
+    )
+    .join('');
+}
+
 export function detail(
   recipe: string,
   missing: readonly ItemSpec[],

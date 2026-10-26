@@ -38,8 +38,11 @@ const FAQ =
   'Ogni ricetta di livello N richiede il livello N.\n\nBuon divertimento!';
 
 /** A classified event as a plain record, for field access in assertions. */
-const fields = (text: string, query: string | null): Record<string, unknown> =>
-  classify(text, query) as unknown as Record<string, unknown>;
+const fields = (
+  text: string,
+  query: string | null,
+  file: string | null = null
+): Record<string, unknown> => classify(text, query, file) as unknown as Record<string, unknown>;
 
 describe('item line', () => {
   it('typical_line', () => {
@@ -913,6 +916,60 @@ describe('preferences and quests', () => {
   });
 });
 
+describe('the /esporta file', () => {
+  const CAPTION = 'Inventario di @mario_r, al 2026/10/26 20:56:57';
+  const FILE = T.inventoryFile([
+    ["una chiave d'argento 🔑", 'X', 3],
+    ['un fiorino ƒ', 'X', 2, true],
+    ['un sasso', 'C+', 618],
+  ]);
+
+  it('with_its_file_every_item_the_player_owns', () => {
+    expect(classify(CAPTION, '/esporta', FILE)).toStrictEqual({
+      type: 'inventory',
+      filtered: false,
+      truncated: false,
+      items: [
+        item("una chiave d'argento 🔑", 'X', false, 3),
+        item('un fiorino ƒ', 'X', true, 2),
+        item('un sasso', 'C+', false, 618),
+      ],
+      exported: true,
+    });
+    // Whatever command it is paired with: the file lists everything.
+    expect(fields(CAPTION, null, FILE)['exported']).toBe(true);
+  });
+
+  it('without_its_file_a_caption_that_tells_nothing', () => {
+    expect(classify(CAPTION, '/esporta')).toStrictEqual({
+      type: 'miss',
+      reply: 'inventory_file',
+      command: '/esporta',
+    });
+    expect([...(compatibleCommands(CAPTION) ?? [])]).toStrictEqual(['/esporta']);
+    expect(classify(CAPTION + ' e altro', '/esporta', FILE).type).toBe('unknown');
+  });
+
+  it('the_caption_names_its_player', () => {
+    expect(playerOf(CAPTION)).toBe('mario_r');
+  });
+
+  it('a_player_made_name_spans_lines_up_to_its_rarity', () => {
+    const file =
+      '1x\tun sasso\t[C]\n' +
+      '2x\tuna cornice con dentro\n- 🖼\nun tappetino con scritto Benvenuti\t[S]\n' +
+      'una riga di nessun oggetto\n' +
+      '1x\tun grembiule da cuoco\t[L2]\n';
+    expect(classify(CAPTION, '/esporta', file)).toMatchObject({
+      items: [
+        item('un sasso', 'C'),
+        item('una cornice con dentro\n- 🖼\nun tappetino con scritto Benvenuti', 'S', false, 2),
+        item('un grembiule da cuoco', 'L2'),
+      ],
+    });
+  });
+});
+
 describe('old formats', () => {
   const fmt = (t: string, q: string | null = null): [string, unknown, string[] | null] => {
     const e = classify(t, q) as unknown as Record<string, unknown>;
@@ -931,7 +988,6 @@ describe('old formats', () => {
         'nessuna ricetta trovata con quel nome (chiodi)',
         '@mario_r, un uovo di quaglia [C] non da nessun titolo..',
         "@mario_r, ti fregi del titolo che si confa' al possessore di un astrolabio da cartografo [L1].",
-        'Inventario di @mario_r, al 2017/10/15 13:11:45',
       ].map((t) => fmt(t))
     ).toStrictEqual([
       ['old_format', 'quest_offer', null],
@@ -942,7 +998,6 @@ describe('old formats', () => {
       ['old_format', 'hide_not_found', ['/nascondi']],
       ['old_format', 'title_none', ['/titolo']],
       ['old_format', 'title_choice', ['/titolo']],
-      ['old_format', 'inventory_header', ['/i', '/inventario', '/inventory']],
     ]);
   });
 

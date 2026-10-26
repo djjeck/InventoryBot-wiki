@@ -89,6 +89,8 @@ export interface InventoryEvent {
   filtered: boolean;
   truncated: boolean;
   items: ItemLine[];
+  /** Present for the /esporta file: every item the player owns, whatever its command. */
+  exported?: true;
 }
 
 /** `/titolo`: the title-giving items the player owns (none in the current reply form). */
@@ -676,7 +678,8 @@ export interface Wiki {
 }
 
 /** How a holding was last set (Italian, shown on the page). */
-export type HoldingVia = 'inventario' | 'esamina' | 'ricetta' | 'mostra' | 'dai' | 'movimento';
+export type HoldingVia =
+  'inventario' | 'esporta' | 'esamina' | 'ricetta' | 'mostra' | 'dai' | 'movimento';
 
 export interface Holding {
   qty: number;

@@ -41,6 +41,8 @@ export interface ReplyContext {
 export interface BotReply {
   /** The reply as the dialect normalised it (and, for a broadcast, as BotDialect.broadcast returned it). */
   text: string;
+  /** The text file the reply has attached, as phase 1 read it (Message.file_text). */
+  file_text?: string;
   context: ReplyContext;
 }
 
@@ -130,6 +132,7 @@ export function readConversation(
       player = matcher.senderUser.get(senderIdentity(cmd)) ?? null;
     replies.push({
       text: m.text,
+      ...(m.file_text === undefined ? {} : { file_text: m.file_text }),
       context: {
         chat: m.chat ?? null,
         dm: m.dm ?? false,

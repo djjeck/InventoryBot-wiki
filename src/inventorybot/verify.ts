@@ -40,9 +40,9 @@ const isGroupPair = (r: BotReply): boolean =>
   r.context.query !== null && (r.context.match === 'user' || r.context.match === 'single');
 
 /** The reply read without its command: classified again, no query, no player unless it names one. */
-function dissolve({ text, context }: BotReply): EventRecord {
+function dissolve({ text, file_text, context }: BotReply): EventRecord {
   const ev = {
-    ...classify(text, null),
+    ...classify(text, null, file_text ?? null),
     ...context,
     player: playerOf(text) === null ? null : context.player,
     query: null,

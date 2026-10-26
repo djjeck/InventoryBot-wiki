@@ -124,8 +124,8 @@ export type RarityOf = (name: string) => string | null | undefined;
 /**
  * Which unlisted items an inventory reply proves the player does not have.
  *
- * Returns a predicate on item names, or null when the reply says nothing about
- * unlisted items: it was truncated (or is one /inv2 page of several), its command is
+ * Returns a predicate on item names (every one for the /esporta file), or null when the
+ * reply says nothing about unlisted items: it was truncated (or is one /inv2 page of several), its command is
  * unknown (an unmatched group reply), it used the "M" filter, which does not work in
  * the bot, or it is a /collezioni or /inv2 with an argument.
  */
@@ -133,8 +133,9 @@ export function inventoryScope(
   e: BuildEvent,
   rarityOf: RarityOf
 ): ((name: string) => boolean) | null {
-  if (e.type !== 'inventory' || e.truncated || e.query === null || e.query === undefined)
-    return null;
+  if (e.type !== 'inventory' || e.truncated) return null;
+  if (e.exported) return () => true;
+  if (e.query === null || e.query === undefined) return null;
   // /collezioni and /inv2 list everything; nothing is known of what they do with an argument.
   const list = queryArg(e.query, ...INVENTORY_LIST_COMMANDS);
   if (list !== null) return list === '' ? () => true : null;

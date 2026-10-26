@@ -65,6 +65,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     const visited = (n) => !!P?.locations[n]?.visited;
     const VIA = {
       inventario: '/inventario',
+      esporta: '/esporta',
       esamina: '/esamina',
       ricetta: '/ricetta',
       dai: '/dai',

@@ -96,6 +96,19 @@ describe('pairing', () => {
   });
 });
 
+describe('attached files', () => {
+  it('a_reply_keeps_the_text_of_its_file', () => {
+    const dm = new Chat(BOT);
+    dm.user('Daniele', '/esporta', 0);
+    dm.bot(DROP('djjeck'), 1);
+    dm.bot(DROP('djjeck'), 2);
+    const [cmd, withFile, without] = dm.clean() as [Message, Message, Message];
+    const c = converse([cmd, { ...withFile, file_text: 'riga 1\n' }, without]);
+    expect(c.replies.map((r) => r.file_text)).toStrictEqual(['riga 1\n', undefined]);
+    expect(c.replies[1]).not.toHaveProperty('file_text');
+  });
+});
+
 describe('ignored messages', () => {
   it('chat_other_bots_and_forwarded_commands_ignored', () => {
     const g = new Chat('G');

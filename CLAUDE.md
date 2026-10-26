@@ -100,13 +100,13 @@ order:
    disk (used by the tests).
 
 2. **Conversation** (`src/telegram/conversation/`, `readConversation`): the messages become the
-   bot's replies, each paired with the command it answers and the player it concerns. In the DM a
-   reply answers the latest command; in a group it is paired with the command it quotes, else the
-   addressed player's oldest unanswered command, else the only candidate, within the bot's answer
-   window. Display names are mapped to @usernames by voting over the whole chat (opaque sender keys,
-   when the export gives them, tell apart people with the same name). Everything that depends on the
-   bot's wording comes through a `BotDialect` (`dialect.ts`); the tests use a synthetic one
-   (`test/conversation.ts`).
+   bot's replies, each paired with the command it answers and the player it concerns, and with the
+   text file it has attached, if any. In the DM a reply answers the latest command; in a group it is
+   paired with the command it quotes, else the addressed player's oldest unanswered command, else
+   the only candidate, within the bot's answer window. Display names are mapped to @usernames by
+   voting over the whole chat (opaque sender keys, when the export gives them, tell apart people
+   with the same name). Everything that depends on the bot's wording comes through a `BotDialect`
+   (`dialect.ts`); the tests use a synthetic one (`test/conversation.ts`).
 
 3. **Anonymisation** (`src/telegram/anonymise/`, `anonymise`): the conversation with every other
    player's identity replaced by a pseudonym (`VolpeVeloce`, `GufoGentile`, …), one per person or
@@ -123,19 +123,20 @@ order:
 
 4. **Interpretation** (`src/inventorybot/extract.ts`, `interpretReplies`): every reply becomes a
    typed event (`src/inventorybot/types.ts`): the classifier (`classify.ts`) reads it with the
-   command phase 2 paired it with, following the grammars of `docs/bot-protocol.md`, whose
-   `bot-reply` examples are checked against it (`classify.docs-examples.test.ts`). The Pakkomon
-   replies are read by `pakkomon.ts`: fights and boss hits (with the loser's stun their ending
-   phrase states, `ENDINGS`, and every player they name designated for phase 3), records,
-   challenges, stuns, bosses, and the uses of an item on a Pakkomon. A place is named in its article
-   form (`places.ts`: "nella valle" is "la valle"), whatever preposition the reply used, so that
-   every source names it the same way; a travel event also keeps the words its reply wrote each
-   place with (`written`), from which the wiki keeps how the bot writes a place (`at`, the latest
-   wording). The posts of the bot's channels become events too (`channels.ts`, `docs/channels.md`):
-   each card, with the date of its post, merged with the replies' events in date order. The phase
-   ends by verifying the group pairs (`verify.ts`): a reply that, read with its command, is not of
-   that command's family is read again without it, and so is a group `/usa` reply that does not fit
-   the item its query names (which uses phase 5's item catalogue).
+   command phase 2 paired it with (and `/esporta`'s with its file, the whole inventory), following
+   the grammars of `docs/bot-protocol.md`, whose `bot-reply` examples are checked against it
+   (`classify.docs-examples.test.ts`). The Pakkomon replies are read by `pakkomon.ts`: fights and
+   boss hits (with the loser's stun their ending phrase states, `ENDINGS`, and every player they
+   name designated for phase 3), records, challenges, stuns, bosses, and the uses of an item on a
+   Pakkomon. A place is named in its article form (`places.ts`: "nella valle" is "la valle"),
+   whatever preposition the reply used, so that every source names it the same way; a travel event
+   also keeps the words its reply wrote each place with (`written`), from which the wiki keeps how
+   the bot writes a place (`at`, the latest wording). The posts of the bot's channels become events
+   too (`channels.ts`, `docs/channels.md`): each card, with the date of its post, merged with the
+   replies' events in date order. The phase ends by verifying the group pairs (`verify.ts`): a reply
+   that, read with its command, is not of that command's family is read again without it, and so is
+   a group `/usa` reply that does not fit the item its query names (which uses phase 5's item
+   catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, and the rarity legend,

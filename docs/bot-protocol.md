@@ -190,7 +190,8 @@ Other commands: `/start` and `/registrami` (registration, private chat only), `/
 legend, level rule), `/faqcomandi` (the list above), `/gruppi` (unofficial groups), `/titolo`
 (title-giving items owned), `/preferito <item>` (set the favourite item, 6.17), `/quest` (the
 current quest, 6.17), `/biglietto` (lottery ticket while a lottery is open), `/collezioni` (items
-owned, by quantity, 6.8) and `/inv2` (items owned, a page at a time, private chat only, 6.8).
+owned, by quantity, 6.8), `/inv2` (items owned, a page at a time, private chat only, 6.8) and
+`/esporta` (every item owned, as a text file, 6.8).
 
 Arguments:
 
@@ -235,6 +236,7 @@ Most replies begin by naming the player they concern:
 | `Complimenti @user, `            | lucky adventure                                                                                              |
 | `Avventuriero @user`             | `/stats`                                                                                                     |
 | `ciao @user, `                   | "register first" notice                                                                                      |
+| `Inventario di @user, `          | the `/esporta` file's caption (6.8)                                                                          |
 | `@user TITLE, ` / `@user TITLE ` | the same replies, for a player with a title                                                                  |
 | `… a @user TITLE`                | the receiver in a `/dai` reply                                                                               |
 | `@user TITLE (n)`                | leaderboard entries                                                                                          |
@@ -544,6 +546,37 @@ only the page last shown, dated when the message was first sent. Only `pg 1/1` l
 - un candido fazzoletto [C] x14
 - un fiorino ƒ [X] [usabile] x3
 (non esagerare con i tasti o il bot va in antispam)
+```
+
+`/esporta` sends every item owned, with no cut, as a text file named `file.txt`, whose caption names
+the player and the time, in UTC:
+
+```text
+INVENTORY_FILE = "Inventario di " PLAYER ", al " INT "/" INT "/" INT SP INT ":" INT ":" INT EOT
+```
+
+The file is UTF-8, with Windows line ends (CR LF), one line per item in the order of `/inventario`,
+the name between two tabs (`TAB`) and nothing else:
+
+```text
+FILE_LINE = INT "x" TAB NAME TAB RARITY [ SP USABLE ] CR LF
+```
+
+So the file of the first `/inventario` example above reads, a tab where `→` stands:
+
+```text
+2x→una chiave di quercia 🔑→[X]
+3x→un fiorino ƒ→[X] [usabile]
+1x→un Motocarro anni 70→[L3]
+1x→un grembiule da cuoco→[R]
+14x→un candido fazzoletto→[C]
+```
+
+An export holds the file only when made with its files ([`telegram-export.md`](telegram-export.md)
+§5.6); without it, the caption alone tells nothing:
+
+```bot-reply type=miss query="/esporta" reply=inventory_file addressee=mario_r
+Inventario di @mario_r, al 2026/10/26 20:56:57
 ```
 
 ### 6.9 Travel
@@ -1167,8 +1200,7 @@ Group histories reach back to 2017. These formats belong to earlier periods:
   - parcels: `@u bravissimo, hai trovato un pacchetto! Tutto contento lo apri e dentro ci trovi:` +
     item lines + a pointer to `/faq`, and the gift parcel opened with `/usa`
     (`@u, ti accingi ad aprire il tuo pacco eccitato come un bambino a natale, …` + item lines);
-  - bans (`[BAN] Sei stato bannato per: N ore. Motivazione: …`) and the inventory header
-    `Inventario di @u, al YYYY/MM/DD HH:MM:SS`.
+  - bans (`[BAN] Sei stato bannato per: N ore. Motivazione: …`).
 - **In 2017**, `/nascondi` with a recipe not found answered
   `nessuna ricetta trovata con quel nome (ARG)`.
 - **Items get renamed**: "un Gufetto d'Argento" became "un Premio Sgranocchio" in 2026, with the
@@ -1228,6 +1260,8 @@ Every reply example above is a block with the info string `bot-reply` and attrib
 - Whether "half of the ingredients" (recipe visibility) counts units or distinct items.
 - Whether an exact name wins over partial matches in lookups.
 - Whether `/collezioni` and `/inv2` take a filter, and how they answer an empty inventory.
+- How the `/esporta` file writes a player-made name with line breaks; the pipeline reads a line that
+  starts an item without ending it as continued by the next ones, up to the one that ends it.
 - The current `/titolo` reply of a player who owns title-giving items.
 - What triggers the "ti serve per passare" notice (6.9); it can follow `/dai` and `/ricetta`
   replies.

@@ -28,6 +28,8 @@ export interface EvOptions {
   forwarded?: boolean;
   broadcast?: boolean;
   base?: Instant;
+  /** The text file the reply has attached (BotReply.file_text). */
+  file?: string;
 }
 
 let msgCounter = 50000;
@@ -36,7 +38,7 @@ let msgCounter = 50000;
 export function ev(text: string, query: string | null = null, o: EvOptions = {}): BuildEvent {
   const dm = o.dm ?? true;
   const e = {
-    ...classify(text, query),
+    ...classify(text, query, o.file ?? null),
     chat: o.chat ?? (dm ? BOT : 'Gruppo'),
     dm,
     msg: o.msg ?? ++msgCounter,

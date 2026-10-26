@@ -88,6 +88,8 @@ export class Chat {
   readonly dm: boolean;
   nextId: number;
   readonly messages: BuiltMessage[] = [];
+  /** Other files of its export, by path in it (`files/file.txt`): writeExport's `files`. */
+  readonly files: Record<string, string> = {};
 
   constructor(title: string = BOT, startId = 1000, base: Instant = BASE) {
     this.title = title;

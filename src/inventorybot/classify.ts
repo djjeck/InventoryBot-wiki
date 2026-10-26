@@ -50,8 +50,11 @@ import {
 
 /** /inventario and its other names (dialect.ts ALIASES). */
 export const INVENTORY_COMMANDS: readonly string[] = ['/inventario', '/inventory', '/i'];
-/** /collezioni (the inventory by quantity) and /inv2 (a page of it), which take no filter. */
-export const INVENTORY_LIST_COMMANDS: readonly string[] = ['/collezioni', '/inv2'];
+/**
+ * /collezioni (the inventory by quantity), /inv2 (a page of it) and /esporta (the inventory
+ * as a file), which take no filter.
+ */
+export const INVENTORY_LIST_COMMANDS: readonly string[] = ['/collezioni', '/inv2', '/esporta'];
 
 // "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space; any
 // whitespace may stand before the tags)
@@ -159,7 +162,7 @@ interface OldFormat {
 /**
  * Formats of earlier periods recognised as such, without reading facts from them:
  * quest offers, progress and completion, parcels, the 2017 /nascondi "not found", old
- * /titolo replies, the old inventory header. (The current /preferito,
+ * /titolo replies. (The current /preferito,
  * /nascondi and "no quest" replies are in KNOWN_REPLIES.) Before the other classifiers (a quest's "ti manca:" is not a recipe).
  */
 const OLD_FORMATS: readonly OldFormat[] = [
@@ -206,11 +209,6 @@ const OLD_FORMATS: readonly OldFormat[] = [
     format: 'title_choice',
     match: rx(`^${A}ti fregi del titolo che si confa' al possessore di `),
     commands: ['/titolo'],
-  },
-  {
-    format: 'inventory_header',
-    match: rx(`^Inventario di @${W}+, al ${D}{4}/${D}{2}/${D}{2} ${D}{2}:${D}{2}:${D}{2}`),
-    commands: ['/inventario'],
   },
 ];
 
@@ -440,6 +438,42 @@ const INVENTORY_PAGE = rx(`possiedi \\(pg (?<n>${D}+)/(?<of>${D}+)\\):`);
  * a page of /inv2 ("possiedi (pg N/M):"), which shows every item only when it is the one page.
  * A machine's /usa gives the /collezioni listing too: that is a use (cUse, NOT_RECEIVED).
  */
+/** The caption of the /esporta file: "Inventario di @u, al 2026/10/26 20:56:57" (UTC). */
+const INVENTORY_FILE = rx(
+  `^Inventario di @${W}+${DOT}*?, al ${D}{4}/${D}{2}/${D}{2} ${D}{2}:${D}{2}:${D}{2}${S}*${END}`
+);
+
+/** A line of the /esporta file: "3x<TAB>un fiorino ƒ<TAB>[X] [usabile]". */
+const FILE_LINE = rx(
+  `^(?<qty>${D}+)x\\t(?<name>[^\\t]+)\\t\\[(?<rarity>${RARITY})\\](?<usable> \\[usabile\\])?${S}*$`
+);
+const FILE_LINE_START = rx(`^${D}+x\\t`);
+
+/**
+ * The items of the /esporta file, a line each. A player-made name may span lines: a line
+ * that starts an item without ending it is joined with the next ones up to the one that
+ * ends it. Lines of no item are skipped.
+ */
+export function inventoryFileItems(file: string): ItemLine[] {
+  const out: ItemLine[] = [];
+  let pending: string | null = null;
+  for (const l of file.split('\n')) {
+    const line: string = pending === null ? l : `${pending}\n${l}`;
+    const m = FILE_LINE.exec(line);
+    if (m) {
+      const g = groups(m);
+      out.push({
+        name: itemName(g['name'] as string),
+        rarity: g['rarity'] as string,
+        usable: Boolean(g['usable']),
+        qty: parseDecimalInt(g['qty'] as string),
+      });
+      pending = null;
+    } else pending = pending !== null || FILE_LINE_START.test(l) ? line : null;
+  }
+  return out;
+}
+
 const cInventory: Classifier = (t, q) => {
   const lines = t.split('\n');
   const head = lines[0] as string;
@@ -820,6 +854,8 @@ const DAI_NOT_ENOUGH = rx(`^non ne hai abbastanza, ne possiedi solo (?<n>${D}+)\
  * wins). A reply that matches none stays unknown: nothing is noise unless it is listed.
  */
 const KNOWN_REPLIES: readonly KnownReply[] = [
+  // The /esporta caption whose file the export left out (read by classify itself).
+  { name: 'inventory_file', match: INVENTORY_FILE, commands: ['/esporta'] },
   { name: 'dai_syntax', match: { head: 'Sintassi: /dai' }, commands: ['/dai'] },
   { name: 'dai_unknown_user', match: { head: "Non esiste quell'utente" }, commands: ['/dai'] },
   {
@@ -1122,8 +1158,23 @@ const CLASSIFIERS: readonly Classifier[] = [
   cNarratedArrival,
 ];
 
-/** The event a bot reply describes; `query` is the command it answers, if known. */
-export function classify(text: string, query: Query): Event {
+/**
+ * The event a bot reply describes; `query` is the command it answers, if known, and
+ * `file` the text file the reply has attached (Message.file_text), if the export holds it.
+ * The one reply with a file is /esporta's: with it, every item the player owns; without
+ * it, a caption that tells nothing (inventory_file).
+ */
+export function classify(text: string, query: Query, file: string | null = null): Event {
+  if (INVENTORY_FILE.test(text))
+    return file === null
+      ? { type: 'miss', reply: 'inventory_file', command: '/esporta' }
+      : {
+          type: 'inventory',
+          filtered: false,
+          truncated: false,
+          items: inventoryFileItems(file),
+          exported: true,
+        };
   for (const c of CLASSIFIERS) {
     const ev = c(text, query);
     if (ev) return ev;

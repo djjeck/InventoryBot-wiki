@@ -28,7 +28,7 @@ export const COMPATIBLE: Readonly<Partial<Record<EventType, ReadonlySet<string>>
   recipe_detail: new Set(['/ricetta', '/esamina']),
   craft: new Set(['/ricetta']),
   item_info: new Set(['/esamina']),
-  inventory: new Set(['/inventario', '/collezioni', '/inv2']),
+  inventory: new Set(['/inventario', '/collezioni', '/inv2', '/esporta']),
   travel: new Set(['/viaggio']),
   location: new Set(['/viaggio']),
   travel_blocked: new Set(['/viaggio']),
@@ -119,7 +119,7 @@ export function stripSuaMaesta(text: string): string {
   return text.replace(SUA_MAESTA, '$1');
 }
 
-const PLAYER = rx(`^(?:Complimenti |Avventuriero |ciao )?@(${W}+)`);
+const PLAYER = rx(`^(?:Complimenti |Avventuriero |ciao |Inventario di )?@(${W}+)`);
 
 /** The @username the bot is answering (needed to tell players apart in groups). */
 export function playerOf(text: string): string | null {
@@ -181,7 +181,7 @@ const withIndices = (re: RegExp): RegExp => new RegExp(re.source, re.flags.repla
 
 /** The username (without `@`) each pattern designates, by its named group. */
 const DESIGNATED: readonly [RegExp, string][] = [
-  [withIndices(rx(`^(?:Complimenti |Avventuriero |ciao )?@(?<u>${W}+)`)), 'u'],
+  [withIndices(rx(`^(?:Complimenti |Avventuriero |ciao |Inventario di )?@(?<u>${W}+)`)), 'u'],
   [withIndices(GIVE), 'to'],
   [withIndices(GIFT), 'from'],
   [withIndices(GIVE_REFUSED), 'to'],
@@ -189,7 +189,7 @@ const DESIGNATED: readonly [RegExp, string][] = [
 
 /**
  * The usernames a reply designates, as spans of the text (without `@`): the addressee at
- * the start ("@u, ...", "Complimenti @u", "Avventuriero @u", "ciao @u"), the receiver of a
+ * the start ("@u, ...", "Complimenti @u", "Avventuriero @u", "ciao @u", "Inventario di @u"), the receiver of a
  * `/dai` ("dai 1x ... a @y", "meglio non dare niente a @y", "sicuro che vuoi dare cose a @y?")
  * the giver of a gift notice ("[N] @x ti ha dato ..."), and every player a Pakkomon
  * reply names (owners, challengers, makers, fighters of a boss: pakkomonUserSpans).

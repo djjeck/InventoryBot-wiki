@@ -33,12 +33,15 @@
       "first_seen": "2025-11-27T19:00:11-05:00"
     },
     "un dado": {
-      "first_seen": "2025-11-27T19:03:11-05:00",
-      "used": 4,
+      "first_seen": "2025-11-27T19:03:21-05:00",
+      "used": 3,
       "last_used": "2025-11-27T19:03:41-05:00"
     },
-    "un elisir": {
-      "first_seen": "2025-11-27T19:03:01-05:00"
+    "un drago": {
+      "first_seen": "2025-11-27T19:03:11-05:00"
+    },
+    "un fiore": {
+      "first_seen": "2025-11-27T19:03:11-05:00"
     },
     "un fiore di pianura": {
       "first_seen": "2025-11-27T19:04:40-05:00"
@@ -54,6 +57,9 @@
     },
     "un sasso": {
       "first_seen": "2025-11-27T19:00:01+01:00"
+    },
+    "una cosa": {
+      "first_seen": "2025-11-27T19:03:11-05:00"
     },
     "una ghianda d'oro": {
       "first_seen": "2025-11-27T19:00:41-05:00"
@@ -122,23 +128,23 @@
     }
   },
   "inventory": {
-    "__proto__": {
-      "qty": 2,
-      "exact": true,
-      "date": "2025-11-27T19:03:11-05:00",
-      "via": "esamina"
-    },
     "un baule": {
       "qty": 1,
       "exact": true,
       "date": "2025-11-27T19:05:51-05:00",
       "via": "esamina"
     },
-    "un elisir": {
-      "qty": 2,
+    "un drago": {
+      "qty": 1,
       "exact": true,
-      "date": "2025-11-27T19:03:01-05:00",
-      "via": "inventario"
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
+    },
+    "un fiore": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
     },
     "un fiore di pianura": {
       "qty": 1,
@@ -149,13 +155,19 @@
     "un sasso": {
       "qty": 3,
       "exact": true,
-      "date": "2025-11-27T19:03:01-05:00",
-      "via": "inventario"
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
+    },
+    "una cosa": {
+      "qty": 3,
+      "exact": true,
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
     }
   },
   "inventory_check": {
     "compared": 4,
-    "agreed": 2
+    "agreed": 1
   },
   "pakkomon": []
 }

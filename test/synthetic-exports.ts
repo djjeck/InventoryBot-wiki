@@ -648,7 +648,9 @@ export function writeStage3Scenarios(root: string): Scenario[] {
   const out: Scenario[] = [];
   const scenario = (name: string, chats: Chat[]): void => {
     const dir = path.join(root, name);
-    chats.forEach((c, i) => writeExport(path.join(dir, `Export${i}`), c.title, [c.messages]));
+    chats.forEach((c, i) =>
+      writeExport(path.join(dir, `Export${i}`), c.title, [c.messages], undefined, c.files)
+    );
     out.push({ name: `stage3-${name}`, paths: [dir] });
   };
   /** A DM command and its reply, `t` seconds after the chat's base. */
@@ -1119,6 +1121,12 @@ export function writeStage3Scenarios(root: string): Scenario[] {
         ['Muro', 2, 3],
       ])
     );
+    // The /esporta file, as Telegram writes it (CRLF), then one the export left out.
+    dm.user('Daniele', '/esporta', t + 40);
+    dm.bot('Inventario di @djjeck, al 2025/11/28 00:00:00', t + 41, { file: 'files/file.txt' });
+    dm.files['files/file.txt'] = T.inventoryFile(items.slice(1, 4)).replaceAll('\n', '\r\n');
+    dm.user('Daniele', '/esporta', t + 50);
+    dm.bot('Inventario di @djjeck, al 2025/11/28 00:00:10', t + 51, { file: null });
     const g = new Chat('Gruppo Inventari', 500);
     g.bot(T.inventory([['un sasso', 'C', 1]]), t + 30);
     scenario('inventory', [dm, g]);

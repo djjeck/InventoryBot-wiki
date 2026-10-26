@@ -21,6 +21,7 @@
  *   /inventario complete, filtered     exact for listed items; unlisted items in the
  *                                      filter's scope -> 0 (see build.inventoryScope:
  *                                      a rarity like "C", or words of the name)
+ *   /esporta with its file             exact for everything; unlisted items -> 0
  *   /collezioni, /inv2 complete        as /inventario complete, unfiltered (an /inv2
  *                                      page is complete only as the one page, "pg 1/1")
  *   /inventario truncated, "M" filter,
@@ -224,9 +225,10 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     if (e.type === 'inventory') {
       const listed = new Map(e.items.map((x) => [x.name, x.qty]));
       const scope = inventoryScope(e, rarityOf);
-      if (scope) hold.zeroExcept(listed, scope, d, 'inventario');
+      const via = e.exported ? 'esporta' : 'inventario';
+      if (scope) hold.zeroExcept(listed, scope, d, via);
       for (const [n, q] of listed) {
-        hold.exact(n, q, d, 'inventario');
+        hold.exact(n, q, d, via);
         seen(n, d);
       }
     } else if (e.type === 'item_info') {

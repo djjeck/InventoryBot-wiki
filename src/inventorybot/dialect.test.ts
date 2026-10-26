@@ -99,6 +99,7 @@ describe('anonymisation', () => {
     expect(spanned('@luigi, dai 1x il ritratto di @anna a @bice')).toStrictEqual(['luigi', 'bice']);
     expect(spanned("Complimenti @luigi, questa e' l'avventura FORTUNATA")).toStrictEqual(['luigi']);
     expect(spanned('ciao @luigi, prima registrati')).toStrictEqual(['luigi']);
+    expect(spanned('Inventario di @luigi, al 2026/10/26 20:56:57')).toStrictEqual(['luigi']);
     expect(spanned('Avventuriero @luigi\n- Livello: 3\n- Amico di @anna')).toStrictEqual(['luigi']);
     expect(spanned('[N] @anna ti ha dato 2x un sasso')).toStrictEqual(['anna']);
     expect(
@@ -113,7 +114,7 @@ describe('anonymisation', () => {
     const d = inventoryBotDialect(['il fornaio']);
     expect(d.normalizeReply('Sua Maestà @msx80 il fornaio, possiedi:')).toBe('@msx80, possiedi:');
     expect(d.compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
-      new Set(['/inventario', '/collezioni', '/inv2', '/i', '/inventory'])
+      new Set(['/inventario', '/collezioni', '/inv2', '/esporta', '/i', '/inventory'])
     );
     expect([...d.publicNames]).toStrictEqual(['msx80']);
     expect(
@@ -165,7 +166,7 @@ describe('pairing', () => {
       compatibleCommands('@mario_r, per fare Torre ti manca:\n- un sasso [C] x1')
     ).toStrictEqual(new Set(['/ricetta', '/esamina']));
     expect(compatibleCommands('@mario_r, possiedi:\n- un sasso [C] x1')).toStrictEqual(
-      new Set(['/inventario', '/collezioni', '/inv2', '/i', '/inventory'])
+      new Set(['/inventario', '/collezioni', '/inv2', '/esporta', '/i', '/inventory'])
     );
     // A successful /usa has no grammar (each item answers in its own words): read without its
     // command it is unrecognised, so it may answer any command, and pairing finds its /usa.

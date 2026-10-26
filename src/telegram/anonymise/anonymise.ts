@@ -12,7 +12,8 @@
  *   @usernames and the known usernames written without `@` (whole words, ignoring case);
  * - `chat` for a group: `Gruppo <pseudonym>`. The DM keeps its title.
  * Every other username in a text (leaderboards, item names, announcements, group names
- * the bot lists) is part of what the bot says and stays as written.
+ * the bot lists) is part of what the bot says and stays as written, as does a reply's
+ * attached file (`file_text`).
  *
  * The mapping is built before anything is rewritten, in order of first appearance: in
  * reply order, for each reply its group chat, its `player`, the @usernames of its query's
@@ -139,8 +140,9 @@ export function anonymise(conversation: Conversation, options: AnonymiseOptions)
   const chatOf = (title: string | null, dm: boolean): string | null =>
     title === null || dm ? title : (chats.get(title) ?? title);
 
-  const replies = conversation.replies.map(({ text, context }, i): BotReply => ({
+  const replies = conversation.replies.map(({ text, file_text, context }, i): BotReply => ({
     text: rewriteText(text, spans[i] ?? []),
+    ...(file_text === undefined ? {} : { file_text }),
     context: {
       ...context,
       chat: chatOf(context.chat, context.dm),

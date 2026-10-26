@@ -1,6 +1,6 @@
 {
   "player": "djjeck",
-  "as_of": "2025-11-27T19:03:00-05:00",
+  "as_of": "2025-11-27T19:03:21-05:00",
   "recipes": {},
   "items": {
     "un cappello piumato": {
@@ -47,53 +47,23 @@
     }
   },
   "inventory": {
-    "un cappello piumato": {
-      "qty": 3,
-      "exact": false,
-      "date": "2025-11-27T19:02:41-05:00",
-      "via": "mostra"
-    },
     "un drago": {
       "qty": 1,
       "exact": true,
-      "date": "2025-11-27T19:01:51-05:00",
-      "via": "inventario"
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
     },
-    "un oro falso": {
+    "un fiore": {
       "qty": 1,
       "exact": true,
-      "date": "2025-11-27T19:01:51-05:00",
-      "via": "inventario"
-    },
-    "un sasso": {
-      "qty": 1,
-      "exact": true,
-      "date": "2025-11-27T19:03:00-05:00",
-      "via": "inventario"
-    },
-    "una L1 rara": {
-      "qty": 1,
-      "exact": true,
-      "date": "2025-11-27T19:01:51-05:00",
-      "via": "inventario"
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
     },
     "una cosa": {
       "qty": 3,
       "exact": true,
-      "date": "2025-11-27T19:02:11-05:00",
-      "via": "inventario"
-    },
-    "una trave": {
-      "qty": 1,
-      "exact": false,
-      "date": "2025-11-27T19:02:31-05:00",
-      "via": "ricetta"
-    },
-    "uno scudo": {
-      "qty": 1,
-      "exact": true,
-      "date": "2025-11-27T19:01:51-05:00",
-      "via": "inventario"
+      "date": "2025-11-27T19:03:11-05:00",
+      "via": "esporta"
     }
   },
   "inventory_check": {

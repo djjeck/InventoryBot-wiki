@@ -126,7 +126,12 @@ export function unknownEntities(text: string, universe: Universe): Finding[] {
       text.lastIndexOf('\\n', m.index) + 2, // a source string's `\n`
       0
     );
-    const before = text.slice(start, m.index).trimEnd();
+    // The /esporta file sets the name between tabs: `\t` in a source string, `→` in the docs.
+    const before = text
+      .slice(start, m.index)
+      .replaceAll('\\t', '\t')
+      .replaceAll('→', '\t')
+      .trimEnd();
     // A tag alone (a legend, a pattern), after code (`${name} [C]`, `'[N] '`) or after a
     // command (`/inventario [C]`, a rarity filter) names no item; a channel's recipe card
     // names its recipe with its level (`RICETTA: Torre [L1]`: a recipe, below).

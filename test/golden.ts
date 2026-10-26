@@ -132,9 +132,9 @@ const json = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
 
 const lines = (report: readonly string[]): string => report.map((l) => l + '\n').join('');
 
-/** The conversation as JSON Lines: one reply per line, its context then its text. */
+/** The conversation as JSON Lines: one reply per line, its context, its text, then its file's. */
 const conversationLines = (replies: readonly BotReply[]): string =>
-  jsonLines(replies.map(({ text, context }) => ({ ...context, text })));
+  jsonLines(replies.map(({ text, file_text, context }) => ({ ...context, text, file_text })));
 
 /** Normalises the wiki: the `generated` value is the run's time. */
 export function normaliseOutput(text: string): string {

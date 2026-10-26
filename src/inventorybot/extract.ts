@@ -31,9 +31,9 @@ export interface Interpretation {
  */
 export function interpretReplies(replies: readonly BotReply[]): Interpretation {
   const classified: EventRecord[] = [];
-  for (const { text, context } of replies) {
+  for (const { text, file_text, context } of replies) {
     // Spread keeps a classified key that the context repeats in its first position.
-    const ev = { ...classify(text, context.query), ...context } as EventRecord;
+    const ev = { ...classify(text, context.query, file_text ?? null), ...context } as EventRecord;
     if (ev.type === 'unknown') (ev as { text: string }).text = text;
     classified.push(ev);
   }

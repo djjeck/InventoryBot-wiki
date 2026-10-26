@@ -55,6 +55,10 @@ describe('unknownEntities', () => {
     expect(unknownEntities('@u, possiedi:\n- una mela [N+] x1', U)).toStrictEqual([
       { kind: 'item', text: '- una mela', line: 2 },
     ]);
+    // The /esporta file's lines: tabs, `\t` in a source string, `→` in the docs.
+    for (const text of ['2x\tun sasso\t[C]', "'2x\\tun sasso\\t[C]'", '2x→un sasso→[C]'])
+      expect(unknownEntities(text, U), text).toStrictEqual([]);
+    expect(unknownEntities("'2x\\tuna mela\\t[C]'", U)).toHaveLength(1);
     // Only at a word boundary: "un sassolino" is not "un sasso".
     expect(unknownEntities('trovi un sassolino [C]', U)).toHaveLength(1);
   });
