@@ -291,10 +291,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     state.tree = store.get('ib-tree') === 'tutto' ? 'tutto' : 'mancanti';
     // ---- the owner's Pakkomon -------------------------------------------------------
     // Each Pakkomon is the owner's own (player-pakkomon.ts), never the wiki's: the tab lists
-    // theirs, after a page on how Pakkomon work, which also shows without any.
+    // theirs, after a page on how Pakkomon work. Pakkomon come late in the game: the tab
+    // shows only while the owner has one.
     const GUIDE = 'Come funzionano';
-    const PK = Object.fromEntries((P?.pakkomon || []).map((p) => [p.name, p]));
-    const pakkomonTab = !!P || !!I[PAKKOMON];
+    const MY_PK = P?.pakkomon || [];
+    const PK = Object.fromEntries(MY_PK.map((p) => [p.name, p]));
+    const pakkomonTab = MY_PK.some((p) => !p.gone);
     const TABS = ['oggetti', 'ricette', 'luoghi', ...(pakkomonTab ? ['pakkomon'] : [])];
     // ---- the URL -------------------------------------------------------------------
     // `#tab` or `#tab/slug`. A slug is the name folded to lower-case ASCII letters and
@@ -832,9 +834,11 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     /** What an item is for, with Pakkomon; the one Pakkomon leads to the tab. */
     function pakkomonLine(i) {
       if (i.name === PAKKOMON)
-        return `<p class="makes">Ogni Pakkomon è unico: ${goLink('pakkomon', GUIDE, 'come funzionano')}${P?.pakkomon.length ? ` · ${goLink('pakkomon', P.pakkomon[0].name, 'i tuoi Pakkomon')}` : ''}</p>`;
+        return pakkomonTab
+          ? `<p class="makes">Ogni Pakkomon è unico: ${goLink('pakkomon', GUIDE, 'come funzionano')} · ${goLink('pakkomon', MY_PK[0].name, 'i tuoi Pakkomon')}</p>`
+          : '';
       return i.pakkomon_roles?.length
-        ? `<p class="makes">Per i Pakkomon: ${i.pakkomon_roles.map((r) => esc(ROLE_NAMES[r])).join(', ')} (${goLink('pakkomon', GUIDE, 'come funzionano')}).</p>`
+        ? `<p class="makes">Per i Pakkomon: ${i.pakkomon_roles.map((r) => esc(ROLE_NAMES[r])).join(', ')}${pakkomonTab ? ` (${goLink('pakkomon', GUIDE, 'come funzionano')})` : ''}.</p>`
         : '';
     }
     function madeBy(i) {
@@ -860,7 +864,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
               [
                 // The owner's Pakkomon are counted one by one, not estimated.
                 name === PAKKOMON
-                  ? [`Hai ${P.pakkomon.filter((p) => !p.gone).length} Pakkomon.`]
+                  ? [`Hai ${MY_PK.filter((p) => !p.gone).length} Pakkomon.`]
                   : h
                     ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty}.`
                     : 'Non ne hai neanche uno.',
@@ -1068,7 +1072,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const f = PAKKOMON_FILTERS[state.filter.pakkomon][1];
       return [
         ...(!q || fold(GUIDE).includes(q) ? [{ name: GUIDE }] : []),
-        ...(P?.pakkomon || []).filter((p) => f(p) && (!q || fold(p.name).includes(q))),
+        ...MY_PK.filter((p) => f(p) && (!q || fold(p.name).includes(q))),
       ];
     }
     const goneText = (p) =>
@@ -1172,23 +1176,15 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const prizeLines = [...prizes]
         .sort((a, b) => a[0].localeCompare(b[0], 'it'))
         .map(([o, items]) => `- ${esc(o)}: ${items.map((n) => itemRef(n)).join(', ')}`);
-      const own = P?.pakkomon.filter((p) => !p.gone).length || 0;
+      const own = MY_PK.filter((p) => !p.gone).length;
       const endings = `<table class="endings"><thead><tr><th>Frase finale</th><th>Rintronato per</th></tr></thead><tbody>${ENDINGS.map(
         ([phrase, lo, hi]) =>
           `<tr><td>${esc(phrase)}</td><td>${hi === null ? `almeno ${lo}` : `${lo}-${hi}`} minuti</td></tr>`
       ).join('')}</tbody></table>`;
       const usage = (s) => `<code>${esc(s)}</code>`;
+      // The tab shows only while the owner has a Pakkomon.
       return page(
-        P
-          ? myCard(
-              [],
-              [
-                own
-                  ? `Hai ${own} Pakkomon: li trovi nell'elenco.`
-                  : 'Non hai ancora un Pakkomon nelle chat importate.',
-              ]
-            )
-          : '',
+        myCard([], [`Hai ${own} Pakkomon: li trovi nell'elenco.`]),
         `<div class="head"><div class="kicker"><span class="tag t-q">?</span><span>Pakkomon</span></div>
     <h2>Come funzionano i Pakkomon</h2></div>
     <p class="note">Un Pakkomon è una creatura che combatte contro quelle degli altri giocatori. Ognuno è unico: ha un nome tutto suo, e tiene le sue vittorie, le sue sconfitte, il suo equipaggiamento e i suoi potenziamenti anche se cambia padrone.</p>
@@ -1678,7 +1674,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         rows = pakkomonRows(q);
         rowFn = pakkomonRow;
         detail = pakkomonPage(state.sel.pakkomon ?? rows[0]?.name);
-        filters = P?.pakkomon.some((p) => p.gone) ? filtersHtml('pakkomon', PAKKOMON_FILTERS) : '';
+        filters = MY_PK.some((p) => p.gone) ? filtersHtml('pakkomon', PAKKOMON_FILTERS) : '';
       }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
       $('#side-tools').innerHTML = filters;

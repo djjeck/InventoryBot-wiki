@@ -35,10 +35,10 @@ passato resta, così si può vedere a colpo d'occhio cosa produce una ricetta, q
 contendono lo stesso ingrediente e, per un oggetto di livello alto, l'albero delle ricette che
 portano fin lì, con quante volte va craftato o trovato ogni oggetto.
 
-La scheda Pakkomon spiega come funzionano i combattimenti (quanto resta rintronato chi perde,
-secondo la frase con cui finisce lo scontro), quali oggetti fanno da equipaggiamento, cura o
-potenziamento, e quali premi danno i Pakkomon del bot e i boss. Elenca anche i tuoi Pakkomon, ognuno
-con la sua scheda, la sua storia e i suoi combattimenti.
+Quando hai almeno un Pakkomon compare la scheda Pakkomon, che spiega come funzionano i combattimenti
+(quanto resta rintronato chi perde, secondo la frase con cui finisce lo scontro), quali oggetti
+fanno da equipaggiamento, cura o potenziamento, e quali premi danno i Pakkomon del bot e i boss.
+Elenca anche i tuoi Pakkomon, ognuno con la sua scheda, la sua storia e i suoi combattimenti.
 
 ## Limiti
 

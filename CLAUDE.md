@@ -214,36 +214,36 @@ selected entry are in the URL's fragment (`#oggetti/l_oro`: a slug of the name, 
 tab; a recipe whose item is known is shown on the item's page, which also holds its recipes, at the
 item's address with the list it was opened from, `#oggetti/una_torre?lista=ricette`, and
 `#ricette/<slug>` leads there), so a reload keeps them and each change is a step of the browser's
-history; and the report is in a collapsed section. A fourth tab, Pakkomon, shown with a player state
-or once the wiki knows a Pakkomon, lists a guide first (the fight rules and the ending phrases'
-stuns, `ENDINGS` of `pakkomon.ts`, the items of each Pakkomon role, the prizes of fights), then the
-owner's Pakkomon, current ones unless a filter shows the former: each page is its record as the bot
-shows it, then its story and fights; the wiki's one Pakkomon item leads there. Each recipe on a page
-comes with its tree, when it takes an item that a recipe makes: everything it takes, a column per
-level, down to the items to find, each item once (an ingredient of several of its recipes has an
-edge from each) with how many times to craft it, or how many to find, to make the recipe once. With
-the owner's state, a toggle above it, "Ti manca" by default (remembered in this browser), shows only
-what they still lack: the inventory estimate is taken off each count, an item they hold enough of is
-not drawn, nor what it takes, and a recipe they can make now is green. Above a place, Luoghi shows
-the map of the places (`map-layout.ts`, drawn by the view as pixel art, the same in both themes, its
-rows a little closer than its columns): a grid, as in classic role-playing games, running across a
-wide window and down a tall one, where no two roads cross and a road goes at 45° only from a place
-with more than four roads. It is the tree of the shortest routes from the village (the place the bot
-calls "il villaggio"), drawn in three steps: directions by rules alone (a place's straight
-directions to its biggest branches, along the main axis first, a branch linked to a sibling beside
-it, the rest diagonally), lengths by pushing each branch out as one block until it fits, the lines
-towards the branches still to join kept clear, then straight dead-end chains folded at a right angle
-where that makes the map smaller; a link that no length keeps clear may cross a road. Places the
-village does not reach go on free cells along its edge. The selected place is marked, with its
-shortest route from the village. The owner is the player the bot addresses most in the DM; without a
-DM the build stops, the records stay kept, and the panel shows a username field, which the page
-offers nowhere else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the
-records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
-counts, in upload order, which is their merge order; the last results (wiki, player state, report,
-options) with the records they were built from and the build of the page that made them
-(`__BUILD__`, from `vite.config.ts`: a release's version, a new value at each start of the dev
-server), so a returning player sees their wiki at once and the worker rebuilds only if they are not
-current, from other records or by another build; and the salt of the pseudonyms and sender keys,
+history; and the report is in a collapsed section. A fourth tab, Pakkomon, shown only while the
+owner has a Pakkomon (they come late in the game), lists a guide first (the fight rules and the
+ending phrases' stuns, `ENDINGS` of `pakkomon.ts`, the items of each Pakkomon role, the prizes of
+fights), then the owner's Pakkomon, current ones unless a filter shows the former: each page is its
+record as the bot shows it, then its story and fights; the wiki's one Pakkomon item leads there.
+Each recipe on a page comes with its tree, when it takes an item that a recipe makes: everything it
+takes, a column per level, down to the items to find, each item once (an ingredient of several of
+its recipes has an edge from each) with how many times to craft it, or how many to find, to make the
+recipe once. With the owner's state, a toggle above it, "Ti manca" by default (remembered in this
+browser), shows only what they still lack: the inventory estimate is taken off each count, an item
+they hold enough of is not drawn, nor what it takes, and a recipe they can make now is green. Above
+a place, Luoghi shows the map of the places (`map-layout.ts`, drawn by the view as pixel art, the
+same in both themes, its rows a little closer than its columns): a grid, as in classic role-playing
+games, running across a wide window and down a tall one, where no two roads cross and a road goes at
+45° only from a place with more than four roads. It is the tree of the shortest routes from the
+village (the place the bot calls "il villaggio"), drawn in three steps: directions by rules alone (a
+place's straight directions to its biggest branches, along the main axis first, a branch linked to a
+sibling beside it, the rest diagonally), lengths by pushing each branch out as one block until it
+fits, the lines towards the branches still to join kept clear, then straight dead-end chains folded
+at a right angle where that makes the map smaller; a link that no length keeps clear may cross a
+road. Places the village does not reach go on free cells along its edge. The selected place is
+marked, with its shortest route from the village. The owner is the player the bot addresses most in
+the DM; without a DM the build stops, the records stay kept, and the panel shows a username field,
+which the page offers nowhere else. What the worker keeps is in IndexedDB, in this browser only
+(`storage.ts`): the records of the exports (`ExportRecord`, never the export pages), each with its
+folder, dates and counts, in upload order, which is their merge order; the last results (wiki,
+player state, report, options) with the records they were built from and the build of the page that
+made them (`__BUILD__`, from `vite.config.ts`: a release's version, a new value at each start of the
+dev server), so a returning player sees their wiki at once and the worker rebuilds only if they are
+not current, from other records or by another build; and the salt of the pseudonyms and sender keys,
 made once. A record is valid only with the salt that made it, so the three live in one database:
 without a salt the records and results are dropped, and a record or results made with another salt
 are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can
