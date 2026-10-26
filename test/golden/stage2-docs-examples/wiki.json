@@ -529,8 +529,42 @@
       "exclusive": false,
       "locations": []
     },
-    "un Pakkomon di nome Brumolo 👻": {
-      "name": "un Pakkomon di nome Brumolo 👻",
+    "un Pakkomon": {
+      "name": "un Pakkomon",
+      "rarity": "X",
+      "usable": true,
+      "sources": [
+        "special"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "last_seen": "2025-11-27T19:34:02-05:00",
+      "observations": 8,
+      "use": {
+        "observations": 2,
+        "shapes": [
+          {
+            "parts": [
+              "equipaggi il tuo Zampirlo 🐯 con una spada di cartone [S]."
+            ],
+            "count": 2,
+            "slots": []
+          }
+        ],
+        "result": "fixed",
+        "consumed": null,
+        "consumed_evidence": {
+          "yes": 0,
+          "no": 0
+        },
+        "requirements": []
+      },
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un floppy disk incrinato": {
+      "name": "un floppy disk incrinato",
       "rarity": "X",
       "usable": false,
       "sources": [
@@ -538,7 +572,49 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:27:32-05:00",
+      "from_fight": [
+        "Codicillo 💾"
+      ],
+      "last_seen": "2025-11-27T19:29:32-05:00",
+      "observations": 2,
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "un granello di sale grosso": {
+      "name": "un granello di sale grosso",
+      "rarity": "R",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "from_fight": [
+        "Gigante di Sale 🧂"
+      ],
+      "last_seen": "2025-11-27T19:30:32-05:00",
+      "observations": 4,
+      "sources_inferred": true,
+      "exclusive": false,
+      "locations": []
+    },
+    "una spada di cartone": {
+      "name": "una spada di cartone",
+      "rarity": "S",
+      "usable": false,
+      "sources": [
+        "adventure"
+      ],
+      "used_in": [],
+      "made_by": [],
+      "used_with": [
+        "un Pakkomon"
+      ],
+      "pakkomon_roles": [
+        "equipment"
+      ],
+      "last_seen": "2025-11-27T19:31:32-05:00",
       "observations": 2,
       "sources_inferred": true,
       "exclusive": false,

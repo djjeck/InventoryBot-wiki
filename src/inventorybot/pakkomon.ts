@@ -25,6 +25,7 @@ import {
   type PakkomonFightEvent,
   type PakkomonReadiness,
   type PakkomonRecordEvent,
+  type PakkomonRole,
   type PakkomonUse,
   type UseEvent,
 } from './types.ts';
@@ -34,6 +35,29 @@ const groups = (m: RegExpExecArray): Groups => m.groups ?? {};
 
 /** The name of a Pakkomon as an inventory item ("un Pakkomon di nome Zampirlo 🐯"). */
 export const pakkomonItem = (name: string): string => `un Pakkomon di nome ${name}`;
+
+/**
+ * The wiki's one item for every Pakkomon: each is a creature of its owner, not an item of
+ * the game, so the wiki learns only what holds for any of them.
+ */
+export const PAKKOMON = 'un Pakkomon';
+
+/** An item name as the wiki keeps it: any Pakkomon as PAKKOMON. */
+export const wikiItemName = (name: string): string =>
+  name.startsWith(pakkomonItem('')) ? PAKKOMON : name;
+
+/** The role a use gives the item used, for Pakkomon (equipping gives one to the item taken). */
+export const USE_ROLES: Readonly<Record<PakkomonUse, PakkomonRole | null>> = {
+  hatch: 'sphere',
+  equip: null,
+  scan: 'scanner',
+  heal: 'heal',
+  power_up: 'power_up',
+  probe: 'probe',
+  scale: 'scale',
+  extract: 'extractor',
+  customise: 'customisation',
+};
 
 /**
  * The ending phrases of a fight, from the narrowest win, each with the loser's stun it

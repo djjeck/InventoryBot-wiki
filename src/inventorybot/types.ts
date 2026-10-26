@@ -232,6 +232,18 @@ export interface UseEvent {
 export type PakkomonUse =
   'hatch' | 'equip' | 'scan' | 'heal' | 'power_up' | 'probe' | 'scale' | 'extract' | 'customise';
 
+/** What an item is for, with Pakkomon (docs/bot-protocol.md 6.18). */
+export type PakkomonRole =
+  | 'sphere'
+  | 'equipment'
+  | 'scanner'
+  | 'heal'
+  | 'power_up'
+  | 'probe'
+  | 'scale'
+  | 'extractor'
+  | 'customisation';
+
 /** A Pakkomon of the scanner's list, and the seconds before it can fight (0: ready). */
 export interface PakkomonReadiness {
   pakkomon: string;
@@ -543,6 +555,13 @@ export interface WikiItem {
   from_use?: string[];
   /** The events of the game that give it: a level-up, a lottery draw; only when there are some. */
   rewards?: WikiReward[];
+  /**
+   * The Pakkomon whose defeat, or a hit on whom (a boss), gave it, sorted: the bot's own
+   * and the bosses; only when there are some.
+   */
+  from_fight?: string[];
+  /** What it is for, with Pakkomon (equipment, healing...), sorted; only when it has a role. */
+  pakkomon_roles?: PakkomonRole[];
   last_seen: string | null;
   /** How many observations name it: replies of the bot and channel cards, each once. */
   observations: number;

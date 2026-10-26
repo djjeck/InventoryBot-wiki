@@ -1311,12 +1311,12 @@ describe('replies naming the item used', () => {
       scan,
     ]);
     expect([f(equip)['used_item'], f(scan)['used_item']]).toStrictEqual([
-      'un Pakkomon di nome Brumolo 👻',
+      'un Pakkomon',
       'uno scanner da tasca 📟',
     ]);
   });
 
-  it('equipping_a_pakkomon_unknown_as_an_item_is_not_guessed_from_the_command', () => {
+  it('equipping_a_pakkomon_never_listed_is_a_use_of_the_one_pakkomon', () => {
     // "caps" also names an item, but the reply says the Pakkomon was used.
     const equip = ev(
       '@djjeck, equipaggi il tuo Brumolo 👻 con una caps rossa [C].',
@@ -1329,7 +1329,7 @@ describe('replies naming the item used', () => {
       ev(T.inventory([['una caps rossa', 'C', 1, true]]), '/inventario', { t: 0 }),
       equip,
     ]);
-    expect(f(equip)).not.toHaveProperty('used_item');
+    expect(f(equip)['used_item']).toBe('un Pakkomon');
     expect(wiki.items['una caps rossa']).not.toHaveProperty('use');
   });
 });
@@ -1362,12 +1362,7 @@ describe('items used with another', () => {
       // Neither the item used nor what a use gives.
       wiki.items['un baule di ebano 📦']?.used_with,
       wiki.items["una moneta d'oro"]?.used_with,
-    ]).toStrictEqual([
-      ['un baule di ebano 📦'],
-      ['un Pakkomon di nome Brumolo 👻'],
-      undefined,
-      undefined,
-    ]);
+    ]).toStrictEqual([['un baule di ebano 📦'], ['un Pakkomon'], undefined, undefined]);
   });
 });
 
@@ -1445,13 +1440,107 @@ describe('Pakkomon sphere', () => {
     expect(f(ball)['used_item']).toBe('una sfera Frullo 💊');
     expect([
       wiki.items['una sfera Frullo 💊']?.use?.observations,
-      wiki.items['un Pakkomon di nome Brumolo 👻']?.rarity,
-    ]).toStrictEqual([1, 'X']);
+      wiki.items['una sfera Frullo 💊']?.pakkomon_roles,
+      wiki.items['un Pakkomon']?.rarity,
+      wiki.items['un Pakkomon']?.from_use,
+      Object.hasOwn(wiki.items, 'un Pakkomon di nome Brumolo 👻'),
+    ]).toStrictEqual([1, ['sphere'], 'X', ['una sfera Frullo 💊'], false]);
     expect([
       kb.report.has('unresolved_drop'),
       kb.report.has('unresolved_use'),
       state.inventory['un Pakkomon di nome Brumolo 👻']?.qty,
     ]).toStrictEqual([false, false, 1]);
+  });
+});
+
+describe('Pakkomon in the wiki', () => {
+  const inGroup = { dm: false, chat: 'Gruppo', match: 'user' } as const;
+
+  it('every_pakkomon_is_the_one_pakkomon_of_the_wiki', () => {
+    const { wiki } = runBuild([
+      ev(
+        T.inventory([
+          ['un Pakkomon di nome Brumolo 👻', 'X', 1, true],
+          ['un Pakkomon di nome Zampirlo 🐯', 'X', 1, true],
+        ]),
+        '/inventario',
+        { t: 0 }
+      ),
+      ev('@lucia_b, dai 1x un Pakkomon di nome Tibolah 🐸 a @djjeck', '/dai djjeck tib', {
+        t: 1,
+        ...inGroup,
+      }),
+    ]);
+    expect(Object.keys(wiki.items).filter((n) => n.includes('Pakkomon'))).toStrictEqual([
+      'un Pakkomon',
+    ]);
+    expect(wiki.items['un Pakkomon']?.observations).toBe(2);
+  });
+
+  it('a_use_on_a_pakkomon_gives_its_item_a_role_and_the_one_pakkomon', () => {
+    const { wiki } = runBuild([
+      ev(T.inventory([['un unguento di menta', 'N', 2, true]]), '/inventario', { t: 0 }),
+      ev(
+        '@djjeck, spalmi un Pakkomon di nome Zampirlo 🐯 con un unguento di menta e dopo pochi istanti torna in perfetta forma e pronto a combattere!',
+        '/usa unguento # zamp',
+        { t: 1 }
+      ),
+    ]);
+    const it = wiki.items['un unguento di menta'];
+    expect([it?.pakkomon_roles, it?.used_with, it?.use?.observations]).toStrictEqual([
+      ['heal'],
+      ['un Pakkomon'],
+      1,
+    ]);
+  });
+
+  it('a_heal_paired_with_another_item_is_moved_back_and_gives_it_no_role', () => {
+    const heal = (pk: string): string =>
+      `@djjeck, spalmi un Pakkomon di nome ${pk} con un unguento di menta e dopo pochi istanti torna in perfetta forma e pronto a combattere!`;
+    const stray = ev(heal('Brumolo 👻'), '/usa dado', { t: 20 });
+    const { wiki } = runBuild([
+      ev(
+        T.inventory([
+          ['un unguento di menta', 'N', 9, true],
+          ['un dado', 'C', 1, true],
+        ]),
+        '/inventario',
+        { t: 0 }
+      ),
+      // On two Pakkomon: one shape, as the Pakkomon's name is blanked.
+      ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((t) =>
+        ev(heal(t % 2 ? 'Zampirlo 🐯' : 'Tibolah 🐸'), '/usa unguento # x', { t })
+      ),
+      stray,
+      ev('@djjeck, tiri il dado e fai 5!', '/usa dado', { t: 21 }),
+    ]);
+    expect([
+      f(stray)['used_item'],
+      wiki.items['un unguento di menta']?.use?.observations,
+      wiki.items['un dado']?.pakkomon_roles,
+      wiki.items['un dado']?.used_with,
+    ]).toStrictEqual(['un unguento di menta', 10, undefined, undefined]);
+  });
+
+  it('prizes_come_from_the_fight_and_records_name_equipment', () => {
+    const { wiki } = runBuild([
+      ev(
+        '@lucia_b, i due pakkomon iniziano a combattere furiosamente. Alla fine Tibolah 🐸 di @lucia_b colpisce Gigante di Sale 🧂 di @InventoryBot per un soffio!\n@lucia_b ottiene un granello di sale grosso [R]!\nGigante di Sale 🧂 ha qualche graffio!',
+        '/usa tib # @InventoryBot',
+        { t: 0, ...inGroup }
+      ),
+      ev(
+        "@lucia_b, Tibolah 🐸 ha vinto 3 battaglie e ne ha perse 1.\nE' equipaggiato con una spada di cartone [S].\nE' pronto a combattere.",
+        '/usa tib',
+        { t: 1, ...inGroup }
+      ),
+    ]);
+    expect([
+      wiki.items['un granello di sale grosso']?.from_fight,
+      wiki.items['un granello di sale grosso']?.rarity,
+      wiki.items['una spada di cartone']?.pakkomon_roles,
+      Object.keys(wiki.items).some((n) => n.includes('Tibolah')),
+    ]).toStrictEqual([['Gigante di Sale 🧂'], 'R', ['equipment'], false]);
   });
 });
 

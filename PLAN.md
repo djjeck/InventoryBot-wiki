@@ -25,26 +25,11 @@ ending phrase.
 Every Pakkomon reply is a typed event (`pakkomon.ts`), and every player it names, in its text or
 after a `/usa`'s `#`, is anonymised.
 
-## Phase 3: the wiki without Pakkomon ⬜
+## Phase 3: the wiki without Pakkomon ✅
 
-Goal: no Pakkomon is a wiki item; the wiki learns what acts on any Pakkomon and what fights give.
-
-### 3.1 Pakkomon are not items ⬜
-
-- ⬜ No `un Pakkomon di nome …` item: a sphere gives "a Pakkomon", an item used on one is used with
-  "a Pakkomon" (`used_with`), never with a named one.
-- ⬜ Inventory and `/ricetta` lists ignore Pakkomon lines for the wiki; the inventory check still
-  agrees with the bot.
-
-### 3.2 Items for Pakkomon ⬜
-
-- ⬜ An item learns its role from how it was used on a Pakkomon: equipment, power-up, healing, tool
-  (scanner, probe, scale, extractor, kit), sphere.
-- ⬜ Fight prizes as a source of the item: beating one of the bot's Pakkomon or hitting a boss (with
-  its name, as the replies give it).
-
-Acceptance: on the real exports the wiki has no Pakkomon among its items; the items seen used on
-Pakkomon show their role; the golden wiki changes accordingly.
+Every Pakkomon is the wiki's one item `un Pakkomon`; items learn their role with Pakkomon
+(`pakkomon_roles`) and fight prizes their opponent (`from_fight`). Known gap: the uses of an item
+whose command matches two items and whose reply names neither (`/usa sonda`) stay unresolved.
 
 ## Phase 4: the owner's Pakkomon ⬜
 

@@ -37,7 +37,7 @@ import {
   WS_CLASS,
 } from '#src/lib/text.ts';
 import { INVENTORY_COMMANDS, useItems, useTakes } from './classify.ts';
-import { pakkomonItem } from './pakkomon.ts';
+import { PAKKOMON, USE_ROLES, wikiItemName } from './pakkomon.ts';
 import { itemName, parseDuration, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
@@ -45,6 +45,7 @@ import {
   type BuildEvent,
   type EventRecord,
   type InventoryEvent,
+  type PakkomonRole,
   type TravelRequirementEvent,
   type Wiki,
   type WikiItem,
@@ -216,6 +217,10 @@ export interface KbItem {
   fromUse: Set<string>;
   /** The events of the game that give it (resolveRewards). */
   rewards: Set<WikiReward>;
+  /** The Pakkomon a fight against which gave it (a prize). */
+  fromFight: Set<string>;
+  /** What it is for, with Pakkomon. */
+  pakkomonRoles: Set<PakkomonRole>;
   last_seen: string | null;
   /** Where it is found: the owner's drops and the channels' place cards; only exported for exclusive items. */
   dropLocations: Set<string>;
@@ -357,7 +362,9 @@ export class KB {
       obj.firstSeen = this.now;
   }
 
-  item(name: string, rarity: string | null = null, usable: boolean | null = null): KbItem {
+  /** The item of this name, a Pakkomon as the wiki's one Pakkomon (wikiItemName). */
+  item(itemName: string, rarity: string | null = null, usable: boolean | null = null): KbItem {
+    const name = wikiItemName(itemName);
     let it = this.items.get(name);
     if (it === undefined) {
       it = {
@@ -370,6 +377,8 @@ export class KB {
         usedWith: new Set(),
         fromUse: new Set(),
         rewards: new Set(),
+        fromFight: new Set(),
+        pakkomonRoles: new Set(),
         last_seen: null,
         dropLocations: new Set(),
         firstSeen: null,
@@ -965,7 +974,15 @@ function merge(kb: KB, events: BuildEvent[], player: string | null): Use[] {
       kb.item(e.item, e.rarity, e.usable);
     } else if (e.type === 'use') {
       for (const x of e.items) kb.item(x.name, x.rarity, x.usable);
+      // A use on a Pakkomon: the wiki's one Pakkomon is what it is used with.
+      if ((e.pakkomon ?? []).length > 0) kb.item(PAKKOMON);
       uses.push(e);
+    } else if (e.type === 'pakkomon_fight' && e.prize !== null) {
+      // A prize: the item comes from the fight against the Pakkomon its winner beat or hit.
+      kb.item(e.prize.name, e.prize.rarity, e.prize.usable).fromFight.add(e.loser.pakkomon);
+    } else if (e.type === 'pakkomon_record' && e.equipment !== null) {
+      const x = e.equipment;
+      kb.item(x.name, x.rarity, x.usable).pakkomonRoles.add('equipment');
     }
   }
   kb.event = null;
@@ -1305,11 +1322,19 @@ export const isFailedUse = (text: string): boolean => hasAny(text, USE_FAILED);
 
 const DIGITS = /\p{Nd}+/gu;
 
-/** Reply shape (first line, numbers blanked), used to attribute ambiguous /usa queries. */
-export function useTemplate(text: string): string {
+/**
+ * Reply shape (first line, numbers and the Pakkomon it names blanked), used to attribute
+ * ambiguous /usa queries.
+ */
+export function useTemplate(text: string, pakkomon: readonly string[] = []): string {
   const i = text.indexOf('\n');
-  return (i < 0 ? text : text.slice(0, i)).replace(DIGITS, 'N');
+  let line = i < 0 ? text : text.slice(0, i);
+  for (const p of pakkomon) line = line.split(p).join('\u0000');
+  return line.replace(DIGITS, 'N');
 }
+
+/** A use's shape: useTemplate with the Pakkomon it names. */
+const templateOf = (e: UseLike): string => useTemplate(e.text, e.pakkomon ?? []);
 
 /**
  * Items a /usa query can name: those its part before "#" names, the item's argument
@@ -1364,13 +1389,13 @@ export const USE_SHAPE_SHARE = 0.9;
 type ShapeCounts = Map<string, Map<string, number>>;
 
 /** A /usa reply while its item is resolved: the item it is attributed to, once known. */
-type UseLike = Pick<Use, 'text' | 'query'> & Partial<Pick<Use, 'named' | 'used_item'>>;
+type UseLike = Pick<Use, 'text' | 'query'> & Partial<Pick<Use, 'named' | 'used_item' | 'pakkomon'>>;
 
 function shapeCounts(uses: readonly UseLike[]): ShapeCounts {
   const out: ShapeCounts = new Map();
   for (const e of uses) {
     if (!truthy(e.used_item)) continue;
-    const k = useTemplate(e.text);
+    const k = templateOf(e);
     let m = out.get(k);
     if (m === undefined) out.set(k, (m = new Map()));
     m.set(e.used_item, (m.get(e.used_item) ?? 0) + 1);
@@ -1406,7 +1431,7 @@ export function mispairedUses<U extends UseLike>(uses: readonly U[]): U[] {
     if (!truthy(e.used_item) || isFailedUse(e.text)) continue;
     let m = byItem.get(e.used_item);
     if (m === undefined) byItem.set(e.used_item, (m = new Map()));
-    const k = useTemplate(e.text);
+    const k = templateOf(e);
     m.set(k, (m.get(k) ?? 0) + 1);
   }
   const mainShape = new Map<string, string>();
@@ -1417,7 +1442,7 @@ export function mispairedUses<U extends UseLike>(uses: readonly U[]): U[] {
   return uses.filter((e) => {
     const item = e.used_item;
     if (!truthy(item) || isFailedUse(e.text)) return false;
-    const k = useTemplate(e.text);
+    const k = templateOf(e);
     const main = mainShape.get(item);
     // A shape another item dominates is moved to that item instead (repairUses).
     return dominantItem(counts.get(k)) === null && truthy(main) && main !== k;
@@ -1434,7 +1459,7 @@ function repairUses(uses: readonly Use[]): void {
   for (const e of uses) {
     const item = e.used_item;
     if (!truthy(item) || isFailedUse(e.text)) continue;
-    const owner = dominantItem(counts.get(useTemplate(e.text)));
+    const owner = dominantItem(counts.get(templateOf(e)));
     if (owner !== null && owner !== item) e.used_item = owner;
   }
 }
@@ -1464,16 +1489,17 @@ export function attributeUses<U extends UseLike>(
     // A reply that names its item (a Pakkomon sphere's) is stronger evidence than the command: the items
     // matching every word of that name (usable ones first), and the query's candidates only without any.
     let c: string[] = [];
-    if (truthy(e.named)) {
+    // A Pakkomon is the wiki's one Pakkomon: the command, which names the Pakkomon in short
+    // ("/usa cesa # ..."), could only point to another item.
+    const pakkomon = truthy(e.named) && wikiItemName(e.named) === PAKKOMON;
+    if (pakkomon) {
+      if (items.has(PAKKOMON)) c = [PAKKOMON];
+    } else if (truthy(e.named)) {
       const words = norm(e.named);
       c = fitting(usable, words);
       if (c.length === 0) c = fitting(all, words);
     }
-    // A Pakkomon the wiki does not know as an item: the command, which names the
-    // Pakkomon in short ("/usa cesa # ..."), could only point to another item.
-    const unknownPakkomon =
-      truthy(e.named) && e.named.startsWith(pakkomonItem('')) && c.length === 0;
-    if (c.length === 0 && !unknownPakkomon) c = candidates(q);
+    if (c.length === 0 && !pakkomon) c = candidates(q);
     if (c.length > 1) {
       // prefer the item named explicitly in, or sharing most words with, the reply
       const named = c.filter((n) => e.text.includes(n));
@@ -1497,7 +1523,7 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
   const templates = shapeCounts(uses);
   // Still ambiguous ("/usa dado"): take the item with USE_SHAPE_SHARE of the replies of the same shape.
   for (const [e, c] of pending) {
-    const t = dominantItem(templates.get(useTemplate(e.text)), c.length > 0 ? new Set(c) : null);
+    const t = dominantItem(templates.get(templateOf(e)), c.length > 0 ? new Set(c) : null);
     if (t !== null) e.used_item = t;
     else
       kb.addReport({
@@ -1553,15 +1579,36 @@ function resolveUses(kb: KB, events: BuildEvent[], recorded: readonly Use[]): vo
   // equipment) is used with that item, when the wiki knows it otherwise: a name read from
   // a reply's wording alone could make another use's command ambiguous.
   // And what it gives comes from it.
+  // An item equipping a Pakkomon (what the equipping takes) is equipment.
   for (const e of uses)
     if (truthy(e.used_item)) {
       for (const x of e.takes ?? []) {
-        const it = kb.items.get(x);
-        if (it !== undefined && x !== e.used_item) it.usedWith.add(e.used_item);
+        const it = kb.items.get(wikiItemName(x));
+        if (it !== undefined && it.name !== e.used_item) {
+          it.usedWith.add(e.used_item);
+          if (e.pakkomon_use === 'equip') it.pakkomonRoles.add('equipment');
+        }
       }
-      for (const x of e.items)
-        if (x.name !== e.used_item) (kb.items.get(x.name) as KbItem).fromUse.add(e.used_item);
+      for (const x of e.items) {
+        const it = kb.items.get(wikiItemName(x.name)) as KbItem;
+        if (it.name !== e.used_item) it.fromUse.add(e.used_item);
+      }
     }
+  // An item's role, and that it is used with a Pakkomon, from most of its successful uses:
+  // a use paired with the wrong command gives none.
+  for (const [name, es] of byItem) {
+    const ok = es.filter((e) => !isFailedUse(e.text));
+    const roles = new Map<PakkomonRole, number>();
+    let onPakkomon = 0;
+    for (const e of ok) {
+      const role = e.pakkomon_use === undefined ? null : USE_ROLES[e.pakkomon_use];
+      if (role !== null) roles.set(role, (roles.get(role) ?? 0) + 1);
+      if ((e.pakkomon ?? []).length > 0) onPakkomon++;
+    }
+    const it = kb.items.get(name) as KbItem;
+    for (const [role, n] of roles) if (2 * n > ok.length) it.pakkomonRoles.add(role);
+    if (name !== PAKKOMON && 2 * onPakkomon > ok.length) it.usedWith.add(PAKKOMON);
+  }
   for (const [name, es] of byItem) {
     const ok = es.filter((e) => !isFailedUse(e.text)).map((e) => e.text);
     const failed = es.filter((e) => isFailedUse(e.text)).map((e) => e.text);
@@ -1947,6 +1994,8 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       ...(it.usedWith.size > 0 && { used_with: sortedStrings(it.usedWith) }),
       ...(it.fromUse.size > 0 && { from_use: sortedStrings(it.fromUse) }),
       ...(it.rewards.size > 0 && { rewards: [...it.rewards].sort() }),
+      ...(it.fromFight.size > 0 && { from_fight: sortedStrings(it.fromFight) }),
+      ...(it.pakkomonRoles.size > 0 && { pakkomon_roles: [...it.pakkomonRoles].sort() }),
       last_seen: it.last_seen,
       observations: it.seenIn.size,
       ...(it.use !== undefined && { use: it.use }),

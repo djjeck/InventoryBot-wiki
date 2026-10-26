@@ -75,7 +75,13 @@ export function verifyPairs(
 
   // The /usa replies, attributed to their items as phase 5 does; the group ones that do
   // not fit their item are dissolved.
-  const uses: { i: number; text: string; query: string | null; named?: string }[] = [];
+  const uses: {
+    i: number;
+    text: string;
+    query: string | null;
+    named?: string;
+    pakkomon?: string[];
+  }[] = [];
   for (const [i, e] of events.entries()) {
     if (e.type !== 'use') continue;
     uses.push({
@@ -83,6 +89,7 @@ export function verifyPairs(
       text: e.text,
       query: e.query,
       ...(e.named === undefined ? {} : { named: e.named }),
+      ...(e.pakkomon === undefined ? {} : { pakkomon: e.pakkomon }),
     });
   }
   if (uses.some((u) => isGroupPair(replies[u.i] as BotReply))) {
