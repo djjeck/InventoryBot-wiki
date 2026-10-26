@@ -288,6 +288,10 @@ This project must stay on the right side of that.
     additions to the universe.
 - **Group history is other players' discoveries.** Using it for one's own page is what any member
   can do by scrolling the group; publishing it is not. Keep it out of anything shared.
+- **Group exports are supported, never suggested.** The pipeline reads them, but nothing a player
+  sees (the web app, `README.md`) mentions, encourages or explains exporting a group: they export
+  their chat with the bot and, optionally, the encyclopedia channels. This holds until the game's
+  author says otherwise. Developer docs (`CLAUDE.md`, `docs/`) still describe group exports.
 - **The published page is the tool, never data.** GitHub Pages serves the web app, published from
   `main` by the CI workflow; the repository and the page contain no game content, other than the
   bot's own profile picture (`src/web/avatar.png`), its public branding, which the game's author may

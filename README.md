@@ -12,8 +12,8 @@ vuota: la pagina mostra la chat con il bot di un giocatore inventato, appena arr
 la wiki. Oggetti, ricette e luoghi sono quelli del gioco, limitati ai primi passi. L'esempio
 sparisce appena aggiungi una tua esportazione.
 
-1. In **Telegram Desktop** apri la chat con il bot (o un gruppo in cui si gioca), menu **⋮** →
-   **Esporta cronologia chat**, formato **HTML**; foto e altri allegati non servono.
+1. In **Telegram Desktop** apri la chat con il bot, menu **⋮** → **Esporta cronologia chat**,
+   formato **HTML**; foto e altri allegati non servono.
 2. Apri la pagina, premi **Importa** in alto a destra, poi **Aggiungi esportazione**, e scegli la
    cartella creata dall'esportazione (o una cartella che ne contiene più d'una).
 3. Facoltativo: esporta allo stesso modo i tre canali enciclopedici che il bot indica in `/gruppi`
