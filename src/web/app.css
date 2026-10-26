@@ -142,6 +142,7 @@ main:focus {
   image-rendering: pixelated;
 }
 .actions {
+  align-self: flex-start;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
