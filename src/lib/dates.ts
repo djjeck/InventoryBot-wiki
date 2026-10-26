@@ -144,6 +144,22 @@ export function formatIso(d: ZonedDate): string {
   );
 }
 
+/** An ISO date `seconds` later, with the same offset; null if it is not one. */
+export function isoPlusSeconds(s: string | null | undefined, seconds: number): string | null {
+  const d = parseIsoDate(s);
+  if (d === null) return null;
+  const t = new Date((epochSeconds(d) + seconds + d.offsetMinutes * 60) * 1000);
+  return formatIso({
+    year: t.getUTCFullYear(),
+    month: t.getUTCMonth() + 1,
+    day: t.getUTCDate(),
+    hour: t.getUTCHours(),
+    minute: t.getUTCMinutes(),
+    second: t.getUTCSeconds(),
+    offsetMinutes: d.offsetMinutes,
+  });
+}
+
 /** Epoch seconds of an ISO date, or null if it is not one. */
 export function isoDateSeconds(s: string | null | undefined): number | null {
   const d = parseIsoDate(s);

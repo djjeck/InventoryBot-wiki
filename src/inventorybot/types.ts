@@ -686,6 +686,46 @@ export interface Holding {
   via: HoldingVia;
 }
 
+/**
+ * One of the owner's Pakkomon (player-pakkomon.ts), now or once: what the exports show of
+ * it. Dates are ISO.
+ */
+export interface PlayerPakkomon {
+  /** Its name and emoji, as last written. */
+  name: string;
+  /** How it came to the owner: hatched from a sphere, or received from a player; null when not shown. */
+  came: { via: 'hatched' | 'received'; from: string | null; date: string | null } | null;
+  /** The day it was hatched and by whom, as its record says. */
+  born: string | null;
+  maker: string | null;
+  first_seen: string | null;
+  last_seen: string | null;
+  /**
+   * No longer the owner's: given to a player, extracted, or left out of a list of all their
+   * Pakkomon (the scanner's, a complete inventory); null while the owner has it.
+   */
+  gone: { via: 'given' | 'extracted' | 'unlisted'; to: string | null; date: string | null } | null;
+  /** Its latest record. */
+  record: { wins: number; losses: number; date: string | null } | null;
+  /** Its equipment, from the latest equipping or record; null when it has none or none is known. */
+  equipment: string | null;
+  /** The power-ups its latest record shows, one icon each. */
+  power_ups: string[];
+  /** The items the owner gave it as power-ups. */
+  power_up_items: string[];
+  /** The fights the exports show: won, lost, and the wins after which it learned something. */
+  fights: { won: number; lost: number; learned: number };
+  /**
+   * Its widest win: the stun its ending phrase states, in minutes, which its strength and
+   * equipment's bonus together reach at least.
+   */
+  best_win: { min: number; max: number | null } | null;
+  /** Until when it is stunned, from the latest stun shown; null when ready, or not known. */
+  stunned_until: string | null;
+  /** The probe's latest reading of it. */
+  probe: string | null;
+}
+
 /** The player state: the export owner's own state. */
 export interface PlayerState {
   player: string | null;
@@ -705,4 +745,9 @@ export interface PlayerState {
    * estimate of that moment, and those whose missing units it got right.
    */
   inventory_check: { compared: number; agreed: number };
+  /**
+   * The owner's Pakkomon, by their name (the items and the inventory count them as the
+   * wiki's one Pakkomon), current ones first, then by name.
+   */
+  pakkomon: PlayerPakkomon[];
 }

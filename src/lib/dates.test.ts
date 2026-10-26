@@ -3,6 +3,7 @@ import {
   formatIso,
   formatWindowsDate,
   isoDateSeconds,
+  isoPlusSeconds,
   isTimeZone,
   localNowIso,
   parseWindowsDate,
@@ -101,6 +102,12 @@ describe('dates', () => {
     expect(isoDateSeconds('2025-11-27T19:00:00Z')).toBeNull();
     expect(isoDateSeconds('garbage')).toBeNull();
     expect(isoDateSeconds(null)).toBeNull();
+  });
+
+  it('isoPlusSeconds keeps the offset across days and months', () => {
+    expect(isoPlusSeconds('2025-11-30T23:30:00-05:00', 3600)).toBe('2025-12-01T00:30:00-05:00');
+    expect(isoPlusSeconds('2025-03-01T00:00:00+05:30', -1)).toBe('2025-02-28T23:59:59+05:30');
+    expect(isoPlusSeconds(null, 1)).toBeNull();
   });
 
   it('localNowIso is the local time with its offset', () => {

@@ -22,12 +22,9 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un Pakkomon": {
-      "first_seen": "2025-11-27T19:33:01-05:00",
+      "first_seen": "2025-11-27T19:27:31-05:00",
       "used": 1,
       "last_used": "2025-11-27T19:33:01-05:00"
-    },
-    "un Pakkomon di nome Brumolo 👻": {
-      "first_seen": "2025-11-27T19:27:31-05:00"
     },
     "un apriscatole storto": {
       "first_seen": "2025-11-27T19:05:01-05:00"
@@ -162,7 +159,7 @@
     }
   },
   "inventory": {
-    "un Pakkomon di nome Brumolo 👻": {
+    "un Pakkomon": {
       "qty": 2,
       "exact": false,
       "date": "2025-11-27T19:27:31-05:00",
@@ -214,5 +211,63 @@
   "inventory_check": {
     "compared": 0,
     "agreed": 0
-  }
+  },
+  "pakkomon": [
+    {
+      "name": "Brumolo 👻",
+      "came": {
+        "via": "hatched",
+        "from": "Sfera Frullo",
+        "date": "2025-11-27T19:27:31-05:00"
+      },
+      "born": null,
+      "maker": null,
+      "first_seen": "2025-11-27T19:27:31-05:00",
+      "last_seen": "2025-11-27T19:32:32-05:00",
+      "gone": null,
+      "record": null,
+      "equipment": null,
+      "power_ups": [],
+      "power_up_items": [],
+      "fights": {
+        "won": 0,
+        "lost": 0,
+        "learned": 0
+      },
+      "best_win": null,
+      "stunned_until": null,
+      "probe": null
+    },
+    {
+      "name": "Zampirlo 🐯",
+      "came": null,
+      "born": "2025-04-18",
+      "maker": "mario_r",
+      "first_seen": "2025-11-27T19:28:01-05:00",
+      "last_seen": "2025-11-27T19:36:32-05:00",
+      "gone": null,
+      "record": {
+        "wins": 54,
+        "losses": 44,
+        "date": "2025-11-27T19:31:32-05:00"
+      },
+      "equipment": "una spada di cartone",
+      "power_ups": [
+        "🏆",
+        "💧"
+      ],
+      "power_up_items": [],
+      "fights": {
+        "won": 8,
+        "lost": 2,
+        "learned": 0
+      },
+      "best_win": {
+        "min": 50,
+        "max": 59
+      },
+      "stunned_until": null,
+      "probe": "Decente"
+    }
+  ]
 }

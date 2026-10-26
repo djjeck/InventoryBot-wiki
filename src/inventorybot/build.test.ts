@@ -1448,8 +1448,14 @@ describe('Pakkomon sphere', () => {
     expect([
       kb.report.has('unresolved_drop'),
       kb.report.has('unresolved_use'),
-      state.inventory['un Pakkomon di nome Brumolo 👻']?.qty,
-    ]).toStrictEqual([false, false, 1]);
+      state.inventory['un Pakkomon']?.qty,
+      state.pakkomon.map((p) => [p.name, p.came]),
+    ]).toStrictEqual([
+      false,
+      false,
+      1,
+      [['Brumolo 👻', { via: 'hatched', from: 'una sfera Frullo 💊', date: f(ball)['date'] }]],
+    ]);
   });
 });
 

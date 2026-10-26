@@ -31,27 +31,10 @@ Every Pakkomon is the wiki's one item `un Pakkomon`; items learn their role with
 (`pakkomon_roles`) and fight prizes their opponent (`from_fight`). Known gap: the uses of an item
 whose command matches two items and whose reply names neither (`/usa sonda`) stay unresolved.
 
-## Phase 4: the owner's Pakkomon ⬜
+## Phase 4: the owner's Pakkomon ✅
 
-Goal: the player state holds the owner's Pakkomon, each with its history.
-
-### 4.1 The owner's Pakkomon ⬜
-
-- ⬜ A Pakkomon of the owner's: name, emoji, how it came (hatched from which sphere, received from
-  whom), birth date, given away (to whom, when), record, equipment, power-ups, learnings, last stun,
-  last seen.
-- ⬜ Which fights count: those in which an owner's Pakkomon fights, whoever challenged (a decision
-  for the data rules, to write in `CLAUDE.md`).
-- ⬜ Identity by name; a Pakkomon gone without a trace (renamed, extracted) stays with its last
-  known state.
-
-### 4.2 Strength estimate ⬜
-
-- ⬜ From the hardcoded rules: lower bounds from the stuns it inflicted, the probe's band, the
-  scale's comparisons; shown as a range, never as a value the game gives.
-
-Acceptance: `npm run inspect -- --player <a player with Pakkomon>` lists their Pakkomon with records
-that agree with their latest record replies; unit tests on synthetic fights.
+The player state lists the owner's Pakkomon (`player-pakkomon.ts`), each followed by name, with its
+fights, widest win (the strength estimate the rules allow) and probe reading.
 
 ## Phase 5: the Pakkomon tab ⬜
 

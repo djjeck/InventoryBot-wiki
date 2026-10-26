@@ -80,5 +80,6 @@
   "inventory_check": {
     "compared": 1,
     "agreed": 1
-  }
+  },
+  "pakkomon": []
 }

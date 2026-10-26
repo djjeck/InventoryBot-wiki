@@ -139,20 +139,22 @@ order:
    facts about the game the same for every player (items, recipes, places, and the rarity legend,
    which `build.ts` states with the rest of the rarity system rather than reading it from the bot's
    `/faq`), and the owner's own state (recipes made, items seen and how often each was used, places
-   visited, an estimate of the inventory and how often it agreed with the bot's `/ricetta` lists),
-   kept apart so that the wiki can be shared. `build` merges the events into a knowledge base,
-   newest observation first, an item's `/usa` replies kept by shape, what varies in them described
-   as the channels' cards do (`use-shapes.ts`: "tiri il dado e fai N!", N from 1 to 6), and an item
-   a use takes (a chest's key, a machine's inputs, a Pakkomon's equipment, `takes` in the use event)
-   used with the item used (`used_with`), and where an item comes from besides adventures and
-   recipes: the items whose use gave it (`from_use`), a level-up or a lottery draw (`rewards`), a
-   fight against one of the bot's Pakkomon or a boss (`from_fight`). Every Pakkomon is the wiki's
-   one item `un Pakkomon` (`wikiItemName` in `pakkomon.ts`): each is a creature of its owner, so the
-   wiki learns only what holds for any of them, and an item learns what it is for with Pakkomon
-   (`pakkomon_roles`: equipment, healing, power-up…) from most of its uses, a use's shape leaving
-   the Pakkomon's name out. `toJson` writes the wiki, `playerState` the player state. Phase 5 reads
-   plain JSON copies of the events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates
-   them for `playerState`.
+   visited, an estimate of the inventory and how often it agreed with the bot's `/ricetta` lists,
+   and their Pakkomon, `player-pakkomon.ts`: each followed by name from its hatching or arrival to
+   its departure, given, extracted or left out of a list of all of them, with its record, equipment,
+   power-ups, fights, widest win and stun), kept apart so that the wiki can be shared. `build`
+   merges the events into a knowledge base, newest observation first, an item's `/usa` replies kept
+   by shape, what varies in them described as the channels' cards do (`use-shapes.ts`: "tiri il dado
+   e fai N!", N from 1 to 6), and an item a use takes (a chest's key, a machine's inputs, a
+   Pakkomon's equipment, `takes` in the use event) used with the item used (`used_with`), and where
+   an item comes from besides adventures and recipes: the items whose use gave it (`from_use`), a
+   level-up or a lottery draw (`rewards`), a fight against one of the bot's Pakkomon or a boss
+   (`from_fight`). Every Pakkomon is the wiki's one item `un Pakkomon` (`wikiItemName` in
+   `pakkomon.ts`): each is a creature of its owner, so the wiki learns only what holds for any of
+   them, and an item learns what it is for with Pakkomon (`pakkomon_roles`: equipment, healing,
+   power-up…) from most of its uses, a use's shape leaving the Pakkomon's name out. `toJson` writes
+   the wiki, `playerState` the player state. Phase 5 reads plain JSON copies of the events
+   (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates them for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply
@@ -275,7 +277,9 @@ import from the generic layer into either.
 - **Telegram user ids never leave phase 1** (`docs/telegram-export.md` §11.4): no output, report
   line or test fixture holds one.
 - **Other players teach the wiki, never the owner's state.** Their replies in group exports add
-  recipes, items and places, but only the owner's own events change the player state.
+  recipes, items and places, but only the owner's own events change the player state. One exception:
+  a fight in which one of the owner's Pakkomon takes part counts for it, whoever started the fight,
+  since the fight's reply goes to the player who did.
 - **Old data**: group exports span years, and the game and the bot's wording changed over them. An
   attribute keeps the date of the observation that set it, and only a newer one replaces it; never
   assume that an old message format or game state still holds.

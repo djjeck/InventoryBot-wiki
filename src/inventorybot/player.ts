@@ -48,7 +48,9 @@
  */
 import { isoDateSeconds } from '#src/lib/dates.ts';
 import { compareCodePoints } from '#src/lib/text.ts';
-import { inventoryScope, isFailedUse, isMine, type KB } from './build.ts';
+import { instant, inventoryScope, isFailedUse, isMine, type KB } from './build.ts';
+import { PAKKOMON } from './pakkomon.ts';
+import { ownerPakkomon, pakkomonOf } from './player-pakkomon.ts';
 import { type BuildEvent, type Holding, type HoldingVia, type PlayerState } from './types.ts';
 
 export class Holdings {
@@ -314,6 +316,31 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
   }
 
   const asOf = [...events].reverse().find((e) => isMine(e, player));
+  // Each Pakkomon is the owner's own (`pakkomon`): the items and the inventory count them
+  // as the wiki's one Pakkomon.
+  for (const [name, d] of [...firstSeen]) {
+    if (pakkomonOf(name) === null) continue;
+    firstSeen.delete(name);
+    const cur = firstSeen.get(PAKKOMON);
+    if (cur === undefined || (d !== null && instant(d) < instant(cur))) firstSeen.set(PAKKOMON, d);
+  }
+  let pakkomonHeld: Holding | null = null;
+  for (const [name, h] of [...hold.h]) {
+    if (pakkomonOf(name) === null) continue;
+    hold.h.delete(name);
+    if (h.qty <= 0) continue;
+    pakkomonHeld =
+      pakkomonHeld === null
+        ? { ...h }
+        : {
+            qty: pakkomonHeld.qty + h.qty,
+            exact: pakkomonHeld.exact && h.exact,
+            ...(instant(h.date) > instant(pakkomonHeld.date)
+              ? { date: h.date, via: h.via }
+              : { date: pakkomonHeld.date, via: pakkomonHeld.via }),
+          };
+  }
+  if (pakkomonHeld !== null) hold.h.set(PAKKOMON, pakkomonHeld);
   return {
     player,
     as_of: asOf === undefined ? null : (asOf.date ?? null),
@@ -339,5 +366,6 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     recipe_list: lastList,
     inventory: Object.fromEntries(byKey(hold.h).filter(([, v]) => v.qty > 0)),
     inventory_check: check,
+    pakkomon: ownerPakkomon(events, player),
   };
 }
