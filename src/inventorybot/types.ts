@@ -493,7 +493,9 @@ export type BuildEvent =
 export type WikiUseSlot =
   | { kind: 'number'; min: number; max: number; decimals: number }
   | { kind: 'duration'; min: number; max: number }
-  | { kind: 'item' | 'place' | 'pakkomon' | 'symbols'; values: string[] }
+  /** `counts`: how many of the shape's replies held each item, in the order of `values`. */
+  | { kind: 'item'; values: string[]; counts: number[] }
+  | { kind: 'place' | 'pakkomon' | 'symbols'; values: string[] }
   | { kind: 'user' | 'text' | 'list' };
 
 /** Replies of a use with the same shape: their text, with slot numbers in place of what varies. */

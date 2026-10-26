@@ -148,16 +148,17 @@ order:
    power-ups, fights, widest win and stun), kept apart so that the wiki can be shared. `build`
    merges the events into a knowledge base, newest observation first, an item's `/usa` replies kept
    by shape, what varies in them described as the channels' cards do (`use-shapes.ts`: "tiri il dado
-   e fai N!", N from 1 to 6), and an item a use takes (a chest's key, a machine's inputs, a
-   Pakkomon's equipment, `takes` in the use event) used with the item used (`used_with`), and where
-   an item comes from besides adventures and recipes: the items whose use gave it (`from_use`), a
-   level-up or a lottery draw (`rewards`), a fight against one of the bot's Pakkomon or a boss
-   (`from_fight`). Every Pakkomon is the wiki's one item `un Pakkomon` (`wikiItemName` in
-   `pakkomon.ts`): each is a creature of its owner, so the wiki learns only what holds for any of
-   them, and an item learns what it is for with Pakkomon (`pakkomon_roles`: equipment, healing,
-   power-up…) from most of its uses, a use's shape leaving the Pakkomon's name out. `toJson` writes
-   the wiki, `playerState` the player state. Phase 5 reads plain JSON copies of the events
-   (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates them for `playerState`.
+   e fai N!", N from 1 to 6; an item slot with how many replies held each item), and an item a use
+   takes (a chest's key, a machine's inputs, a Pakkomon's equipment, `takes` in the use event) used
+   with the item used (`used_with`), and where an item comes from besides adventures and recipes:
+   the items whose use gave it (`from_use`), a level-up or a lottery draw (`rewards`), a fight
+   against one of the bot's Pakkomon or a boss (`from_fight`). Every Pakkomon is the wiki's one item
+   `un Pakkomon` (`wikiItemName` in `pakkomon.ts`): each is a creature of its owner, so the wiki
+   learns only what holds for any of them, and an item learns what it is for with Pakkomon
+   (`pakkomon_roles`: equipment, healing, power-up…) from most of its uses, a use's shape leaving
+   the Pakkomon's name out. `toJson` writes the wiki, `playerState` the player state. Phase 5 reads
+   plain JSON copies of the events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates
+   them for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply
@@ -230,38 +231,39 @@ with how many times to craft it, or how many to find, to make the recipe once. A
 use gives (no adventure, recipe or reward) opens into the item used and what the use takes (the
 chest and its key, from the key's `used_with`), the source found rather than crafted first, then the
 one whose every reply names it; a use that gives it only at times is a dashed line, and what is
-below it has no count. With the owner's state, a toggle above it, "Ti manca" by default (remembered
-in this browser), shows only what they still lack: the inventory estimate is taken off each count,
-an item they hold enough of is not drawn, nor what it takes, and a recipe they can make now is
-green. Above a place, Luoghi shows the map of the places (`map-layout.ts`, drawn by the view as
-pixel art, the same in both themes, its rows a little closer than its columns): a grid, as in
-classic role-playing games, running across a wide window and down a tall one, where no two roads
-cross and a road goes at 45° only from a place with more than four roads. It is the tree of the
-shortest routes from the village (the place the bot calls "il villaggio"), drawn in three steps:
-directions by rules alone (a place's straight directions to its biggest branches, along the main
-axis first, a branch linked to a sibling beside it, the rest diagonally), lengths by pushing each
-branch out as one block until it fits, the lines towards the branches still to join kept clear, then
-straight dead-end chains folded at a right angle where that makes the map smaller; a link that no
-length keeps clear may cross a road. Places the village does not reach go on free cells along its
-edge. The selected place is marked, with its shortest route from the village. The owner is the
-player the bot addresses most in the DM; without a DM the build stops, the records stay kept, and
-the panel shows a username field, which the page offers nowhere else. What the worker keeps is in
-IndexedDB, in this browser only (`storage.ts`): the records of the exports (`ExportRecord`, never
-the export pages), each with its folder, dates and counts, in upload order, which is their merge
-order; the last results (wiki, player state, report, options) with the records they were built from
-and the build of the page that made them (`__BUILD__`, from `vite.config.ts`: a release's version, a
-new value at each start of the dev server), so a returning player sees their wiki at once and the
-worker rebuilds only if they are not current, from other records or by another build; and the salt
-of the pseudonyms and sender keys, made once. A record is valid only with the salt that made it, so
-the three live in one database: without a salt the records and results are dropped, and a record or
-results made with another salt are refused. A record of an older `RECORD_FORMAT_VERSION` is stale:
-it is listed, so the player can add the export again, but never used, and its payload is dropped.
-Opening the database of an older schema drops what it kept. Without storage the worker keeps the
-records of the visit in memory. "Cancella i miei dati" deletes the whole database and resets the
-options. `run.ts`, `storage.ts`, `labels.ts`, `debounce.ts`, `demo.ts` and `map-layout.ts` use no
-browser API and are tested in Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and
-`worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
-`tsconfig.web.json`, and left out of coverage).
+below it an estimate ("≈N"), the uses it took on average, from how often the uses seen gave it. With
+the owner's state, a toggle above it, "Ti manca" by default (remembered in this browser), shows only
+what they still lack: the inventory estimate is taken off each count, an item they hold enough of is
+not drawn, nor what it takes, and a recipe they can make now is green. Above a place, Luoghi shows
+the map of the places (`map-layout.ts`, drawn by the view as pixel art, the same in both themes, its
+rows a little closer than its columns): a grid, as in classic role-playing games, running across a
+wide window and down a tall one, where no two roads cross and a road goes at 45° only from a place
+with more than four roads. It is the tree of the shortest routes from the village (the place the bot
+calls "il villaggio"), drawn in three steps: directions by rules alone (a place's straight
+directions to its biggest branches, along the main axis first, a branch linked to a sibling beside
+it, the rest diagonally), lengths by pushing each branch out as one block until it fits, the lines
+towards the branches still to join kept clear, then straight dead-end chains folded at a right angle
+where that makes the map smaller; a link that no length keeps clear may cross a road. Places the
+village does not reach go on free cells along its edge. The selected place is marked, with its
+shortest route from the village. The owner is the player the bot addresses most in the DM; without a
+DM the build stops, the records stay kept, and the panel shows a username field, which the page
+offers nowhere else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the
+records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
+counts, in upload order, which is their merge order; the last results (wiki, player state, report,
+options) with the records they were built from and the build of the page that made them
+(`__BUILD__`, from `vite.config.ts`: a release's version, a new value at each start of the dev
+server), so a returning player sees their wiki at once and the worker rebuilds only if they are not
+current, from other records or by another build; and the salt of the pseudonyms and sender keys,
+made once. A record is valid only with the salt that made it, so the three live in one database:
+without a salt the records and results are dropped, and a record or results made with another salt
+are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can
+add the export again, but never used, and its payload is dropped. Opening the database of an older
+schema drops what it kept. Without storage the worker keeps the records of the visit in memory.
+"Cancella i miei dati" deletes the whole database and resets the options. `run.ts`, `storage.ts`,
+`labels.ts`, `debounce.ts`, `demo.ts` and `map-layout.ts` use no browser API and are tested in Node
+(on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring,
+checked in a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out of
+coverage).
 
 `npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
 (`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the

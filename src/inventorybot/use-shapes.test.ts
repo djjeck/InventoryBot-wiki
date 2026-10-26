@@ -41,7 +41,7 @@ describe('use shapes', () => {
         count: 2,
         slots: [
           { kind: 'number', min: 29, max: 41, decimals: 0 },
-          { kind: 'item', values: ['una caps rossa', 'un dado truccato'] },
+          { kind: 'item', values: ['una caps rossa', 'un dado truccato'], counts: [1, 1] },
         ],
       },
     ]);
@@ -57,8 +57,24 @@ describe('use shapes', () => {
       {
         parts: ['dentro trovi: ', 0, ' x1'],
         count: 2,
-        slots: [{ kind: 'item', values: ['una caps rossa', 'un dado truccato'] }],
+        slots: [{ kind: 'item', values: ['una caps rossa', 'un dado truccato'], counts: [1, 1] }],
       },
+    ]);
+  });
+
+  it('an_item_slot_counts_the_replies_of_each_item', () => {
+    // How often each prize came, the most frequent first: the odds of a use giving it.
+    const shapes = useShapes(
+      [
+        'dentro trovi: un dado truccato [C] x1',
+        'dentro trovi: una caps rossa [C] x1',
+        'dentro trovi: un dado truccato [C] x1',
+        'dentro trovi: un dado truccato [C] x1',
+      ],
+      NAMES
+    );
+    expect(shapes[0]?.slots).toStrictEqual([
+      { kind: 'item', values: ['un dado truccato', 'una caps rossa'], counts: [3, 1] },
     ]);
   });
 

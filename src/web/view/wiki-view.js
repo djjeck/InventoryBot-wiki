@@ -1397,7 +1397,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // recipe once (a craft gives one item). An item that only a use gives (a key in a
     // chest) opens into the item used and what the use takes (the chest and its key); a
     // use that gives it only at times (one of the chest's prizes) is a dashed line, and
-    // how many it takes is not known.
+    // how many uses it takes is an estimate, from how often the uses seen gave it.
     /** The items a use of an item takes besides it: the key of a chest. */
     const takenBy = new Map();
     for (const i of Object.values(I))
@@ -1405,12 +1405,31 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         const c = current(u);
         takenBy.set(c, [...(takenBy.get(c) ?? []), i.name]);
       }
-    /** Whether every use of `used` gives `n`: it is in the fixed text of each of its replies. */
-    const alwaysGives = (used, n) =>
-      !!I[used]?.use?.shapes.length &&
-      I[used].use.shapes.every((sh) =>
-        sh.parts.some((p) => typeof p === 'string' && p.includes(n))
-      );
+    /**
+     * How often the uses of `used` seen gave `n`: in how many replies (`times`: those whose
+     * fixed text names it, and the counts of the item slots that held it), out of all
+     * (`uses`); `certain` when each reply's fixed text names it. `times` is null without
+     * the slots' counts (results built before the wiki kept them).
+     */
+    function gives(used, n) {
+      const shapes = I[used]?.use?.shapes || [];
+      let times = 0,
+        uses = 0,
+        certain = shapes.length > 0;
+      for (const sh of shapes) {
+        uses += sh.count;
+        if (sh.parts.some((p) => typeof p === 'string' && p.includes(n))) {
+          times += sh.count;
+          continue;
+        }
+        certain = false;
+        for (const sl of sh.slots) {
+          const at = sl.kind === 'item' ? sl.values.findIndex((v) => current(v) === n) : -1;
+          if (at >= 0) times = sl.counts && times !== null ? times + sl.counts[at] : null;
+        }
+      }
+      return { certain, times, uses };
+    }
     /**
      * How the tree obtains an item: `{ recipe }` to craft it, `{ use, certain }` to get it by
      * using another item, or null for an item to find (or of no known way).
@@ -1432,7 +1451,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const uses = i.from_use
         .map(current)
         .filter((u) => I[u])
-        .map((u) => ({ use: u, certain: alwaysGives(u, n) }));
+        .map((u) => ({ use: u, ...gives(u, n) }));
       const rank = (x) => (I[x.use].made_by.length ? 2 : 0) + (x.certain ? 0 : 1);
       const [best, ...others] = uses.sort((a, b) => rank(a) - rank(b));
       return best ? { ...best, others: others.map((x) => x.use) } : null;
@@ -1469,7 +1488,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       visit(rootKey, { recipe: name }, [rootKey]);
       const top = nodes.get(rootKey);
       const found = (n) => n !== top && !n.recipe && !n.use && craftedLevel(n.key) === null;
-      /** A use that gives the item only at times: how many uses it takes is not known. */
+      /** A use that gives the item only at times: how many uses it takes is an estimate. */
       const chance = (n) => !!n.use && !n.certain;
       /** Where the tree stops before reaching items to find: no recipe known, or not all of it. */
       const stopsAt = (n) =>
@@ -1489,9 +1508,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           n.need = Math.max(0, n.need - (have(n.key)?.qty || 0));
         for (const [k, q] of n.kids) {
           const kid = nodes.get(k);
-          const add = n.need === null || q === null || chance(n) ? null : n.need * q;
+          // A use that gives it at times is repeated as often as it took on average.
+          const per = chance(n) ? (n.times ? n.uses / n.times : null) : 1;
+          const add = n.need === null || q === null || per === null ? null : n.need * per * q;
           if (add === 0) continue;
           kid.need = kid.need === null || add === null ? null : kid.need + add;
+          if (add !== null && (n.approx || chance(n))) kid.approx = true;
           kid.parents.push([n.key, add]);
         }
       }
@@ -1575,7 +1597,16 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         const item = n.key ? I[n.key] : null;
         n.tag = item ? `[${item.rarity || '?'}]` : R[name].level ? `[L${R[name].level}]` : '';
         n.label = short(n.key || name);
-        n.count = n === top ? '' : n.need === null ? '×?' : n.need === 1 ? '' : `×${n.need}`;
+        n.count =
+          n === top
+            ? ''
+            : n.need === null
+              ? '×?'
+              : n.approx
+                ? `≈${Math.ceil(n.need)}`
+                : n.need === 1
+                  ? ''
+                  : `×${n.need}`;
         n.w =
           8 +
           (n.tag ? width(n.tag, F.tag) + 6 : 0) +
@@ -1605,27 +1636,37 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         const [k] = levels;
         return levels.size === 1 && k ? `LIVELLO ${k}` : '';
       };
-      const times = (k) => (k === null ? '? volte' : k === 1 ? 'una volta' : `${k} volte`);
+      /** A count in words: "circa N" when it is an estimate. */
+      const amount = (k, approx) =>
+        k === null ? '?' : approx ? `circa ${Math.ceil(k)}` : String(k);
+      const times = (n) =>
+        n.need === null
+          ? '? volte'
+          : n.need === 1 && !n.approx
+            ? 'una volta'
+            : `${amount(n.need, n.approx)} volte`;
       const titleOf = (n) => {
         if (n === top) return n.key ? `${n.key}, con la ricetta ${name}` : `Ricetta ${name}`;
         const split =
           n.parents.length > 1
-            ? ` (${n.parents.map(([p, k]) => `${k ?? '?'} per ${p || name}`).join(', ')})`
+            ? ` (${n.parents.map(([p, k]) => `${amount(k, n.approx)} per ${p || name}`).join(', ')})`
             : '';
         const still = lacking ? 'ancora ' : '';
-        if (found(n))
-          return `${n.key}: ${still}da trovare ${n.need === null ? '?' : n.need}${split}`;
+        if (found(n)) return `${n.key}: ${still}da trovare ${amount(n.need, n.approx)}${split}`;
         const now = ready(n) ? ', puoi farlo ora' : '';
         if (n.use) {
           const or = n.others.length ? `; si ottiene anche usando ${listIt(n.others)}` : '';
+          const odds = n.times
+            ? `, che lo ha dato ${n.times} ${n.times === 1 ? 'volta' : 'volte'} su ${n.uses}`
+            : ', che lo dà solo a volte';
           return chance(n)
-            ? `${n.key}: ${still}da ottenere usando ${n.use}, che lo dà solo a volte${now}${split}${or}`
-            : `${n.key}: ${still}da ottenere ${times(n.need)} usando ${n.use}${now}${split}${or}`;
+            ? `${n.key}: ${still}da ottenere ${times(n)} usando ${n.use}${odds}${now}${split}${or}`
+            : `${n.key}: ${still}da ottenere ${times(n)} usando ${n.use}${now}${split}${or}`;
         }
         if (!n.recipe)
-          return `${n.key}: ${still}da craftare ${times(n.need)}, ricetta non ancora identificata${split}`;
+          return `${n.key}: ${still}da craftare ${times(n)}, ricetta non ancora identificata${split}`;
         const open = R[n.recipe].ingredients ? '' : ', ingredienti non ancora tutti noti';
-        return `${n.key}: ${still}da craftare ${times(n.need)} con la ricetta ${n.recipe}${open}${now}${split}`;
+        return `${n.key}: ${still}da craftare ${times(n)} con la ricetta ${n.recipe}${open}${now}${split}`;
       };
       const edges = shown.flatMap((n) =>
         n.out.map(([k]) => {
@@ -1673,7 +1714,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           ? "Dove una ricetta, o parte dei suoi ingredienti, non è ancora nota (bordo tratteggiato), l'albero si ferma."
           : '',
         odds
-          ? 'Linea tratteggiata: un oggetto che si ottiene usandone un altro, che però lo dà solo a volte; quante volte va usato non si sa.'
+          ? 'Linea tratteggiata: un oggetto che si ottiene usandone un altro, che però lo dà solo a volte. Con ≈, quante volte va usato in media, da quanto spesso lo ha dato negli usi osservati: una stima, tanto meno sicura quanto meno sono gli usi.'
           : '',
         partial ? 'Con ×? la quantità non è ancora nota.' : '',
       ].filter(Boolean);

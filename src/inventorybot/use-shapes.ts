@@ -4,7 +4,8 @@
  * text, rows of symbols, list lines), the replies with the same cut are one shape, and a
  * slot holding the same value in all of them is fixed text again. Each slot left is
  * described by what it held, as the channels' cards describe a reply ("dove N è un numero
- * compreso tra 1 e 6"); players and the text players typed are not kept. Pure logic.
+ * compreso tra 1 e 6"), an item slot with how often each item came, from which a use's
+ * odds of giving it follow; players and the text players typed are not kept. Pure logic.
  */
 import { parseDuration } from './patterns.ts';
 import { type WikiUseShape, type WikiUseSlot } from './types.ts';
@@ -84,12 +85,14 @@ function cut(text: string, rx: RegExp): Cut {
 const numberOf = (v: string): number => Number(v.replace(',', '.'));
 const decimalsOf = (v: string): number => /[.,](\d+)$/u.exec(v)?.[1]?.length ?? 0;
 
-/** The values of a slot, most frequent first (first seen first among equals). */
-function byFrequency(values: readonly string[]): string[] {
+/** The values of a slot with how often each came, most frequent first (first seen first among equals). */
+function counted(values: readonly string[]): [string, number][] {
   const n = new Map<string, number>();
   for (const v of values) n.set(v, (n.get(v) ?? 0) + 1);
-  return [...n].sort((a, b) => b[1] - a[1]).map(([v]) => v);
+  return [...n].sort((a, b) => b[1] - a[1]);
 }
+/** The values of a slot, most frequent first (first seen first among equals). */
+const byFrequency = (values: readonly string[]): string[] => counted(values).map(([v]) => v);
 
 function describe(kind: Kind, values: readonly string[]): WikiUseSlot {
   switch (kind) {
@@ -106,12 +109,11 @@ function describe(kind: Kind, values: readonly string[]): WikiUseSlot {
       const ds = values.map((v) => parseDuration(v)?.seconds ?? 0);
       return { kind, min: Math.min(...ds), max: Math.max(...ds) };
     }
-    case 'item':
+    case 'item': {
       // The item's name: its tags are the item's own, as the wiki knows them.
-      return {
-        kind,
-        values: byFrequency(values.map((v) => v.replace(new RegExp(`${TAGS}$`, 'u'), ''))),
-      };
+      const items = counted(values.map((v) => v.replace(new RegExp(`${TAGS}$`, 'u'), '')));
+      return { kind, values: items.map(([v]) => v), counts: items.map(([, k]) => k) };
+    }
     case 'place':
     case 'pakkomon':
       return { kind, values: byFrequency(values) };
