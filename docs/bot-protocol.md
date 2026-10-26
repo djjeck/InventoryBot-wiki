@@ -908,8 +908,8 @@ Help, listings and refusals:
 
 Lotteries are announced in groups; the announcements are not answers to a player's command. A
 lottery opens with `APRE LA BIGLIETTERIA! PRENDETE UN BIGLIETTO CON /biglietto!`, players take a
-ticket with `/biglietto` (a `[N] @u, prendi un biglietto!` notice follows), then
-`LA BIGLIETTERIA E' CHIUSA!! NIENTE PIU' BIGLIETTI!!`,
+ticket with `/biglietto` (a `[N] @u, prendi un biglietto!` notice follows), then, five minutes after
+the opening, `LA BIGLIETTERIA E' CHIUSA!! NIENTE PIU' BIGLIETTI!!`,
 `ABBIAMO N PARTECIPANTI! PRONTI ALL'ESTRAZIONE!`, `RULLO DI TAMBURI!!!`, and the draw:
 `IL FORTUNATO E': @u ! Evviva! Vince il fantastico Primo Premio della lotteria!` and
 `PREMIO DI CONSOLAZIONE: @u vince un pacchettino di consolazione 🎁!` for the others. The prizes are
