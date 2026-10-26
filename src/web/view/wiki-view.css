@@ -769,6 +769,21 @@ h4 {
 .tree .g-node.found rect {
   fill: var(--bg);
 }
+.tree-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+/* A recipe the owner can make now. */
+.tree .g-node.ready rect {
+  stroke: var(--r-N);
+  stroke-width: 1.6;
+}
+.tree .g-node.ready .n {
+  fill: var(--r-N);
+}
 .tree .g-node.open rect {
   stroke-dasharray: 4 3;
 }

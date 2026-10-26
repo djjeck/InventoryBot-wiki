@@ -267,6 +267,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       tab: 'oggetti',
       sel: { ricette: null, oggetti: null, luoghi: null },
       filter: { ricette: 'tutte', oggetti: 'tutti' },
+      // What a recipe's tree shows: what the owner still lacks, or all of it.
+      tree: null,
     };
     const store = {
       get(k) {
@@ -284,6 +286,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         }
       },
     };
+    state.tree = store.get('ib-tree') === 'tutto' ? 'tutto' : 'mancanti';
     const TABS = ['oggetti', 'ricette', 'luoghi'];
     // ---- the URL -------------------------------------------------------------------
     // `#tab` or `#tab/slug`. A slug is the name folded to lower-case ASCII letters and
@@ -1173,33 +1176,50 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const found = (n) => n !== top && !n.recipe && craftedLevel(n.key) === null;
       if (top.kids.every(([k]) => found(nodes.get(k)))) return '';
       // Parents before children; the counts flow down. An unknown quantity (a partial list
-      // of ingredients) makes unknown all that is below it.
+      // of ingredients) makes unknown all that is below it. Showing what the owner lacks,
+      // what they hold (by the inventory estimate) is taken off each item once all the
+      // recipes that take it are counted, and an item they hold enough of is not drawn,
+      // nor is what it takes.
+      const lacking = !!P && state.tree === 'mancanti';
       const topo = post.reverse();
       for (const n of nodes.values()) n.need = 0;
       top.need = 1;
-      for (const n of topo)
+      for (const n of topo) {
+        if (lacking && n !== top && n.need !== null)
+          n.need = Math.max(0, n.need - (have(n.key)?.qty || 0));
         for (const [k, q] of n.kids) {
           const kid = nodes.get(k);
           const add = n.need === null || q === null ? null : n.need * q;
+          if (add === 0) continue;
           kid.need = kid.need === null || add === null ? null : kid.need + add;
           kid.parents.push([n.key, add]);
         }
+      }
+      const shown = topo.filter((n) => n === top || n.need !== 0);
+      for (const n of shown) n.out = n.kids.filter(([k]) => nodes.get(k).need !== 0);
+      // A recipe whose ingredients the owner all holds: they can make it now.
+      const ready = (n) => lacking && !!n.recipe && !!R[n.recipe].ingredients && !n.out.length;
+      if (lacking && !top.out.length)
+        return treeSection(
+          name,
+          `<p class="note">${ESTIMATE}, hai già tutto quello che serve: puoi eseguirla ora.</p>`
+        );
       // Columns: a level each, from the recipe's on the left (an item of level k is N - k
       // columns from it), always right of the recipes that take it, the items to find last.
       const N = lvl(name);
       const levelOf = (n) =>
         (n.recipe ? lvl(n.recipe) : found(n) ? 0 : craftedLevel(n.key)) || null;
-      for (const n of topo) {
+      for (const n of shown) {
         const after = Math.max(-1, ...n.parents.map(([p]) => nodes.get(p).col)) + 1;
         const level = levelOf(n);
         n.col = N && level !== null ? Math.max(after, N - level) : after;
       }
-      const last = Math.max(0, ...topo.filter((n) => !found(n)).map((n) => n.col)) + 1;
-      for (const n of topo) if (found(n)) n.col = Math.max(n.col, last);
-      const cols = [];
-      for (const n of [...nodes.values()].sort((a, b) => a.order - b.order))
-        (cols[n.col] ??= []).push(n);
-      for (let c = 0; c < cols.length; c++) cols[c] ??= [];
+      const last = Math.max(0, ...shown.filter((n) => !found(n)).map((n) => n.col)) + 1;
+      for (const n of shown) if (found(n)) n.col = Math.max(n.col, last);
+      // A level with nothing left to draw takes no column.
+      const byCol = [];
+      for (const n of [...shown].sort((a, b) => a.order - b.order)) (byCol[n.col] ??= []).push(n);
+      const cols = byCol.filter(Boolean);
       // Fewer crossings: each column sorted a few times by where its parents are, then
       // by where its children are.
       const pos = new Map();
@@ -1225,11 +1245,11 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           c.sort(
             (a, b) =>
               mean(
-                a.kids.map(([k]) => pos.get(k)),
+                a.out.map(([k]) => pos.get(k)),
                 pos.get(a.key)
               ) -
               mean(
-                b.kids.map(([k]) => pos.get(k)),
+                b.out.map(([k]) => pos.get(k)),
                 pos.get(b.key)
               )
           );
@@ -1250,7 +1270,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         n: `600 12px ${fonts.getPropertyValue('--font-body')}`,
       };
       const short = (t) => (t.length > 24 ? t.slice(0, 23) + '…' : t);
-      for (const n of nodes.values()) {
+      for (const n of shown) {
         const item = n.key ? I[n.key] : null;
         n.tag = item ? `[${item.rarity || '?'}]` : R[name].level ? `[L${R[name].level}]` : '';
         n.label = short(n.key || name);
@@ -1291,14 +1311,17 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           n.parents.length > 1
             ? ` (${n.parents.map(([p, k]) => `${k ?? '?'} per ${p || name}`).join(', ')})`
             : '';
-        if (found(n)) return `${n.key}: da trovare ${n.need === null ? '?' : n.need}${split}`;
+        const still = lacking ? 'ancora ' : '';
+        if (found(n))
+          return `${n.key}: ${still}da trovare ${n.need === null ? '?' : n.need}${split}`;
         if (!n.recipe)
-          return `${n.key}: da craftare ${times(n.need)}, ricetta non ancora identificata${split}`;
+          return `${n.key}: ${still}da craftare ${times(n.need)}, ricetta non ancora identificata${split}`;
         const open = R[n.recipe].ingredients ? '' : ', ingredienti non ancora tutti noti';
-        return `${n.key}: da craftare ${times(n.need)} con la ricetta ${n.recipe}${open}${split}`;
+        const now = ready(n) ? ', puoi farlo ora' : '';
+        return `${n.key}: ${still}da craftare ${times(n.need)} con la ricetta ${n.recipe}${open}${now}${split}`;
       };
-      const edges = topo.flatMap((n) =>
-        n.kids.map(([k]) => {
+      const edges = shown.flatMap((n) =>
+        n.out.map(([k]) => {
           const kid = nodes.get(k),
             x1 = n.x + n.w,
             y1 = n.y + nodeH / 2,
@@ -1308,10 +1331,16 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           return `<path class="g-edge" data-a="${esc(n.key)}" data-b="${esc(k)}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
         })
       );
-      const svgNodes = topo.map((n) => {
+      const svgNodes = shown.map((n) => {
         // Where the tree stops before reaching items to find: dashed.
         const open = n !== top && !found(n) && (!n.recipe || !R[n.recipe].ingredients);
-        const cls = ['g-node', n === top && 'root sel', found(n) && 'found', open && 'open']
+        const cls = [
+          'g-node',
+          n === top && 'root sel',
+          found(n) && 'found',
+          open && 'open',
+          ready(n) && 'ready',
+        ]
           .filter(Boolean)
           .join(' ');
         const go =
@@ -1325,25 +1354,44 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       <text x="${n.x + 8 + tagW}" y="${n.y + 17}">${esc(n.label)}</text>
       ${n.count ? `<text class="n" x="${n.x + n.w - 10}" y="${n.y + 17}" text-anchor="end">${esc(n.count)}</text>` : ''}</g>`;
       });
-      const partial = topo.some((n) => n.need === null);
-      const stops = topo.some(
+      const partial = shown.some((n) => n.need === null);
+      const stops = shown.some(
         (n) => n !== top && !found(n) && (!n.recipe || !R[n.recipe].ingredients)
       );
+      const goal = madeItem(name) ? `fare ${esc(madeItem(name))}` : 'eseguire la ricetta';
       const notes = [
-        `Per ${madeItem(name) ? `fare ${esc(madeItem(name))}` : 'eseguire la ricetta'} una volta: ogni oggetto, quante volte va craftato o, nell'ultima colonna, quanti vanno trovati. Tocca un oggetto per aprirlo.`,
+        lacking
+          ? `Per ${goal} una volta, ${ESTIMATE.toLowerCase()}: solo quello che ti manca, quante volte va ancora craftato o, nell'ultima colonna, quanti vanno ancora trovati. In verde, quello che puoi già craftare. Tocca un oggetto per aprirlo.`
+          : `Per ${goal} una volta: ogni oggetto, quante volte va craftato o, nell'ultima colonna, quanti vanno trovati. Tocca un oggetto per aprirlo.`,
         stops
           ? "Dove una ricetta, o parte dei suoi ingredienti, non è ancora nota (bordo tratteggiato), l'albero si ferma."
           : '',
         partial ? 'Con ×? la quantità non è ancora nota.' : '',
       ].filter(Boolean);
-      return sec(
-        'Albero della ricetta',
+      return treeSection(
+        name,
         `${notes.map((t) => `<p class="note">${t}</p>`).join('')}<div class="tree-box"><svg class="tree" viewBox="0 0 ${Wd} ${H}" width="${Wd}" height="${H}" role="img" aria-label="Albero della ricetta ${esc(name)}">
     ${cols.map((c, ci) => `<text class="g-col" x="${colX[ci]}" y="14">${heading(c)}</text>`).join('')}
     ${edges.join('')}
     ${svgNodes.join('')}
   </svg></div>`
       );
+    }
+    /** The tree's section: its title and, with the owner's state, what it shows, on the right. */
+    function treeSection(name, body) {
+      const modes = [
+        ['mancanti', 'Ti manca', `${ESTIMATE}, solo quello che ti manca`],
+        ['tutto', 'Tutto', 'Tutto quello che serve'],
+      ];
+      const toggle = P
+        ? `<div class="filters" role="group" aria-label="Cosa mostrare">${modes
+            .map(
+              ([k, label, title]) =>
+                `<button data-tree="${k}" aria-pressed="${state.tree === k}" title="${title}">${label}</button>`
+            )
+            .join('')}</div>`
+        : '';
+      return `<div class="section tree-section"><div class="tree-head"><h3>Albero della ricetta</h3>${toggle}</div>${body}</div>`;
     }
 
     // ---- view --------------------------------------------------------------------
@@ -1454,8 +1502,14 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     }
 
     root.addEventListener('click', (e) => {
-      const t = e.target.closest('[data-go],[data-sel],[data-filter],[data-tab]');
+      const t = e.target.closest('[data-go],[data-sel],[data-filter],[data-tab],[data-tree]');
       if (!t) return;
+      if (t.dataset.tree) {
+        state.tree = t.dataset.tree;
+        store.set('ib-tree', state.tree);
+        render();
+        return;
+      }
       if (t.dataset.tab) {
         state.tab = t.dataset.tab;
         pushUrl();
