@@ -1394,19 +1394,48 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // recipe opens into that recipe's ingredients, and so on. An item that several of its
     // recipes take is one node, with an edge from each, so the tree may be a graph: each
     // node says how many times to craft it, or how many to find, in all, to make the
-    // recipe once (a craft gives one item).
-    /** The recipe to craft an item with, or null for an item to find (or of no known recipe). */
-    function recipeFor(n) {
+    // recipe once (a craft gives one item). An item that only a use gives (a key in a
+    // chest) opens into the item used and what the use takes (the chest and its key); a
+    // use that gives it only at times (one of the chest's prizes) is a dashed line, and
+    // how many it takes is not known.
+    /** The items a use of an item takes besides it: the key of a chest. */
+    const takenBy = new Map();
+    for (const i of Object.values(I))
+      for (const u of i.used_with || []) {
+        const c = current(u);
+        takenBy.set(c, [...(takenBy.get(c) ?? []), i.name]);
+      }
+    /** Whether every use of `used` gives `n`: it is in the fixed text of each of its replies. */
+    const alwaysGives = (used, n) =>
+      !!I[used]?.use?.shapes.length &&
+      I[used].use.shapes.every((sh) =>
+        sh.parts.some((p) => typeof p === 'string' && p.includes(n))
+      );
+    /**
+     * How the tree obtains an item: `{ recipe }` to craft it, `{ use, certain }` to get it by
+     * using another item, or null for an item to find (or of no known way).
+     */
+    function sourceFor(n) {
       const i = I[n];
-      // An item found in adventures is found, even if a recipe also makes it.
+      // An item found in adventures is found, even if a recipe or a use also gives it.
       if (!i || i.sources.includes('adventure') || i.exclusive) return null;
       const made = i.made_by.filter((r) => R[r]);
-      return (
+      const recipe =
         made.find((r) => R[r].ingredients) ??
         made.find((r) => R[r].partial_ingredients.length) ??
-        made[0] ??
-        null
-      );
+        made[0];
+      if (recipe) return { recipe };
+      // An item given otherwise (a level-up, the lottery) is not looked for in a use.
+      if (i.rewards?.length || !i.from_use?.length) return null;
+      // Of the items whose use gives it: one found rather than crafted first (a crafted
+      // one is a whole tree more), then one that always gives it.
+      const uses = i.from_use
+        .map(current)
+        .filter((u) => I[u])
+        .map((u) => ({ use: u, certain: alwaysGives(u, n) }));
+      const rank = (x) => (I[x.use].made_by.length ? 2 : 0) + (x.certain ? 0 : 1);
+      const [best, ...others] = uses.sort((a, b) => rank(a) - rank(b));
+      return best ? { ...best, others: others.map((x) => x.use) } : null;
     }
     /** The level of an item a recipe makes, by its rarity (L2: 2, 0 if not given), else null. */
     function craftedLevel(n) {
@@ -1418,24 +1447,33 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const nodes = new Map();
       // Depth first from the recipe, each item once; an item that leads back to itself
       // (a cycle) is not followed again.
-      const visit = (key, recipe, path) => {
+      const visit = (key, source, path) => {
         if (nodes.has(key)) return;
-        const node = { key, recipe, kids: [], parents: [], order: nodes.size };
+        const node = { key, ...source, kids: [], parents: [], order: nodes.size };
         nodes.set(key, node);
-        if (recipe)
-          for (const [n, q] of ingredientsOf(R[recipe])) {
-            const c = current(n);
-            if (path.includes(c) || node.kids.some(([k]) => k === c)) continue;
-            visit(c, recipeFor(c), [...path, c]);
-            node.kids.push([c, q]);
-          }
+        const parts = node.recipe
+          ? ingredientsOf(R[node.recipe])
+          : node.use
+            ? [node.use, ...(takenBy.get(node.use) ?? [])].map((n) => [n, 1])
+            : [];
+        for (const [n, q] of parts) {
+          const c = current(n);
+          if (path.includes(c) || node.kids.some(([k]) => k === c)) continue;
+          visit(c, sourceFor(c), [...path, c]);
+          node.kids.push([c, q]);
+        }
         post.push(node);
       };
       const post = [];
       const rootKey = madeItem(name) ?? '';
-      visit(rootKey, name, [rootKey]);
+      visit(rootKey, { recipe: name }, [rootKey]);
       const top = nodes.get(rootKey);
-      const found = (n) => n !== top && !n.recipe && craftedLevel(n.key) === null;
+      const found = (n) => n !== top && !n.recipe && !n.use && craftedLevel(n.key) === null;
+      /** A use that gives the item only at times: how many uses it takes is not known. */
+      const chance = (n) => !!n.use && !n.certain;
+      /** Where the tree stops before reaching items to find: no recipe known, or not all of it. */
+      const stopsAt = (n) =>
+        n !== top && !found(n) && !n.use && (!n.recipe || !R[n.recipe].ingredients);
       if (top.kids.every(([k]) => found(nodes.get(k)))) return '';
       // Parents before children; the counts flow down. An unknown quantity (a partial list
       // of ingredients) makes unknown all that is below it. Showing what the owner lacks,
@@ -1451,7 +1489,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           n.need = Math.max(0, n.need - (have(n.key)?.qty || 0));
         for (const [k, q] of n.kids) {
           const kid = nodes.get(k);
-          const add = n.need === null || q === null ? null : n.need * q;
+          const add = n.need === null || q === null || chance(n) ? null : n.need * q;
           if (add === 0) continue;
           kid.need = kid.need === null || add === null ? null : kid.need + add;
           kid.parents.push([n.key, add]);
@@ -1460,7 +1498,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const shown = topo.filter((n) => n === top || n.need !== 0);
       for (const n of shown) n.out = n.kids.filter(([k]) => nodes.get(k).need !== 0);
       // A recipe whose ingredients the owner all holds: they can make it now.
-      const ready = (n) => lacking && !!n.recipe && !!R[n.recipe].ingredients && !n.out.length;
+      const ready = (n) =>
+        lacking && (!!n.use || (!!n.recipe && !!R[n.recipe].ingredients)) && !n.out.length;
       if (lacking && !top.out.length)
         return treeSection(
           name,
@@ -1576,10 +1615,16 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         const still = lacking ? 'ancora ' : '';
         if (found(n))
           return `${n.key}: ${still}da trovare ${n.need === null ? '?' : n.need}${split}`;
+        const now = ready(n) ? ', puoi farlo ora' : '';
+        if (n.use) {
+          const or = n.others.length ? `; si ottiene anche usando ${listIt(n.others)}` : '';
+          return chance(n)
+            ? `${n.key}: ${still}da ottenere usando ${n.use}, che lo dà solo a volte${now}${split}${or}`
+            : `${n.key}: ${still}da ottenere ${times(n.need)} usando ${n.use}${now}${split}${or}`;
+        }
         if (!n.recipe)
           return `${n.key}: ${still}da craftare ${times(n.need)}, ricetta non ancora identificata${split}`;
         const open = R[n.recipe].ingredients ? '' : ', ingredienti non ancora tutti noti';
-        const now = ready(n) ? ', puoi farlo ora' : '';
         return `${n.key}: ${still}da craftare ${times(n.need)} con la ricetta ${n.recipe}${open}${now}${split}`;
       };
       const edges = shown.flatMap((n) =>
@@ -1590,12 +1635,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
             x2 = kid.x,
             y2 = kid.y + nodeH / 2,
             mx = (x1 + x2) / 2;
-          return `<path class="g-edge" data-a="${esc(n.key)}" data-b="${esc(k)}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+          return `<path class="g-edge${chance(n) ? ' chance' : ''}" data-a="${esc(n.key)}" data-b="${esc(k)}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
         })
       );
       const svgNodes = shown.map((n) => {
         // Where the tree stops before reaching items to find: dashed.
-        const open = n !== top && !found(n) && (!n.recipe || !R[n.recipe].ingredients);
+        const open = stopsAt(n);
         const cls = [
           'g-node',
           n === top && 'root sel',
@@ -1617,9 +1662,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ${n.count ? `<text class="n" x="${n.x + n.w - 10}" y="${n.y + 17}" text-anchor="end">${esc(n.count)}</text>` : ''}</g>`;
       });
       const partial = shown.some((n) => n.need === null);
-      const stops = shown.some(
-        (n) => n !== top && !found(n) && (!n.recipe || !R[n.recipe].ingredients)
-      );
+      const stops = shown.some(stopsAt);
+      const odds = shown.some((n) => chance(n) && n.out.length);
       const goal = madeItem(name) ? `fare ${esc(madeItem(name))}` : 'eseguire la ricetta';
       const notes = [
         lacking
@@ -1627,6 +1671,9 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           : `Per ${goal} una volta: ogni oggetto, quante volte va craftato o, nell'ultima colonna, quanti vanno trovati. Tocca un oggetto per aprirlo.`,
         stops
           ? "Dove una ricetta, o parte dei suoi ingredienti, non è ancora nota (bordo tratteggiato), l'albero si ferma."
+          : '',
+        odds
+          ? 'Linea tratteggiata: un oggetto che si ottiene usandone un altro, che però lo dà solo a volte; quante volte va usato non si sa.'
           : '',
         partial ? 'Con ×? la quantità non è ancora nota.' : '',
       ].filter(Boolean);
