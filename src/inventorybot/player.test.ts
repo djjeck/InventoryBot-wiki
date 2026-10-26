@@ -159,6 +159,14 @@ describe('collezioni and inv2', () => {
     expect(after(T.inventoryByQuantity([['un sasso', 'C', 3]]), '/collezioni')).toStrictEqual({
       'un sasso': 3,
     });
+    const via = (text: string, query: string | null): unknown =>
+      invOf([ev(text, query, { t: 0 })])[1].inventory['un sasso']?.via;
+    expect([
+      via(T.inventoryByQuantity([['un sasso', 'C', 3]]), '/collezioni'),
+      via(T.inventoryPage([['un sasso', 'C', 3]], 1, 2), '/inv2'),
+      via(T.inventory([['un sasso', 'C', 3]]), '/i'),
+      via(T.inventoryByQuantity([['un sasso', 'C', 3]]), null),
+    ]).toStrictEqual(['collezioni', 'inv2', 'inventario', 'inventario']);
     expect(after(T.inventoryPage([['un sasso', 'C', 3]], 1, 1), '/inv2')).toStrictEqual({
       'un sasso': 3,
     });

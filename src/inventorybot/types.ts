@@ -679,7 +679,15 @@ export interface Wiki {
 
 /** How a holding was last set (Italian, shown on the page). */
 export type HoldingVia =
-  'inventario' | 'esporta' | 'esamina' | 'ricetta' | 'mostra' | 'dai' | 'movimento';
+  | 'inventario'
+  | 'collezioni'
+  | 'inv2'
+  | 'esporta'
+  | 'esamina'
+  | 'ricetta'
+  | 'mostra'
+  | 'dai'
+  | 'movimento';
 
 export interface Holding {
   qty: number;

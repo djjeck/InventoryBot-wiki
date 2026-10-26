@@ -52,7 +52,7 @@
  */
 import { isoDateSeconds } from '#src/lib/dates.ts';
 import { compareCodePoints } from '#src/lib/text.ts';
-import { instant, inventoryScope, isFailedUse, isMine, type KB } from './build.ts';
+import { instant, inventoryScope, isFailedUse, isMine, type KB, queryArg } from './build.ts';
 import { PAKKOMON } from './pakkomon.ts';
 import { ownerPakkomon, pakkomonOf } from './player-pakkomon.ts';
 import { type BuildEvent, type Holding, type HoldingVia, type PlayerState } from './types.ts';
@@ -225,7 +225,14 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     if (e.type === 'inventory') {
       const listed = new Map(e.items.map((x) => [x.name, x.qty]));
       const scope = inventoryScope(e, rarityOf);
-      const via = e.exported ? 'esporta' : 'inventario';
+      // The command that listed it; /inventario when the command is not known.
+      const via: HoldingVia = e.exported
+        ? 'esporta'
+        : queryArg(e.query, '/collezioni') !== null
+          ? 'collezioni'
+          : queryArg(e.query, '/inv2') !== null
+            ? 'inv2'
+            : 'inventario';
       if (scope) hold.zeroExcept(listed, scope, d, via);
       for (const [n, q] of listed) {
         hold.exact(n, q, d, via);
