@@ -76,17 +76,19 @@ day) and is followed by a second message with an extra item.
 
 Every item carries a rarity code:
 
-| Code         | Meaning (from `/faq`)   |
-| ------------ | ----------------------- |
-| `C`          | comune                  |
-| `N`          | non comune              |
-| `R`          | raro                    |
-| `S`          | super raro              |
-| `U`          | unico: only one exists  |
-| `L1` … `L11` | ottenibile da ricette   |
-| `X`          | oggetti speciali        |
-| `M`          | not explained by `/faq` |
+| Code         | Meaning                |
+| ------------ | ---------------------- |
+| `C`          | comune                 |
+| `N`          | non comune             |
+| `R`          | raro                   |
+| `S`          | super raro             |
+| `M`          | mega raro              |
+| `U`          | unico: only one exists |
+| `L1` … `L11` | ottenibile da ricette  |
+| `X`          | oggetti speciali       |
 
+- `/faq` does not explain `M`. The map of _L'Atlante di Barbabeige_ ([channels.md](channels.md) §3)
+  calls `M+` "Mega Raro Plus", so `M` is "mega raro", above super raro.
 - A `+` after the code (`C+`, `N+`, `R+`, `S+`, `M+`) marks an item that drops in only one place.
   All other adventure items drop everywhere.
 - A level-`k` recipe usually produces an `Lk` item, but some recipes produce items of other rarities
@@ -1254,7 +1256,6 @@ Every reply example above is a block with the info string `bot-reply` and attrib
 
 ## 9. Unknowns
 
-- What `M` means.
 - Whether the lucky adventure of the day is one per day for all players or one per player.
 - What `[W]` stands for.
 - Whether "half of the ingredients" (recipe visibility) counts units or distinct items.

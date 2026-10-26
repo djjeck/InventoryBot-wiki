@@ -163,26 +163,24 @@ export function inventoryScope(
 // Every item carries a rarity code (docs/bot-protocol.md §2.2). The game's rules for it are
 // stated here rather than read from the bot's /faq, whose wording would change with them.
 
-/** Rarity code -> meaning, in the bot's words and order ("Ln" stands for L1, L2, ...). */
+/**
+ * Rarity code -> meaning, in the bot's words and order ("Ln" stands for L1, L2, ...). The bot's
+ * /faq leaves M out: its meaning comes from the legend of L'Atlante di Barbabeige's map, "M+" is
+ * "Mega Raro Plus" (docs/channels.md §3).
+ */
 const RARITIES: Readonly<Record<string, string>> = {
   C: 'comune',
   N: 'non comune',
   R: 'raro',
   S: 'super raro',
+  M: 'mega raro',
   U: 'unico (esiste un solo oggetto di questo tipo)',
   Ln: 'ottenibile da ricette',
   X: 'oggetti speciali',
 };
 
-/** Rarity codes the bot does not explain -> the meaning assumed for them. */
-const RARITY_HYPOTHESES: Readonly<Record<string, string>> = {
-  M:
-    'mitico: più raro di super raro ma non unico, per analogia con altri giochi ' +
-    '(es. il mythic rare di Magic). Non confermato dal bot',
-};
-
 /**
- * Source implied by the rarity class. Ln and X come from the legend; C/N/R/S being
+ * Source implied by the rarity class. Ln and X come from the legend; C/N/R/S/M being
  * adventure drops is observed (no counter-example in the data).
  */
 const SOURCE_BY_CLASS: Readonly<Record<string, string>> = {
@@ -190,6 +188,7 @@ const SOURCE_BY_CLASS: Readonly<Record<string, string>> = {
   N: 'adventure',
   R: 'adventure',
   S: 'adventure',
+  M: 'adventure',
   L: 'recipe',
   X: 'special',
 };
@@ -2094,7 +2093,6 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
     trivia: [...kb.trivia],
     // Old item name -> current name, for links and searches by an old name.
     renames: record([...kb.renames].sort((a, b) => compareCodePoints(a[0], b[0]))),
-    rarity_hypotheses: { ...RARITY_HYPOTHESES },
     items: record(items),
     recipes: record(recipes),
     locations: record(locations),

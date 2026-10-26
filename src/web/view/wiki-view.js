@@ -105,11 +105,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ),
       q: 'rarità sconosciuta',
     };
-    const rarityName = (g) =>
-      RARITY_NAMES[g] ||
-      (W.rarity_hypotheses?.[g]
-        ? W.rarity_hypotheses[g].split(':')[0] + ' (ipotesi)'
-        : `rarità ${g}, non spiegata dal bot`);
+    const rarityName = (g) => RARITY_NAMES[g] || `rarità ${g}, non spiegata dal bot`;
     const ingredientsOf = (r) =>
       r.ingredients ? Object.entries(r.ingredients) : r.partial_ingredients.map((n) => [n, null]);
     for (const r of Object.values(R)) {
@@ -901,7 +897,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         ? `<p class="makes">${i.locations.length ? `Esce solo qui: ${i.locations.map((k) => goLink('loc', k, at(k))).join(', ')}` : '<span class="makes-unknown">Esce in un solo luogo, non ancora identificato.</span>'}</p>`
         : ''
     }
-    ${W.rarity_hypotheses?.[rarityGroup(i.rarity)] ? `<p class="note">Rarità ${esc(rarityGroup(i.rarity))}: ${esc(W.rarity_hypotheses[rarityGroup(i.rarity)])}.</p>` : ''}</div>
+</div>
     ${itemBubble(i)}
     ${i.sources_inferred ? '<p class="note">Come si ottiene è dedotto dalla rarità: il bot non lo ha ancora detto.</p>' : ''}
     ${recipes

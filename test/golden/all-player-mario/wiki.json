@@ -5,6 +5,7 @@
     "N": "non comune",
     "R": "raro",
     "S": "super raro",
+    "M": "mega raro",
     "U": "unico (esiste un solo oggetto di questo tipo)",
     "Ln": "ottenibile da ricette",
     "X": "oggetti speciali"
@@ -18,9 +19,6 @@
     }
   ],
   "renames": {},
-  "rarity_hypotheses": {
-    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dal bot"
-  },
   "items": {
     "un dado": {
       "name": "un dado",
@@ -560,11 +558,14 @@
       "name": "un drago",
       "rarity": "M",
       "usable": false,
-      "sources": [],
+      "sources": [
+        "adventure"
+      ],
       "used_in": [],
       "made_by": [],
       "last_seen": "2025-11-27T19:03:11-05:00",
       "observations": 1,
+      "sources_inferred": true,
       "exclusive": false,
       "locations": []
     },

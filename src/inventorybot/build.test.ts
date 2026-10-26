@@ -106,16 +106,7 @@ describe('common build', () => {
     expect(wiki.locations[P(BOSCO)]?.label).toBe('Il bosco nebbioso di Valtorbo 🌲');
     expect(wiki.rarities['C']).toBe('comune');
     expect(Object.keys(wiki).sort()).toStrictEqual(
-      [
-        'generated',
-        'rarities',
-        'trivia',
-        'renames',
-        'rarity_hypotheses',
-        'items',
-        'recipes',
-        'locations',
-      ].sort()
+      ['generated', 'rarities', 'trivia', 'renames', 'items', 'recipes', 'locations'].sort()
     );
     expect(JSON.parse(JSON.stringify(wiki))).toStrictEqual(wiki); // plain JSON values (no Maps or Sets left)
     expect(events[0]?.date).toBe(iso(0)); // dates converted in place
@@ -554,6 +545,7 @@ describe('infer', () => {
           ['un vortice', 'L2', 1],
           ["una moneta d'oro", 'X', 1],
           ['un drago', 'M', 1],
+          ['il Sigillo Antico', 'U', 1],
           ['una ghianda', 'R+', 1],
         ]),
         '/inventario',
@@ -568,7 +560,8 @@ describe('infer', () => {
       'una perla': [['adventure'], true],
       'un vortice': [['recipe'], true],
       "una moneta d'oro": [['special'], true],
-      'un drago': [[], false],
+      'un drago': [['adventure'], true],
+      'il Sigillo Antico': [[], false],
       'una ghianda': [['adventure'], true],
     });
   });
@@ -1882,20 +1875,16 @@ describe('renames', () => {
 });
 
 describe('rarity system', () => {
-  it('legend_and_m_hypothesis_without_events', () => {
+  it('legend_without_events', () => {
     const { wiki } = runBuild([ev(T.inventory([['un drago', 'M', 1]]), null, { t: 0 })]);
-    expect(Object.keys(wiki.rarities)).toStrictEqual(['C', 'N', 'R', 'S', 'U', 'Ln', 'X']);
-    expect(Object.keys(wiki.rarity_hypotheses)).toStrictEqual(['M']);
+    expect(Object.keys(wiki.rarities)).toStrictEqual(['C', 'N', 'R', 'S', 'M', 'U', 'Ln', 'X']);
+    expect(wiki.rarities['M']).toBe('mega raro');
   });
 
   it('faq_reply_changes_nothing', () => {
     const base = runBuild([]).wiki;
     const { wiki } = runBuild([ev(T.FAQ, '/faq', { t: 0 })]);
-    expect([wiki.rarities, wiki.rarity_hypotheses, wiki.items]).toStrictEqual([
-      base.rarities,
-      base.rarity_hypotheses,
-      {},
-    ]);
+    expect([wiki.rarities, wiki.items]).toStrictEqual([base.rarities, {}]);
   });
 });
 

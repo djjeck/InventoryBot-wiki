@@ -670,8 +670,6 @@ export interface Wiki {
   trivia: WikiTrivia[];
   /** Old item name -> current name. */
   renames: Record<string, string>;
-  /** Rarity codes the bot does not explain -> assumed meaning. */
-  rarity_hypotheses: Record<string, string>;
   items: Record<string, WikiItem>;
   recipes: Record<string, WikiRecipe>;
   locations: Record<string, WikiLocation>;

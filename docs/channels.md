@@ -104,7 +104,16 @@ STAGE  = "🚩" | "🏃" | "🏃‍♂️" | "🏁"             (* the start, a 
 - The `🔎` remark "Questo è un luogo segreto!" marks a place that the travel panel lists only to a
   player who owns its items.
 
-Other posts of the channel (a welcome, the map of every place) are no cards and are skipped.
+Other posts of the channel (a welcome, the map of every place) are no cards and are skipped. The map
+opens with the legend of the books, the one place that names the `M` rarity:
+
+```text
+📒 [C+] = [Comune Plus]
+📗 [N+] = [Non Comune Plus]
+📘 [R+] = [Raro Plus]
+📕 [S+] = [Super Raro Plus]
+📙 [M+] = [Mega Raro Plus]
+```
 
 ```text
 🗺 LUOGO: nelle cripte del monastero 👻

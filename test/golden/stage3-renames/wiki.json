@@ -5,6 +5,7 @@
     "N": "non comune",
     "R": "raro",
     "S": "super raro",
+    "M": "mega raro",
     "U": "unico (esiste un solo oggetto di questo tipo)",
     "Ln": "ottenibile da ricette",
     "X": "oggetti speciali"
@@ -14,9 +15,6 @@
     "un A": "un C",
     "un B": "un C",
     "un Gufetto d'Argento": "un Premio Sgranocchio"
-  },
-  "rarity_hypotheses": {
-    "M": "mitico: più raro di super raro ma non unico, per analogia con altri giochi (es. il mythic rare di Magic). Non confermato dal bot"
   },
   "items": {
     "un nastro": {
