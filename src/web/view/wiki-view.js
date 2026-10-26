@@ -1141,13 +1141,65 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ].filter(Boolean);
       const notes = (lines) => lines.map((l) => `<p class="note">${l}</p>`).join('');
       return page(
-        '',
+        p.gone ? '' : pakkomonCard(p),
         `<div class="head"><div class="kicker"><span class="tag t-X">PK</span><span>Pakkomon</span><span>· ${p.gone ? 'non più tuo' : 'tuo'}</span></div>
     <h2>${esc(p.name)}</h2></div>
     ${record}
     ${sec('Storia', notes(story))}
     ${sec('Combattimenti', notes(fights))}`
       );
+    }
+    /**
+     * The items for Pakkomon the owner holds, as a card beside one of theirs: its
+     * equipment, then the free equipment, then that of their other Pakkomon (an item equips
+     * several), the healing items and power-ups (one given to it already marked: each works
+     * once), the tools. Equipment is what someone was seen equipping: any item can be.
+     */
+    function pakkomonCard(p) {
+      const held = (n) => (have(n)?.qty || 0) > 0;
+      const qty = (n) => {
+        const h = have(n);
+        return ` x${h.exact ? '' : '≥'}${h.qty}`;
+      };
+      const aside = (t) => `<span class="aside">${t}</span>`;
+      const others = new Map();
+      for (const o of MY_PK)
+        if (!o.gone && o !== p && o.equipment)
+          others.set(o.equipment, [...(others.get(o.equipment) || []), o.name]);
+      // A Pakkomon equipped with another is no equipment to offer.
+      const kit = withRole('equipment').filter((n) => n !== PAKKOMON && held(n));
+      const free = kit.filter((n) => n !== p.equipment && !others.has(n));
+      const worn = kit.filter((n) => n !== p.equipment && others.has(n));
+      // What is worn, with who wears it; then the free ones.
+      const equipment = [
+        ...kit
+          .filter((n) => n === p.equipment)
+          .map((n) => `- ${itemRef(n)}${aside('equipaggiato')}`),
+        ...worn.map(
+          (n) => `- ${itemRef(n)}${aside(`anche su ${others.get(n).map(esc).join(', ')}`)}`
+        ),
+        ...(free.length ? ['Liberi:', ...free.map((n) => `- ${itemRef(n)}`)] : []),
+      ];
+      const list = (title, roles, note = () => '') => {
+        const items = [...new Set(roles.flatMap(withRole))].filter(held);
+        return items.length
+          ? [title, ...items.map((n) => `- ${itemRef(n)}${qty(n)}${note(n)}`)]
+          : [];
+      };
+      const replies = [
+        equipment.length ? ['Equipaggiamento che hai:', ...equipment] : [],
+        list('Cure che hai:', ['heal']),
+        list('Potenziamenti che hai:', ['power_up'], (n) =>
+          p.power_up_items.includes(n) ? aside('già dato a lui') : ''
+        ),
+        list('Strumenti che hai:', ['scanner', 'probe', 'scale', 'extractor', 'customisation']),
+      ].filter((r) => r.length);
+      return myCard(replies, [
+        replies.length ? '' : 'Non hai oggetti per i Pakkomon.',
+        equipment.length
+          ? "Equipaggiare non consuma l'oggetto: lo stesso può equipaggiare più Pakkomon."
+          : '',
+      ]);
     }
     /** How Pakkomon work: the game's rules, and the items and prizes the wiki knows. */
     function guideDetail() {
