@@ -150,6 +150,29 @@ describe('full inventory', () => {
   });
 });
 
+describe('collezioni and inv2', () => {
+  const base = (): BuildEvent[] => [info('un sasso', 2, 0), info('un paio di mollette', 1, 1)];
+  const after = (text: string, query: string): Record<string, number> =>
+    invOf([...base(), ev(text, query, { t: 2 })])[0];
+
+  it('a_complete_list_zeroes_unlisted', () => {
+    expect(after(T.inventoryByQuantity([['un sasso', 'C', 3]]), '/collezioni')).toStrictEqual({
+      'un sasso': 3,
+    });
+    expect(after(T.inventoryPage([['un sasso', 'C', 3]], 1, 1), '/inv2')).toStrictEqual({
+      'un sasso': 3,
+    });
+  });
+
+  it('a_cut_list_a_page_of_several_or_an_argument_zero_nothing', () => {
+    const kept = { 'un sasso': 3, 'un paio di mollette': 1 };
+    const listed: T.ItemSpec[] = [['un sasso', 'C', 3]];
+    expect(after(T.inventoryByQuantity(listed, 'djjeck', true), '/collezioni')).toStrictEqual(kept);
+    expect(after(T.inventoryPage(listed, 2, 2), '/inv2')).toStrictEqual(kept);
+    expect(after(T.inventoryByQuantity(listed), '/collezioni C')).toStrictEqual(kept);
+  });
+});
+
 describe('filtered inventory', () => {
   const base = (): BuildEvent[] => [
     info("una moneta d'Oro", 3, 0, 'X'),

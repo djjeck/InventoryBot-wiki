@@ -1,6 +1,6 @@
 {
   "player": "mario_r",
-  "as_of": "2025-11-27T19:37:01-05:00",
+  "as_of": "2025-11-27T19:38:01-05:00",
   "recipes": {
     "(ricetta senza nome) → un caffè ristretto": {
       "crafted": 2,
@@ -22,9 +22,9 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un Pakkomon": {
-      "first_seen": "2025-11-27T19:27:31-05:00",
+      "first_seen": "2025-11-27T19:28:31-05:00",
       "used": 1,
-      "last_used": "2025-11-27T19:33:01-05:00"
+      "last_used": "2025-11-27T19:34:01-05:00"
     },
     "un apriscatole storto": {
       "first_seen": "2025-11-27T19:05:01-05:00"
@@ -35,7 +35,7 @@
     "un baule di ebano 📦": {
       "first_seen": "2025-11-27T19:01:01-05:00",
       "used": 2,
-      "last_used": "2025-11-27T19:17:32-05:00"
+      "last_used": "2025-11-27T19:18:32-05:00"
     },
     "un caffè ristretto": {
       "first_seen": "2025-11-27T19:04:31-05:00"
@@ -44,7 +44,7 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un cartoccio di caldarroste🌰": {
-      "first_seen": "2025-11-27T19:17:31-05:00"
+      "first_seen": "2025-11-27T19:18:31-05:00"
     },
     "un chicco di caffè": {
       "first_seen": "2025-11-27T19:04:31-05:00"
@@ -56,7 +56,7 @@
       "first_seen": "2025-11-27T19:07:01-05:00"
     },
     "un fischietto di quelli da carnevale che fanno le trombette": {
-      "first_seen": "2025-11-27T19:16:01-05:00"
+      "first_seen": "2025-11-27T19:17:01-05:00"
     },
     "un grembiule da cuoco": {
       "first_seen": "2025-11-27T19:07:01-05:00"
@@ -68,10 +68,10 @@
       "first_seen": "2025-11-27T19:04:01-05:00"
     },
     "un seme di Zaffirella": {
-      "first_seen": "2025-11-27T19:18:01-05:00"
+      "first_seen": "2025-11-27T19:19:01-05:00"
     },
     "un tappetino con scritto Benvenuti": {
-      "first_seen": "2025-11-27T19:12:01-05:00"
+      "first_seen": "2025-11-27T19:13:01-05:00"
     },
     "una Sfera del Grillo da 1 stella ⭐️": {
       "first_seen": "2025-11-27T19:01:31-05:00"
@@ -95,15 +95,15 @@
       "first_seen": "2025-11-27T19:07:31-05:00"
     },
     "una pigna secca": {
-      "first_seen": "2025-11-27T19:13:01-05:00"
+      "first_seen": "2025-11-27T19:14:01-05:00"
     },
     "una ruota della fortuna 🎡": {
-      "first_seen": "2025-11-27T19:12:31-05:00",
+      "first_seen": "2025-11-27T19:13:31-05:00",
       "used": 2,
-      "last_used": "2025-11-27T19:18:01-05:00"
+      "last_used": "2025-11-27T19:19:01-05:00"
     },
     "una simpatica zucchina": {
-      "first_seen": "2025-11-27T19:14:01-05:00"
+      "first_seen": "2025-11-27T19:15:01-05:00"
     },
     "una splendida statuetta di Torosco di quelle con la coda a spirale 🐲": {
       "first_seen": "2025-11-27T19:07:31-05:00"
@@ -162,49 +162,61 @@
     "un Pakkomon": {
       "qty": 2,
       "exact": false,
-      "date": "2025-11-27T19:27:31-05:00",
+      "date": "2025-11-27T19:28:31-05:00",
       "via": "movimento"
     },
     "un candido fazzoletto": {
       "qty": 14,
-      "exact": false,
-      "date": "2025-11-27T19:15:31-05:00",
-      "via": "mostra"
+      "exact": true,
+      "date": "2025-11-27T19:09:32-05:00",
+      "via": "inventario"
     },
     "un cartoccio di caldarroste🌰": {
       "qty": 2,
       "exact": false,
-      "date": "2025-11-27T19:17:31-05:00",
+      "date": "2025-11-27T19:18:31-05:00",
       "via": "movimento"
+    },
+    "un fiorino ƒ": {
+      "qty": 3,
+      "exact": true,
+      "date": "2025-11-27T19:09:32-05:00",
+      "via": "inventario"
     },
     "un fischietto di quelli da carnevale che fanno le trombette": {
       "qty": 241,
       "exact": false,
-      "date": "2025-11-27T19:16:01-05:00",
+      "date": "2025-11-27T19:17:01-05:00",
       "via": "mostra"
+    },
+    "un grembiule da cuoco": {
+      "qty": 1,
+      "exact": true,
+      "date": "2025-11-27T19:09:01-05:00",
+      "via": "inventario"
     },
     "un seme di Zaffirella": {
       "qty": 1,
       "exact": false,
-      "date": "2025-11-27T19:18:01-05:00",
+      "date": "2025-11-27T19:19:01-05:00",
       "via": "movimento"
     },
     "un tappetino con scritto Benvenuti": {
       "qty": 1,
       "exact": false,
-      "date": "2025-11-27T19:12:01-05:00",
+      "date": "2025-11-27T19:13:01-05:00",
       "via": "movimento"
     },
     "una moneta d'oro": {
       "qty": 139,
       "exact": true,
-      "date": "2025-11-27T19:15:01-05:00",
+      "date": "2025-11-27T19:16:01-05:00",
       "via": "dai"
     },
     "una ruota della fortuna 🎡": {
       "qty": 1,
       "exact": false,
-      "date": "2025-11-27T19:12:31-05:00",
+      "date": "2025-11-27T19:13:31-05:00",
       "via": "movimento"
     }
   },
@@ -218,12 +230,12 @@
       "came": {
         "via": "hatched",
         "from": "Sfera Frullo",
-        "date": "2025-11-27T19:27:31-05:00"
+        "date": "2025-11-27T19:28:31-05:00"
       },
       "born": null,
       "maker": null,
-      "first_seen": "2025-11-27T19:27:31-05:00",
-      "last_seen": "2025-11-27T19:32:32-05:00",
+      "first_seen": "2025-11-27T19:28:31-05:00",
+      "last_seen": "2025-11-27T19:33:32-05:00",
       "gone": null,
       "record": null,
       "equipment": null,
@@ -243,13 +255,13 @@
       "came": null,
       "born": "2025-04-18",
       "maker": "mario_r",
-      "first_seen": "2025-11-27T19:28:01-05:00",
-      "last_seen": "2025-11-27T19:36:32-05:00",
+      "first_seen": "2025-11-27T19:29:01-05:00",
+      "last_seen": "2025-11-27T19:37:32-05:00",
       "gone": null,
       "record": {
         "wins": 54,
         "losses": 44,
-        "date": "2025-11-27T19:31:32-05:00"
+        "date": "2025-11-27T19:32:32-05:00"
       },
       "equipment": "una spada di cartone",
       "power_ups": [

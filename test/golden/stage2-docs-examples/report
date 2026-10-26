@@ -1,12 +1,12 @@
 cartelle di esportazione: 2; chat: Gruppo NibbioEsuberante, InventoryBot
-messaggi: 280 (dal bot: 150)
+messaggi: 288 (dal bot: 154)
 giocatore: @mario_r
-risposte del bot: 150
-  InventoryBot: risposte del bot abbinate a un comando: dm=75
-  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=42, user=26, single=3
+risposte del bot: 154
+  InventoryBot: risposte del bot abbinate a un comando: dm=77
+  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: unmatched=43, user=27, single=3
 nomi visualizzati abbinati a un giocatore: 2; titoli dei giocatori riconosciuti: 3
-eventi: miss=26 use=15 travel=10 pakkomon_fight=10 drop=8 item_info=8 inventory=8 give=6 stats=6 unknown=5 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2 pakkomon_ready=2 pakkomon_challenge=2 pakkomon_boss=2 pakkomon_record=2 pakkomon_stunned=2 old_format=2
-  coppie nei gruppi verificate dalla risposta: confermate=29, sciolte=0
+eventi: miss=26 use=15 inventory=12 travel=10 pakkomon_fight=10 drop=8 item_info=8 give=6 stats=6 unknown=5 recipe_list=4 recipe_detail=4 craft=4 gift=4 show=4 item_cooldown=4 title=4 cooldown=2 location=2 travel_blocked=2 travel_requirement=2 pakkomon_ready=2 pakkomon_challenge=2 pakkomon_boss=2 pakkomon_record=2 pakkomon_stunned=2 old_format=2
+  coppie nei gruppi verificate dalla risposta: confermate=30, sciolte=0
   risposte del bot non riconosciute, per anno: 2025=5
 oggetti: 39; ricette: 13 (con tutti gli ingredienti: 4, con il risultato noto: 2); luoghi: 9
 -- unresolved_travel: 2

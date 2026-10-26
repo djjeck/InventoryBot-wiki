@@ -93,7 +93,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:37:02-05:00",
+      "last_seen": "2025-11-27T19:38:02-05:00",
       "observations": 3,
       "gives_title": true,
       "sources_inferred": true,
@@ -253,7 +253,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:11:32-05:00",
+      "last_seen": "2025-11-27T19:12:32-05:00",
       "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
@@ -287,20 +287,20 @@
         "Cera riciclata"
       ],
       "made_by": [],
-      "last_seen": "2025-11-27T19:35:32-05:00",
+      "last_seen": "2025-11-27T19:36:32-05:00",
       "observations": 5,
       "use": {
-        "observations": 1,
+        "observations": 2,
         "shapes": [
           {
             "parts": [
               "infili una chiave di ebano 🔑 nella serratura di un baule di ebano 📦, lo apri e dentro trovi:\n-una moneta d'oro [X] x41\n-un cartoccio di caldarroste🌰 [X] [usabile] x1"
             ],
-            "count": 1,
+            "count": 2,
             "slots": []
           }
         ],
-        "result": "single",
+        "result": "fixed",
         "consumed": null,
         "consumed_evidence": {
           "yes": 0,
@@ -438,7 +438,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:12:32-05:00",
+      "last_seen": "2025-11-27T19:13:32-05:00",
       "observations": 2,
       "use": {
         "observations": 1,
@@ -827,8 +827,8 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:07:02-05:00",
-      "observations": 1,
+      "last_seen": "2025-11-27T19:09:32-05:00",
+      "observations": 3,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -857,8 +857,8 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:07:02-05:00",
-      "observations": 1,
+      "last_seen": "2025-11-27T19:09:02-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -872,8 +872,8 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:15:32-05:00",
-      "observations": 2,
+      "last_seen": "2025-11-27T19:16:32-05:00",
+      "observations": 4,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -893,8 +893,8 @@
       "rewards": [
         "level_up"
       ],
-      "last_seen": "2025-11-27T19:17:32-05:00",
-      "observations": 2,
+      "last_seen": "2025-11-27T19:18:32-05:00",
+      "observations": 4,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -921,7 +921,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:12:02-05:00",
+      "last_seen": "2025-11-27T19:13:02-05:00",
       "observations": 1,
       "exclusive": false,
       "locations": []
@@ -933,7 +933,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:13:32-05:00",
+      "last_seen": "2025-11-27T19:14:32-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -947,7 +947,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:16:02-05:00",
+      "last_seen": "2025-11-27T19:17:02-05:00",
       "observations": 1,
       "sources_inferred": true,
       "exclusive": false,
@@ -965,8 +965,8 @@
       "from_use": [
         "un baule di ebano 📦"
       ],
-      "last_seen": "2025-11-27T19:17:32-05:00",
-      "observations": 1,
+      "last_seen": "2025-11-27T19:18:32-05:00",
+      "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
       "locations": []
@@ -978,8 +978,8 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:18:02-05:00",
-      "observations": 1,
+      "last_seen": "2025-11-27T19:19:02-05:00",
+      "observations": 2,
       "exclusive": false,
       "locations": []
     },
@@ -990,7 +990,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:02-05:00",
+      "last_seen": "2025-11-27T19:22:02-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -1002,7 +1002,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:32-05:00",
+      "last_seen": "2025-11-27T19:22:32-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -1014,7 +1014,7 @@
       "sources": [],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:21:32-05:00",
+      "last_seen": "2025-11-27T19:22:32-05:00",
       "observations": 2,
       "exclusive": false,
       "locations": []
@@ -1028,7 +1028,7 @@
       ],
       "used_in": [],
       "made_by": [],
-      "last_seen": "2025-11-27T19:34:02-05:00",
+      "last_seen": "2025-11-27T19:35:02-05:00",
       "observations": 8,
       "use": {
         "observations": 2,
@@ -1065,7 +1065,7 @@
       "from_fight": [
         "Codicillo 💾"
       ],
-      "last_seen": "2025-11-27T19:29:32-05:00",
+      "last_seen": "2025-11-27T19:30:32-05:00",
       "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
@@ -1083,7 +1083,7 @@
       "from_fight": [
         "Gigante di Sale 🧂"
       ],
-      "last_seen": "2025-11-27T19:30:32-05:00",
+      "last_seen": "2025-11-27T19:31:32-05:00",
       "observations": 4,
       "sources_inferred": true,
       "exclusive": false,
@@ -1104,7 +1104,7 @@
       "pakkomon_roles": [
         "equipment"
       ],
-      "last_seen": "2025-11-27T19:31:32-05:00",
+      "last_seen": "2025-11-27T19:32:32-05:00",
       "observations": 2,
       "sources_inferred": true,
       "exclusive": false,
@@ -1425,7 +1425,7 @@
       ],
       "output": null,
       "craft_text": null,
-      "last_seen": "2025-11-27T19:35:32-05:00",
+      "last_seen": "2025-11-27T19:36:32-05:00",
       "observations": 3
     },
     "Piccola collezione": {
@@ -1512,7 +1512,7 @@
       "name": "in cima al monte Grevolo 🏔",
       "label": "In cima al monte Grevolo 🏔",
       "at": "in cima al monte Grevolo 🏔",
-      "last_seen": "2025-11-27T19:34:32-05:00",
+      "last_seen": "2025-11-27T19:35:32-05:00",
       "observations": 3,
       "exits": [],
       "requires_item": false,
@@ -1525,7 +1525,7 @@
       "name": "le cripte del monastero 👻",
       "label": "Le cripte del monastero 👻",
       "at": "nelle cripte del monastero 👻",
-      "last_seen": "2025-11-27T19:11:32-05:00",
+      "last_seen": "2025-11-27T19:12:32-05:00",
       "observations": 2,
       "exits": [],
       "requires_item": true,
@@ -1614,7 +1614,7 @@
       "name": "i piedi del monte Grevolo ⛰",
       "label": "I piedi del monte Grevolo ⛰",
       "at": "ai piedi del monte Grevolo ⛰",
-      "last_seen": "2025-11-27T19:09:32-05:00",
+      "last_seen": "2025-11-27T19:10:32-05:00",
       "observations": 3,
       "exits": [
         "il banco corallino 🐠",
@@ -1647,7 +1647,7 @@
       "name": "la palude sussurrante 🌾",
       "label": "La palude sussurrante 🌾",
       "at": "nella palude sussurrante 🌾",
-      "last_seen": "2025-11-27T19:10:32-05:00",
+      "last_seen": "2025-11-27T19:11:32-05:00",
       "observations": 2,
       "exits": [
         "il bosco nebbioso di Valtorbo 🌲"
@@ -1664,7 +1664,7 @@
       "name": "l'immenso deserto di Sabbiora 🏜",
       "label": "L'immenso deserto di Sabbiora 🏜",
       "at": "nell'immenso deserto di Sabbiora 🏜",
-      "last_seen": "2025-11-27T19:09:02-05:00",
+      "last_seen": "2025-11-27T19:10:02-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": false,
@@ -1677,7 +1677,7 @@
       "name": "il magnifico Palazzo di Cristallo 🏰",
       "label": "Il magnifico Palazzo di Cristallo 🏰",
       "at": "nel magnifico Palazzo di Cristallo 🏰",
-      "last_seen": "2025-11-27T19:11:02-05:00",
+      "last_seen": "2025-11-27T19:12:02-05:00",
       "observations": 1,
       "exits": [],
       "requires_item": true,

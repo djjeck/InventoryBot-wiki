@@ -28,7 +28,7 @@ export const COMPATIBLE: Readonly<Partial<Record<EventType, ReadonlySet<string>>
   recipe_detail: new Set(['/ricetta', '/esamina']),
   craft: new Set(['/ricetta']),
   item_info: new Set(['/esamina']),
-  inventory: new Set(['/inventario']),
+  inventory: new Set(['/inventario', '/collezioni', '/inv2']),
   travel: new Set(['/viaggio']),
   location: new Set(['/viaggio']),
   travel_blocked: new Set(['/viaggio']),

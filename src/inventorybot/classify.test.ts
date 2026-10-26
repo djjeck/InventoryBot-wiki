@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { BOT, Chat, tgDate } from '#test/helpers.ts';
 import { byType, runExtract } from '#test/interpret.ts';
+import * as T from '#test/texts.ts';
 import { classify, itemFromLine, itemLines } from './classify.ts';
 import { compatibleCommands, playerOf } from './dialect.ts';
 import { type ItemLine } from './types.ts';
@@ -329,6 +330,42 @@ describe('inventory', () => {
     const e = fields(INVENTORY + '\ne altre robe che non ci stanno..', '/inventario');
     expect(e['truncated']).toBe(true);
     expect(e['items']).toHaveLength(2);
+  });
+
+  it('collezioni_lists_by_quantity', () => {
+    const t = T.inventoryByQuantity([
+      ["una moneta d'oro", 'X', 5],
+      ['un fiorino ƒ', 'X', 3, true],
+    ]);
+    expect(classify(t, '/collezioni')).toStrictEqual({
+      type: 'inventory',
+      filtered: false,
+      truncated: false,
+      items: [item("una moneta d'oro", 'X', false, 5), item('un fiorino ƒ', 'X', true, 3)],
+    });
+    expect(fields(T.inventoryByQuantity([], 'djjeck', true), '/collezioni')['truncated']).toBe(
+      true
+    );
+  });
+
+  it('inv2_page_is_truncated_unless_it_is_the_only_one', () => {
+    const page = (n: number, of: number): Record<string, unknown> =>
+      fields(T.inventoryPage([['un sasso', 'C', 2]], n, of), '/inv2');
+    expect(page(1, 1)).toStrictEqual({
+      type: 'inventory',
+      filtered: false,
+      truncated: false,
+      items: [item('un sasso', 'C', false, 2)],
+    });
+    expect([page(1, 3)['truncated'], page(3, 3)['truncated']]).toStrictEqual([true, true]);
+  });
+
+  it('collezioni_and_inv2_pair_with_their_commands', () => {
+    const replies = [T.inventoryByQuantity([['un sasso', 'C', 2]]), T.inventoryPage([], 1, 1)];
+    for (const t of replies)
+      expect([...(compatibleCommands(t) ?? [])]).toStrictEqual(
+        expect.arrayContaining(['/inventario', '/collezioni', '/inv2'])
+      );
   });
 });
 

@@ -44,6 +44,30 @@ export function inventory(items: readonly ItemSpec[], user = 'djjeck', truncated
   return t + (truncated ? '\ne altre robe che non ci stanno..' : '');
 }
 
+/** A /collezioni reply: the inventory by quantity. */
+export function inventoryByQuantity(
+  items: readonly ItemSpec[],
+  user = 'djjeck',
+  truncated = false
+): string {
+  const t = `@${user}, ecco i tuoi oggetti in ordine di quantità:\n` + lines(items);
+  return t + (truncated ? '\ne altre robe che non ci stanno..' : '');
+}
+
+/** A page of an /inv2 reply. */
+export function inventoryPage(
+  items: readonly ItemSpec[],
+  page: number,
+  of: number,
+  user = 'djjeck'
+): string {
+  return (
+    `@${user}, possiedi (pg ${page}/${of}):\n` +
+    lines(items) +
+    '\n(non esagerare con i tasti o il bot va in antispam)'
+  );
+}
+
 export function detail(
   recipe: string,
   missing: readonly ItemSpec[],

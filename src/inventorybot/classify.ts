@@ -50,6 +50,8 @@ import {
 
 /** /inventario and its other names (dialect.ts ALIASES). */
 export const INVENTORY_COMMANDS: readonly string[] = ['/inventario', '/inventory', '/i'];
+/** /collezioni (the inventory by quantity) and /inv2 (a page of it), which take no filter. */
+export const INVENTORY_LIST_COMMANDS: readonly string[] = ['/collezioni', '/inv2'];
 
 // "- un tubetto di colla verde [N] [usabile] x3" (the leading "- " may lack the space; any
 // whitespace may stand before the tags)
@@ -430,14 +432,28 @@ export function inventoryItems(lines: readonly string[]): ItemLine[] {
   return out;
 }
 
+/** The header of an /inv2 page: "possiedi (pg 2/5):". */
+const INVENTORY_PAGE = rx(`possiedi \\(pg (?<n>${D}+)/(?<of>${D}+)\\):`);
+
+/**
+ * /inventario ("possiedi:"), /collezioni ("ecco i tuoi oggetti in ordine di quantità:") and
+ * a page of /inv2 ("possiedi (pg N/M):"), which shows every item only when it is the one page.
+ * A machine's /usa gives the /collezioni listing too: that is a use (cUse, NOT_RECEIVED).
+ */
 const cInventory: Classifier = (t, q) => {
   const lines = t.split('\n');
-  if (!(lines[0] as string).includes('possiedi:')) return null;
-  // Long inventories are cut off by the bot with "e altre robe che non ci stanno.."
+  const head = lines[0] as string;
+  const page = INVENTORY_PAGE.exec(head);
+  const byQuantity = head.includes('ecco i tuoi oggetti in ordine di quantità:');
+  if (!head.includes('possiedi:') && !(byQuantity && !isUseQuery(q)) && !page) return null;
+  const unfiltered = [...INVENTORY_COMMANDS, ...INVENTORY_LIST_COMMANDS];
   return {
     type: 'inventory',
-    filtered: q !== null && !INVENTORY_COMMANDS.includes(q.toLowerCase()),
-    truncated: t.includes('altre robe che non ci stanno'),
+    filtered: q !== null && !unfiltered.includes(q.toLowerCase()),
+    // Long inventories are cut off by the bot with "e altre robe che non ci stanno.."
+    truncated:
+      t.includes('altre robe che non ci stanno') ||
+      (page !== null && parseDecimalInt(groups(page)['of'] as string) !== 1),
     items: inventoryItems(lines.slice(1)),
   };
 };

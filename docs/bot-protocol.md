@@ -189,7 +189,8 @@ The bot's own list (`/faqcomandi`):
 Other commands: `/start` and `/registrami` (registration, private chat only), `/faq` (help, rarity
 legend, level rule), `/faqcomandi` (the list above), `/gruppi` (unofficial groups), `/titolo`
 (title-giving items owned), `/preferito <item>` (set the favourite item, 6.17), `/quest` (the
-current quest, 6.17), `/biglietto` (lottery ticket while a lottery is open).
+current quest, 6.17), `/biglietto` (lottery ticket while a lottery is open), `/collezioni` (items
+owned, by quantity, 6.8) and `/inv2` (items owned, a page at a time, private chat only, 6.8).
 
 Arguments:
 
@@ -507,6 +508,42 @@ Rarity arguments are case-insensitive: `c` lists the same items as `C`, `r+` as 
 ```bot-reply type=inventory query="/inventario" items=[]
 @mario_r, possiedi:
 un bel niente!
+```
+
+`/collezioni` lists the same lines from the largest quantity down, cut off like `/inventario`:
+
+```text
+COLLECTIONS = ADDR "ecco i tuoi oggetti in ordine di quantità:" { NL ITEM_LINE }
+              [ NL "e altre robe che non ci stanno.." ] EOT
+```
+
+```bot-reply type=inventory query="/collezioni" filtered=false truncated=false items.0.qty=35
+@mario_r, ecco i tuoi oggetti in ordine di quantità:
+- una moneta d'oro [X] x35
+- un candido fazzoletto [C] x14
+- un fiorino ƒ [X] [usabile] x3
+- un grembiule da cuoco [R] x1
+```
+
+A machine's `/usa` gives the same listing (6.13).
+
+`/inv2` shows the inventory a page of 20 lines at a time, in alphabetical order of the names without
+their article, under buttons that turn the page in place:
+
+```text
+INVENTORY_PAGE = ADDR "possiedi (pg " INT "/" INT "):" { NL ITEM_LINE }
+                 NL "(non esagerare con i tasti o il bot va in antispam)" EOT
+```
+
+The buttons go to the first page, back 5 and 1, forward 1 and 5, and to the last page (callback data
+`page0`, …, `page1000`, counting pages from 0). The message is edited in place, so an export holds
+only the page last shown, dated when the message was first sent. Only `pg 1/1` lists every item.
+
+```bot-reply type=inventory query="/inv2" filtered=false truncated=true items.0.name="un candido fazzoletto"
+@mario_r, possiedi (pg 2/2):
+- un candido fazzoletto [C] x14
+- un fiorino ƒ [X] [usabile] x3
+(non esagerare con i tasti o il bot va in antispam)
 ```
 
 ### 6.9 Travel
@@ -1190,6 +1227,7 @@ Every reply example above is a block with the info string `bot-reply` and attrib
 - What `[W]` stands for.
 - Whether "half of the ingredients" (recipe visibility) counts units or distinct items.
 - Whether an exact name wins over partial matches in lookups.
+- Whether `/collezioni` and `/inv2` take a filter, and how they answer an empty inventory.
 - The current `/titolo` reply of a player who owns title-giving items.
 - What triggers the "ti serve per passare" notice (6.9); it can follow `/dai` and `/ricetta`
   replies.

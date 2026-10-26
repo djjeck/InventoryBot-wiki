@@ -21,7 +21,10 @@
  *   /inventario complete, filtered     exact for listed items; unlisted items in the
  *                                      filter's scope -> 0 (see build.inventoryScope:
  *                                      a rarity like "C", or words of the name)
+ *   /collezioni, /inv2 complete        as /inventario complete, unfiltered (an /inv2
+ *                                      page is complete only as the one page, "pg 1/1")
  *   /inventario truncated, "M" filter,
+ *   /collezioni truncated, /inv2 page,
  *   or with an unknown command         exact for listed items only
  *   /esamina "Ne hai N"                exact
  *   "ti manca X xK" (needs N)          exact: N-K

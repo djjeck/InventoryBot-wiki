@@ -4,18 +4,18 @@ macos-export/ChatExport_Gruppo_Mac: date senza fuso orario, lette nel fuso orari
 macos-export/ChatExport_InventoryBot: date senza fuso orario, lette nel fuso orario Europe/Rome
 macos-and-windows/ChatExport_Gruppo_Misto: date senza fuso orario, lette come UTC-05:00 come le altre esportazioni della stessa chat (4 messaggi in comune); in 1 di questi un'altra esportazione mostra un'altra data o un altro fuso orario
 cartelle di esportazione: 45; chat: Gruppo AlceGioviale, Gruppo ArmadilloSocievole, Gruppo BisontePotente, Gruppo CorvoCapace, Gruppo DonnolaRibelle, Gruppo ElefanteRaggiante, Gruppo GazzellaCortese, Gruppo GazzellaTenace, Gruppo GiraffaTenace, Gruppo LamaGentile, Gruppo MarmottaAgile, Gruppo NibbioEsuberante, Gruppo PettirossoLucente, Gruppo PumaAmabile, Gruppo SgombroBrillante, Gruppo SqualoImponente, Gruppo StruzzoEccellente, Gruppo TassoSorridente, Il Grimorio del Golem, InventoryBot, L'Atlante di Barbabeige, La Cittadella dei Demiurghi
-messaggi: 633 (dal bot: 317)
+messaggi: 641 (dal bot: 321)
 giocatore: @mario
-risposte del bot: 317
+risposte del bot: 321
   Gruppo StruzzoEccellente: risposte del bot abbinate a un comando: single=16, unmatched=4
   Gruppo LamaGentile: risposte del bot abbinate a un comando: user=7
-  InventoryBot: risposte del bot abbinate a un comando: dm=91
+  InventoryBot: risposte del bot abbinate a un comando: dm=93
   Gruppo ArmadilloSocievole: risposte del bot abbinate a un comando: single=32, unmatched=15, user=10, reply=3
   Gruppo SgombroBrillante: risposte del bot abbinate a un comando: single=4, unmatched=4
   Gruppo CorvoCapace: risposte del bot abbinate a un comando: user=21, single=4
   Gruppo MarmottaAgile: risposte del bot abbinate a un comando: unmatched=1
   Gruppo DonnolaRibelle: risposte del bot abbinate a un comando: single=2
-  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: single=38, user=26, unmatched=7
+  Gruppo NibbioEsuberante: risposte del bot abbinate a un comando: single=39, user=27, unmatched=7
   Gruppo BisontePotente: risposte del bot abbinate a un comando: single=1, unmatched=1
   Gruppo SqualoImponente: risposte del bot abbinate a un comando: unmatched=2, user=2
   Gruppo PumaAmabile: risposte del bot abbinate a un comando: unmatched=3
@@ -23,8 +23,8 @@ risposte del bot: 317
   Gruppo GazzellaCortese: risposte del bot abbinate a un comando: unmatched=1
   Gruppo GazzellaTenace: risposte del bot abbinate a un comando: user=2
 nomi visualizzati abbinati a un giocatore: 8; titoli dei giocatori riconosciuti: 11
-eventi: drop=65 inventory=41 use=39 miss=32 item_info=23 travel=13 give=12 craft=10 pakkomon_fight=10 unknown=8 stats=8 gift=7 recipe_list=6 item_cooldown=6 title=5 recipe_detail=5 old_format=4 show=4 location=4 cooldown=2 travel_blocked=2 pakkomon_ready=2 pakkomon_challenge=2 pakkomon_boss=2 pakkomon_record=2 pakkomon_stunned=2 travel_requirement=1
-  coppie nei gruppi verificate dalla risposta: confermate=165, sciolte=0
+eventi: drop=65 inventory=43 use=41 miss=32 item_info=23 travel=13 give=12 craft=10 pakkomon_fight=10 unknown=8 stats=8 gift=7 recipe_list=6 item_cooldown=6 title=5 recipe_detail=5 old_format=4 show=4 location=4 cooldown=2 travel_blocked=2 pakkomon_ready=2 pakkomon_challenge=2 pakkomon_boss=2 pakkomon_record=2 pakkomon_stunned=2 travel_requirement=1
+  coppie nei gruppi verificate dalla risposta: confermate=167, sciolte=0
   risposte del bot non riconosciute, per anno: 2018=1, 2025=7
 schede dei canali: 4 (post: 5)
 oggetti: 68; ricette: 21 (con tutti gli ingredienti: 10, con il risultato noto: 5); luoghi: 10
@@ -75,7 +75,7 @@ oggetti: 68; ricette: 21 (con tutti gli ingredienti: 10, con il risultato noto: 
   output_conflict: recipe="Torre" old="un muro" new="una torre" date="2025-11-28T11:30:01+09:00"
 -- unresolved_requirement: 1
   unresolved_requirement: item="una lanterna cieca" location="le cripte del monastero 👻" reason="no_way_back"
--- unresolved_use: 15
+-- unresolved_use: 16 (primi 15)
   unresolved_use: query="/usa caps # palude" text="lanci il tappo nella palude"
   unresolved_use: query="/usa caps" text="lanci il tappo lontano"
   unresolved_use: query="/usa truccato" text="il dado rotola sotto il tavolo e sparisce, ' \" \\   🧑‍🚀 lungo lungo lungo lungo l"
@@ -83,13 +83,13 @@ oggetti: 68; ricette: 21 (con tutti gli ingredienti: 10, con il risultato noto: 
   unresolved_use: query="/usa baule" text="apri il baule ma è vuoto"
   unresolved_use: query="/usa baule" text="apri il baule ma è vuoto"
   unresolved_use: query="/usa alberello" text="osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un p"
+  unresolved_use: query="/usa alberello" text="osservi il tuo vecchio alberello e sorpresa! Noti che su un ramo è spuntato un p"
   unresolved_use: query="/quest" text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
   unresolved_use: query=null text="lanci la tua Sfera Frullo, si apre a mezz'aria ed esce un Pakkomon di nome Brumo"
   unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "
   unresolved_use: query="/usa scanner" text="esamini i tuoi pakkomon con lo scanner:\n - Zampirlo 🐯: 5 minuti e 38 secondi\n - "
   unresolved_use: query="/usa zamp # spada" text="spalmi un Pakkomon di nome Zampirlo 🐯 con un unguento di menta e dopo pochi ista"
   unresolved_use: query=null text="spalmi un Pakkomon di nome Zampirlo 🐯 con un unguento di menta e dopo pochi ista"
-  unresolved_use: query="/usa sonda # zamp" text="inserisci Zampirlo 🐯 nella sonda e sul display appare una scritta: \"Decente\"!"
   unresolved_use: query="/usa sonda # zamp" text="inserisci Zampirlo 🐯 nella sonda e sul display appare una scritta: \"Decente\"!"
 -- source_vs_rarity: 3
   source_vs_rarity: item="un \\ rovescio" rarity="N" sources=["special"]
