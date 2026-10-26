@@ -1143,8 +1143,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       return page(
         '',
         `<div class="head"><div class="kicker"><span class="tag t-X">PK</span><span>Pakkomon</span><span>· ${p.gone ? 'non più tuo' : 'tuo'}</span></div>
-    <h2>${esc(p.name)}</h2>
-    <p class="makes">${goLink('pakkomon', GUIDE, 'Come funzionano i Pakkomon')}</p></div>
+    <h2>${esc(p.name)}</h2></div>
     ${record}
     ${sec('Storia', notes(story))}
     ${sec('Combattimenti', notes(fights))}`
