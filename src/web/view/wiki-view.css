@@ -593,6 +593,34 @@ body:has(.sidebar) {
   font-size: 0.85rem;
   margin: 0;
 }
+/* A command, in a guide's text. */
+.note code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: var(--search-bg);
+  border-radius: 4px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+/* How long the loser of a Pakkomon fight is stunned, by the fight's ending phrase. */
+.endings {
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+  width: 100%;
+  max-width: 480px;
+}
+.endings th,
+.endings td {
+  text-align: left;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.endings th {
+  color: var(--muted);
+  font-weight: 500;
+}
 /* An entry's sources, its last line. */
 .sources {
   margin: 0;

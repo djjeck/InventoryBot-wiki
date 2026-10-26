@@ -1,4 +1,5 @@
 /* global window, document, localStorage, location, history, matchMedia, URLSearchParams, getComputedStyle */
+import { ENDINGS, PAKKOMON, WOUNDS } from '#src/inventorybot/pakkomon.ts';
 import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
 
 /**
@@ -31,6 +32,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     <button role="tab" data-tab="oggetti"><span class="tab-name">Oggetti</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="ricette"><span class="tab-name">Ricette</span><span class="badge" aria-hidden="true"></span></button>
     <button role="tab" data-tab="luoghi"><span class="tab-name">Luoghi</span><span class="badge" aria-hidden="true"></span></button>
+    <button role="tab" data-tab="pakkomon" hidden><span class="tab-name">Pakkomon</span><span class="badge" aria-hidden="true"></span></button>
   </div>
   <div class="side-tools" id="side-tools"></div>
   <div class="list" id="list"></div>
@@ -172,7 +174,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // A real link to the entry's address, so that it wraps as text does and opens in a
     // new tab like any link; a plain click shows the entry in place (see `go`).
     const goLink = (kind, n, text = n) => {
-      const tab = { item: 'oggetti', recipe: 'ricette', loc: 'luoghi' }[kind];
+      const tab = { item: 'oggetti', recipe: 'ricette', loc: 'luoghi', pakkomon: 'pakkomon' }[kind];
       return `<a class="link" href="${hashOf(tab, n)}" data-go="${kind}" data-name="${esc(n)}">${esc(text)}</a>`;
     };
     /** An item as the bot writes it: its name, then `[R]` and `[usabile]`. */
@@ -265,8 +267,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     // ---- state -------------------------------------------------------------------
     const state = {
       tab: 'oggetti',
-      sel: { ricette: null, oggetti: null, luoghi: null },
-      filter: { ricette: 'tutte', oggetti: 'tutti' },
+      sel: { ricette: null, oggetti: null, luoghi: null, pakkomon: null },
+      filter: { ricette: 'tutte', oggetti: 'tutti', pakkomon: 'tuoi' },
       // What a recipe's tree shows: what the owner still lacks, or all of it.
       tree: null,
     };
@@ -287,12 +289,18 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       },
     };
     state.tree = store.get('ib-tree') === 'tutto' ? 'tutto' : 'mancanti';
-    const TABS = ['oggetti', 'ricette', 'luoghi'];
+    // ---- the owner's Pakkomon -------------------------------------------------------
+    // Each Pakkomon is the owner's own (player-pakkomon.ts), never the wiki's: the tab lists
+    // theirs, after a page on how Pakkomon work, which also shows without any.
+    const GUIDE = 'Come funzionano';
+    const PK = Object.fromEntries((P?.pakkomon || []).map((p) => [p.name, p]));
+    const pakkomonTab = !!P || !!I[PAKKOMON];
+    const TABS = ['oggetti', 'ricette', 'luoghi', ...(pakkomonTab ? ['pakkomon'] : [])];
     // ---- the URL -------------------------------------------------------------------
     // `#tab` or `#tab/slug`. A slug is the name folded to lower-case ASCII letters and
     // digits, with `_` in place of everything else (`l'oro` is `l_oro`); names with the
     // same slug take `_2`, `_3`, ... in the order of their names, so each is one entry.
-    const ENTRIES = { ricette: R, oggetti: I, luoghi: L };
+    const ENTRIES = { ricette: R, oggetti: I, luoghi: L, pakkomon: { [GUIDE]: {}, ...PK } };
     const slugify = (s) =>
       fold(s)
         .replace(/[^a-z0-9]+/gu, '_')
@@ -313,6 +321,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ricette: slugTable(Object.keys(R)),
       oggetti: slugTable(Object.keys(I)),
       luoghi: slugTable(Object.keys(L)),
+      pakkomon: slugTable(Object.keys(ENTRIES.pakkomon)),
     };
     // The old names of renamed items lead to the item, where no current name has the slug.
     for (const [old, name] of Object.entries(W.renames || {}))
@@ -555,6 +564,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ingredienti: ['Usati in ricette', (i) => i.used_in.length > 0],
       craftati: ['Craftati', (i) => i.made_by.length || (i.rarity || '')[0] === 'L'],
       esclusivi: ['Esclusivi di un luogo', (i) => i.exclusive],
+      pakkomon: ['Per i Pakkomon', (i) => !!i.pakkomon_roles?.length || !!i.from_fight?.length],
       // Nor to open a place, nor with another item: a key is far from useless.
       inutili: [
         'Non usati',
@@ -595,6 +605,9 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       if (i.from_use?.length) bits.push(`usando: ${few(i.from_use.map(current), esc)}`);
       if (i.rewards?.includes('level_up')) bits.push('salendo di livello');
       if (i.rewards?.includes('lottery')) bits.push('alla lotteria');
+      if (i.from_fight?.length) bits.push(`battendo ${few(i.from_fight, (x) => x)}`);
+      if (i.pakkomon_roles?.length)
+        bits.push(`Pakkomon: ${i.pakkomon_roles.map((r) => ROLE_NAMES[r]).join(', ')}`);
       if (i.exclusive)
         bits.push(
           i.locations.length
@@ -747,6 +760,8 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         );
       if (i.rewards?.includes('level_up')) lines.push('Si riceve in omaggio salendo di livello.');
       if (i.rewards?.includes('lottery')) lines.push('Si vince alla lotteria.');
+      if (i.from_fight?.length)
+        lines.push(`Si vince combattendo con un Pakkomon contro ${listIt(i.from_fight.map(esc))}.`);
       if (i.sources.includes('special')) lines.push("E' un oggetto speciale.");
       if (!lines.length)
         lines.push('<span class="unknown">Non si sa ancora come si ottiene.</span>');
@@ -814,6 +829,14 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         ? `<p class="makes">Si usa con: ${few(w.map(current), (n) => goLink('item', n))}</p>`
         : '';
     }
+    /** What an item is for, with Pakkomon; the one Pakkomon leads to the tab. */
+    function pakkomonLine(i) {
+      if (i.name === PAKKOMON)
+        return `<p class="makes">Ogni Pakkomon è unico: ${goLink('pakkomon', GUIDE, 'come funzionano')}${P?.pakkomon.length ? ` · ${goLink('pakkomon', P.pakkomon[0].name, 'i tuoi Pakkomon')}` : ''}</p>`;
+      return i.pakkomon_roles?.length
+        ? `<p class="makes">Per i Pakkomon: ${i.pakkomon_roles.map((r) => esc(ROLE_NAMES[r])).join(', ')} (${goLink('pakkomon', GUIDE, 'come funzionano')}).</p>`
+        : '';
+    }
     function madeBy(i) {
       const arrow = '<span class="arrow" aria-hidden="true">←</span>';
       if (i.made_by.length)
@@ -834,7 +857,14 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const personal = P
         ? myCard(
             [
-              [h ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty}.` : 'Non ne hai neanche uno.'],
+              [
+                // The owner's Pakkomon are counted one by one, not estimated.
+                name === PAKKOMON
+                  ? [`Hai ${P.pakkomon.filter((p) => !p.gone).length} Pakkomon.`]
+                  : h
+                    ? `Ne hai ${h.exact ? '' : 'almeno '}${h.qty}.`
+                    : 'Non ne hai neanche uno.',
+              ].flat(),
               ...recipes.map(([, p]) => p.myLines),
             ],
             [
@@ -857,6 +887,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     ${fromUseLine(i)}
     ${opensLines(name)}
     ${usedWithLine(name)}
+    ${pakkomonLine(i)}
     ${
       // A "+" item drops in one place: where, right under its name.
       i.exclusive
@@ -995,6 +1026,191 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     ${moreInfo(notesOf(l.channel))}
     ${sourcesLine(l, l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" })}
 `
+      );
+    }
+    // ---- Pakkomon -----------------------------------------------------------------
+    /** What an item is for, with Pakkomon (pakkomon_roles). */
+    const ROLE_NAMES = {
+      sphere: 'fa nascere un Pakkomon',
+      equipment: 'equipaggiamento',
+      scanner: 'mostra quando i tuoi Pakkomon possono combattere',
+      heal: 'cura un Pakkomon rintronato',
+      power_up: 'potenziamento',
+      probe: 'misura la forza',
+      scale: 'confronta due Pakkomon',
+      extractor: 'distrugge un Pakkomon',
+      customisation: 'cambia nome e icona a un Pakkomon',
+    };
+    const withRole = (role) =>
+      Object.values(I)
+        .filter((i) => i.pakkomon_roles?.includes(role))
+        .map((i) => i.name)
+        .sort((a, b) => a.localeCompare(b, 'it'));
+    const fmtDateTime = (d) =>
+      d
+        ? new Date(d).toLocaleString('it-IT', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : '';
+    /** Stunned at the date of the owner's latest event. */
+    const stunned = (p) =>
+      !!p.stunned_until && !!P?.as_of && new Date(p.stunned_until) > new Date(P.as_of);
+    const PAKKOMON_FILTERS = {
+      tuoi: ['I tuoi', (p) => !p.gone],
+      ceduti: ['Non più tuoi', (p) => !!p.gone, 'Ceduti, distrutti, o non più elencati'],
+    };
+    /** The guide first, then the owner's Pakkomon of the filter. */
+    function pakkomonRows(q) {
+      const f = PAKKOMON_FILTERS[state.filter.pakkomon][1];
+      return [
+        ...(!q || fold(GUIDE).includes(q) ? [{ name: GUIDE }] : []),
+        ...(P?.pakkomon || []).filter((p) => f(p) && (!q || fold(p.name).includes(q))),
+      ];
+    }
+    const goneText = (p) =>
+      ({
+        given: `dato a @${p.gone.to}`,
+        extracted: 'distrutto con un estrattore',
+        unlisted: 'non più tra i tuoi',
+      })[p.gone.via] + (p.gone.date ? ` il ${fmtDate(p.gone.date)}` : '');
+    function pakkomonRow(p) {
+      const cur = `aria-current="${state.sel.pakkomon === p.name}"`;
+      if (p.name === GUIDE)
+        return `<button class="row" data-sel="${esc(GUIDE)}" ${cur}><span class="tag t-q">?</span><span class="name">${esc(GUIDE)}</span>
+    <span class="sub">combattimenti, equipaggiamento, cure, premi</span></button>`;
+      const sub = [
+        p.record ? `${p.record.wins} vittorie, ${p.record.losses} sconfitte` : 'scheda mai vista',
+        p.gone ? goneText(p) : '',
+      ].filter(Boolean);
+      return `<button class="row" data-sel="${esc(p.name)}" ${cur}>
+    <span class="tag t-X">PK</span><span class="name">${esc(p.name)}</span><span class="meta">${p.gone ? '' : stunned(p) ? 'rintronato' : '<span class="mine ok">pronto</span>'}</span>
+    <span class="sub">${esc(sub.join(' · '))}</span></button>`;
+    }
+    /** The page of the tab's entry: the guide, or one of the owner's Pakkomon. */
+    const pakkomonPage = (name) => (PK[name] ? pakkomonDetail(PK[name]) : guideDetail());
+    /** One of the owner's Pakkomon: its record as the bot shows it, then its story. */
+    function pakkomonDetail(p) {
+      const rec = p.record;
+      const born = p.born ? p.born.split('-').reverse().join('-') : null;
+      const record = rec
+        ? bubble([
+            `<b>${esc(p.name)}</b> ha vinto ${rec.wins} battaglie e ne ha perse ${rec.losses}.`,
+            p.equipment
+              ? `E' equipaggiato con ${itemRef(p.equipment)}.`
+              : 'Non ha nulla equipaggiato.',
+            stunned(p)
+              ? `E' ancora rintronato dall'ultimo combattimento. Si rimettera' il ${fmtDateTime(p.stunned_until)}.`
+              : "E' pronto a combattere.",
+            ...(born ? [`E' nato il giorno ${born} dalle mani di @${esc(p.maker)}.`] : []),
+            ...(p.power_ups.length ? [esc(p.power_ups.join(''))] : []),
+          ])
+        : `<p class="note">La sua scheda non compare nelle chat importate: /usa ${esc(p.name)} la mostra.</p>`;
+      const story = [
+        p.came
+          ? p.came.via === 'hatched'
+            ? `Nato da ${I[current(p.came.from)] ? goLink('item', current(p.came.from)) : esc(p.came.from || 'una sfera')}${p.came.date ? ` il ${fmtDate(p.came.date)}` : ''}.`
+            : `Ricevuto da @${esc(p.came.from)}${p.came.date ? ` il ${fmtDate(p.came.date)}` : ''}.`
+          : '',
+        p.first_seen
+          ? `Visto per la prima volta il ${fmtDate(p.first_seen)}, l'ultima il ${fmtDate(p.last_seen)}.`
+          : '',
+        p.gone ? `${esc(goneText(p).replace(/^./u, (c) => c.toUpperCase()))}.` : '',
+        rec ? `Scheda del ${fmtDate(rec.date)}.` : '',
+      ].filter(Boolean);
+      const f = p.fights;
+      const ending = p.best_win ? ENDINGS.find(([, lo]) => lo === p.best_win.min)?.[0] : null;
+      const fights = [
+        f.won + f.lost
+          ? `Nelle chat importate: ${f.won} ${f.won === 1 ? 'vittoria' : 'vittorie'} e ${f.lost} ${f.lost === 1 ? 'sconfitta' : 'sconfitte'}${f.learned ? `; ha imparato qualcosa di nuovo ${f.learned} ${f.learned === 1 ? 'volta' : 'volte'}` : ''}.`
+          : 'Nessun combattimento nelle chat importate.',
+        p.best_win
+          ? `La vittoria più netta: «${esc(ending)}», con l'avversario rintronato per ${p.best_win.max === null ? `almeno ${p.best_win.min}` : `${p.best_win.min}-${p.best_win.max}`} minuti: la sua forza, più il bonus dell'equipaggiamento, arriva almeno a ${p.best_win.min}.`
+          : '',
+        p.probe ? `La sonda lo dice «${esc(p.probe)}».` : '',
+        p.power_up_items.length
+          ? `Potenziato con ${p.power_up_items.map((n) => goLink('item', current(n))).join(', ')}.`
+          : '',
+      ].filter(Boolean);
+      const notes = (lines) => lines.map((l) => `<p class="note">${l}</p>`).join('');
+      return page(
+        '',
+        `<div class="head"><div class="kicker"><span class="tag t-X">PK</span><span>Pakkomon</span><span>· ${p.gone ? 'non più tuo' : 'tuo'}</span></div>
+    <h2>${esc(p.name)}</h2>
+    <p class="makes">${goLink('pakkomon', GUIDE, 'Come funzionano i Pakkomon')}</p></div>
+    ${record}
+    ${sec('Storia', notes(story))}
+    ${sec('Combattimenti', notes(fights))}`
+      );
+    }
+    /** How Pakkomon work: the game's rules, and the items and prizes the wiki knows. */
+    function guideDetail() {
+      const spheres = [...new Set([...withRole('sphere'), ...(I[PAKKOMON]?.from_use || [])])];
+      const roleSec = (title, roles, note) => {
+        const items = roles.flatMap((r) => withRole(r).map((n) => [n, r]));
+        return sec(
+          title,
+          `<p class="note">${note}</p>` +
+            (items.length
+              ? // A long list (anything can be equipment) is folded, with its size.
+                ((list) =>
+                  items.length > 12
+                    ? `<details class="cand"><summary>${items.length} oggetti osservati</summary>${list}</details>`
+                    : list)(
+                  `<div class="chips">${items.map(([n, r]) => `${itemLink(n)}${roles.length > 1 ? ` <span class="note">${esc(ROLE_NAMES[r])}</span>` : ''}`).join('')}</div>`
+                )
+              : '<p class="empty">Nessuno osservato.</p>')
+        );
+      };
+      // The prizes of fights, by the Pakkomon beaten or hit.
+      const prizes = new Map();
+      for (const i of Object.values(I))
+        for (const o of i.from_fight || []) prizes.set(o, [...(prizes.get(o) || []), i.name]);
+      const prizeLines = [...prizes]
+        .sort((a, b) => a[0].localeCompare(b[0], 'it'))
+        .map(([o, items]) => `- ${esc(o)}: ${items.map((n) => itemRef(n)).join(', ')}`);
+      const own = P?.pakkomon.filter((p) => !p.gone).length || 0;
+      const endings = `<table class="endings"><thead><tr><th>Frase finale</th><th>Rintronato per</th></tr></thead><tbody>${ENDINGS.map(
+        ([phrase, lo, hi]) =>
+          `<tr><td>${esc(phrase)}</td><td>${hi === null ? `almeno ${lo}` : `${lo}-${hi}`} minuti</td></tr>`
+      ).join('')}</tbody></table>`;
+      const usage = (s) => `<code>${esc(s)}</code>`;
+      return page(
+        P
+          ? myCard(
+              [],
+              [
+                own
+                  ? `Hai ${own} Pakkomon: li trovi nell'elenco.`
+                  : 'Non hai ancora un Pakkomon nelle chat importate.',
+              ]
+            )
+          : '',
+        `<div class="head"><div class="kicker"><span class="tag t-q">?</span><span>Pakkomon</span></div>
+    <h2>Come funzionano i Pakkomon</h2></div>
+    <p class="note">Un Pakkomon è una creatura che combatte contro quelle degli altri giocatori. Ognuno è unico: ha un nome tutto suo, e tiene le sue vittorie, le sue sconfitte, il suo equipaggiamento e i suoi potenziamenti anche se cambia padrone.</p>
+    ${sec('Come si ottiene', `<p class="note">Usando una sfera, da cui esce un Pakkomon dal nome e dall'icona casuali.</p>` + (spheres.length ? chips(spheres, itemLink) : '<p class="empty">Nessuna sfera osservata.</p>'))}
+    ${sec(
+      'Combattimenti',
+      `<p class="note">${usage('/usa <pakkomon> # @utente')} sfida un giocatore, ${usage('/usa <pakkomon> # ?')} aspetta uno sfidante qualsiasi, ${usage('/usa <pakkomon>')} mostra la sua scheda.</p>
+      <p class="note">Ogni Pakkomon ha una forza che il gioco non mostra. In un combattimento ciascuno tira un numero fino alla sua forza, più il bonus del suo equipaggiamento: vince il più alto, e a parità chi ha sfidato. Chi vince può imparare qualcosa di nuovo, e diventa più forte.</p>
+      <p class="note">Chi perde resta rintronato, e non può combattere, per tanti minuti quanta è la differenza tra i due tiri, e la frase con cui finisce il combattimento lo dice. La vittoria più netta di un Pakkomon dice quindi a quanto arrivano almeno la sua forza e il bonus del suo equipaggiamento.</p>
+      ${endings}`
+    )}
+    ${roleSec('Equipaggiamento', ['equipment'], `Un Pakkomon si equipaggia con un oggetto dell'inventario (${usage('/usa <pakkomon> # <oggetto>')}), che resta nell'inventario e può equipaggiarne altri. Il bonus che dà non si vede: alcuni oggetti non ne danno, altri tolgono forza.`)}
+    ${roleSec('Potenziamenti', ['power_up'], 'Danno forza per sempre. Ognuno si può dare una volta sola allo stesso Pakkomon, e la sua scheda ne mostra l’icona.')}
+    ${roleSec('Cure', ['heal'], `Rimettono subito in forma un Pakkomon rintronato (${usage('/usa <oggetto> # <pakkomon>')}).`)}
+    ${roleSec('Strumenti', ['scanner', 'probe', 'scale', 'extractor', 'customisation'], 'Per conoscere i propri Pakkomon, e cambiarli.')}
+    ${sec(
+      'Avversari del bot e boss',
+      `<p class="note">Contro @InventoryBot si affrontano i Pakkomon del bot, molto più forti di quelli dei giocatori: battuto uno, si passa al successivo. Ogni tanto arriva un boss, che si affronta allo stesso modo nei gruppi dell'Arena: ogni colpo dà un oggetto, e le sue ferite crescono da «${esc(WOUNDS[0])}» a «${esc(WOUNDS.at(-1))}», finché è sconfitto.</p>` +
+        (prizeLines.length
+          ? bubble(['Premi osservati:', ...prizeLines])
+          : '<p class="empty">Nessun premio osservato.</p>')
+    )}`
       );
     }
     // ---- the map of the places ---------------------------------------------------
@@ -1411,9 +1627,11 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       ricette: recipeRows,
       oggetti: itemRows,
       luoghi: locRows,
+      pakkomon: pakkomonRows,
     };
     function renderTabs(q) {
-      root.querySelectorAll('#tabs button').forEach((b) => {
+      $('#tabs [data-tab="pakkomon"]').hidden = !pakkomonTab;
+      root.querySelectorAll('#tabs button:not([hidden])').forEach((b) => {
         b.setAttribute('aria-selected', b.dataset.tab === state.tab);
         const n = TAB_ROWS[b.dataset.tab](q).length;
         b.querySelector('.badge').textContent = n ? String(n) : '';
@@ -1456,6 +1674,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         detail = locDetail(shown);
         extra = `<div class="graphbox">${mapSvg(shown)}</div><div class="legend"><span>bordo tratteggiato: serve un oggetto per entrare</span>${P ? "<span>riempito d'oro: visitato da te</span>" : ''}<span>freccia: si va solo in quel verso</span>${Object.values(L).some((l) => l.secret) ? '<span>strada tratteggiata: porta a un luogo segreto, che compare tra le destinazioni solo a chi ha il suo oggetto</span>' : ''}</div>`;
       }
+      if (state.tab === 'pakkomon') {
+        rows = pakkomonRows(q);
+        rowFn = pakkomonRow;
+        detail = pakkomonPage(state.sel.pakkomon ?? rows[0]?.name);
+        filters = P?.pakkomon.some((p) => p.gone) ? filtersHtml('pakkomon', PAKKOMON_FILTERS) : '';
+      }
       const curSel = state.sel[state.tab] ?? rows[0]?.name;
       $('#side-tools').innerHTML = filters;
       $('#list').innerHTML = list(rows, rowFn);
@@ -1481,7 +1705,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
     }
     function go(kind, name) {
       if (kind === 'item' && !I[name] && W.renames?.[name]) name = W.renames[name]; // old name of a renamed item
-      const tab = { recipe: 'ricette', item: 'oggetti', loc: 'luoghi' }[kind];
+      const tab = { recipe: 'ricette', item: 'oggetti', loc: 'luoghi', pakkomon: 'pakkomon' }[kind];
       state.sel[tab] = name;
       if (state.tab !== tab) {
         state.tab = tab;

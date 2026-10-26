@@ -36,25 +36,9 @@ whose command matches two items and whose reply names neither (`/usa sonda`) sta
 The player state lists the owner's Pakkomon (`player-pakkomon.ts`), each followed by name, with its
 fights, widest win (the strength estimate the rules allow) and probe reading.
 
-## Phase 5: the Pakkomon tab ⬜
+## Phase 5: the Pakkomon tab ✅
 
-Goal: the web app shows the owner's Pakkomon in a tab of their own.
-
-### 5.1 The tab and its pages ⬜
-
-- ⬜ A "Pakkomon" tab, present only with a player state, listing only the owner's Pakkomon (as if
-  "Posseduti" were always selected), current ones first.
-- ⬜ A Pakkomon's page: its record as the bot would show it, then what the bot does not say
-  (history, strength estimate, equipment and power-ups, fights won and lost).
-- ⬜ A page on how Pakkomon work: the hardcoded rules, the ending phrases and their stun ranges, the
-  items with a Pakkomon role from the wiki.
-
-### 5.2 Docs ⬜
-
-- ⬜ `README.md` (Italian) and `CLAUDE.md` (architecture, data rules) describe the tab and the
-  player state's Pakkomon.
-
-Acceptance: checked in a browser with the Arena exports loaded as a player with several Pakkomon.
+The web app has a Pakkomon tab: a guide to how Pakkomon work, then the owner's Pakkomon.
 
 ## Closing ⬜
 
