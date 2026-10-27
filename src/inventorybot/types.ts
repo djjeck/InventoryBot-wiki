@@ -761,4 +761,16 @@ export interface PlayerState {
    * wiki's one Pakkomon), current ones first, then by name.
    */
   pakkomon: PlayerPakkomon[];
+  /**
+   * The shapes the owner's shaped items had (the items and the inventory count each as the
+   * item it was shaped from), per item, the latest first.
+   */
+  shapes: Record<string, PlayerShape[]>;
+}
+
+/** A shape of one of the owner's shaped items: the text, and when it was seen. */
+export interface PlayerShape {
+  shape: string;
+  first_seen: string | null;
+  last_seen: string | null;
 }

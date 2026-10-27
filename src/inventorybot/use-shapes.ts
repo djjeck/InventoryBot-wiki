@@ -25,6 +25,18 @@ export function unshaped(name: string): string {
   return i > 0 ? name.slice(0, i) : name;
 }
 
+/** The shape of a shaped item ("NAME modellato a forma di TEXT" is TEXT), or null. */
+export function shapeOf(name: string): string | null {
+  const i = name.indexOf(SHAPED);
+  return i > 0 ? name.slice(i + SHAPED.length).trim() : null;
+}
+
+/** The shape a use's reply gave the item ("… gli dai la forma di TEXT" is TEXT), or null. */
+export function shapeGiven(text: string): string | null {
+  const i = text.indexOf(SHAPED_AS);
+  return i < 0 ? null : text.slice(i + SHAPED_AS.length).trim() || null;
+}
+
 /** What the replies may name, known from the wiki: items, and places as the bot writes them. */
 export interface ShapeNames {
   items: Iterable<string>;

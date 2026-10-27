@@ -848,6 +848,15 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         return `<p class="makes"><span class="visually-hidden">Si ottiene con: </span>${arrow} ? <span class="makes-unknown">ricetta non ancora identificata</span></p>`;
       return '';
     }
+    /** The shapes the owner gave an item of theirs, the latest first (results stored before them have none). */
+    function shapeNotes(shapes) {
+      if (!shapes?.length) return [];
+      const [last, ...before] = shapes;
+      return [
+        `Ultima forma: «${esc(last.shape)}», dal ${fmtDate(last.first_seen)}.`,
+        before.length ? `Prima: ${before.map((x) => `«${esc(x.shape)}»`).join(', ')}.` : '',
+      ];
+    }
     function itemDetail(name) {
       const i = I[name];
       if (!i) return `<p class="empty">Seleziona un oggetto dall'elenco.</p>`;
@@ -874,6 +883,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
               ...recipes.map(([, p]) => p.myNote),
               h ? `Ultimo riscontro con ${VIA[h.via] || h.via} il ${fmtDate(h.date)}.` : '',
               seenAt ? `Visto per la prima volta il ${fmtDate(seenAt)}.` : '',
+              ...shapeNotes(P.shapes?.[name]),
               i.usable
                 ? mineI?.used
                   ? `Usato ${mineI.used} ${mineI.used === 1 ? 'volta' : 'volte'}, l'ultima il ${fmtDate(mineI.last_used)}.`

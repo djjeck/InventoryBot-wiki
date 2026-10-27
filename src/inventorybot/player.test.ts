@@ -163,6 +163,34 @@ describe('shaped items', () => {
     expect(Object.keys(state.items)).toStrictEqual(["un po' di creta"]);
   });
 
+  it('the_shapes_of_the_owners_items_are_kept_the_latest_first', () => {
+    const [, state] = invOf([
+      ev(T.inventory([[shaped('un drago'), 'U', 1, true]]), '/inventario', { t: 0 }),
+      ev(
+        "@djjeck, ti metti a manipolare la creta finche', con somma maestria, gli dai la forma di un fiore",
+        '/usa creta # un fiore',
+        { t: 1 }
+      ),
+      ev(T.inventory([[shaped('un fiore'), 'U', 1, true]]), '/inventario', { t: 2 }),
+      // Another player's shapes are theirs.
+      g(T.inventory([[shaped('un biscotto'), 'U', 1, true]], 'luigi'), '/inventario', 3),
+    ]);
+    expect(state.shapes).toStrictEqual({
+      "un po' di creta": [
+        {
+          shape: 'un fiore',
+          first_seen: iso('27.11.2025 19:00:01 UTC-05:00'),
+          last_seen: iso('27.11.2025 19:00:02 UTC-05:00'),
+        },
+        {
+          shape: 'un drago',
+          first_seen: iso('27.11.2025 19:00:00 UTC-05:00'),
+          last_seen: iso('27.11.2025 19:00:00 UTC-05:00'),
+        },
+      ],
+    });
+  });
+
   it('shapes_listed_together_add_up', () => {
     const [inv] = invOf([
       ev(T.inventory([["un po' di creta", 'U', 1, true]]), '/inventario', { t: 0 }),

@@ -281,5 +281,6 @@
       "stunned_until": null,
       "probe": "Decente"
     }
-  ]
+  ],
+  "shapes": {}
 }

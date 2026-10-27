@@ -55,8 +55,14 @@ import { compareCodePoints } from '#src/lib/text.ts';
 import { instant, inventoryScope, isFailedUse, isMine, type KB, queryArg } from './build.ts';
 import { PAKKOMON } from './pakkomon.ts';
 import { ownerPakkomon, pakkomonOf } from './player-pakkomon.ts';
-import { type BuildEvent, type Holding, type HoldingVia, type PlayerState } from './types.ts';
-import { unshaped } from './use-shapes.ts';
+import {
+  type BuildEvent,
+  type Holding,
+  type HoldingVia,
+  type PlayerShape,
+  type PlayerState,
+} from './types.ts';
+import { shapeGiven, shapeOf, unshaped } from './use-shapes.ts';
 
 export class Holdings {
   /** name -> holding, in order of first observation. */
@@ -209,8 +215,23 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
   const check: PlayerState['inventory_check'] = { compared: 0, agreed: 0 };
   const rarityOf = (n: string): string | null | undefined => kb.items.get(unshaped(n))?.rarity;
 
+  // item -> shape -> when it was seen
+  const shapes = new Map<string, Map<string, PlayerShape>>();
+  const shaped = (item: string, shape: string | null, date: string | null): void => {
+    if (shape === null) return;
+    let m = shapes.get(item);
+    if (m === undefined) shapes.set(item, (m = new Map()));
+    const s = m.get(shape);
+    if (s === undefined) m.set(shape, { shape, first_seen: date, last_seen: date });
+    else {
+      if (instant(date) < instant(s.first_seen)) s.first_seen = date;
+      if (instant(date) > instant(s.last_seen)) s.last_seen = date;
+    }
+  };
   const seen = (name: string | null | undefined, date: string | null): void => {
-    if (name && !firstSeen.has(name)) firstSeen.set(name, date);
+    if (!name) return;
+    if (!firstSeen.has(name)) firstSeen.set(name, date);
+    shaped(unshaped(name), shapeOf(name), date);
   };
 
   for (const e of events) {
@@ -307,6 +328,7 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
       const item = e.used_item;
       if (item && !isFailedUse(e.text)) {
         seen(item, d);
+        shaped(item, shapeGiven(e.text), d);
         increment(used, item);
         lastUsed.set(item, d);
         // A successful use of an item the wiki found to be consumed takes one away;
@@ -364,14 +386,14 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     const cur = firstSeen.get(item);
     if (cur === undefined || (d !== null && instant(d) < instant(cur))) firstSeen.set(item, d);
   }
-  const shapes = new Map<string, Holding[]>();
+  const shapeHoldings = new Map<string, Holding[]>();
   for (const [name, h] of [...hold.h]) {
     const item = unshaped(name);
     if (item === name) continue;
     hold.h.delete(name);
-    shapes.set(item, [...(shapes.get(item) ?? []), h]);
+    shapeHoldings.set(item, [...(shapeHoldings.get(item) ?? []), h]);
   }
-  for (const [item, hs] of shapes) {
+  for (const [item, hs] of shapeHoldings) {
     const base = hold.h.get(item);
     if (base !== undefined) hs.push(base);
     const latest = Math.max(...hs.map((h) => instant(h.date)));
@@ -406,5 +428,14 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
     inventory: Object.fromEntries(byKey(hold.h).filter(([, v]) => v.qty > 0)),
     inventory_check: check,
     pakkomon: ownerPakkomon(events, player),
+    shapes: Object.fromEntries(
+      byKey(shapes).map(([n, m]) => [
+        n,
+        [...m.values()].sort(
+          (a, b) =>
+            instant(b.last_seen) - instant(a.last_seen) || compareCodePoints(a.shape, b.shape)
+        ),
+      ])
+    ),
   };
 }
