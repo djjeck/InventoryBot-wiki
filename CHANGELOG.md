@@ -2,28 +2,24 @@
 
 ## 0.9.2 (2026-10-26)
 
-- The file `/esporta` sends, which lists every item you own, sets the inventory estimate exactly:
-  every count, and every item not in it goes to zero. An export holds the file when made with
-  **File** selected; the page and the README now say to send `/esporta` and select it before
-  exporting the chat.
-- `/collezioni` replies and `/inv2` pages update the inventory estimate like `/inventario` does, and
-  each count says which of these commands last confirmed it.
+- **Lettura di `/esporta`.** Il file che il bot manda in risposta a `/esporta` elenca tutto quello
+  che possiedi, e ora la stima dell'inventario riparte esatta da lì. Perché l'esportazione contenga
+  il file, seleziona **File** quando esporti la chat: la pagina e il README ora lo spiegano.
+- **Pure altri formati:** `/collezioni` e le pagine di `/inv2` aggiornano la stima dell'inventario,
+  come `/inventario`, e ogni quantità dice quale di questi comandi l'ha confermata per ultimo.
 
 ## 0.9.1 (2026-10-26)
 
-- Pakkomon fights, records, challenges, stuns, bosses and the uses of items on a Pakkomon are read
-  from the bot's replies, as they are today, instead of as a format of 2017-2018.
-- The wiki no longer lists each Pakkomon as an item: they are one item, `un Pakkomon`, and items say
-  what they are for with Pakkomon (equipment, healing, power-up, tool) and which fight against the
-  bot's Pakkomon or a boss gives them. A new item filter lists them.
-- A Pakkomon tab, shown while you have a Pakkomon: how fights work (how long the loser stays stunned
-  for each ending phrase), then your Pakkomon, each with its record, story, fights and the items you
-  hold for it.
-- Usernames in Pakkomon replies and after a `/usa`'s `#` are anonymised like the others.
-- A saved wiki is built again after the page is updated, instead of showing the old version's
-  results.
-- The web app is published only from release tags.
+- **Supporto Pakkomon.** Mostra Pakkomon a parte, non più come oggetti.
+- **Supporto roba Pakkomon.** Gli oggetti dicono a cosa servono per i Pakkomon (equipaggiamento,
+  cura, potenziamento, strumento) e quale combattimento contro un Pakkomon del bot o un boss li fa
+  vincere. Un nuovo filtro della lista degli oggetti li mostra tutti.
+- I nomi utente nelle risposte sui Pakkomon e dopo il `#` di `/usa` sono anonimizzati come tutti gli
+  altri.
+- Quando la pagina si aggiorna a una nuova versione, la wiki salvata viene ricostruita, invece di
+  mostrare i risultati della versione precedente.
+- La pagina di github.io si aggiorna solo quando esce una nuova versione taggata.
 
 ## 0.9.0 (2026-10-26)
 
-Initial version.
+Prima versione.

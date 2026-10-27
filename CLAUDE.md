@@ -54,8 +54,9 @@ requests included, can land at any time and reach players together, recorded in
    `git log --oneline <previous tag>..main`.
 2. Choose the version (semantic versioning; below 1.0.0 until the game's author has had their say),
    and add its entry at the top of `CHANGELOG.md`: `## X.Y.Z (YYYY-MM-DD)`, then a short list of the
-   changes since the previous release that a player, or a contributor, would notice. Skip cosmetic
-   and trivial changes (formatting, refactoring, wording, small fixes of style).
+   changes since the previous release that a player would notice, in Italian and in the player's
+   terms (what they see and can do, not how it works). Skip cosmetic and trivial changes
+   (formatting, refactoring, wording, small fixes of style) and those only contributors see.
 3. Set the version: `npm version X.Y.Z --no-git-tag-version` (it updates `package.json` and
    `package-lock.json`), and commit it with the changelog as `Release X.Y.Z`.
 4. Tag that commit, `git tag -a vX.Y.Z -m "X.Y.Z"`, and push both: `git push origin main vX.Y.Z`.
@@ -361,7 +362,7 @@ This project must stay on the right side of that.
 - **Language**: authors and contributors work in English, so everything for developers is in
   English: code, comments, tests, commit messages, `CLAUDE.md` and `docs/`. The game is Italian, and
   so are its players: everything they see is in Italian, including the end-user documentation
-  (`README.md`), messages and the web app.
+  (`README.md`, `CHANGELOG.md`), messages and the web app.
 - **Node.js 24**, pinned in `.nvmrc`; `engines` in `package.json` matches it.
 - **No build step.** Node runs the `.ts` sources directly by stripping types, and `tsc` only
   type-checks (`noEmit`). So imports use `.ts` extensions, and only erasable TypeScript syntax is
