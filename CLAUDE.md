@@ -154,11 +154,13 @@ order:
    the items whose use gave it (`from_use`), a level-up or a lottery draw (`rewards`), a fight
    against one of the bot's Pakkomon or a boss (`from_fight`). Every Pakkomon is the wiki's one item
    `un Pakkomon` (`wikiItemName` in `pakkomon.ts`): each is a creature of its owner, so the wiki
-   learns only what holds for any of them, and an item learns what it is for with Pakkomon
-   (`pakkomon_roles`: equipment, healing, power-up…) from most of its uses, a use's shape leaving
-   the Pakkomon's name out. `toJson` writes the wiki, `playerState` the player state. Phase 5 reads
-   plain JSON copies of the events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates
-   them for `playerState`.
+   learns only what holds for any of them; likewise an item a use shaped as its player typed is the
+   item it was (`NAME modellato a forma di …` is `NAME`, `unshaped` in `use-shapes.ts`), its use's
+   shape a slot of typed text; and an item learns what it is for with Pakkomon (`pakkomon_roles`:
+   equipment, healing, power-up…) from most of its uses, a use's shape leaving the Pakkomon's name
+   out. `toJson` writes the wiki, `playerState` the player state. Phase 5 reads plain JSON copies of
+   the events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates them for
+   `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply

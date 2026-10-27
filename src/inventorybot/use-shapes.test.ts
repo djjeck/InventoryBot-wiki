@@ -1,6 +1,6 @@
 /** The shapes of an item's /usa replies (use-shapes.ts). Synthetic replies only. */
 import { describe, expect, it } from 'vitest';
-import { useShapes } from './use-shapes.ts';
+import { unshaped, useShapes } from './use-shapes.ts';
 
 const NAMES = {
   items: [
@@ -98,6 +98,27 @@ describe('use shapes', () => {
         slots: [{ kind: 'user' }, { kind: 'text' }],
       },
     ]);
+  });
+
+  it('a_player_and_typed_text_stay_slots_even_with_one_value', () => {
+    expect(useShapes(['mandi a @bea il messaggio: "ciao".'], NAMES)[0]?.parts).toStrictEqual([
+      'mandi a ',
+      0,
+      ' il messaggio: ',
+      1,
+      '.',
+    ]);
+  });
+
+  it('the_shape_given_to_an_item_is_typed_text_even_naming_an_item', () => {
+    expect(
+      useShapes(['gli dai la forma di un dado truccato', 'gli dai la forma di un drago'], NAMES)
+    ).toStrictEqual([{ parts: ['gli dai la forma di ', 0], count: 2, slots: [{ kind: 'text' }] }]);
+  });
+
+  it('a_shaped_item_is_the_item_shaped', () => {
+    expect(unshaped("un po' di creta modellato a forma di un drago")).toBe("un po' di creta");
+    expect(unshaped("un po' di creta")).toBe("un po' di creta");
   });
 
   it('durations_places_pakkomon_symbols_and_lists_are_slots', () => {

@@ -56,6 +56,7 @@ import { instant, inventoryScope, isFailedUse, isMine, type KB, queryArg } from 
 import { PAKKOMON } from './pakkomon.ts';
 import { ownerPakkomon, pakkomonOf } from './player-pakkomon.ts';
 import { type BuildEvent, type Holding, type HoldingVia, type PlayerState } from './types.ts';
+import { unshaped } from './use-shapes.ts';
 
 export class Holdings {
   /** name -> holding, in order of first observation. */
@@ -206,7 +207,7 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
   const adventures = new Map<string, number>();
   let lastList: PlayerState['recipe_list'] = null;
   const check: PlayerState['inventory_check'] = { compared: 0, agreed: 0 };
-  const rarityOf = (n: string): string | null | undefined => kb.items.get(n)?.rarity;
+  const rarityOf = (n: string): string | null | undefined => kb.items.get(unshaped(n))?.rarity;
 
   const seen = (name: string | null | undefined, date: string | null): void => {
     if (name && !firstSeen.has(name)) firstSeen.set(name, date);
@@ -353,6 +354,32 @@ export function playerState(input: readonly BuildEvent[], kb: KB): PlayerState {
           };
   }
   if (pakkomonHeld !== null) hold.h.set(PAKKOMON, pakkomonHeld);
+  // A shaped item is the item it was shaped from, whatever its shape: a new shape leaves
+  // the old name's holding behind, so only those of the latest observation count, summed
+  // (one listing may show several shapes).
+  for (const [name, d] of [...firstSeen]) {
+    const item = unshaped(name);
+    if (item === name) continue;
+    firstSeen.delete(name);
+    const cur = firstSeen.get(item);
+    if (cur === undefined || (d !== null && instant(d) < instant(cur))) firstSeen.set(item, d);
+  }
+  const shapes = new Map<string, Holding[]>();
+  for (const [name, h] of [...hold.h]) {
+    const item = unshaped(name);
+    if (item === name) continue;
+    hold.h.delete(name);
+    shapes.set(item, [...(shapes.get(item) ?? []), h]);
+  }
+  for (const [item, hs] of shapes) {
+    const base = hold.h.get(item);
+    if (base !== undefined) hs.push(base);
+    const latest = Math.max(...hs.map((h) => instant(h.date)));
+    const last = hs.filter((h) => instant(h.date) === latest);
+    const qty = last.reduce((n, h) => n + h.qty, 0);
+    const first = last[0] as Holding;
+    hold.h.set(item, { ...first, qty, exact: last.every((h) => h.exact) });
+  }
   return {
     player,
     as_of: asOf === undefined ? null : (asOf.date ?? null),

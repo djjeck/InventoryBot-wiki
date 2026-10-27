@@ -1,14 +1,29 @@
 /**
  * What the replies of an item's /usa have in common: each reply is cut into fixed text and
  * typed slots (numbers, durations, known items, Pakkomon names, places, players, quoted
- * text, rows of symbols, list lines), the replies with the same cut are one shape, and a
- * slot holding the same value in all of them is fixed text again. Each slot left is
+ * text, the shape a player gave an item, rows of symbols, list lines), the replies with
+ * the same cut are one shape, and a slot holding the same value in all of them is fixed
+ * text again, unless it holds what players typed or who they are. Each slot left is
  * described by what it held, as the channels' cards describe a reply ("dove N è un numero
  * compreso tra 1 e 6"), an item slot with how often each item came, from which a use's
  * odds of giving it follow; players and the text players typed are not kept. Pure logic.
  */
 import { parseDuration } from './patterns.ts';
 import { type WikiUseShape, type WikiUseSlot } from './types.ts';
+
+/**
+ * How the bot names an item a use gave a shape to: the item, then the shape the player
+ * typed (docs/bot-protocol.md 2.6). It is the same item whatever its shape.
+ */
+const SHAPED = ' modellato a forma di ';
+/** Where a use's reply names the shape the player gave the item, up to the end of the reply. */
+export const SHAPED_AS = 'gli dai la forma di ';
+
+/** The item a shaped item is ("NAME modellato a forma di TEXT" is NAME); any other name as it is. */
+export function unshaped(name: string): string {
+  const i = name.indexOf(SHAPED);
+  return i > 0 ? name.slice(0, i) : name;
+}
 
 /** What the replies may name, known from the wiki: items, and places as the bot writes them. */
 export interface ShapeNames {
@@ -40,6 +55,8 @@ function slotPattern(names: ShapeNames): RegExp {
     [
       // A list line, "- name: value", after the first line (the scanner's Pakkomon).
       `(?<list>(?:\\n ?- [^\\n]+: [^\\n]+)+)`,
+      // The shape a player gave an item, before any item it may name.
+      `(?<=${SHAPED_AS})(?<shape>[^\\n]+)`,
       // An item, with its tags: the same item with other tags is the same slot.
       ...(items ? [`(?<![\\p{L}'’])(?<item>(?:${items})(?!\\p{L})${TAGS})`] : []),
       ...(places ? [`(?<![\\p{L}'’])(?<place>${places})(?!\\p{L})`] : []),
@@ -58,6 +75,8 @@ function slotPattern(names: ShapeNames): RegExp {
 }
 
 type Kind = WikiUseSlot['kind'];
+/** The slots whose values are not kept: players, and the text players typed. */
+const UNKEPT: ReadonlySet<Kind> = new Set(['user', 'text']);
 /** A reply cut into fixed text and slots: `parts` alternates them, starting with text. */
 interface Cut {
   parts: string[];
@@ -71,7 +90,8 @@ function cut(text: string, rx: RegExp): Cut {
   for (const m of text.matchAll(rx)) {
     const g = m.groups ?? {};
     const group = Object.keys(g).find((k) => g[k] !== undefined);
-    const kind = (group === 'where' ? 'place' : group) as Kind | undefined;
+    const kind = (group === 'where' ? 'place' : group === 'shape' ? 'text' : group) as
+      Kind | undefined;
     if (kind === undefined) continue;
     parts.push(text.slice(at, m.index), g[group as string] as string);
     kinds.push(kind);
@@ -160,10 +180,11 @@ export function useShapes(replies: readonly string[], names: ShapeNames): WikiUs
     first.parts.forEach((p, i) => {
       if (i % 2 === 0) return text(p);
       const values = cuts.map((c) => c.parts[i] as string);
-      // A slot that always held the same value is fixed text.
-      if (values.every((v) => v === values[0])) return text(p);
+      const kind = first.kinds[(i - 1) / 2] as Kind;
+      // A slot that always held the same value is fixed text, but for what is not kept.
+      if (!UNKEPT.has(kind) && values.every((v) => v === values[0])) return text(p);
       parts.push(slots.length);
-      slots.push(describe(first.kinds[(i - 1) / 2] as Kind, values));
+      slots.push(describe(kind, values));
     });
     shapes.push({ parts, count: cuts.length, slots });
   }

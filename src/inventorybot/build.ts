@@ -57,7 +57,7 @@ import {
   type WikiReward,
   type WikiTrivia,
 } from './types.ts';
-import { useShapes } from './use-shapes.ts';
+import { SHAPED_AS, useShapes } from './use-shapes.ts';
 
 /** Whether an optional string is present and non-empty. */
 const truthy = (s: string | null | undefined): s is string =>
@@ -1282,6 +1282,8 @@ const USE_NOISE: readonly (string | RegExp)[] = [
   "non e' un utente e non hai oggetti del genere",
   "non e' ne un utente ne un oggetto in tuo possesso",
   /^Troppo (?:lungo|corto) vecchio\.\.\.\s*$/u,
+  // The shape given to an item is too long.
+  'troppo lungo, non ci sta..',
   /^Esiste gia\.\.\.\s*$/u,
   // How to use the item, when its argument is not understood.
   /^utilizzo:\s*\n/u,
@@ -1292,6 +1294,7 @@ const USE_NOISE: readonly (string | RegExp)[] = [
   'su che Pakkomon vuoi usarlo?',
   'a chi lo vuoi tirare?',
   'dove vuoi teletrasportarti?',
+  'che forma vuoi dargli?',
   "Non e' un pakkomon!",
   'non hai nessun oggetto con quel nome',
   'nessun oggetto trovato con quel nome',
@@ -1327,12 +1330,14 @@ export const isFailedUse = (text: string): boolean => hasAny(text, USE_FAILED);
 const DIGITS = /\p{Nd}+/gu;
 
 /**
- * Reply shape (first line, numbers and the Pakkomon it names blanked), used to attribute
- * ambiguous /usa queries.
+ * Reply shape (first line, numbers, the Pakkomon it names and the shape a player gave the
+ * item blanked), used to attribute ambiguous /usa queries.
  */
 export function useTemplate(text: string, pakkomon: readonly string[] = []): string {
   const i = text.indexOf('\n');
   let line = i < 0 ? text : text.slice(0, i);
+  const shaped = line.indexOf(SHAPED_AS);
+  if (shaped >= 0) line = line.slice(0, shaped + SHAPED_AS.length) + '\u0000';
   for (const p of pakkomon) line = line.split(p).join('\u0000');
   return line.replace(DIGITS, 'N');
 }

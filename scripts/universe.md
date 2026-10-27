@@ -85,6 +85,7 @@ player sees anyway, and says why it is allowed.
 - un piccolo annaffiatoio
 - un piccolo bonsai
 - un pomodoro
+- un po' di creta
 - un Premio
 - un Premio Sgranocchio
 - un rampino di ferro

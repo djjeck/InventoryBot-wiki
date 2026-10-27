@@ -29,6 +29,7 @@ import {
   type PakkomonUse,
   type UseEvent,
 } from './types.ts';
+import { unshaped } from './use-shapes.ts';
 
 type Groups = Record<string, string | undefined>;
 const groups = (m: RegExpExecArray): Groups => m.groups ?? {};
@@ -42,9 +43,9 @@ export const pakkomonItem = (name: string): string => `un Pakkomon di nome ${nam
  */
 export const PAKKOMON = 'un Pakkomon';
 
-/** An item name as the wiki keeps it: any Pakkomon as PAKKOMON. */
+/** An item name as the wiki keeps it: any Pakkomon as PAKKOMON, a shaped item as the item (unshaped). */
 export const wikiItemName = (name: string): string =>
-  name.startsWith(pakkomonItem('')) ? PAKKOMON : name;
+  name.startsWith(pakkomonItem('')) ? PAKKOMON : unshaped(name);
 
 /** The role a use gives the item used, for Pakkomon (equipping gives one to the item taken). */
 export const USE_ROLES: Readonly<Record<PakkomonUse, PakkomonRole | null>> = {

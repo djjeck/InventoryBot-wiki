@@ -150,6 +150,35 @@ describe('full inventory', () => {
   });
 });
 
+describe('shaped items', () => {
+  const shaped = (shape: string): string => `un po' di creta modellato a forma di ${shape}`;
+
+  it('a_new_shape_replaces_the_old_one', () => {
+    // The listing of the new shape does not name the old one, which stays behind.
+    const [inv, state] = invOf([
+      ev(T.inventory([[shaped('un drago'), 'U', 1, true]]), '/inventario', { t: 0 }),
+      ev(T.inventory([[shaped('un fiore'), 'U', 1, true]]), '/inventario fiore', { t: 1 }),
+    ]);
+    expect(inv).toStrictEqual({ "un po' di creta": 1 });
+    expect(Object.keys(state.items)).toStrictEqual(["un po' di creta"]);
+  });
+
+  it('shapes_listed_together_add_up', () => {
+    const [inv] = invOf([
+      ev(T.inventory([["un po' di creta", 'U', 1, true]]), '/inventario', { t: 0 }),
+      ev(
+        T.inventory([
+          [shaped('un drago'), 'U', 1, true],
+          [shaped('un fiore'), 'U', 1, true],
+        ]),
+        '/inventario creta',
+        { t: 1 }
+      ),
+    ]);
+    expect(inv).toStrictEqual({ "un po' di creta": 2 });
+  });
+});
+
 describe('collezioni and inv2', () => {
   const base = (): BuildEvent[] => [info('un sasso', 2, 0), info('un paio di mollette', 1, 1)];
   const after = (text: string, query: string): Record<string, number> =>

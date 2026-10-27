@@ -127,6 +127,11 @@ failures that say what is missing (a key, a complete set of something). Usable i
 cooldown, shown by `/esamina` and enforced by `/usa`. Some are consumed by use and some are not; the
 reply does not say which.
 
+An item can take the shape the player types as its argument (`/usa <item> # <shape>`; without one
+the bot asks `che forma vuoi dargli?`, and the player's next message is not read as the shape). From
+then on the bot names it `NAME modellato a forma di SHAPE`, in every reply, until it is shaped
+again: it is still the item `NAME`, and the shape is the player's own text.
+
 ### 2.7 Transfers and showing
 
 `/dai` gives items to another player, in a group or in private; with `/notificheon` the receiver
@@ -741,8 +746,8 @@ the player's items, under `ecco i tuoi oggetti in ordine di quantità:`.
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | item not found / not named    | `non hai niente del genere di usabile.`, `si ma cosa vuoi usare?`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | item not usable               | `non puoi usare quell'oggetto..`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| argument not understood       | `<arg> non e' un utente e non hai oggetti del genere.`, `quello non e' ne un utente ne un oggetto in tuo possesso.`, `Troppo lungo vecchio...`                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| argument asked for            | `su che Pakkomon vuoi usarlo?`, `a chi lo vuoi tirare?`, `dove vuoi teletrasportarti?`, how to use the item (`utilizzo:` + its syntax)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| argument not understood       | `<arg> non e' un utente e non hai oggetti del genere.`, `quello non e' ne un utente ne un oggetto in tuo possesso.`, `Troppo lungo vecchio...`, `troppo lungo, non ci sta..`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| argument asked for            | `su che Pakkomon vuoi usarlo?`, `a chi lo vuoi tirare?`, `dove vuoi teletrasportarti?`, `che forma vuoi dargli?`, how to use the item (`utilizzo:` + its syntax)                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | argument not found            | `non hai nessun oggetto con quel nome.`, `nessun oggetto trovato con quel nome`, `non conosco nessuno con quel nome..`, `troppi luoghi trovati con quel nome(<arg>)`, `Non e' un pakkomon!`, `Troppo corto vecchio...`, `Esiste gia...`                                                                                                                                                                                                                                                                                                                                              |
 | errors                        | `Qualcosa e' andato storto.. <detail>`, `qualcosa e' andato storto.. :(`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | failure stating a requirement | `non hai la chiave giusta per aprire questo baule..`, `… ma non le hai ancora tutte..`, `non puoi teletrasportarti in quei luoghi, forse ti mancano gli oggetti necessari..`, `<player> non ha un walkie talkie..`, `<player> non e' un nuovo arrivato..`, `quel pakkomon ha gia' bevuto l'elisir..`, `i pakkomon boss vanno sfidati in Arena!`, `non hai abbastanza <item>`, `devi introdurre esattamente N oggetti in totale.`, `gli oggetti inseriti devono essere tutti della stessa rarita' (C, N, R o S)`, `Rarità ammesse: …`, `non ti senti in grado di cuocere una pizza..` |
@@ -784,6 +789,21 @@ Hai fatto coppia, vinci 2 gettoni!
 
 ```bot-reply type=item_cooldown query="/dai lucia_b ruota" item="una ruota della fortuna 🎡" action=give remaining=12 precision=1 addressee=null
 una ruota della fortuna 🎡 deve raffreddarsi ancora per 12 secondi prima di poterlo dare in giro.
+```
+
+Shaping an item (2.6) names the shape at the end of the reply:
+
+```text
+SHAPE_USE = ADDR "ti metti a manipolare " MATERIAL " finche', con somma maestria, gli dai la forma di "
+            SHAPE EOT
+```
+
+```bot-reply type=use query="/usa creta" text="che forma vuoi dargli?"
+@mario_r, che forma vuoi dargli?
+```
+
+```bot-reply type=use query="/usa creta # un drago" items=[]
+@mario_r, ti metti a manipolare la creta finche', con somma maestria, gli dai la forma di un drago
 ```
 
 The replies about Pakkomon, among them the scanner's and equipping, are in 6.18.

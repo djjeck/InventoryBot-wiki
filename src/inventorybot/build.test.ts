@@ -989,6 +989,45 @@ describe('uses', () => {
     expect(useCandidates(kb.items, '', ['un dado magico'])).toStrictEqual([]);
   });
 
+  it('a_shaped_item_is_one_item_and_its_shaping_a_use', () => {
+    const CRETA = "un po' di creta";
+    const shaping = (shape: string): string =>
+      `@djjeck, ti metti a manipolare la creta finche', con somma maestria, gli dai la forma di ${shape}`;
+    const { wiki, events } = runUses(
+      [
+        ['/usa creta', '@djjeck, che forma vuoi dargli?'],
+        ['/usa creta', '@djjeck, troppo lungo, non ci sta..'],
+        ['/usa creta # un drago', shaping('un drago')],
+        ['/usa drago # un fiore', shaping('un fiore')],
+      ],
+      [
+        ev(T.inventory([[CRETA, 'U', 1, true]]), '/inventario', { t: 1 }),
+        ev(T.inventory([[`${CRETA} modellato a forma di un drago`, 'U', 1, true]]), '/inventario', {
+          t: 101,
+        }),
+      ]
+    );
+    expect(Object.keys(wiki.items).filter((n) => n.includes('creta'))).toStrictEqual([CRETA]);
+    // Its shapes do not name the item: the query naming the old shape still finds it.
+    expect(f(events[4] as BuildEvent)['used_item']).toBe(CRETA);
+    expect(wiki.items[CRETA]?.use).toMatchObject({
+      observations: 2,
+      shapes: [
+        {
+          parts: [
+            "ti metti a manipolare la creta finche', con somma maestria, gli dai la forma di ",
+            0,
+          ],
+          count: 2,
+          slots: [{ kind: 'text' }],
+        },
+      ],
+    });
+    expect(useTemplate(shaping('un 2 drago').slice(9))).toBe(
+      "ti metti a manipolare la creta finche', con somma maestria, gli dai la forma di \u0000"
+    );
+  });
+
   it('unknown_reply_with_known_shape_becomes_use', () => {
     const stray = ev('@djjeck, tiri il dado e fai 3!', null, { t: 100 });
     expect(stray.type).toBe('unknown');
