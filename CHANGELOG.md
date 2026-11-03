@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.4 (2026-11-03)
+
+- **Aggiunto il livello ai luoghi.** Ogni luogo mostra accanto al nome il livello più basso da cui
+  ci si può arrivare. Il livello viene dagli oggetti che servono per entrarci o per vederlo tra le
+  destinazioni, e dai luoghi da cui si passa per arrivarci; la pagina del luogo dice da cosa.
+- **Cosa serve per arrivare in un luogo.** La pagina di un luogo dove non puoi ancora andare mostra
+  l'albero delle ricette che mancano per arrivarci.
+- **Gli alberi delle ricette tengono conto dei luoghi bloccati.** Se un ingrediente si trova solo in
+  un luogo dove non puoi ancora arrivare, compare il luogo nell'albero delle ricette con l'oggetto
+  che lo sblocca.
+- **Un luogo può richiudersi.** Se non hai più l'oggetto che ti faceva entrare (per esempio perché
+  l'hai dato via), «Ti manca» considera il luogo di nuovo chiuso, anche se ci sei già stato.
+
 ## 0.9.3 (2026-10-27)
 
 - **Alberi delle ricette più completi.** Se un ingrediente si ottiene solo usando un altro oggetto
