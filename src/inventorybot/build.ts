@@ -37,6 +37,7 @@ import {
   WS_CLASS,
 } from '#src/lib/text.ts';
 import { INVENTORY_COMMANDS, INVENTORY_LIST_COMMANDS, useItems, useTakes } from './classify.ts';
+import { placeLevels } from './levels.ts';
 import { PAKKOMON, USE_ROLES, wikiItemName } from './pakkomon.ts';
 import { itemName, parseDuration, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
@@ -2091,6 +2092,17 @@ export function toJson(kb: KB, generated: string = localNowIso()): Wiki {
       }),
     },
   ]);
+  const levels = placeLevels(
+    record(items),
+    record(recipes),
+    record(locations),
+    record([...kb.renames]),
+    [...kb.locations.keys()].find((n) => VILLAGE.test(n))
+  );
+  for (const [n, l] of locations) {
+    const k = levels.get(n);
+    if (k !== undefined) Object.assign(l, { level: k.level, level_via: k.via });
+  }
   return {
     generated,
     // The rarity system: rarity codes ("Ln" stands for L1, L2, ...).

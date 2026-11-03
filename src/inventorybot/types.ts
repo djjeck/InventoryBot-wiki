@@ -658,6 +658,12 @@ export interface WikiLocation {
   sight_items: string[];
   /** Not listed in the travel panel without its items (place cards). */
   secret?: true;
+  /**
+   * The lowest level of the game at which a player can reach it (levels.ts), when above
+   * 0, and what sets it: an item it requires, or the place it is reached through.
+   */
+  level?: number;
+  level_via?: string;
   /** Present when a channel's card describes the place (channels.ts). */
   channel?: WikiChannelCard<'items' | 'route' | 'access' | 'sight' | 'secret'>;
 }

@@ -1589,7 +1589,9 @@
           "una lanterna cieca: trovabile nella valle ventosa 🏞",
           "Questo è un luogo segreto! Non è visibile nel pannello di viaggio se non si possiede l'oggetto per raggiungerlo!"
         ]
-      }
+      },
+      "level": 1,
+      "level_via": "un rampino di ferro"
     },
     "il villaggio di Borgoverde 🏡": {
       "name": "il villaggio di Borgoverde 🏡",

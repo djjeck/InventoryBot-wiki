@@ -161,8 +161,23 @@ import { lockedWay } from '#src/web/place-way.ts';
       n = current(n);
       return `<span class="chip">${tag(I[n]?.rarity)} <button class="link" data-go="item" data-name="${esc(n)}">${esc(n)}</button></span>`;
     };
+    /** Why a place is of its level (levels.ts): an item it requires, or a place on the way. */
+    const levelWhy = (n) => {
+      const via = L[n]?.level_via;
+      return I[via] ? `serve ${via}` : `si passa ${L[via]?.at || via}`;
+    };
+    /**
+     * A place's level after its name, as a recipe's: the lowest level of the game at which
+     * one can reach it, deduced from what it requires.
+     */
+    const placeLv = (n) =>
+      L[n]?.level
+        ? ` <span class="added"><span class="t-L" title="${esc(`Livello del luogo: ${levelWhy(n)}`)}">[L${L[n].level}]</span></span>`
+        : '';
+    /** A place's name and level, as plain text. */
+    const placeText = (n) => `${L[n]?.label || n}${L[n]?.level ? ` [L${L[n].level}]` : ''}`;
     const locLink = (n) =>
-      `<button class="link" data-go="loc" data-name="${esc(n)}">${esc(L[n]?.label || n)}</button>`;
+      `<button class="link" data-go="loc" data-name="${esc(n)}">${esc(L[n]?.label || n)}</button>${placeLv(n)}`;
     const sec = (title, body) => `<div class="section"><h3>${title}</h3>${body}</div>`;
     // ---- the bot's own words ---------------------------------------------------------
     // An entry is shown first as the bot's reply to the command that describes it, in a
@@ -599,10 +614,8 @@ import { lockedWay } from '#src/web/place-way.ts';
         bits.push(`in ${i.used_in.length} ricett${i.used_in.length === 1 ? 'a' : 'e'}`);
       if (i.made_by.length) bits.push(`da ${i.made_by.join(', ')}`);
       const opens = OPENS.get(i.name);
-      if (opens?.pass.length)
-        bits.push(`per passare: ${opens.pass.map((w) => L[w]?.label || w).join(', ')}`);
-      if (opens?.see.length)
-        bits.push(`per vedere: ${opens.see.map((w) => L[w]?.label || w).join(', ')}`);
+      if (opens?.pass.length) bits.push(`per passare: ${opens.pass.map(placeText).join(', ')}`);
+      if (opens?.see.length) bits.push(`per vedere: ${opens.see.map(placeText).join(', ')}`);
       if (i.used_with?.length) bits.push(`si usa con: ${few(i.used_with.map(current), esc)}`);
       if (i.from_use?.length) bits.push(`usando: ${few(i.from_use.map(current), esc)}`);
       if (i.rewards?.includes('level_up')) bits.push('salendo di livello');
@@ -613,7 +626,7 @@ import { lockedWay } from '#src/web/place-way.ts';
       if (i.exclusive)
         bits.push(
           i.locations.length
-            ? `solo ${i.locations.map((w) => L[w]?.label || w).join(', ')}`
+            ? `solo ${i.locations.map(placeText).join(', ')}`
             : 'luogo esclusivo ignoto'
         );
       return `<button class="row" data-sel="${esc(i.name)}" aria-current="${state.sel.oggetti === i.name}">
@@ -659,7 +672,7 @@ import { lockedWay } from '#src/web/place-way.ts';
         );
       const placeLink = (w) => {
         const l = Object.values(L).find((x) => x.at === w || x.name === w);
-        return l ? goLink('loc', l.name, w) : esc(w);
+        return l ? goLink('loc', l.name, w) + placeLv(l.name) : esc(w);
       };
       const list = (xs, f, k = 8) =>
         xs.slice(0, k).map(f).join(', ') + (xs.length > k ? ` e altri ${xs.length - k}` : '');
@@ -799,7 +812,7 @@ import { lockedWay } from '#src/web/place-way.ts';
       if (!o) return '';
       const line = (label, places) =>
         places.length
-          ? `<p class="makes">${label}: ${places.map((k) => goLink('loc', k, at(k))).join(', ')}</p>`
+          ? `<p class="makes">${label}: ${places.map((k) => goLink('loc', k, at(k)) + placeLv(k)).join(', ')}</p>`
           : '';
       // As the bot says it: "<item> ti serve per passare nelle cripte del monastero 👻".
       return (
@@ -905,7 +918,7 @@ import { lockedWay } from '#src/web/place-way.ts';
     ${
       // A "+" item drops in one place: where, right under its name.
       i.exclusive
-        ? `<p class="makes">${i.locations.length ? `Esce solo qui: ${i.locations.map((k) => goLink('loc', k, at(k))).join(', ')}` : '<span class="makes-unknown">Esce in un solo luogo, non ancora identificato.</span>'}</p>`
+        ? `<p class="makes">${i.locations.length ? `Esce solo qui: ${i.locations.map((k) => goLink('loc', k, at(k)) + placeLv(k)).join(', ')}` : '<span class="makes-unknown">Esce in un solo luogo, non ancora identificato.</span>'}</p>`
         : ''
     }
 </div>
@@ -979,7 +992,7 @@ import { lockedWay } from '#src/web/place-way.ts';
     function locRow(l) {
       const excl = l.exclusive_items.length;
       return `<button class="row" data-sel="${esc(l.name)}" aria-current="${state.sel.luoghi === l.name}">
-    <span class="tag ${l.requires_item ? 't-X' : 't-q'}">${l.requires_item ? 'serve oggetto' : 'libero'}</span><span class="name">${esc(l.label)}</span>
+    <span class="tag ${l.requires_item ? 't-X' : 't-q'}">${l.requires_item ? 'serve oggetto' : 'libero'}</span><span class="name">${esc(l.label)}${placeLv(l.name)}</span>
     <span class="meta">${excl ? excl + ' esclusivi' : ''}</span>
     <span class="sub">${l.exits.length} collegamenti${P ? (visited(l.name) ? ' · <span class="mine ok">visitato</span>' : ' · <span class="mine">mai visitato</span>') : ''}</span></button>`;
     }
@@ -991,7 +1004,7 @@ import { lockedWay } from '#src/web/place-way.ts';
       return bubble([
         `ti trovi: <b>${esc(at(l.name))}</b>`,
         ...(exits.length
-          ? ['Puoi andare verso:', ...exits.map((x) => `- ${goLink('loc', x, at(x))}`)]
+          ? ['Puoi andare verso:', ...exits.map((x) => `- ${goLink('loc', x, at(x))}${placeLv(x)}`)]
           : []),
       ]);
     }
@@ -1015,7 +1028,8 @@ import { lockedWay } from '#src/web/place-way.ts';
       return page(
         personal,
         `<div class="head"><div class="kicker"><span>Luogo</span>${l.requires_item ? '<span>· serve un oggetto per entrare</span>' : ''}${l.secret ? '<span>· segreto</span>' : ''}</div>
-    <h2>${esc(l.label)}</h2>
+    <h2>${esc(l.label)}${placeLv(name)}</h2>
+    ${l.level ? `<p class="makes">Livello ${l.level}: ${I[l.level_via] ? `serve ${itemRef(l.level_via)}` : `si passa ${goLink('loc', l.level_via, at(l.level_via))}${placeLv(l.level_via)}`}</p>` : ''}
     ${
       // What it takes to enter, right under its name.
       (l.required_items || []).length
@@ -1307,7 +1321,7 @@ import { lockedWay } from '#src/web/place-way.ts';
       ctx.font = MAP.font;
       const labels = placeLabels(
         pts,
-        new Map(Object.values(L).map((l) => [l.name, l.label])),
+        new Map(Object.values(L).map((l) => [l.name, placeText(l.name)])),
         segs,
         {
           measure: (t) => ctx.measureText(t).width,
@@ -1711,6 +1725,8 @@ import { lockedWay } from '#src/web/place-way.ts';
         n: `600 12px ${fonts.getPropertyValue('--font-body')}`,
       };
       const short = (t) => (t.length > 24 ? t.slice(0, 23) + '…' : t);
+      /** A place's name, cut short, and its level. */
+      const shortPlace = (p) => `${short(L[p].label)}${L[p].level ? ` [L${L[p].level}]` : ''}`;
       for (const n of shown) {
         const item = n.spot ? null : n.key ? I[n.key] : null;
         n.tag = item
@@ -1719,11 +1735,9 @@ import { lockedWay } from '#src/web/place-way.ts';
             ? `[L${R[name].level}]`
             : '';
         // A place to pass: locked, unless it is the place the tree is for.
-        n.label = n.spot
-          ? `${n === top ? '' : '🔒 '}${short(L[n.place].label)}`
-          : short(n.key || name);
+        n.label = n.spot ? `${n === top ? '' : '🔒 '}${shortPlace(n.place)}` : short(n.key || name);
         // An item found only where the player cannot go yet: the place on a second line.
-        n.where = n.place && !n.spot ? `🔒 ${short(L[n.place].label)}` : '';
+        n.where = n.place && !n.spot ? `🔒 ${shortPlace(n.place)}` : '';
         n.h = n.where ? 42 : 26;
         n.count =
           n === top

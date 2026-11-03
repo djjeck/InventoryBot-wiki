@@ -33,7 +33,8 @@ passato resta, così si può vedere a colpo d'occhio cosa produce una ricetta, q
 contendono lo stesso ingrediente e, per un oggetto di livello alto, l'albero delle ricette che
 portano fin lì, con quante volte va craftato o trovato ogni oggetto. Un oggetto che esce solo in un
 luogo dove non puoi ancora arrivare porta con sé gli oggetti che servono per arrivarci, e la pagina
-di un luogo così mostra lo stesso albero.
+di un luogo così mostra lo stesso albero. Ogni luogo porta il suo livello, il più basso da cui ci si
+può arrivare, dedotto dagli oggetti che servono per entrarci e dai luoghi da cui si passa.
 
 Quando hai almeno un Pakkomon compare la scheda Pakkomon, che spiega come funzionano i combattimenti
 (quanto resta rintronato chi perde, secondo la frase con cui finisce lo scontro), quali oggetti
