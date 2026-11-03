@@ -1745,16 +1745,18 @@ import { lockedWay } from '#src/web/place-way.ts';
           ) +
           10;
       }
-      // Each column centred on the tallest; a node with two lines is taller.
+      // Each column centred on the tallest, but no lower than five nodes from the top, so
+      // that a tall tree does not start below the screen; a node with two lines is taller.
       const space = 8,
         gap = 36,
-        head = 26;
+        head = 26,
+        lowest = 5 * (26 + space);
       const colW = cols.map((c) => Math.max(0, ...c.map((n) => n.w)));
       const colX = colW.map((_, c) => 1 + colW.slice(0, c).reduce((a, w) => a + w + gap, 0));
       const colH = cols.map((c) => c.reduce((t, n) => t + n.h + space, 0));
       const tallest = Math.max(...colH);
       cols.forEach((c, ci) => {
-        let y = head + (tallest - colH[ci]) / 2;
+        let y = head + Math.min((tallest - colH[ci]) / 2, lowest);
         for (const n of c) {
           n.x = colX[ci];
           n.y = y;
