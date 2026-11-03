@@ -31,7 +31,9 @@ cartelle.
 Il gioco dimentica le ricette già eseguite e non dice cosa producono: qui ogni osservazione fatta in
 passato resta, così si può vedere a colpo d'occhio cosa produce una ricetta, quali ricette si
 contendono lo stesso ingrediente e, per un oggetto di livello alto, l'albero delle ricette che
-portano fin lì, con quante volte va craftato o trovato ogni oggetto.
+portano fin lì, con quante volte va craftato o trovato ogni oggetto. Un oggetto che esce solo in un
+luogo dove non puoi ancora arrivare porta con sé gli oggetti che servono per arrivarci, e la pagina
+di un luogo così mostra lo stesso albero.
 
 Quando hai almeno un Pakkomon compare la scheda Pakkomon, che spiega come funzionano i combattimenti
 (quanto resta rintronato chi perde, secondo la frase con cui finisce lo scontro), quali oggetti

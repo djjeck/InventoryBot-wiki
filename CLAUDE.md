@@ -234,39 +234,49 @@ with how many times to craft it, or how many to find, to make the recipe once. A
 use gives (no adventure, recipe or reward) opens into the item used and what the use takes (the
 chest and its key, from the key's `used_with`), the source found rather than crafted first, then the
 one whose every reply names it; a use that gives it only at times is a dashed line, and what is
-below it an estimate ("≈N"), the uses it took on average, from how often the uses seen gave it. With
-the owner's state, a toggle above it, "Ti manca" by default (remembered in this browser), shows only
-what they still lack: the inventory estimate is taken off each count, an item they hold enough of is
-not drawn, nor what it takes, and a recipe they can make now is green. Above a place, Luoghi shows
-the map of the places (`map-layout.ts`, drawn by the view as pixel art, the same in both themes, its
-rows a little closer than its columns): a grid, as in classic role-playing games, running across a
-wide window and down a tall one, where no two roads cross and a road goes at 45° only from a place
-with more than four roads. It is the tree of the shortest routes from the village (the place the bot
-calls "il villaggio"), drawn in three steps: directions by rules alone (a place's straight
-directions to its biggest branches, along the main axis first, a branch linked to a sibling beside
-it, the rest diagonally), lengths by pushing each branch out as one block until it fits, the lines
-towards the branches still to join kept clear, then straight dead-end chains folded at a right angle
-where that makes the map smaller; a link that no length keeps clear may cross a road. Places the
-village does not reach go on free cells along its edge. The selected place is marked, with its
-shortest route from the village. The owner is the player the bot addresses most in the DM; without a
-DM the build stops, the records stay kept, and the panel shows a username field, which the page
-offers nowhere else. What the worker keeps is in IndexedDB, in this browser only (`storage.ts`): the
-records of the exports (`ExportRecord`, never the export pages), each with its folder, dates and
-counts, in upload order, which is their merge order; the last results (wiki, player state, report,
-options) with the records they were built from and the build of the page that made them
-(`__BUILD__`, from `vite.config.ts`: a release's version, a new value at each start of the dev
-server), so a returning player sees their wiki at once and the worker rebuilds only if they are not
-current, from other records or by another build; and the salt of the pseudonyms and sender keys,
-made once. A record is valid only with the salt that made it, so the three live in one database:
-without a salt the records and results are dropped, and a record or results made with another salt
-are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can
-add the export again, but never used, and its payload is dropped. Opening the database of an older
-schema drops what it kept. Without storage the worker keeps the records of the visit in memory.
-"Cancella i miei dati" deletes the whole database and resets the options. `run.ts`, `storage.ts`,
-`labels.ts`, `debounce.ts`, `demo.ts` and `map-layout.ts` use no browser API and are tested in Node
-(on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring,
-checked in a browser (type-checked with the DOM types by `tsconfig.web.json`, and left out of
-coverage).
+below it an estimate ("≈N"), the uses it took on average, from how often the uses seen gave it. An
+item found only in places that require an item (an exclusive one, each of whose places has a place
+that requires one, to enter it or to see it among the destinations, on its way from the village,
+along the way that passes the fewest, `place-way.ts`) is one taller node, the item over "🔒" and the
+place, which opens the place and leads to the items the place requires and to the locked place
+before it on that way, a node of its own that leads on in turn; each item and place is needed once
+however many go that way, since the items are held, not used up; a place page has the same tree,
+rooted at the place, unless it requires only items to find. With the owner's state, a toggle above
+it, "Ti manca" by default (remembered in this browser), shows only what they still lack: the
+inventory estimate is taken off each count, an item they hold enough of is not drawn, nor what it
+takes, a recipe they can make now is green, and only the places they cannot enter keep them out:
+those whose items they do not all hold, by the estimate, even if they went there (an item given
+away, or lost, may lock a place again; when its item to enter is not identified, a place they went
+to stays open); "Tutto", like the page without the owner's state, counts every place that requires
+an item. Above a place, Luoghi shows the map of the places (`map-layout.ts`, drawn by the view as
+pixel art, the same in both themes, its rows a little closer than its columns): a grid, as in
+classic role-playing games, running across a wide window and down a tall one, where no two roads
+cross and a road goes at 45° only from a place with more than four roads. It is the tree of the
+shortest routes from the village (the place the bot calls "il villaggio"), drawn in three steps:
+directions by rules alone (a place's straight directions to its biggest branches, along the main
+axis first, a branch linked to a sibling beside it, the rest diagonally), lengths by pushing each
+branch out as one block until it fits, the lines towards the branches still to join kept clear, then
+straight dead-end chains folded at a right angle where that makes the map smaller; a link that no
+length keeps clear may cross a road. Places the village does not reach go on free cells along its
+edge. The selected place is marked, with its shortest route from the village. The owner is the
+player the bot addresses most in the DM; without a DM the build stops, the records stay kept, and
+the panel shows a username field, which the page offers nowhere else. What the worker keeps is in
+IndexedDB, in this browser only (`storage.ts`): the records of the exports (`ExportRecord`, never
+the export pages), each with its folder, dates and counts, in upload order, which is their merge
+order; the last results (wiki, player state, report, options) with the records they were built from
+and the build of the page that made them (`__BUILD__`, from `vite.config.ts`: a release's version, a
+new value at each start of the dev server), so a returning player sees their wiki at once and the
+worker rebuilds only if they are not current, from other records or by another build; and the salt
+of the pseudonyms and sender keys, made once. A record is valid only with the salt that made it, so
+the three live in one database: without a salt the records and results are dropped, and a record or
+results made with another salt are refused. A record of an older `RECORD_FORMAT_VERSION` is stale:
+it is listed, so the player can add the export again, but never used, and its payload is dropped.
+Opening the database of an older schema drops what it kept. Without storage the worker keeps the
+records of the visit in memory. "Cancella i miei dati" deletes the whole database and resets the
+options. `run.ts`, `storage.ts`, `labels.ts`, `debounce.ts`, `demo.ts`, `map-layout.ts` and
+`place-way.ts` use no browser API and are tested in Node (on a fake IndexedDB,
+`test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are browser-only wiring, checked in a browser
+(type-checked with the DOM types by `tsconfig.web.json`, and left out of coverage).
 
 `npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
 (`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the

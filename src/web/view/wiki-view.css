@@ -798,7 +798,8 @@ h4 {
 .tree .g-node.root rect {
   fill: var(--accent-soft);
 }
-.tree .g-node.found rect {
+.tree .g-node.found rect,
+.tree .g-node.locked rect {
   fill: var(--bg);
 }
 .tree-head {
@@ -815,6 +816,10 @@ h4 {
 }
 .tree .g-node.ready .n {
   fill: var(--r-N);
+}
+/* An item found where the player cannot go yet: the place, on its second line. */
+.tree .g-node .where {
+  fill: var(--muted);
 }
 .tree .g-node.open rect {
   stroke-dasharray: 4 3;

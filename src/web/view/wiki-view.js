@@ -1,6 +1,7 @@
 /* global window, document, localStorage, location, history, matchMedia, URLSearchParams, getComputedStyle */
 import { ENDINGS, PAKKOMON, WOUNDS } from '#src/inventorybot/pakkomon.ts';
 import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
+import { lockedWay } from '#src/web/place-way.ts';
 
 /**
  * The wiki view: renders a wiki and, optionally, the owner's player state into an
@@ -1035,6 +1036,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
             )
           : ''
     }
+    ${placeTree(name)}
     ${sec('Oggetti esclusivi', chips(excl, itemLink))}
     ${moreInfo(notesOf(l.channel))}
     ${sourcesLine(l, l.channel, { items: 'gli oggetti esclusivi', route: 'il percorso', access: "l'oggetto per entrare", sight: "l'oggetto per vederlo" })}
@@ -1440,14 +1442,68 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       }
       return { certain, times, uses };
     }
+    /** The items a place requires: to enter it, and to see it among the destinations. */
+    const requiredOf = (p) =>
+      [...new Set([...(L[p]?.required_items || []), ...(L[p]?.sight_items || [])])].map(current);
+    /** Whether a place requires an item to enter it that is not yet identified. */
+    const unknownKey = (p) => !!L[p]?.requires_item && !(L[p].required_items || []).length;
+    /** Whether a place requires an item at all. */
+    const gated = (p) => unknownKey(p) || requiredOf(p).length > 0;
+    /**
+     * Whether the owner can enter a place: they hold every item it requires, by the
+     * inventory estimate (an item given away, or lost, locks it again); when one of them is
+     * not yet identified, only if they went there too.
+     */
+    const canEnter = (p) =>
+      !gated(p) || ((!unknownKey(p) || visited(p)) && requiredOf(p).every((n) => have(n)?.qty > 0));
+    /**
+     * What keeps a player out of a place: the places on its way from the village that
+     * require an item (when `lacking`, only those the owner cannot enter), from the village;
+     * none when nothing does.
+     */
+    const wayTo = (place, lacking) =>
+      lockedWay(mapPlaces, (p) => gated(p) && !(lacking && canEnter(p)), place);
+    /**
+     * What it takes to reach `place` along its locked `way` (wayTo), as a tree's parts
+     * `[key, 1, true, source]`: the items it requires, when it is locked itself, and the
+     * locked place before it, a node of its own (`spot`) that leads on to the rest.
+     */
+    function wayParts(place, way) {
+      const last = way.at(-1);
+      const before = last === place ? way.slice(0, -1) : way;
+      return [
+        ...(last === place ? requiredOf(place).map((n) => [n, 1, true]) : []),
+        ...(before.length
+          ? [[before.at(-1), 1, true, { place: before.at(-1), way: before, spot: true }]]
+          : []),
+      ];
+    }
+    /** What `wayParts` asks for, in words: "un'ascia e passare nella palude". */
+    const wayText = (place, way) =>
+      listIt([
+        ...wayParts(place, way).map(([k, , , src]) => (src ? `passare ${at(k)}` : k)),
+        ...(way.at(-1) === place && unknownKey(place)
+          ? ['un oggetto non ancora identificato']
+          : []),
+      ]);
     /**
      * How the tree obtains an item: `{ recipe }` to craft it, `{ use, certain }` to get it by
-     * using another item, or null for an item to find (or of no known way).
+     * using another item, `{ place, way }` to find it where the player cannot go yet (when
+     * `lacking`, the owner), or null for an item to find (or of no known way).
      */
-    function sourceFor(n) {
+    function sourceFor(n, lacking) {
       const i = I[n];
+      if (!i) return null;
+      // An item found only in places a player cannot reach yet is found there once what
+      // opens the way is held: of its places, the one with the fewest locked on the way.
+      if (i.exclusive && i.locations.length) {
+        const ways = i.locations.map((p) => ({ place: p, way: wayTo(p, lacking) }));
+        return ways.every((w) => w.way.length)
+          ? ways.sort((a, b) => a.way.length - b.way.length)[0]
+          : null;
+      }
       // An item found in adventures is found, even if a recipe or a use also gives it.
-      if (!i || i.sources.includes('adventure') || i.exclusive) return null;
+      if (i.sources.includes('adventure') || i.exclusive) return null;
       const made = i.made_by.filter((r) => R[r]);
       const recipe =
         made.find((r) => R[r].ingredients) ??
@@ -1471,11 +1527,32 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       const r = I[n]?.rarity;
       return r?.[0] === 'L' ? Number(r.slice(1)) || 0 : null;
     }
-    /** The tree of a recipe, as a graph in columns, or '' when it takes only items to find. */
-    function recipeTree(name) {
+    /** The tree of a recipe, or '' when it takes only items to find. */
+    const recipeTree = (name) => chainTree(name, false);
+    /**
+     * The tree of what it takes to reach a place, or '' when the place needs no item, or only
+     * items to find that the line under its name already lists.
+     */
+    function placeTree(name) {
+      const full = wayTo(name, false);
+      if (
+        !full.length ||
+        (full.length === 1 &&
+          full[0] === name &&
+          requiredOf(name).every((n) => !sourceFor(n, false) && craftedLevel(n) === null))
+      )
+        return '';
+      return chainTree(name, true);
+    }
+    /** The tree of a recipe, or of a place (`isPlace`), as a graph in columns. */
+    function chainTree(name, isPlace) {
+      // Showing what the owner lacks, only the places they cannot enter keep them out.
+      const lacking = !!P && state.tree === 'mancanti';
+      const title = isPlace ? 'Cosa serve per arrivarci' : 'Albero della ricetta';
       const nodes = new Map();
-      // Depth first from the recipe, each item once; an item that leads back to itself
-      // (a cycle) is not followed again.
+      // Depth first from the root, each item once; an item that leads back to itself
+      // (a cycle) is not followed again. The items that open the way to a place are held,
+      // not used up, and a place is passed once: their edges are marked (`gate`).
       const visit = (key, source, path) => {
         if (nodes.has(key)) return;
         const node = { key, ...source, kids: [], parents: [], order: nodes.size };
@@ -1484,40 +1561,66 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           ? ingredientsOf(R[node.recipe])
           : node.use
             ? [node.use, ...(takenBy.get(node.use) ?? [])].map((n) => [n, 1])
-            : [];
-        for (const [n, q] of parts) {
-          const c = current(n);
+            : node.place
+              ? wayParts(node.place, node.way)
+              : [];
+        for (const [n, q, gate, src] of parts) {
+          const c = src ? n : current(n);
           if (path.includes(c) || node.kids.some(([k]) => k === c)) continue;
-          visit(c, sourceFor(c), [...path, c]);
-          node.kids.push([c, q]);
+          visit(c, src ?? sourceFor(c, lacking), [...path, c]);
+          node.kids.push([c, q, !!gate]);
         }
         post.push(node);
       };
       const post = [];
-      const rootKey = madeItem(name) ?? '';
-      visit(rootKey, { recipe: name }, [rootKey]);
+      const rootKey = isPlace ? name : (madeItem(name) ?? '');
+      if (isPlace) {
+        const way = wayTo(name, lacking);
+        if (!way.length)
+          return treeSection(
+            title,
+            `<p class="note">${ESTIMATE}, hai già quello che serve per arrivarci.</p>`
+          );
+        visit(rootKey, { place: name, way, spot: true }, [rootKey]);
+      } else visit(rootKey, { recipe: name }, [rootKey]);
       const top = nodes.get(rootKey);
-      const found = (n) => n !== top && !n.recipe && !n.use && craftedLevel(n.key) === null;
+      const found = (n) =>
+        n !== top && !n.recipe && !n.use && !n.place && craftedLevel(n.key) === null;
       /** A use that gives the item only at times: how many uses it takes is an estimate. */
       const chance = (n) => !!n.use && !n.certain;
-      /** Where the tree stops before reaching items to find: no recipe known, or not all of it. */
+      /** A place that requires an item not yet identified, as it is locked. */
+      const unknownAt = (n) => !!n.place && n.way.at(-1) === n.place && unknownKey(n.place);
+      /**
+       * Where the tree stops before reaching items to find: no recipe known, or not all of
+       * it; a place that requires an item not yet identified.
+       */
       const stopsAt = (n) =>
-        n !== top && !found(n) && !n.use && (!n.recipe || !R[n.recipe].ingredients);
-      if (top.kids.every(([k]) => found(nodes.get(k)))) return '';
+        n !== top &&
+        !found(n) &&
+        !n.use &&
+        (n.place ? unknownAt(n) : !n.recipe || !R[n.recipe].ingredients);
+      if (!isPlace && top.kids.every(([k]) => found(nodes.get(k)))) return '';
       // Parents before children; the counts flow down. An unknown quantity (a partial list
       // of ingredients) makes unknown all that is below it. Showing what the owner lacks,
       // what they hold (by the inventory estimate) is taken off each item once all the
       // recipes that take it are counted, and an item they hold enough of is not drawn,
       // nor is what it takes.
-      const lacking = !!P && state.tree === 'mancanti';
       const topo = post.reverse();
       for (const n of nodes.values()) n.need = 0;
       top.need = 1;
       for (const n of topo) {
         if (lacking && n !== top && n.need !== null)
           n.need = Math.max(0, n.need - (have(n.key)?.qty || 0));
-        for (const [k, q] of n.kids) {
+        for (const [k, q, gate] of n.kids) {
           const kid = nodes.get(k);
+          // What opens the way is held, not used up: one, however many go that way.
+          if (gate) {
+            if (n.need === 0) continue;
+            if (!kid.gated && kid.need !== null) kid.need += 1;
+            kid.gated = true;
+            kid.parents.push([n.key, 1]);
+            continue;
+          }
           // A use that gives it at times is repeated as often as it took on average.
           const per = chance(n) ? (n.times ? n.uses / n.times : null) : 1;
           const add = n.need === null || q === null || per === null ? null : n.need * per * q;
@@ -1532,14 +1635,19 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       // A recipe whose ingredients the owner all holds: they can make it now.
       const ready = (n) =>
         lacking && (!!n.use || (!!n.recipe && !!R[n.recipe].ingredients)) && !n.out.length;
+      if (isPlace && !top.out.length)
+        return treeSection(
+          title,
+          `<p class="note">${unknownAt(top) ? 'Per arrivarci serve un oggetto non ancora identificato.' : `${ESTIMATE}, hai già quello che serve per arrivarci.`}</p>`
+        );
       if (lacking && !top.out.length)
         return treeSection(
-          name,
+          title,
           `<p class="note">${ESTIMATE}, hai già tutto quello che serve: puoi eseguirla ora.</p>`
         );
       // Columns: a level each, from the recipe's on the left (an item of level k is N - k
       // columns from it), always right of the recipes that take it, the items to find last.
-      const N = lvl(name);
+      const N = isPlace ? 0 : lvl(name);
       const levelOf = (n) =>
         (n.recipe ? lvl(n.recipe) : found(n) ? 0 : craftedLevel(n.key)) || null;
       for (const n of shown) {
@@ -1604,9 +1712,19 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       };
       const short = (t) => (t.length > 24 ? t.slice(0, 23) + '…' : t);
       for (const n of shown) {
-        const item = n.key ? I[n.key] : null;
-        n.tag = item ? `[${item.rarity || '?'}]` : R[name].level ? `[L${R[name].level}]` : '';
-        n.label = short(n.key || name);
+        const item = n.spot ? null : n.key ? I[n.key] : null;
+        n.tag = item
+          ? `[${item.rarity || '?'}]`
+          : !isPlace && n === top && R[name].level
+            ? `[L${R[name].level}]`
+            : '';
+        // A place to pass: locked, unless it is the place the tree is for.
+        n.label = n.spot
+          ? `${n === top ? '' : '🔒 '}${short(L[n.place].label)}`
+          : short(n.key || name);
+        // An item found only where the player cannot go yet: the place on a second line.
+        n.where = n.place && !n.spot ? `🔒 ${short(L[n.place].label)}` : '';
+        n.h = n.where ? 42 : 26;
         n.count =
           n === top
             ? ''
@@ -1619,26 +1737,32 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
                   : `×${n.need}`;
         n.w =
           8 +
-          (n.tag ? width(n.tag, F.tag) + 6 : 0) +
-          width(n.label, F.name) +
-          (n.count ? 6 + width(n.count, F.n) : 0) +
+          Math.max(
+            (n.tag ? width(n.tag, F.tag) + 6 : 0) +
+              width(n.label, F.name) +
+              (n.count ? 6 + width(n.count, F.n) : 0),
+            n.where ? width(n.where, F.name) : 0
+          ) +
           10;
       }
-      const rowH = 34,
-        nodeH = 26,
+      // Each column centred on the tallest; a node with two lines is taller.
+      const space = 8,
         gap = 36,
         head = 26;
       const colW = cols.map((c) => Math.max(0, ...c.map((n) => n.w)));
       const colX = colW.map((_, c) => 1 + colW.slice(0, c).reduce((a, w) => a + w + gap, 0));
-      const rows = Math.max(...cols.map((c) => c.length));
-      cols.forEach((c, ci) =>
-        c.forEach((n, ri) => {
+      const colH = cols.map((c) => c.reduce((t, n) => t + n.h + space, 0));
+      const tallest = Math.max(...colH);
+      cols.forEach((c, ci) => {
+        let y = head + (tallest - colH[ci]) / 2;
+        for (const n of c) {
           n.x = colX[ci];
-          n.y = head + ((rows - c.length) * rowH) / 2 + ri * rowH;
-        })
-      );
+          n.y = y;
+          y += n.h + space;
+        }
+      });
       const Wd = colX.at(-1) + colW.at(-1) + 1,
-        H = head + rows * rowH;
+        H = head + tallest;
       // Each column's heading: the level of its items, if they share one.
       const heading = (c) => {
         if (c.length && c.every(found)) return 'DA TROVARE';
@@ -1656,12 +1780,22 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
             ? 'una volta'
             : `${amount(n.need, n.approx)} volte`;
       const titleOf = (n) => {
-        if (n === top) return n.key ? `${n.key}, con la ricetta ${name}` : `Ricetta ${name}`;
+        if (n === top)
+          return isPlace
+            ? `Per arrivare ${at(name)}`
+            : n.key
+              ? `${n.key}, con la ricetta ${name}`
+              : `Ricetta ${name}`;
         const split =
           n.parents.length > 1
             ? ` (${n.parents.map(([p, k]) => `${amount(k, n.approx)} per ${p || name}`).join(', ')})`
             : '';
         const still = lacking ? 'ancora ' : '';
+        const where = lacking ? 'non puoi ancora arrivare' : 'si arriva solo con un oggetto';
+        const needs = n.place ? `per arrivarci serve ${wayText(n.place, n.way)}` : '';
+        if (n.spot) return `${L[n.place].label}: un luogo dove ${where}; ${needs}`;
+        if (n.place)
+          return `${n.key}: ${still}da trovare ${amount(n.need, n.approx)} ${at(n.place)}, dove ${where}: ${needs}${split}`;
         if (found(n)) return `${n.key}: ${still}da trovare ${amount(n.need, n.approx)}${split}`;
         const now = ready(n) ? ', puoi farlo ora' : '';
         if (n.use) {
@@ -1682,9 +1816,9 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
         n.out.map(([k]) => {
           const kid = nodes.get(k),
             x1 = n.x + n.w,
-            y1 = n.y + nodeH / 2,
+            y1 = n.y + n.h / 2,
             x2 = kid.x,
-            y2 = kid.y + nodeH / 2,
+            y2 = kid.y + kid.h / 2,
             mx = (x1 + x2) / 2;
           return `<path class="g-edge${chance(n) ? ' chance' : ''}" data-a="${esc(n.key)}" data-b="${esc(k)}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
         })
@@ -1696,30 +1830,41 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           'g-node',
           n === top && 'root sel',
           found(n) && 'found',
+          n !== top && n.place && 'locked',
           open && 'open',
           ready(n) && 'ready',
         ]
           .filter(Boolean)
           .join(' ');
+        // An item found where the player cannot go yet opens the place: what it takes to
+        // get there is what they will look for.
+        const [kind, target] = n.place ? ['loc', n.place] : ['item', n.key];
         const go =
-          n !== top && I[n.key]
-            ? ` data-go="item" data-name="${esc(n.key)}" tabindex="0" role="button" aria-label="${esc(titleOf(n))}"`
+          n !== top && (n.place || I[n.key])
+            ? ` data-go="${kind}" data-name="${esc(target)}" tabindex="0" role="button" aria-label="${esc(titleOf(n))}"`
             : '';
         const tagW = n.tag ? width(n.tag, F.tag) + 6 : 0;
         return `<g class="${cls}" data-key="${esc(n.key)}"${go}><title>${esc(titleOf(n))}</title>
-      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${nodeH}" rx="5"/>
+      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="5"/>
       ${n.tag ? `<text class="lv" x="${n.x + 8}" y="${n.y + 17}">${esc(n.tag)}</text>` : ''}
       <text x="${n.x + 8 + tagW}" y="${n.y + 17}">${esc(n.label)}</text>
-      ${n.count ? `<text class="n" x="${n.x + n.w - 10}" y="${n.y + 17}" text-anchor="end">${esc(n.count)}</text>` : ''}</g>`;
+      ${n.count ? `<text class="n" x="${n.x + n.w - 10}" y="${n.y + 17}" text-anchor="end">${esc(n.count)}</text>` : ''}
+      ${n.where ? `<text class="where" x="${n.x + 8}" y="${n.y + 33}">${esc(n.where)}</text>` : ''}</g>`;
       });
       const partial = shown.some((n) => n.need === null);
       const stops = shown.some(stopsAt);
       const odds = shown.some((n) => chance(n) && n.out.length);
-      const goal = madeItem(name) ? `fare ${esc(madeItem(name))}` : 'eseguire la ricetta';
+      const locks = shown.some((n) => n !== top && n.place);
+      const goal = isPlace
+        ? `Per arrivare ${esc(at(name))}`
+        : `Per ${madeItem(name) ? `fare ${esc(madeItem(name))}` : 'eseguire la ricetta'} una volta`;
       const notes = [
         lacking
-          ? `Per ${goal} una volta, ${ESTIMATE.toLowerCase()}: solo quello che ti manca, quante volte va ancora craftato o, nell'ultima colonna, quanti vanno ancora trovati. In verde, quello che puoi già craftare. Tocca un oggetto per aprirlo.`
-          : `Per ${goal} una volta: ogni oggetto, quante volte va craftato o, nell'ultima colonna, quanti vanno trovati. Tocca un oggetto per aprirlo.`,
+          ? `${goal}, ${ESTIMATE.toLowerCase()}: solo quello che ti manca, quante volte va ancora craftato o, nell'ultima colonna, quanti vanno ancora trovati. In verde, quello che puoi già craftare. Tocca un oggetto per aprirlo.`
+          : `${goal}: ogni oggetto, quante volte va craftato o, nell'ultima colonna, quanti vanno trovati. Tocca un oggetto per aprirlo.`,
+        locks
+          ? `Con 🔒, un oggetto che si trova solo in un luogo dove ${lacking ? 'non puoi ancora arrivare' : 'si arriva solo con un oggetto'}: lo seguono gli oggetti che servono per arrivarci, da avere una volta sola, perché non si consumano, e i luoghi da cui passare per arrivarci, se servono anche lì degli oggetti. Toccalo per aprire il luogo.`
+          : '',
         stops
           ? "Dove una ricetta, o parte dei suoi ingredienti, non è ancora nota (bordo tratteggiato), l'albero si ferma."
           : '',
@@ -1728,9 +1873,12 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
           : '',
         partial ? 'Con ×? la quantità non è ancora nota.' : '',
       ].filter(Boolean);
+      const label = isPlace
+        ? `Cosa serve per arrivare ${at(name)}`
+        : `Albero della ricetta ${name}`;
       return treeSection(
-        name,
-        `${notes.map((t) => `<p class="note">${t}</p>`).join('')}<div class="tree-box"><svg class="tree" viewBox="0 0 ${Wd} ${H}" width="${Wd}" height="${H}" role="img" aria-label="Albero della ricetta ${esc(name)}">
+        title,
+        `${notes.map((t) => `<p class="note">${t}</p>`).join('')}<div class="tree-box"><svg class="tree" viewBox="0 0 ${Wd} ${H}" width="${Wd}" height="${H}" role="img" aria-label="${esc(label)}">
     ${cols.map((c, ci) => `<text class="g-col" x="${colX[ci]}" y="14">${heading(c)}</text>`).join('')}
     ${edges.join('')}
     ${svgNodes.join('')}
@@ -1738,7 +1886,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
       );
     }
     /** The tree's section: its title and, with the owner's state, what it shows, on the right. */
-    function treeSection(name, body) {
+    function treeSection(title, body) {
       const modes = [
         ['mancanti', 'Ti manca', `${ESTIMATE}, solo quello che ti manca`],
         ['tutto', 'Tutto', 'Tutto quello che serve'],
@@ -1751,7 +1899,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
             )
             .join('')}</div>`
         : '';
-      return `<div class="section tree-section"><div class="tree-head"><h3>Albero della ricetta</h3>${toggle}</div>${body}</div>`;
+      return `<div class="section tree-section"><div class="tree-head"><h3>${title}</h3>${toggle}</div>${body}</div>`;
     }
 
     // ---- view --------------------------------------------------------------------
@@ -1837,7 +1985,7 @@ import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
             .forEach((e) =>
               e.classList.toggle(
                 'hi',
-                on && (e.dataset.a === el.dataset.name || e.dataset.b === el.dataset.name)
+                on && (e.dataset.a === el.dataset.key || e.dataset.b === el.dataset.key)
               )
             );
         el.addEventListener('mouseenter', () => hi(true));
