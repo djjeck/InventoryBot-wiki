@@ -1,6 +1,7 @@
 /**
  * The web app's page: the wiki, the only view, under a header whose "Importa" button
- * opens a modal panel below it with the owner whose wiki it is, the list of exports (each removed by its bin button),
+ * opens a modal panel below it with the owner whose wiki it is, the list of exports (a card per
+ * chat, each export a row with its days, its status and a bin button to remove it),
  * how to export a chat, "Aggiungi esportazione", which opens the folder picker, the
  * options and "Cancella i miei dati"; the panel closes on Escape or on a click outside it.
  * While no export is listed, the empty wiki offers "Prova con un esempio". Each folder
@@ -23,7 +24,7 @@
 import { type Phase } from '#src/pipeline.ts';
 import { debounce } from './debounce.ts';
 import { DEMO_FOLDER, demoMessages } from './demo.ts';
-import { accountLabel, activityText, entryLabel } from './labels.ts';
+import { accountLabel, activityText, chatCards, entryLabel } from './labels.ts';
 import {
   type BuildOptions,
   type ExportEntry,
@@ -212,60 +213,77 @@ ui.panel.addEventListener('click', (e) => {
 const BIN_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg>';
 
+/** The row of an export within its chat's card: its days, then its status and bin. */
+function exportRow(e: ExportEntry, chat: string): HTMLLIElement {
+  const l = entryLabel(e);
+  const li = document.createElement('li');
+  li.className = `export s-${e.status}`;
+  li.title = e.folder;
+  const text = document.createElement('div');
+  text.className = 'export-text';
+  const days = document.createElement('span');
+  days.className = 'export-days';
+  days.textContent = l.text;
+  text.append(days);
+  if (l.detail !== null) {
+    const detail = document.createElement('span');
+    detail.className = 'export-detail';
+    detail.textContent = l.detail;
+    if (e.details?.length) {
+      const ul = document.createElement('ul');
+      ul.append(
+        ...e.details.map((d) => {
+          const item = document.createElement('li');
+          item.textContent = d;
+          return item;
+        })
+      );
+      detail.append(ul);
+    }
+    text.append(detail);
+  }
+  const icons = document.createElement('div');
+  icons.className = 'export-icons';
+  const status = document.createElement('span');
+  status.className = 'export-status';
+  status.setAttribute('role', 'img');
+  status.setAttribute('aria-label', l.status);
+  status.title = l.status;
+  status.textContent = l.icon;
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'icon-btn export-remove';
+  remove.innerHTML = BIN_ICON;
+  const what = l.text === l.status ? chat : `${chat} (${l.text})`;
+  remove.setAttribute('aria-label', `Togli ${what}`);
+  remove.title = 'Togli';
+  remove.addEventListener('click', () => {
+    if (
+      (e.status === 'ready' || e.status === 'stale') &&
+      !confirm(`Togliere l’esportazione ${what}? La wiki verrà ricreata senza.`)
+    )
+      return;
+    send({ type: 'remove', id: e.id });
+    ui.panel.focus();
+  });
+  icons.append(status, remove);
+  li.append(text, icons);
+  return li;
+}
+
 function renderExports(): void {
   ui.exports.replaceChildren(
-    ...exportList.map((e) => {
-      const l = entryLabel(e);
+    ...chatCards(exportList).map((c) => {
       const li = document.createElement('li');
-      li.className = `export s-${e.status}`;
-      const text = document.createElement('div');
-      text.className = 'export-text';
+      li.className = 'chat';
       const name = document.createElement('span');
-      name.className = 'export-name';
-      name.textContent = l.name;
-      if (l.name !== e.folder) name.title = e.folder;
-      const meta = document.createElement('span');
-      meta.className = 'export-meta';
-      const status = document.createElement('span');
-      status.className = 'export-status';
-      status.textContent = l.status;
-      if (l.days !== null) meta.append(`${l.days} · `);
-      meta.append(status);
-      text.append(name, meta);
-      if (l.detail !== null) {
-        const detail = document.createElement('span');
-        detail.className = 'export-detail';
-        detail.textContent = l.detail;
-        if (e.details?.length) {
-          const ul = document.createElement('ul');
-          ul.append(
-            ...e.details.map((d) => {
-              const item = document.createElement('li');
-              item.textContent = d;
-              return item;
-            })
-          );
-          detail.append(ul);
-        }
-        text.append(detail);
-      }
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.className = 'icon-btn export-remove';
-      remove.innerHTML = BIN_ICON;
-      const what = l.days === null ? l.name : `${l.name} (${l.days})`;
-      remove.setAttribute('aria-label', `Togli ${what}`);
-      remove.title = 'Togli';
-      remove.addEventListener('click', () => {
-        if (
-          (e.status === 'ready' || e.status === 'stale') &&
-          !confirm(`Togliere l’esportazione ${what}? La wiki verrà ricreata senza.`)
-        )
-          return;
-        send({ type: 'remove', id: e.id });
-        ui.panel.focus();
-      });
-      li.append(text, remove);
+      name.className = 'chat-name';
+      name.textContent = c.name;
+      const list = document.createElement('ul');
+      list.className = 'chat-exports';
+      list.setAttribute('aria-label', `Esportazioni di ${c.name}`);
+      list.append(...c.entries.map((e) => exportRow(e, c.name)));
+      li.append(name, list);
       return li;
     })
   );

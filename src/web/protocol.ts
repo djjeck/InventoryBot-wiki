@@ -87,6 +87,11 @@ export interface ExportEntry {
   details?: string[];
   /** `ready` and `stale`: the stored record. */
   info?: RecordInfo;
+  /**
+   * `ready` and `stale`: its chat, the same for the exports of one chat (chats.ts): of the
+   * same title, or overlapping.
+   */
+  chat?: string;
 }
 
 /** Worker -> page: the answer to `state`, and again after `clear`. */

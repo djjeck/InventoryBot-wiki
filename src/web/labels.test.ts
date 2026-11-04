@@ -4,6 +4,7 @@ import { DEMO_FOLDER } from './demo.ts';
 import {
   accountLabel,
   activityText,
+  chatCards,
   chatName,
   entryLabel,
   exportDay,
@@ -28,11 +29,11 @@ const info = (over: Partial<RecordInfo> = {}): RecordInfo => ({
 
 describe('dates', () => {
   it('a_windows_date_gives_the_day_as_written', () => {
-    expect(exportDay('03.10.2026 23:30:00 UTC-05:00')).toBe('3 ott 2026');
+    expect(exportDay('03.10.2026 23:30:00 UTC-05:00')).toBe('2026-10-03');
   });
 
   it('a_macos_date_gives_its_day', () => {
-    expect(exportDay('27 November 2025, 19:14:19')).toBe('27 nov 2025');
+    expect(exportDay('27 November 2025, 19:14:19')).toBe('2025-11-27');
   });
 
   it('anything_else_is_no_day', () => {
@@ -41,9 +42,9 @@ describe('dates', () => {
   });
 
   it('first_and_last_day_make_a_range_or_one_day', () => {
-    expect(exportDays(info())).toBe('dal 3 ott 2026 al 17 ott 2026');
-    expect(exportDays(info({ lastDate: '03.10.2026 18:00:00 UTC+02:00' }))).toBe('3 ott 2026');
-    expect(exportDays(info({ firstDate: null }))).toBe('17 ott 2026');
+    expect(exportDays(info())).toBe('2026-10-03 - 2026-10-17');
+    expect(exportDays(info({ lastDate: '03.10.2026 18:00:00 UTC+02:00' }))).toBe('2026-10-03');
+    expect(exportDays(info({ firstDate: null }))).toBe('2026-10-17');
     expect(exportDays(info({ firstDate: null, lastDate: null }))).toBe('senza date');
   });
 });
@@ -72,48 +73,115 @@ describe('entries', () => {
     ...over,
   });
 
-  it('a_ready_export_shows_its_chat_and_days', () => {
+  it('a_ready_export_shows_its_days', () => {
     expect(entryLabel(entry({ id: 'h', info: info() }))).toStrictEqual({
-      name: '@InventoryBot',
-      days: 'dal 3 ott 2026 al 17 ott 2026',
+      text: '2026-10-03 - 2026-10-17',
+      icon: '✅',
       status: 'pronta',
       detail: null,
     });
-  });
-
-  it('the_example_is_named_for_what_it_is', () => {
-    const e = entry({ id: 'h', info: info({ folder: DEMO_FOLDER }), folder: DEMO_FOLDER });
-    expect(entryLabel(e).name).toBe('Esempio: un giocatore inventato');
-    expect(entryLabel({ ...e, status: 'reading' }).name).toBe('Esempio: un giocatore inventato');
   });
 
   it('a_stale_export_asks_for_its_folder_again', () => {
     const l = entryLabel(
       entry({ status: 'stale', info: info({ chats: ['Gruppo Avventurieri'] }) })
     );
-    expect(l.name).toBe('Gruppo Avventurieri');
-    expect(l.status).toBe('da ricaricare');
-    expect(l.detail).toBe(
-      'Letta da una versione precedente della pagina: aggiungi di nuovo la cartella inbox/ChatExport_2026-10-17 perché conti.'
-    );
+    expect(l).toStrictEqual({
+      text: '2026-10-03 - 2026-10-17',
+      icon: '⚠️',
+      status: 'da ricaricare',
+      detail:
+        'Letta da una versione precedente della pagina: aggiungi di nuovo la cartella inbox/ChatExport_2026-10-17 perché conti.',
+    });
   });
 
-  it('exports_without_a_record_show_their_folder', () => {
+  it('exports_without_a_record_show_what_is_going_on', () => {
     expect(entryLabel(entry({ status: 'queued' }))).toStrictEqual({
-      name: 'inbox/ChatExport_2026-10-17',
-      days: null,
+      text: 'in coda',
+      icon: '⏳',
       status: 'in coda',
       detail: null,
     });
-    expect(entryLabel(entry({ status: 'reading', done: 1, total: 3 })).status).toBe(
-      'in lettura: 1 di 3 pagine'
-    );
+    expect(entryLabel(entry({ status: 'reading', done: 1, total: 3 }))).toMatchObject({
+      text: 'in lettura: 1 di 3 pagine',
+      icon: '⏳',
+    });
     expect(entryLabel(entry({ status: 'reading' })).status).toBe('in lettura: 0 di 0 pagine');
     expect(entryLabel(entry({ status: 'error', message: 'Non va.' }))).toMatchObject({
+      text: 'errore',
+      icon: '❌',
       status: 'errore',
       detail: 'Non va.',
     });
     expect(entryLabel(entry({ status: 'error' })).detail).toBe('Non è stato possibile leggerla.');
+  });
+});
+
+describe('chat cards', () => {
+  const stored = (id: string, chat: string, over: Partial<RecordInfo> = {}): ExportEntry => ({
+    id,
+    status: 'ready',
+    folder: `ChatExport_${id}`,
+    info: info({ hash: id, ...over }),
+    chat,
+  });
+  const cards = (exports: ExportEntry[]) =>
+    chatCards(exports).map((c) => [c.key, c.name, c.entries.map((e) => e.id)]);
+
+  it('the_dm_comes_first_then_the_groups_by_name_then_the_exports_being_read', () => {
+    expect(
+      cards([
+        { id: 'job-1', status: 'reading', folder: 'Nuova' },
+        stored('z', 'z', { chats: ['gruppo Zeta'] }),
+        stored('g', 'g', { chats: ['Gruppo Avventurieri'] }),
+        stored('d', 'd'),
+        { id: 'job-0', status: 'error', folder: 'Rotta' },
+      ])
+    ).toStrictEqual([
+      ['d', '@InventoryBot', ['d']],
+      ['g', 'Gruppo Avventurieri', ['g']],
+      ['z', 'gruppo Zeta', ['z']],
+      ['job-1', 'Nuova', ['job-1']],
+      ['job-0', 'Rotta', ['job-0']],
+    ]);
+  });
+
+  it('a_chat_holds_its_exports_oldest_first_named_by_the_newest', () => {
+    expect(
+      cards([
+        stored('b', 'a', {
+          chats: ['Gruppo Esploratori'],
+          firstDate: '01.11.2026 10:00:00 UTC+01:00',
+          lastDate: '02.11.2026 10:00:00 UTC+01:00',
+        }),
+        stored('a', 'a', {
+          chats: ['Gruppo Avventurieri'],
+          firstDate: '01.10.2026 10:00:00 UTC+02:00',
+          lastDate: '20.10.2026 10:00:00 UTC+02:00',
+        }),
+        {
+          ...stored('s', 'a', { chats: ['Gruppo Avventurieri'], firstDate: null }),
+          status: 'stale',
+        },
+      ])
+    ).toStrictEqual([['a', 'Gruppo Esploratori', ['s', 'a', 'b']]]);
+  });
+
+  it('the_example_is_named_for_what_it_is', () => {
+    const demo = stored('e', 'e', { folder: DEMO_FOLDER });
+    demo.folder = DEMO_FOLDER;
+    expect(cards([stored('g', 'g', { chats: ['Gruppo Avventurieri'] }), demo])).toStrictEqual([
+      ['e', 'Esempio: un giocatore inventato', ['e']],
+      ['g', 'Gruppo Avventurieri', ['g']],
+    ]);
+    expect(cards([{ id: 'job-0', status: 'queued', folder: DEMO_FOLDER }])).toStrictEqual([
+      ['job-0', 'Esempio: un giocatore inventato', ['job-0']],
+    ]);
+  });
+
+  it('an_export_without_a_chat_is_its_own', () => {
+    const { chat: _, ...h } = stored('h', 'x');
+    expect(cards([h])).toStrictEqual([['h', '@InventoryBot', ['h']]]);
   });
 });
 

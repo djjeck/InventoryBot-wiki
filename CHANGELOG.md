@@ -1,5 +1,11 @@
 # Changelog
 
+## Non ancora rilasciata
+
+- **Esportazioni raggruppate per chat.** Nel pannello Importa ogni chat ha una sola scheda, con una
+  riga per esportazione: prima la chat con il bot, poi le altre in ordine alfabetico, con righe più
+  compatte.
+
 ## 0.9.4 (2026-11-03)
 
 - **Aggiunto il livello ai luoghi.** Ogni luogo mostra accanto al nome il livello più basso da cui

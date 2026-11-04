@@ -32,6 +32,7 @@ import {
 } from '#src/telegram/export/browser-files.ts';
 import { type ExportRecord, splitExports } from '#src/telegram/export/record.ts';
 import { type Page } from '#src/telegram/messages.ts';
+import { chatKeys, type FingerprintCache } from './chats.ts';
 import { DEMO_FOLDER, demoFiles } from './demo.ts';
 import {
   type BuildOptions,
@@ -118,6 +119,8 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
   let listed: ListedRecord[] = [];
   /** Records of this visit that storage could not take. */
   const memory = new Map<string, { info: ListedRecord; record: ExportRecord }>();
+  /** What tells which exports overlap (chats.ts), by record hash: computed once each. */
+  const fingerprints: FingerprintCache = new Map();
   /** The stored records, by hash, as loaded at start and kept up to date since. */
   let loaded = new Map<string, ExportRecord>();
   const jobs: Job[] = [];
@@ -133,14 +136,22 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
   const pending = (): boolean => buildWanted || jobs.some((j) => j.status !== 'error');
 
   function entries(): ExportEntry[] {
-    const stored = [...listed, ...[...memory.values()].map((m) => m.info)].map(
-      (i): ExportEntry => ({
-        id: i.hash,
-        status: i.stale ? 'stale' : 'ready',
-        folder: i.folder,
-        info: i,
-      })
+    const infos = [...listed, ...[...memory.values()].map((m) => m.info)];
+    const chats = chatKeys(
+      infos.map((i) => ({
+        hash: i.hash,
+        chats: i.chats,
+        record: loaded.get(i.hash) ?? memory.get(i.hash)?.record,
+      })),
+      fingerprints
     );
+    const stored = infos.map((i): ExportEntry => ({
+      id: i.hash,
+      status: i.stale ? 'stale' : 'ready',
+      folder: i.folder,
+      info: i,
+      chat: chats.get(i.hash) as string,
+    }));
     const unstored = jobs.map((j): ExportEntry => {
       const e: ExportEntry = { id: j.id, status: j.status, folder: j.folder.name };
       if (j.status === 'reading') Object.assign(e, { done: j.done, total: j.pages.length });
@@ -176,8 +187,12 @@ export function startWorker(store: Store, post: (m: WorkerMessage) => void): Wor
     } else {
       post({ type: 'results', current: !pending(), outcome: { status: 'empty' } });
     }
-    // After the saved results are shown: the next build needs no loading.
-    if (listed.some((i) => !i.stale)) await reload();
+    // After the saved results are shown: the next build needs no loading, and the list
+    // knows which exports overlap.
+    if (listed.some((i) => !i.stale)) {
+      await reload();
+      post({ type: 'exports', exports: entries(), storage: store.available });
+    }
     kick();
   }
 

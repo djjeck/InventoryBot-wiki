@@ -398,6 +398,31 @@ describe('records in memory', () => {
   });
 });
 
+describe('chats', () => {
+  it('exports_of_one_chat_share_its_key_even_renamed_if_they_overlap', async () => {
+    const h = await startHarness();
+    const dm = writeDm('ChatExport_dm', 1);
+    const g = new Chat('Gruppo Avventurieri', 5000);
+    for (let t = 0; t < 12; t++) g.user('Luigi', `messaggio ${t}`, t);
+    const dir = tempDir();
+    const old = writeExport(path.join(dir, 'Vecchia'), 'Gruppo Avventurieri', [
+      g.messages.slice(0, 8),
+    ]);
+    // The group renamed after the first export: the second starts inside it.
+    const renamed = writeExport(path.join(dir, 'Nuova'), 'Gruppo Esploratori', [
+      g.messages.slice(2),
+    ]);
+    const later = new Chat('Gruppo Esploratori', 6000);
+    later.user('Luigi', 'più tardi', 100);
+    const apart = writeExport(path.join(dir, 'Dopo'), 'Gruppo Esploratori', [later.messages]);
+    await h.add(...[dm, old, renamed, apart].map(pickFolder));
+    const chats = new Map(h.exports().map((e) => [e.folder, e.chat]));
+    expect(chats.get('Vecchia')).toBe(chats.get('Nuova'));
+    expect(chats.get('Dopo')).toBe(chats.get('Nuova'));
+    expect(chats.get('ChatExport_dm')).not.toBe(chats.get('Nuova'));
+  });
+});
+
 describe('removal', () => {
   it('removing_an_export_rebuilds_from_the_rest', async () => {
     const h = await startHarness();

@@ -192,29 +192,33 @@ with how to export, a link to the repository on GitHub and, while no export is l
 esempio", until there is one), under a header with a GitHub icon that links to the repository and
 whose "Importa" button (with the number of exports) opens a modal panel below it, closed by Escape
 or a click outside it, with the owner whose wiki it is (with the inventory estimate's agreement,
-`accountLabel` in `labels.ts`), the list of exports (each with its chat, the days of its first and
-last message and its status, worded by `labels.ts`, and a bin button to remove it), how to export a
-chat, "Aggiungi esportazione", which opens the folder picker, the options and "Cancella i miei
-dati". The example is a short chat with the bot, written by hand in `demo-chat.ts`: an invented
-player who has just started walks from the village to the plain, finds one each of four common
-items, lists and examines their items and recipes. "Prova con un esempio" opens its page in place of
-the wiki: the chat as Telegram draws it, and a button that builds the wiki from it; the worker
-writes it as an export (`demo.ts`) and reads it like a folder picked, and above its wiki a line
-opens the chat again. Adding an export of the player's own drops it (`run.ts`), as its chat with the
-bot would mix with theirs. It sends each folder picked at once to a Web Worker (`worker.ts`,
-`run.ts`; the messages are in `protocol.ts`), so the page stays responsive, and every change of the
-options (the time zone, the username once typing pauses, `debounce.ts`); there is no button to
-build. The worker owns the storage and runs the pipeline: it reads each folder into records
-(`processExport`) and keeps them, then builds the wiki again from every kept record (`buildWiki`)
-and saves the results. It loads the stored records once, at start, and keeps them in memory, so a
-build loads nothing again unless another tab stored one. Its queue runs one step at a time: the
-folders added, in order, then one build once none is left to read, however many were added. A build
-is never abandoned: a folder added or removed while it runs, or new options, make its results not
-current, and one more build follows. A folder whose exports are all kept already builds nothing, and
-one that cannot be read is listed with the error while the queue goes on. Removing an export
-rebuilds from the rest, and options equal to the current ones build nothing. The header shows the
-reading and the build's phase while the current wiki stays usable; each build's wiki replaces it in
-place, without moving the focus. The wiki and the player state are drawn by the wiki view
+`accountLabel` in `labels.ts`), the list of exports (a card per chat, worded by `labels.ts`: the DM
+first, then the others by name, each named as its newest export titles it, with a small row per
+export, oldest first, of the days of its first and last message, `YYYY-MM-DD - YYYY-MM-DD`, and at
+its right an emoji of its status, ⏳ while queued or read, and a bin button to remove it; an export
+has no chat id, so the worker tells which exports are of one chat, `chats.ts`: of the same title, or
+one holding the first messages of the other, so that a chat renamed between overlapping exports
+stays one), how to export a chat, "Aggiungi esportazione", which opens the folder picker, the
+options and "Cancella i miei dati". The example is a short chat with the bot, written by hand in
+`demo-chat.ts`: an invented player who has just started walks from the village to the plain, finds
+one each of four common items, lists and examines their items and recipes. "Prova con un esempio"
+opens its page in place of the wiki: the chat as Telegram draws it, and a button that builds the
+wiki from it; the worker writes it as an export (`demo.ts`) and reads it like a folder picked, and
+above its wiki a line opens the chat again. Adding an export of the player's own drops it
+(`run.ts`), as its chat with the bot would mix with theirs. It sends each folder picked at once to a
+Web Worker (`worker.ts`, `run.ts`; the messages are in `protocol.ts`), so the page stays responsive,
+and every change of the options (the time zone, the username once typing pauses, `debounce.ts`);
+there is no button to build. The worker owns the storage and runs the pipeline: it reads each folder
+into records (`processExport`) and keeps them, then builds the wiki again from every kept record
+(`buildWiki`) and saves the results. It loads the stored records once, at start, and keeps them in
+memory, so a build loads nothing again unless another tab stored one. Its queue runs one step at a
+time: the folders added, in order, then one build once none is left to read, however many were
+added. A build is never abandoned: a folder added or removed while it runs, or new options, make its
+results not current, and one more build follows. A folder whose exports are all kept already builds
+nothing, and one that cannot be read is listed with the error while the queue goes on. Removing an
+export rebuilds from the rest, and options equal to the current ones build nothing. The header shows
+the reading and the build's phase while the current wiki stays usable; each build's wiki replaces it
+in place, without moving the focus. The wiki and the player state are drawn by the wiki view
 (`view/wiki-view.js` and `.css`, plain JavaScript that defines `window.renderWiki`): as in
 Telegram's chat list, the search, the categories (as tabs, each with how many entries it lists, with
 the search if any, as unread counts) and their list are in a sidebar fixed to the left of the
@@ -280,11 +284,11 @@ without a salt the records and results are dropped, and a record or results made
 are refused. A record of an older `RECORD_FORMAT_VERSION` is stale: it is listed, so the player can
 add the export again, but never used, and its payload is dropped. Opening the database of an older
 schema drops what it kept. Without storage the worker keeps the records of the visit in memory.
-"Cancella i miei dati" deletes the whole database and resets the options. `run.ts`, `storage.ts`,
-`labels.ts`, `debounce.ts`, `demo.ts`, `map-layout.ts` and `place-way.ts` use no browser API and are
-tested in Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and `worker.ts` are
-browser-only wiring, checked in a browser (type-checked with the DOM types by `tsconfig.web.json`,
-and left out of coverage).
+"Cancella i miei dati" deletes the whole database and resets the options. `run.ts`, `chats.ts`,
+`storage.ts`, `labels.ts`, `debounce.ts`, `demo.ts`, `map-layout.ts` and `place-way.ts` use no
+browser API and are tested in Node (on a fake IndexedDB, `test/fake-indexeddb.ts`); `main.ts` and
+`worker.ts` are browser-only wiring, checked in a browser (type-checked with the DOM types by
+`tsconfig.web.json`, and left out of coverage).
 
 `npm run inspect -- [FOLDER ...] [--out DIR] [--player NAME] [--time-zone ZONE]`
 (`scripts/inspect.ts`, the work in `scripts/inspection.ts`) is a development tool, not part of the

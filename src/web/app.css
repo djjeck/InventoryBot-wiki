@@ -292,39 +292,45 @@ main:focus {
 .exports:empty {
   display: none;
 }
-.export {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 8px;
+/* A card per chat: its name, then a small row per export. */
+.chat {
+  display: grid;
+  gap: 2px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   overflow-wrap: anywhere;
+}
+.chat-name {
+  font-weight: 500;
+}
+.chat-exports {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.export {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-left: 6px;
+  border-left: 3px solid transparent;
 }
 .export-text {
   display: grid;
   gap: 2px;
   min-width: 0;
 }
-.export-name {
-  font-weight: 500;
-}
-.export-meta {
+.export-days {
   color: var(--muted);
   font-size: 0.85rem;
-}
-.s-ready .export-status {
-  color: var(--r-N);
-}
-.s-stale .export-status,
-.s-error .export-status {
-  color: var(--warn);
-  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 .s-error,
 .s-stale {
-  border-left: 4px solid var(--warn);
+  border-left-color: var(--warn);
 }
 .export-detail {
   font-size: 0.85rem;
@@ -334,8 +340,23 @@ main:focus {
   padding-left: 1.2em;
   color: var(--muted);
 }
+/* The status and the bin, at the right of the row. */
+.export-icons {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.export-status {
+  font-size: 0.9rem;
+  line-height: 1;
+}
 .export-remove {
-  margin: -6px -6px -6px 0;
+  width: 32px;
+  height: 32px;
+}
+.export-remove svg {
+  width: 18px;
+  height: 18px;
 }
 .export-remove:hover {
   color: var(--danger);
