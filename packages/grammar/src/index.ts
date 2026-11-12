@@ -14,7 +14,7 @@
  * content. Pure logic only: no Node APIs, no npm packages.
  */
 import { classify } from './classify.ts';
-import { type DropKnowledge, type DropResolution, resolveDrop } from './drops.ts';
+import { type DropKnowledge, type DropResolution, guessDropItem, resolveDrop } from './drops.ts';
 import { codePointLength } from './lib/text.ts';
 import { replyNormalizer } from './titles.ts';
 
@@ -60,7 +60,7 @@ export type {
   UnknownEvent,
   UseEvent,
 } from './types.ts';
-export { classify, type DropKnowledge, type DropResolution, resolveDrop };
+export { classify, type DropKnowledge, type DropResolution, guessDropItem, resolveDrop };
 
 /** What the caller knows of the game, which the module never ships. */
 export interface Knowledge extends DropKnowledge {

@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { classify, type Knowledge, normalizeReply, resolveDrop } from './index.ts';
+import { classify, guessDropItem, type Knowledge, normalizeReply, resolveDrop } from './index.ts';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -37,12 +37,18 @@ describe('the entry', () => {
     });
   });
 
-  it('a_drop_nothing_known_resolves', () => {
+  it('a_drop_nothing_known_resolves_and_its_guess', () => {
     expect(read('@mario_r, sulla spiaggia raccogli una conchiglia [C]!')).toBeNull();
+    expect(guessDropItem('sulla spiaggia raccogli una conchiglia')).toBe('una conchiglia');
   });
 
   it('other_replies_are_their_events', () => {
     expect(read('Troppo presto, riposati ancora un po!')).toStrictEqual({ type: 'cooldown' });
+    expect(
+      read(
+        'Troppo presto, devi riposare ancora per 3 minuti e 5 secondi prima di poterti avventurare di nuovo.'
+      )
+    ).toStrictEqual({ type: 'cooldown', remaining: 185, precision: 1 });
   });
 
   it('titles_longest_first_in_any_order_and_the_admin_prefix', () => {

@@ -119,7 +119,20 @@ const after = (s: string, sep: string): string => s.slice(s.indexOf(sep) + sep.l
 type Query = string | null;
 type Classifier = (t: string, q: Query) => Event | null;
 
-const cTooEarly: Classifier = (t) => (t.startsWith('Troppo presto') ? { type: 'cooldown' } : null);
+// "Troppo presto, devi riposare ancora per 9 minuti e 29 secondi prima di poterti avventurare di
+// nuovo. …": the wait, when the reply states one the way 6.3 writes it.
+const TOO_EARLY_WAIT = rx(
+  `^Troppo presto, devi riposare ancora per (?<d>${DOT}+?)(?: prima di poterti avventurare${DOT}*)?${S}*${END}`
+);
+
+const cTooEarly: Classifier = (t) => {
+  if (!t.startsWith('Troppo presto')) return null;
+  const m = TOO_EARLY_WAIT.exec(t);
+  const wait = m ? parseDuration(groups(m)['d'] as string) : null;
+  return wait === null
+    ? { type: 'cooldown' }
+    : { type: 'cooldown', remaining: wait.seconds, precision: wait.precision };
+};
 
 // Addressed for /usa, not addressed for /dai.
 const ITEM_COOLDOWN = rx(

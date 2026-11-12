@@ -7,7 +7,7 @@
  * which learns the item names and the prefixes from every drop first) and for a reply read on its
  * own (the module's `resolveDrop`, with what its caller knows). Pure logic only.
  */
-import { itemName } from './patterns.ts';
+import { itemName, rx, S } from './patterns.ts';
 
 /** What the resolution of a drop knows of the game. */
 export interface DropKnowledge {
@@ -64,4 +64,20 @@ export function resolveDrop(raw: string, known: DropKnowledge): DropResolution |
   return prefix === undefined
     ? null
     : { item: itemName(raw.slice(prefix.length)), sure: false, prefix };
+}
+
+// An indefinite article that starts a word: "un ", "uno ", "una ", "un'".
+const INDEFINITE = rx(`(?<=^|${S})(?:(?:un|uno|una)${S}|un')`, 'g');
+
+/**
+ * A guess at the item of a drop that `resolveDrop` cannot resolve, for a reader that must name it
+ * at once (a live bot, which has not seen the item yet): what follows the narrative's last
+ * indefinite article ("… mentre ti riposi trovi una conchiglia": "una conchiglia"), else the whole
+ * narrative. Only a guess: an item named with another article ("lo stecchino …"), or with an
+ * article inside its name ("un barattolo di una marmellata"), comes out wrong, and nothing should be
+ * learned from it (no item, no prefix).
+ */
+export function guessDropItem(raw: string): string {
+  const last = [...raw.matchAll(INDEFINITE)].at(-1);
+  return last === undefined ? raw : raw.slice(last.index);
 }
