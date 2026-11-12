@@ -6,8 +6,13 @@
  * the order listed here, so that serialising events gives byte-identical output from run
  * to run.
  */
-import { type ReplyContext } from '#src/telegram/conversation/conversation.ts';
-import { type MatchKind } from '#src/telegram/conversation/matcher.ts';
+// Top-level `import type`, which Node erases whole, unlike `import { type … }`, which still loads
+// the module: the classifier imports this file, and must run without the conversation phase
+// (src/index.ts, the module's entry).
+/* eslint-disable import/consistent-type-specifier-style */
+import type { ReplyContext } from '#src/telegram/conversation/conversation.ts';
+import type { MatchKind } from '#src/telegram/conversation/matcher.ts';
+/* eslint-enable import/consistent-type-specifier-style */
 
 /** An item line: `- name [R] [usabile] xN`. */
 export interface ItemLine {

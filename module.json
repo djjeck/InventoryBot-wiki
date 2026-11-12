@@ -1,0 +1,23 @@
+{
+  "id": "inventorybot-grammar",
+  "version": "0.1.0",
+  "api": "1",
+  "provides": "@inventorybot-wiki/grammar",
+  "description": "InventoryBot's reply grammar: classify a reply, resolve a drop's item, strip titles",
+  "imports": {},
+  "plugins": [],
+  "files": [
+    "LICENSE",
+    "package.json",
+    "src/index.ts",
+    "src/inventorybot/classify.ts",
+    "src/inventorybot/drops.ts",
+    "src/inventorybot/pakkomon.ts",
+    "src/inventorybot/patterns.ts",
+    "src/inventorybot/places.ts",
+    "src/inventorybot/titles.ts",
+    "src/inventorybot/types.ts",
+    "src/inventorybot/use-shapes.ts",
+    "src/lib/text.ts"
+  ]
+}

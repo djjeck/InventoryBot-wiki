@@ -13,9 +13,10 @@
 import { INVENTORY_BOT } from './inventorybot/bot.ts';
 import { build, reportLines, toJson } from './inventorybot/build.ts';
 import { isChannelPost, readChannelPosts } from './inventorybot/channels.ts';
-import { inventoryBotDialect, learnTitles } from './inventorybot/dialect.ts';
+import { inventoryBotDialect } from './inventorybot/dialect.ts';
 import { interpretationReport, interpretReplies } from './inventorybot/extract.ts';
 import { playerState } from './inventorybot/player.ts';
+import { learnTitles } from './inventorybot/titles.ts';
 import {
   type BuildEvent,
   type EventRecord,

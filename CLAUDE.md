@@ -311,6 +311,39 @@ never touches it. Everything about InventoryBot belongs in its own layer, `src/i
 only `src/pipeline.ts` and the web app, `src/web/`, join the two. `src/layers.test.ts` fails on any
 import from the generic layer into either.
 
+### The grammar module
+
+The repository is also a library module of
+[MegaBotTron1999](https://github.com/djjeck/MegaBotTron1999) (its `docs/bot-os-api.md` §7), so that
+a bot that reads InventoryBot's replies live, one at a time, reads them with the very grammar the
+wiki uses. `module.json`, at the root, makes it the module `inventorybot-grammar`, with no plugins,
+that provides `@inventorybot-wiki/grammar`; MegaBotTron1999 installs it from the repository's folder
+or its GitHub link. Its entry is `src/index.ts`, which that name alone imports, and it is the
+contract:
+
+- `classify(text, query, file?)`, the classifier of phase 4, and the types of its events (`Event`,
+  `EventType` and each event's);
+- `normalizeReply(text, known)`: the reply as `classify` reads it, the player titles of
+  `known.titles` and the admin's "Sua Maestà" removed (`titles.ts`, which phase 2's dialect uses);
+- `resolveDrop(raw, known)`: the item of an adventure drop, from its `raw` narrative (`drops.ts`),
+  as `{item, sure, prefix}` or null: a known item of `known.items` that ends it (`sure`), else what
+  follows the longest sentence prefix of `known.prefixes` that starts it. `prefix` is the narrative
+  before the item, for the caller to learn. Phase 5 resolves every drop of a run with this same
+  function, after learning the items and prefixes from all of them (`resolveDrops` in `build.ts`);
+- `Knowledge` (`items`, `prefixes`, optional `titles`), `DropKnowledge` and `DropResolution`.
+
+What the entry exports keeps its meaning within a major version of the module (`version` in
+`module.json`, which follows its API, not the wiki's releases): a change that breaks it raises the
+major version, an addition the minor one. Everything else, the files it ships included, is internal
+and may change at any time. The module knows the grammar, never the game: the caller supplies the
+item names, prefixes and titles, and the repository ships none (see "No spoilers in the
+repository"). It ships only what its entry loads, listed one by one in `module.json`'s `files`, with
+`package.json` (whose `imports` resolve the `#src/*` imports) and `LICENSE`; `src/index.test.ts`
+runs the entry in Node and fails unless the files it loads are exactly those listed and none is an
+npm package or a Node API. Hence `types.ts` imports the conversation's types with a top-level
+`import type`, which Node erases whole (an inline `type` specifier would still load the module): the
+module ships no pipeline phase, export reader or web app.
+
 ## Data rules
 
 - **The wiki is objective.** It holds only facts about the game, the same for every player. Anything
@@ -391,8 +424,9 @@ This project must stay on the right side of that.
   allowed (no enums, namespaces or constructor parameter properties).
 - **Strict TypeScript**, including `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
 - **Imports**: ESLint owns their style, and `npm run lint:fix` normalizes them (sorted in one group,
-  inline `type` specifiers, unused ones removed). Import across directories through the `#src/*`
-  alias (`package.json` `imports`), never with `../`.
+  inline `type` specifiers, unused ones removed; `types.ts` is the one exception, see "The grammar
+  module"). Import across directories through the `#src/*` alias (`package.json` `imports`), never
+  with `../`.
 - **Formatting**: Prettier, for every file it supports, including Markdown, whose prose is wrapped
   at 100 columns (`proseWrap: "always"`), so every text has one canonical form.
 - **Tests** sit next to the code they test (`foo.ts`, `foo.test.ts`) and run with Vitest. Helpers

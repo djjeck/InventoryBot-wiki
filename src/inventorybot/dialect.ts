@@ -5,19 +5,19 @@
  * - addressing: "@user, ...", "Complimenti @user", "Avventuriero @user", "ciao @user",
  *   and the anonymous "[.. una presenza indistinta..]";
  * - reply normalisation: player titles learned from the input ("@user il fornaio,") and
- *   the admin's "Sua Maestà" prefix are removed;
+ *   the admin's "Sua Maestà" prefix are removed (titles.ts);
  * - group broadcasts `[W]`, `[N]`, `[BAN]`;
  * - which commands can produce each reply (COMPATIBLE, compatibleCommands), from the
  *   reply type classify() gives without a command;
  * - for anonymisation: the admin's public username (PUBLIC_NAMES), the usernames a reply
  *   designates (userSpans) and the arguments of commands that may name one (userArguments).
  */
-import { codePointLength, escapeRegex, WS_BODY } from '#src/lib/text.ts';
 import { firstWord } from '#src/telegram/conversation/commands.ts';
 import { type BotDialect, type Compatible } from '#src/telegram/conversation/dialect.ts';
 import { classify, producersOf } from './classify.ts';
 import { pakkomonUserSpans } from './pakkomon.ts';
-import { ANONYMOUS_RE, D, GIFT, GIVE, rx, W } from './patterns.ts';
+import { ANONYMOUS_RE, GIFT, GIVE, rx, W } from './patterns.ts';
+import { replyNormalizer } from './titles.ts';
 import { type Event, type EventType } from './types.ts';
 
 /** Which commands can produce each reply type (used to pair replies in groups). */
@@ -77,47 +77,7 @@ export function commandFamily(ev: Event): ReadonlySet<string> | null {
 /** Commands that can have produced this reply, or null when any could have; the reply type is classify()'s without a command. */
 export const compatibleCommands: Compatible = (text) => commandFamily(classify(text, null));
 
-// ---- addressing and titles ----------------------------------------------------------
-
-// Players can earn a title, which the bot prints after the username:
-// "@lucia_b il cartografo, mostri...", "dai 1x ... a @x il fornaio". Titles are
-// learned from the comma form and removed before classification, so that the
-// no-comma replies ("@x il cartografo un secchio di fango [C] al momento...") parse too.
-const NOT_WS_COMMA_PAREN = `[^${WS_BODY},()]`;
-const TITLE_SHAPE = rx(
-  `@${W}+ ((?:il|lo|la|l'|i|gli|le) ?${NOT_WS_COMMA_PAREN}+(?: ${NOT_WS_COMMA_PAREN}+){0,2})(?=,| \\(${D}+\\))`,
-  'g'
-);
-
-/** Titles seen at least `minCount` times, longest first (ties in order of first appearance). */
-export function learnTitles(texts: Iterable<string>, minCount = 2): string[] {
-  const c = new Map<string, number>();
-  for (const text of texts) {
-    for (const m of text.matchAll(TITLE_SHAPE)) {
-      const t = m[1] as string;
-      c.set(t, (c.get(t) ?? 0) + 1);
-    }
-  }
-  return [...c]
-    .filter(([, n]) => n >= minCount)
-    .map(([t]) => t)
-    .sort((a, b) => codePointLength(b) - codePointLength(a));
-}
-
-export function titleStripper(titles: readonly string[]): (text: string) => string {
-  if (titles.length === 0) return (text) => text;
-  const alt = titles.map(escapeRegex).join('|');
-  // The end of a line: before any newline or at the end of the text.
-  const re = rx(`(@${W}+) (?:${alt})(?: \\(${D}+\\))?(?=[ ,]|\\n|(?![\\s\\S]))`, 'g');
-  return (text) => text.replace(re, '$1');
-}
-
-/** The game's admin is addressed as "Sua Maestà @msx80, ...", also in /stats ("Avventuriero Sua Maestà @msx80"). */
-const SUA_MAESTA = rx('^(Avventuriero )?Sua Maestà (?=@)');
-
-export function stripSuaMaesta(text: string): string {
-  return text.replace(SUA_MAESTA, '$1');
-}
+// ---- addressing ------------------------------------------------------------------------
 
 const PLAYER = rx(`^(?:Complimenti |Avventuriero |ciao |Inventario di )?@(${W}+)`);
 
@@ -135,12 +95,6 @@ export function broadcastText(text: string): string | null {
   const b = BROADCAST.exec(text);
   if (b === null) return null;
   return b[1] === 'W' ? text.slice(b[0].length) : text;
-}
-
-/** The text of a bot reply as the classifiers read it: titles (titleStripper) and "Sua Maestà" removed. */
-export function replyNormalizer(titles: readonly string[]): (text: string) => string {
-  const stripTitles = titleStripper(titles);
-  return (text) => stripSuaMaesta(stripTitles(text));
 }
 
 /** A group reply answers a command sent at most this long before it (seconds). */

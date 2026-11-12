@@ -37,9 +37,10 @@ import {
   WS_CLASS,
 } from '#src/lib/text.ts';
 import { INVENTORY_COMMANDS, INVENTORY_LIST_COMMANDS, useItems, useTakes } from './classify.ts';
+import { resolveDrop } from './drops.ts';
 import { placeLevels } from './levels.ts';
 import { PAKKOMON, USE_ROLES, wikiItemName } from './pakkomon.ts';
-import { itemName, parseDuration, stripAddr } from './patterns.ts';
+import { parseDuration, stripAddr } from './patterns.ts';
 import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
 import {
@@ -1134,25 +1135,13 @@ function statsField(e: BuildEvent, key: string): string | undefined {
   return typeof v === 'string' ? v : undefined;
 }
 
+/**
+ * The item of each adventure drop (drops.ts): first those that end with a known item, which teach
+ * the sentence prefixes; then the others, by the longest prefix seen, or reported.
+ */
 function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
-  // Longest first (code points); equal lengths keep insertion order (stable sort).
-  const byLength = (xs: Iterable<string>): string[] =>
-    [...xs]
-      .map((n) => ({ n, len: codePointLength(n) }))
-      .sort((a, b) => b.len - a.len)
-      .map((x) => x.n);
-  const names = new Set(kb.items.keys());
-  // The longest known name that ends `raw` after a space or a line break, or is all of it.
-  const knownSuffix = (raw: string): string | undefined => {
-    for (let i = -1; ;) {
-      const n = raw.slice(i + 1);
-      if (names.has(n)) return n;
-      i = raw.slice(i + 1).search(/[ \n]/u);
-      if (i < 0) return undefined;
-      i += raw.length - n.length;
-    }
-  };
-  const templates = new Set<string>(); // the use templates seen
+  const items = new Set(kb.items.keys());
+  const prefixes = new Set<string>(); // the sentence prefixes seen before a known item
   const pending: [Drop, string | null][] = [];
 
   const record = (e: Drop, loc: string | null, name: string): void => {
@@ -1173,25 +1162,22 @@ function resolveDrops(kb: KB, drops: readonly [Drop, string | null][]): void {
       record(e, loc, e.item);
       continue;
     }
-    const raw = e.raw;
-    const name = knownSuffix(raw);
-    // Below, an empty name or prefix counts as not found.
-    if (truthy(name)) {
-      templates.add(raw.slice(0, raw.length - name.length));
-      record(e, loc, name);
+    const found = resolveDrop(e.raw, { items, prefixes: [] });
+    if (found !== null) {
+      prefixes.add(found.prefix);
+      record(e, loc, found.item);
     } else {
       pending.push([e, loc]);
     }
   }
   kb.event = null;
-  // Unknown items: strip the longest flavour prefix already seen with a known item.
-  const tpl = byLength(templates);
+  // Unknown items: what follows the longest prefix seen with a known item.
   for (const [e, loc] of pending) {
     kb.now = e.date;
     kb.event = e;
     const raw = (e as Extract<Drop, { kind: 'adventure' }>).raw;
-    const pre = tpl.find((p) => raw.startsWith(p) && raw.length > p.length);
-    if (truthy(pre)) record(e, loc, itemName(raw.slice(pre.length)));
+    const found = resolveDrop(raw, { items, prefixes });
+    if (found !== null) record(e, loc, found.item);
     else kb.addReport({ kind: 'unresolved_drop', text: raw });
   }
   kb.event = null;

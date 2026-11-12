@@ -5,7 +5,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stripSuaMaesta, titleStripper } from '#src/inventorybot/dialect.ts';
+import { stripSuaMaesta, titleStripper } from '#src/inventorybot/titles.ts';
 import { parseDecimalInt, stripWs, WORD_BODY, WS_BODY } from '#src/lib/text.ts';
 
 /** Repository root (the parent of test/). */
