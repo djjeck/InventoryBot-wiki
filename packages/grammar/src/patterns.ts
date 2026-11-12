@@ -9,7 +9,7 @@
  * Unicode decimal digit (`\p{Nd}`), `.` is DOT (anything but `\n`) and the end of a
  * reply is END (the end, or before a final newline). Grammars: docs/bot-protocol.md.
  */
-import { parseDecimalInt, stripWs, WORD_CLASS, WS_CLASS } from '#src/lib/text.ts';
+import { parseDecimalInt, stripWs, WORD_CLASS, WS_CLASS } from './lib/text.ts';
 
 export const W = WORD_CLASS;
 export const S = WS_CLASS;

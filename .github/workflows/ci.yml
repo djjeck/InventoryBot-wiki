@@ -41,6 +41,9 @@ jobs:
       - name: Check game content
         run: npm run check:universe
 
+      - name: Check the grammar module's version
+        run: npm run check:grammar
+
       - name: Typecheck
         run: npm run typecheck
 

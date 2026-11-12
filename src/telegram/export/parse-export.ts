@@ -11,6 +11,13 @@
  * on disk is export-files.ts.
  */
 import {
+  compareCodePoints,
+  parseDecimalInt,
+  stripWs,
+  WORD_CLASS,
+  WS_CLASS,
+} from '@inventorybot-wiki/grammar/lib/text.ts';
+import {
   formatOffset,
   isTimeZone,
   parseWindowsDate,
@@ -20,13 +27,6 @@ import {
   type ZonedDate,
 } from '#src/lib/dates.ts';
 import { pathName } from '#src/lib/paths.ts';
-import {
-  compareCodePoints,
-  parseDecimalInt,
-  stripWs,
-  WORD_CLASS,
-  WS_CLASS,
-} from '#src/lib/text.ts';
 import { type BotIdentity } from '#src/telegram/bot.ts';
 import { type Message } from '#src/telegram/messages.ts';
 import { type Attrs, feedHtml, type HtmlEvents } from './html-events.ts';

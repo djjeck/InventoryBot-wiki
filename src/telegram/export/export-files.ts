@@ -8,9 +8,9 @@
  * point order) and do not follow symlinked folders. A folder comes before its
  * subfolders, which are visited in name order: the same order as comparePaths.
  */
+import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
 import * as fs from 'node:fs';
 import { normalizePath, pathSuffix } from '#src/lib/paths.ts';
-import { compareCodePoints } from '#src/lib/text.ts';
 import { type Message, type Page } from '#src/telegram/messages.ts';
 import {
   decodeText,

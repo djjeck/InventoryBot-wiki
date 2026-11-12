@@ -6,11 +6,11 @@
  * a quantity with or without a space after the tags, an emoji before a header or not.
  * Pure logic, no Node APIs.
  */
-import { stripWs } from '#src/lib/text.ts';
+import { stripWs } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { D, DOT, rx, S } from '@inventorybot-wiki/grammar/patterns.ts';
+import { placeName } from '@inventorybot-wiki/grammar/places.ts';
 import { type Message } from '#src/telegram/messages.ts';
 import { ATLANTE, CHANNEL_TITLES, CITTADELLA, GRIMORIO } from './bot.ts';
-import { D, DOT, rx, S } from './patterns.ts';
-import { placeName } from './places.ts';
 import {
   type EventRecord,
   type ItemCardEvent,

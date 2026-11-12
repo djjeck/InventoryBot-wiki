@@ -1,9 +1,9 @@
 /** classify.ts: what each bot reply is read as (docs/bot-protocol.md). */
+import { classify, itemFromLine, itemLines } from '@inventorybot-wiki/grammar/classify.ts';
 import { describe, expect, it } from 'vitest';
 import { BOT, Chat, tgDate } from '#test/helpers.ts';
 import { byType, runExtract } from '#test/interpret.ts';
 import * as T from '#test/texts.ts';
-import { classify, itemFromLine, itemLines } from './classify.ts';
 import { compatibleCommands, playerOf } from './dialect.ts';
 import { type ItemLine } from './types.ts';
 
