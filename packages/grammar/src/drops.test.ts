@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveDrop } from './drops.ts';
+import { guessDropItem, resolveDrop } from './drops.ts';
 
 const known = (items: string[], prefixes: string[] = []) => ({ items: new Set(items), prefixes });
 
@@ -59,5 +59,26 @@ describe('resolveDrop', () => {
 
   it('nothing_known', () => {
     expect(resolveDrop('sulla spiaggia raccogli una conchiglia', known([]))).toBeNull();
+  });
+});
+
+describe('guessDropItem', () => {
+  it('what_follows_the_last_indefinite_article', () => {
+    expect(guessDropItem("dopo un'ora di cammino sulla spiaggia raccogli una conchiglia")).toBe(
+      'una conchiglia'
+    );
+    expect(guessDropItem('nel bosco uno gnomo ti lancia un dado di legno')).toBe(
+      'un dado di legno'
+    );
+    expect(guessDropItem("nel fango trovi un'ancora")).toBe("un'ancora");
+    expect(guessDropItem('nel bosco\nuno gnomo dorme')).toBe('uno gnomo dorme');
+  });
+
+  it('only_at_the_start_of_a_word', () => {
+    expect(guessDropItem('in fondo al lago brilla qualcosa')).toBe(
+      'in fondo al lago brilla qualcosa'
+    );
+    expect(guessDropItem('un sasso')).toBe('un sasso');
+    expect(guessDropItem('al tramonto vedi lo stecchino di un gelato')).toBe('un gelato');
   });
 });

@@ -306,14 +306,16 @@ Complimenti @mario_r, questa e' l'avventura FORTUNATA del giorno! Hai vinto: una
 
 ### 6.3 Adventure cooldown
 
-`/avventura` less than 15 minutes after the previous one. Not addressed.
+`/avventura` less than 15 minutes after the previous one. Not addressed. The event keeps the wait,
+in seconds (`remaining`), and the seconds of its smallest unit (`precision`), when the reply states
+it in this form.
 
 ```text
 COOLDOWN = "Troppo presto, devi riposare ancora per" SP WAIT SP "prima di poterti avventurare di nuovo. Nelle /faq puoi trovare gruppi per scambiare oggetti e giocare con altri utenti! :P" EOT
 WAIT     = INT " minuti e " INT " secondi" | INT " secondi" | INT " minuti"
 ```
 
-```bot-reply type=cooldown query="/avventura" addressee=null
+```bot-reply type=cooldown query="/avventura" remaining=569 precision=1 addressee=null
 Troppo presto, devi riposare ancora per 9 minuti e 29 secondi prima di poterti avventurare di nuovo. Nelle /faq puoi trovare gruppi per scambiare oggetti e giocare con altri utenti! :P
 ```
 

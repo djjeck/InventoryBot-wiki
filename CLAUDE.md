@@ -348,6 +348,9 @@ contract for everyone outside this repository:
   follows the longest sentence prefix of `known.prefixes` that starts it. `prefix` is the narrative
   before the item, for the caller to learn. Phase 5 resolves every drop of a run with this same
   function, after learning the items and prefixes from all of them (`resolveDrops` in `build.ts`);
+- `guessDropItem(raw)`: a guess at the item of a drop `resolveDrop` cannot resolve, for a caller
+  that must name it at once (what follows the last indefinite article, else all of `raw`); the wiki
+  never guesses, it reports such a drop, and nothing should be learned from a guess;
 - `Knowledge` (`items`, `prefixes`, optional `titles`), `DropKnowledge` and `DropResolution`.
 
 What the entry exports keeps its meaning within a major version of the module (`version` in

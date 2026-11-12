@@ -775,6 +775,16 @@ describe('noise', () => {
     expect(classify('Troppo presto! Riprova tra 5 minuti', null)).toStrictEqual({
       type: 'cooldown',
     });
+    // The wait, as 6.3 writes it, with or without the sentence after it.
+    expect(
+      ['2 minuti', '40 secondi prima di poterti avventurare di nuovo.', 'un po'].map((w) =>
+        classify(`Troppo presto, devi riposare ancora per ${w}`, null)
+      )
+    ).toStrictEqual([
+      { type: 'cooldown', remaining: 120, precision: 60 },
+      { type: 'cooldown', remaining: 40, precision: 1 },
+      { type: 'cooldown' },
+    ]);
     expect(classify('Il bot sta dormendo', null)).toStrictEqual({ type: 'unknown' });
   });
 

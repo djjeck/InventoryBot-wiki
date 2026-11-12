@@ -27,6 +27,10 @@ export interface RecipeListEntry {
 /** "Troppo presto...": adventure cooldown. */
 export interface CooldownEvent {
   type: 'cooldown';
+  /** The wait before the next adventure, in seconds; present when the reply states it (6.3). */
+  remaining?: number;
+  /** Seconds of the smallest unit the wait shows (1, 60, 3600 or 86400), with `remaining`. */
+  precision?: number;
 }
 
 /** "<item> deve raffreddarsi ancora per DURATION prima di poterlo usare / dare in giro": an item still cooling down. */

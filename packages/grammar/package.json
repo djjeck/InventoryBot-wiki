@@ -1,6 +1,6 @@
 {
   "name": "@inventorybot-wiki/grammar",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "InventoryBot's reply grammar: the classifier of the wiki, as a MegaBotTron1999 library module",
   "license": "MIT",
