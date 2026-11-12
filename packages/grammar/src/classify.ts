@@ -10,13 +10,7 @@
  *
  * Pure logic only (no Node APIs). Regular expressions follow patterns.ts.
  */
-import {
-  parseDecimalInt,
-  sliceCodePoints,
-  stripStartWs,
-  stripWs,
-  WORD_BODY,
-} from '#src/lib/text.ts';
+import { parseDecimalInt, sliceCodePoints, stripStartWs, stripWs, WORD_BODY } from './lib/text.ts';
 import { pakkomonFight, pakkomonRecord, pakkomonStatus, pakkomonUse } from './pakkomon.ts';
 import {
   A,

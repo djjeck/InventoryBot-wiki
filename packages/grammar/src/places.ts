@@ -5,7 +5,7 @@
  * articulated preposition at the start (nel, sul, al and their forms) becomes its
  * article, so every source names a place the same way. Pure logic, no Node APIs.
  */
-import { WS_CLASS } from '#src/lib/text.ts';
+import { WS_CLASS } from './lib/text.ts';
 
 /** Articulated preposition -> its article (the `nel`, `sul` and `al` families). */
 const ARTICLES: ReadonlyMap<string, string> = new Map(

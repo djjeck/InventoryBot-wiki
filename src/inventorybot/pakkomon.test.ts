@@ -1,7 +1,7 @@
+import { classify } from '@inventorybot-wiki/grammar/classify.ts';
+import { ENDINGS, pakkomonUserSpans, WOUNDS } from '@inventorybot-wiki/grammar/pakkomon.ts';
 import { describe, expect, it } from 'vitest';
-import { classify } from './classify.ts';
 import { compatibleCommands, userSpans } from './dialect.ts';
-import { ENDINGS, pakkomonUserSpans, WOUNDS } from './pakkomon.ts';
 
 const spanned = (t: string): string[] => userSpans(t).map(([a, b]) => t.slice(a, b));
 

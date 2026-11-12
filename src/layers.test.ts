@@ -1,7 +1,8 @@
 /**
  * The generic Telegram-bot layer (`src/telegram/`, `src/lib/`) must stay reusable for any
- * bot: none of its files may import from the InventoryBot layer (`src/inventorybot/`) or
- * from the code that wires the two (`src/pipeline.ts`, `src/web/`). Its tests may also import the
+ * bot: none of its files may import from the InventoryBot layer (`src/inventorybot/`, and the
+ * grammar package but its text helpers) or from the code that wires the two
+ * (`src/pipeline.ts`, `src/web/`). Its tests may also import the
  * test helpers (`test/`). Reads only `src/`.
  */
 import * as fs from 'node:fs';
@@ -12,6 +13,8 @@ import { describe, expect, it } from 'vitest';
 const SRC = path.dirname(fileURLToPath(import.meta.url));
 const GENERIC = ['telegram', 'lib'].map((d) => path.join(SRC, d));
 const TEST = path.join(SRC, '..', 'test');
+/** The one file of the grammar package the generic layer may import. */
+const TEXT_HELPERS = '@inventorybot-wiki/grammar/lib/text.ts';
 
 function tsFiles(dir: string): string[] {
   return fs
@@ -56,7 +59,13 @@ describe('layers', () => {
           : spec.startsWith('.')
             ? path.resolve(path.dirname(file), spec)
             : null;
-        if (target === null) continue;
+        // The workspace's own packages are InventoryBot's: only the grammar's text helpers,
+        // which know nothing of the game, are allowed (CLAUDE.md, "The grammar module").
+        if (target === null) {
+          if (spec.startsWith('@inventorybot-wiki/') && spec !== TEXT_HELPERS)
+            bad.push(`${path.relative(SRC, file)} -> ${spec}`);
+          continue;
+        }
         if (file.endsWith('.test.ts') && isInside(target, TEST)) continue;
         if (!GENERIC.some((dir) => isInside(target, dir)))
           bad.push(`${path.relative(SRC, file)} -> ${spec}`);

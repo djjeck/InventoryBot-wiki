@@ -1,4 +1,6 @@
 /** build.ts: merging events into the wiki (phase 5). */
+import { classify } from '@inventorybot-wiki/grammar/classify.ts';
+import { placeName } from '@inventorybot-wiki/grammar/places.ts';
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
@@ -17,8 +19,6 @@ import {
   useCandidates,
   useTemplate,
 } from './build.ts';
-import { classify } from './classify.ts';
-import { placeName } from './places.ts';
 import { type BuildEvent } from './types.ts';
 
 /** A place's key in the wiki: its article form. */

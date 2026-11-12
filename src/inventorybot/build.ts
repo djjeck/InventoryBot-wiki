@@ -23,7 +23,13 @@
  * a minimum keeps the first of equal candidates, dates are compared as instants, and
  * report entries print in one fixed form (formatReportEntry).
  */
-import { formatIso, isoDateSeconds, localNowIso, parseWindowsDate } from '#src/lib/dates.ts';
+import {
+  INVENTORY_COMMANDS,
+  INVENTORY_LIST_COMMANDS,
+  useItems,
+  useTakes,
+} from '@inventorybot-wiki/grammar/classify.ts';
+import { resolveDrop } from '@inventorybot-wiki/grammar/drops.ts';
 import {
   codePointLength,
   compareCodePoints,
@@ -35,13 +41,13 @@ import {
   stripWs,
   WORD_BODY,
   WS_CLASS,
-} from '#src/lib/text.ts';
-import { INVENTORY_COMMANDS, INVENTORY_LIST_COMMANDS, useItems, useTakes } from './classify.ts';
-import { resolveDrop } from './drops.ts';
+} from '@inventorybot-wiki/grammar/lib/text.ts';
+import { PAKKOMON, USE_ROLES, wikiItemName } from '@inventorybot-wiki/grammar/pakkomon.ts';
+import { parseDuration, stripAddr } from '@inventorybot-wiki/grammar/patterns.ts';
+import { placeLabel, placeName } from '@inventorybot-wiki/grammar/places.ts';
+import { SHAPED_AS } from '@inventorybot-wiki/grammar/shapes.ts';
+import { formatIso, isoDateSeconds, localNowIso, parseWindowsDate } from '#src/lib/dates.ts';
 import { placeLevels } from './levels.ts';
-import { PAKKOMON, USE_ROLES, wikiItemName } from './pakkomon.ts';
-import { parseDuration, stripAddr } from './patterns.ts';
-import { placeLabel, placeName } from './places.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
 import {
   type BuildEvent,
@@ -59,7 +65,7 @@ import {
   type WikiReward,
   type WikiTrivia,
 } from './types.ts';
-import { SHAPED_AS, useShapes } from './use-shapes.ts';
+import { useShapes } from './use-shapes.ts';
 
 /** Whether an optional string is present and non-empty. */
 const truthy = (s: string | null | undefined): s is string =>

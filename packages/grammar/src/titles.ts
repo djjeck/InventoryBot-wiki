@@ -5,7 +5,7 @@
  * (learnTitles); replyNormalizer removes those given. Pure logic only, for the dialect (phase 2)
  * and for the module's `normalizeReply`.
  */
-import { codePointLength, escapeRegex, WS_BODY } from '#src/lib/text.ts';
+import { codePointLength, escapeRegex, WS_BODY } from './lib/text.ts';
 import { D, rx, W } from './patterns.ts';
 
 // Players can earn a title, which the bot prints after the username:

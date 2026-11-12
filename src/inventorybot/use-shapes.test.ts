@@ -1,6 +1,6 @@
 /** The shapes of an item's /usa replies (use-shapes.ts). Synthetic replies only. */
 import { describe, expect, it } from 'vitest';
-import { unshaped, useShapes } from './use-shapes.ts';
+import { useShapes } from './use-shapes.ts';
 
 const NAMES = {
   items: [
@@ -114,11 +114,6 @@ describe('use shapes', () => {
     expect(
       useShapes(['gli dai la forma di un dado truccato', 'gli dai la forma di un drago'], NAMES)
     ).toStrictEqual([{ parts: ['gli dai la forma di ', 0], count: 2, slots: [{ kind: 'text' }] }]);
-  });
-
-  it('a_shaped_item_is_the_item_shaped', () => {
-    expect(unshaped("un po' di creta modellato a forma di un drago")).toBe("un po' di creta");
-    expect(unshaped("un po' di creta")).toBe("un po' di creta");
   });
 
   it('durations_places_pakkomon_symbols_and_lists_are_slots', () => {

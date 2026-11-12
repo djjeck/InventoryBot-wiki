@@ -50,10 +50,11 @@
  *
  * Pure logic only (no Node APIs).
  */
+import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { PAKKOMON } from '@inventorybot-wiki/grammar/pakkomon.ts';
+import { shapeGiven, shapeOf, unshaped } from '@inventorybot-wiki/grammar/shapes.ts';
 import { isoDateSeconds } from '#src/lib/dates.ts';
-import { compareCodePoints } from '#src/lib/text.ts';
 import { instant, inventoryScope, isFailedUse, isMine, type KB, queryArg } from './build.ts';
-import { PAKKOMON } from './pakkomon.ts';
 import { ownerPakkomon, pakkomonOf } from './player-pakkomon.ts';
 import {
   type BuildEvent,
@@ -62,7 +63,6 @@ import {
   type PlayerShape,
   type PlayerState,
 } from './types.ts';
-import { shapeGiven, shapeOf, unshaped } from './use-shapes.ts';
 
 export class Holdings {
   /** name -> holding, in order of first observation. */

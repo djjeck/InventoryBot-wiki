@@ -10,7 +10,7 @@
  *
  * Pure logic only (no Node APIs).
  */
-import { compareCodePoints } from '#src/lib/text.ts';
+import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
 import { type WikiItem, type WikiLocation, type WikiRecipe } from './types.ts';
 
 /** A place's level, and what sets it: an item it requires, or the place it is reached through. */

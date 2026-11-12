@@ -4,7 +4,7 @@
  * a Pakkomon. Also the game's rule that a fight's ending phrase states the loser's stun
  * (ENDINGS). Part of phase 4, wired into classify.ts. Pure logic only (no Node APIs).
  */
-import { parseDecimalInt, stripWs } from '#src/lib/text.ts';
+import { parseDecimalInt, stripWs } from './lib/text.ts';
 import {
   A,
   ADDR_RE,
@@ -19,6 +19,7 @@ import {
   stripAddr,
   W,
 } from './patterns.ts';
+import { unshaped } from './shapes.ts';
 import {
   type Event,
   type ItemLine,
@@ -29,7 +30,6 @@ import {
   type PakkomonUse,
   type UseEvent,
 } from './types.ts';
-import { unshaped } from './use-shapes.ts';
 
 type Groups = Record<string, string | undefined>;
 const groups = (m: RegExpExecArray): Groups => m.groups ?? {};

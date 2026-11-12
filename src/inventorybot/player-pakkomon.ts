@@ -10,10 +10,10 @@
  *
  * Called after build() (it reads the use event's `used_item`). Pure logic only (no Node APIs).
  */
+import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { pakkomonItem } from '@inventorybot-wiki/grammar/pakkomon.ts';
 import { isoPlusSeconds } from '#src/lib/dates.ts';
-import { compareCodePoints } from '#src/lib/text.ts';
 import { instant, isMine, nameKey } from './build.ts';
-import { pakkomonItem } from './pakkomon.ts';
 import { type BuildEvent, type PlayerPakkomon } from './types.ts';
 
 const PREFIX = pakkomonItem('');

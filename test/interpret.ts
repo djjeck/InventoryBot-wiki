@@ -4,9 +4,9 @@
  * interpretation. Phase 3 is skipped, so that the tests read the synthetic names. No vitest
  * imports here.
  */
+import { learnTitles } from '@inventorybot-wiki/grammar/titles.ts';
 import { inventoryBotDialect } from '#src/inventorybot/dialect.ts';
 import { interpretationReport, interpretReplies } from '#src/inventorybot/extract.ts';
-import { learnTitles } from '#src/inventorybot/titles.ts';
 import { type EventRecord } from '#src/inventorybot/types.ts';
 import { matchReportLines, readConversation } from '#src/telegram/conversation/conversation.ts';
 import { type Message } from '#src/telegram/messages.ts';

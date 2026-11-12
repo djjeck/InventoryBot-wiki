@@ -10,13 +10,14 @@
  * An ending condition that needs the user (no owner) is returned, not reported: the front
  * end words it for its own way of asking.
  */
+import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { learnTitles } from '@inventorybot-wiki/grammar/titles.ts';
 import { INVENTORY_BOT } from './inventorybot/bot.ts';
 import { build, reportLines, toJson } from './inventorybot/build.ts';
 import { isChannelPost, readChannelPosts } from './inventorybot/channels.ts';
 import { inventoryBotDialect } from './inventorybot/dialect.ts';
 import { interpretationReport, interpretReplies } from './inventorybot/extract.ts';
 import { playerState } from './inventorybot/player.ts';
-import { learnTitles } from './inventorybot/titles.ts';
 import {
   type BuildEvent,
   type EventRecord,
@@ -24,7 +25,6 @@ import {
   type Wiki,
 } from './inventorybot/types.ts';
 import { windowsDateSeconds } from './lib/dates.ts';
-import { compareCodePoints } from './lib/text.ts';
 import { anonymise } from './telegram/anonymise/anonymise.ts';
 import {
   type Conversation,

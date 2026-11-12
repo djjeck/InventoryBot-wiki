@@ -1,3 +1,4 @@
+import { learnTitles } from '@inventorybot-wiki/grammar/titles.ts';
 import { describe, expect, it } from 'vitest';
 import { readConversation } from '#src/telegram/conversation/conversation.ts';
 import { BOT, Chat } from '#test/helpers.ts';
@@ -8,7 +9,6 @@ import {
   playerOf,
   userSpans,
 } from './dialect.ts';
-import { learnTitles } from './titles.ts';
 
 describe('addressee', () => {
   it('forms', () => {

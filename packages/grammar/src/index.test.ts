@@ -59,7 +59,6 @@ describe('the module', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'module.json'), 'utf-8')) as {
     provides: string;
     plugins: string[];
-    files: string[];
   };
 
   /** Every module Node loads to import the entry, as it runs it: files by their paths, others as named. */
@@ -82,19 +81,22 @@ describe('the module', () => {
   it('is_a_library_whose_entry_is_this_file', () => {
     expect(manifest.plugins).toStrictEqual([]);
     expect(manifest.provides).toBe('@inventorybot-wiki/grammar');
-    // `<provides>` alone is src/index.ts; its `#src/*` imports need the package.json shipped.
     const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf-8')) as {
-      imports: Record<string, string>;
+      name: string;
+      exports: Record<string, string>;
     };
-    expect(pkg.imports['#src/*']).toBe('./src/*');
+    // The workspace resolves the name as MegaBotTron1999 does: `<provides>` is src/index.ts.
+    expect([pkg.name, pkg.exports['.'], pkg.exports['./*']]).toStrictEqual([
+      manifest.provides,
+      './src/index.ts',
+      './src/*',
+    ]);
   });
 
-  it('ships_exactly_what_its_entry_loads', () => {
-    // No npm package nor Node API: only files of src/, each of them listed in `files`.
-    expect(manifest.files.filter((f) => f.startsWith('src/')).sort()).toStrictEqual(loaded());
-    expect(manifest.files.filter((f) => !f.startsWith('src/'))).toStrictEqual([
-      'LICENSE',
-      'package.json',
-    ]);
+  it('its_entry_loads_only_its_own_sources', () => {
+    // No npm package, no Node API, nothing outside the package: only files of its src/.
+    const files = loaded();
+    expect(files.length).toBeGreaterThan(1);
+    expect(files.filter((f) => !/^src\/[\w/.-]+\.ts$/u.test(f))).toStrictEqual([]);
   });
 });

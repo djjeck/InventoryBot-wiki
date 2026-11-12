@@ -48,8 +48,8 @@ export default tseslint.config(
   },
   {
     // Production code never depends on test code, so it can be shipped without it.
-    files: ['src/**/*.ts'],
-    ignores: ['src/**/*.test.ts'],
+    files: ['src/**/*.ts', 'packages/*/src/**/*.ts'],
+    ignores: ['src/**/*.test.ts', 'packages/*/src/**/*.test.ts'],
     rules: {
       'no-restricted-imports': [
         'error',

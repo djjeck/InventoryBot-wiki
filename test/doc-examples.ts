@@ -2,11 +2,16 @@
  * The `bot-reply` example blocks of docs/bot-protocol.md (convention in its section 8).
  * No vitest imports here.
  */
+import {
+  parseDecimalInt,
+  stripWs,
+  WORD_BODY,
+  WS_BODY,
+} from '@inventorybot-wiki/grammar/lib/text.ts';
+import { stripSuaMaesta, titleStripper } from '@inventorybot-wiki/grammar/titles.ts';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stripSuaMaesta, titleStripper } from '#src/inventorybot/titles.ts';
-import { parseDecimalInt, stripWs, WORD_BODY, WS_BODY } from '#src/lib/text.ts';
 
 /** Repository root (the parent of test/). */
 export const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

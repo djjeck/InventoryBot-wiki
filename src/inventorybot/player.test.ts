@@ -1,9 +1,9 @@
 /** player.ts: the export owner's personal state (phase 5). */
+import { placeName } from '@inventorybot-wiki/grammar/places.ts';
 import { describe, expect, it } from 'vitest';
 import { ev, type EvOptions, runBuild } from '#test/build.ts';
 import * as T from '#test/texts.ts';
 import { iso } from './build.ts';
-import { placeName } from './places.ts';
 import { Holdings, renamed, sameTransfer } from './player.ts';
 import { type BuildEvent, type PlayerState } from './types.ts';
 

@@ -13,10 +13,10 @@
  * titles it resolves against are the caller's (`Knowledge`), as the repository holds no real game
  * content. Pure logic only: no Node APIs, no npm packages.
  */
-import { classify } from './inventorybot/classify.ts';
-import { type DropKnowledge, type DropResolution, resolveDrop } from './inventorybot/drops.ts';
-import { replyNormalizer } from './inventorybot/titles.ts';
+import { classify } from './classify.ts';
+import { type DropKnowledge, type DropResolution, resolveDrop } from './drops.ts';
 import { codePointLength } from './lib/text.ts';
+import { replyNormalizer } from './titles.ts';
 
 export type {
   AdventureDropEvent,
@@ -59,7 +59,7 @@ export type {
   TravelRequirementEvent,
   UnknownEvent,
   UseEvent,
-} from './inventorybot/types.ts';
+} from './types.ts';
 export { classify, type DropKnowledge, type DropResolution, resolveDrop };
 
 /** What the caller knows of the game, which the module never ships. */
