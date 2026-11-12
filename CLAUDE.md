@@ -360,6 +360,20 @@ repository"). The folder is the module: MegaBotTron1999 installs all its files b
 `packages/grammar/src/index.test.ts` runs the entry in Node and fails if it loads anything but the
 package's own sources: no npm package, no Node API, nothing outside the folder.
 
+**Versions.** Any change to a file the module ships (all of `packages/grammar/` but its tests) gives
+it a new version, in its `module.json` and its `package.json` alike, since MegaBotTron1999 offers an
+update for a new commit whatever it holds, and the version is all the owner sees of it. Against the
+entry's contract: a patch for a change that keeps every export's meaning (a fix, a reply form newly
+read, a refactor, internal files), a minor version for an addition to the entry (a new export, a new
+event type or field, an optional parameter), a major version for anything that breaks a caller (an
+export removed or renamed, a meaning or a type changed). `packages/grammar/module.lock.json` records
+the version and a hash of the files shipped (`scripts/grammar-lock.ts`: each path, sorted, with the
+SHA-256 of its contents; the lock left out of its own hash, and only the files git tracks or would
+track counted). `npm run check:grammar`, run by `validate`, `ci` and GitHub CI, fails when that hash
+changed and the version did not, when the two versions differ, or when the lock was not stamped
+after a bump; after bumping, `npm run grammar:stamp` writes the lock, and refuses while the version
+is the one it records. A change to tests only changes nothing.
+
 ## Data rules
 
 - **The wiki is objective.** It holds only facts about the game, the same for every player. Anything
