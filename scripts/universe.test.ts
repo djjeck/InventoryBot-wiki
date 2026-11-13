@@ -120,6 +120,19 @@ describe('unknownEntities', () => {
   it('item_tuples_of_the_reply_builders', () => {
     const text = "T.inventory([['un sasso', 'C', 1], [\"una mela\", null, 2, true]])";
     expect(unknownEntities(text, U).map((x) => x.text)).toStrictEqual(['una mela']);
+    // A name with an apostrophe: in double quotes, escaped in single quotes, or in backticks.
+    const apostrophes = [
+      `[["una chiave d'ottone", 'X', 3]]`,
+      "[['una chiave d\\'ottone', 'X', 3]]",
+      '[[`una chiave d\'ottone`, "X", 3]]',
+    ];
+    for (const t of apostrophes)
+      expect(
+        unknownEntities(t, U).map((x) => [x.kind, normalizeName(x.text)]),
+        t
+      ).toStrictEqual([['item', "una chiave d'ottone"]]);
+    expect(unknownEntities(`[["una moneta d'oro", 'X', 3]]`, U)).toStrictEqual([]);
+    expect(unknownEntities("[['una moneta d\\'oro', 'X', 3]]", U)).toStrictEqual([]);
     // Expected values shaped like a tuple, without a quantity, are not items.
     expect(unknownEntities("[['cooldown', null, 'dissolved']]", U)).toStrictEqual([]);
     expect(unknownEntities('Ottieni: un sasso [C] [usabile]!', U)).toStrictEqual([]);
