@@ -28,8 +28,8 @@ import {
   INVENTORY_LIST_COMMANDS,
   useItems,
   useTakes,
-} from '@inventorybot-wiki/grammar/classify.ts';
-import { resolveDrop } from '@inventorybot-wiki/grammar/drops.ts';
+} from '@inventorybottron/grammar/classify.ts';
+import { resolveDrop } from '@inventorybottron/grammar/drops.ts';
 import {
   codePointLength,
   compareCodePoints,
@@ -41,11 +41,11 @@ import {
   stripWs,
   WORD_BODY,
   WS_CLASS,
-} from '@inventorybot-wiki/grammar/lib/text.ts';
-import { PAKKOMON, USE_ROLES, wikiItemName } from '@inventorybot-wiki/grammar/pakkomon.ts';
-import { parseDuration, stripAddr } from '@inventorybot-wiki/grammar/patterns.ts';
-import { placeLabel, placeName } from '@inventorybot-wiki/grammar/places.ts';
-import { SHAPED_AS } from '@inventorybot-wiki/grammar/shapes.ts';
+} from '@inventorybottron/grammar/lib/text.ts';
+import { PAKKOMON, USE_ROLES, wikiItemName } from '@inventorybottron/grammar/pakkomon.ts';
+import { parseDuration, stripAddr } from '@inventorybottron/grammar/patterns.ts';
+import { placeLabel, placeName } from '@inventorybottron/grammar/places.ts';
+import { SHAPED_AS } from '@inventorybottron/grammar/shapes.ts';
 import { formatIso, isoDateSeconds, localNowIso, parseWindowsDate } from '#src/lib/dates.ts';
 import { placeLevels } from './levels.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
@@ -168,7 +168,8 @@ export function inventoryScope(
 }
 
 // ---- the rarity system ----------------------------------------------------------------
-// Every item carries a rarity code (docs/bot-protocol.md §2.2). The game's rules for it are
+// Every item carries a rarity code (InventoryBotTron's docs/bot-protocol.md §2.2,
+// https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md). The game's rules for it are
 // stated here rather than read from the bot's /faq, whose wording would change with them.
 
 /**

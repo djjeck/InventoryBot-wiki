@@ -2,7 +2,7 @@
  * Commands as the conversation phase sees them. Generic: the bot is a parameter, never a
  * constant here. Pure functions, no Node APIs.
  */
-import { splitWords, WORD_CLASS } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { splitWords, WORD_CLASS } from '@inventorybottron/grammar/lib/text.ts';
 import { type Message } from '#src/telegram/messages.ts';
 
 /**

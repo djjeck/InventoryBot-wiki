@@ -15,9 +15,9 @@
  * `match: "dissolved"`, and no player unless it names one. Pairs in the DM and pairs by
  * quote are not checked: they are certain. Pure logic only (no Node APIs).
  */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
-import { sliceCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
-import { stripAddr } from '@inventorybot-wiki/grammar/patterns.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
+import { sliceCodePoints } from '@inventorybottron/grammar/lib/text.ts';
+import { stripAddr } from '@inventorybottron/grammar/patterns.ts';
 import { firstWord } from '#src/telegram/conversation/commands.ts';
 import { type BotReply } from '#src/telegram/conversation/conversation.ts';
 import { attributeUses, itemCatalogue, mispairedUses } from './build.ts';

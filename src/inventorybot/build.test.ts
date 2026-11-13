@@ -1,6 +1,6 @@
 /** build.ts: merging events into the wiki (phase 5). */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
-import { placeName } from '@inventorybot-wiki/grammar/places.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
+import { placeName } from '@inventorybottron/grammar/places.ts';
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
@@ -1162,7 +1162,7 @@ describe('travel unlocks', () => {
   it('longest_known_place_wins_and_later_events_count', () => {
     // The arrival comes first; the places are learned from a later /viaggio.
     const arrival = ev(
-      "@luigi, con dieci borracce piene d'acqua e dopo un lungo viaggio arrivi (stremato) nell'immenso deserto di Sabbiora 🏜",
+      "@luigi, sul dorso del tuo cammello di pezza attraversi le dune e al tramonto arrivi (impolverato) nell'immenso deserto di Sabbiora 🏜",
       '/viaggio deserto',
       { t: 0, dm: false, chat: 'Gruppo', match: 'user' }
     );
@@ -1172,7 +1172,7 @@ describe('travel unlocks', () => {
     ]);
     expect(f(arrival)['location']).toBe(P(DESERTO));
     expect(wiki.locations[P(DESERTO)]?.unlock_texts).toStrictEqual([
-      "con dieci borracce piene d'acqua e dopo un lungo viaggio arrivi (stremato)",
+      'sul dorso del tuo cammello di pezza attraversi le dune e al tramonto arrivi (impolverato)',
     ]);
   });
 

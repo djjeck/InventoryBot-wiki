@@ -1,15 +1,16 @@
 /**
- * docs/bot-protocol.md: every `bot-reply` example is classified as the document says (the
+ * InventoryBotTron's docs/bot-protocol.md (https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md),
+ * read from the submodule: every `bot-reply` example is classified as the document says (the
  * convention is section 8 of the document).
  *
  * Each fenced block whose info string starts with `bot-reply` holds one bot message;
  * its attributes give the expected event type, the command passed as `query`, optional
  * preprocessing (`chat`, `titles`), the expected addressee and expected event fields.
  *
- * The document is a source file of the repository, so the examples are synthetic data
- * like any other test's (and its names are in the invented universe).
+ * The document is a source file of InventoryBotTron, so the examples are synthetic data
+ * like any other test's (and its names are in that repository's invented universe).
  */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
 import { describe, expect, it } from 'vitest';
 import {
   CHATS,

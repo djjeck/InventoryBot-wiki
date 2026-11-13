@@ -1,5 +1,5 @@
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
-import { ENDINGS, pakkomonUserSpans, WOUNDS } from '@inventorybot-wiki/grammar/pakkomon.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
+import { ENDINGS, pakkomonUserSpans, WOUNDS } from '@inventorybottron/grammar/pakkomon.ts';
 import { describe, expect, it } from 'vitest';
 import { compatibleCommands, userSpans } from './dialect.ts';
 

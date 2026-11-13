@@ -17,7 +17,7 @@
  * and the placing of undated messages look across exports. So a record keeps a macOS date
  * as written, and the merge converts it.
  */
-import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { compareCodePoints } from '@inventorybottron/grammar/lib/text.ts';
 import { epochSeconds, formatWindowsDate, parseMacDate, parseWindowsDate } from '#src/lib/dates.ts';
 import { pathName } from '#src/lib/paths.ts';
 import { type BotIdentity } from '#src/telegram/bot.ts';

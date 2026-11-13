@@ -14,7 +14,7 @@ const SRC = path.dirname(fileURLToPath(import.meta.url));
 const GENERIC = ['telegram', 'lib'].map((d) => path.join(SRC, d));
 const TEST = path.join(SRC, '..', 'test');
 /** The one file of the grammar package the generic layer may import. */
-const TEXT_HELPERS = '@inventorybot-wiki/grammar/lib/text.ts';
+const TEXT_HELPERS = '@inventorybottron/grammar/lib/text.ts';
 
 function tsFiles(dir: string): string[] {
   return fs
@@ -59,10 +59,10 @@ describe('layers', () => {
           : spec.startsWith('.')
             ? path.resolve(path.dirname(file), spec)
             : null;
-        // The workspace's own packages are InventoryBot's: only the grammar's text helpers,
-        // which know nothing of the game, are allowed (CLAUDE.md, "The grammar module").
+        // InventoryBotTron's packages are InventoryBot's: only the grammar's text helpers,
+        // which know nothing of the game, are allowed (CLAUDE.md, "The grammar").
         if (target === null) {
-          if (spec.startsWith('@inventorybot-wiki/') && spec !== TEXT_HELPERS)
+          if (spec.startsWith('@inventorybottron/') && spec !== TEXT_HELPERS)
             bad.push(`${path.relative(SRC, file)} -> ${spec}`);
           continue;
         }

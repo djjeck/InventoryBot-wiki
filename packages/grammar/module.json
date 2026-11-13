@@ -1,9 +1,0 @@
-{
-  "id": "inventorybot-grammar",
-  "version": "0.2.0",
-  "api": "1",
-  "provides": "@inventorybot-wiki/grammar",
-  "description": "InventoryBot's reply grammar: classify a reply, resolve a drop's item, strip titles",
-  "imports": {},
-  "plugins": []
-}

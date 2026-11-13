@@ -1,11 +1,11 @@
 /**
  * Phase 4: the bot's replies, paired with their commands by phase 2 (and anonymised by
  * phase 3) -> typed game events, and the report lines of the phase. Phase 4 ends by
- * verifying the group pairs (verify.ts). The reply formats are docs/bot-protocol.md; the
- * classifiers are classify.ts. Pure logic only (no Node APIs).
+ * verifying the group pairs (verify.ts). The reply formats are InventoryBotTron's
+ * docs/bot-protocol.md (https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md); the classifiers are classify.ts. Pure logic only (no Node APIs).
  */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
-import { compareCodePoints, sliceCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
+import { compareCodePoints, sliceCodePoints } from '@inventorybottron/grammar/lib/text.ts';
 import { increment, mostCommon } from '#src/lib/counts.ts';
 import { type BotReply } from '#src/telegram/conversation/conversation.ts';
 import { type ReportEntry, reportSections } from './report.ts';

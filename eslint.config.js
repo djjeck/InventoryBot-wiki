@@ -12,8 +12,9 @@ const PARENT_IMPORTS = {
 
 export default tseslint.config(
   // The built web app (npm run web:build); real exports (which hold js/script.js) and the
-  // output of npm run inspect, git-ignored: the flat config does not read .gitignore.
-  { ignores: ['web-dist/', 'inbox/', 'out/'] },
+  // output of npm run inspect, git-ignored: the flat config does not read .gitignore. The
+  // grammar, vendored as a submodule (vendor/InventoryBotTron), is linted by its own repository.
+  { ignores: ['web-dist/', 'inbox/', 'out/', 'vendor/'] },
   js.configs.recommended,
   tseslint.configs.recommended,
   {
@@ -48,8 +49,8 @@ export default tseslint.config(
   },
   {
     // Production code never depends on test code, so it can be shipped without it.
-    files: ['src/**/*.ts', 'packages/*/src/**/*.ts'],
-    ignores: ['src/**/*.test.ts', 'packages/*/src/**/*.test.ts'],
+    files: ['src/**/*.ts'],
+    ignores: ['src/**/*.test.ts'],
     rules: {
       'no-restricted-imports': [
         'error',

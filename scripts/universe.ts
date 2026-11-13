@@ -3,7 +3,8 @@
  * every item, recipe and place they mention belongs to it, so that no real game content
  * (which players are meant to discover) reaches the repository.
  *
- * Entities are found where the bot's reply formats put them (docs/bot-protocol.md), and
+ * Entities are found where the bot's reply formats put them (InventoryBotTron's docs/bot-protocol.md,
+ * https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md), and
  * the text there must end with a name of the universe (the bot may write words before it):
  *
  * - items: before a rarity tag (`un sasso [C]`: the text before the tag must end with an
@@ -87,8 +88,12 @@ const JSDOC_TAGS = new Set(['param', 'returns', 'return', 'type', 'typedef', 'se
 /** Patterns whose first group is the whole name of an entity. */
 const NAMED: readonly [Kind, RegExp][] = [
   ['item', new RegExp(`Ottieni: (${SPAN})!`, 'gu')],
-  // An item tuple: name, rarity (or null), quantity.
-  ['item', /\[\s*(['"])(?<name>[^'"\n]+)\1,\s*(?:(['"])[CNRSXMUL]\d*\+?\3|null)\s*,\s*\d+/gu],
+  // An item tuple: name, rarity (or null), quantity. The name is a source string in single quotes
+  // (escaped quotes inside), double quotes (apostrophes inside) or backticks.
+  [
+    'item',
+    /\[\s*(?:'(?<sq>(?:[^'\\\n]|\\.)+)'|"(?<dq>(?:[^"\\\n]|\\.)+)"|`(?<bq>[^`\n]+)`),\s*(?:(?<q>['"`])[CNRSXMUL]\d*\+?\k<q>|null)\s*,\s*\d+/gu,
+  ],
   ['recipe', new RegExp(`${LINE_START}- (${SPAN}) L\\d+ \\[(?:\\*|manca)`, 'gu')],
   ['recipe', new RegExp(`per fare (?:la ricetta )?(${SPAN}) ti manca`, 'gu')],
   // A channel's recipe card (src/inventorybot/channels.ts): `📇 RICETTA: Torre [L1]`.
@@ -143,7 +148,9 @@ export function unknownEntities(text: string, universe: Universe): Finding[] {
   for (const [kind, re] of NAMED) {
     for (const m of text.matchAll(re)) {
       // A crafted item may carry its tags (`Ottieni: un baule [X] [usabile]!`).
-      const name = ((m.groups?.['name'] ?? m[1]) as string).replace(/(?:\s*\[[^\]]*\])+$/u, '');
+      const g = m.groups;
+      const found = (g === undefined ? m[1] : (g['sq'] ?? g['dq'] ?? g['bq'])) as string;
+      const name = found.replace(/(?:\s*\[[^\]]*\])+$/u, '');
       // Code (a pattern such as `.*`, `(?<name>${DOT}+?)`) is no name; a name may follow other words.
       if (/\p{L}/u.test(name) && !CODE.test(name) && !endsWithName(name, universe[kind]))
         out.push({ kind, text: name, line: lineOf(text, m.index + m[0].indexOf(name)) });

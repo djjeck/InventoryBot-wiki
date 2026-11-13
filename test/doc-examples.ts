@@ -1,5 +1,7 @@
 /**
- * The `bot-reply` example blocks of docs/bot-protocol.md (convention in its section 8).
+ * The `bot-reply` example blocks of InventoryBot's protocol (convention in its section 8): the
+ * grammar's specification, InventoryBotTron's docs/bot-protocol.md (https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md),
+ * read from the submodule, so the examples are those of the pinned commit.
  * No vitest imports here.
  */
 import {
@@ -7,15 +9,15 @@ import {
   stripWs,
   WORD_BODY,
   WS_BODY,
-} from '@inventorybot-wiki/grammar/lib/text.ts';
-import { stripSuaMaesta, titleStripper } from '@inventorybot-wiki/grammar/titles.ts';
+} from '@inventorybottron/grammar/lib/text.ts';
+import { stripSuaMaesta, titleStripper } from '@inventorybottron/grammar/titles.ts';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /** Repository root (the parent of test/). */
 export const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const DOC = path.join(REPO, 'docs', 'bot-protocol.md');
+export const DOC = path.join(REPO, 'vendor', 'InventoryBotTron', 'docs', 'bot-protocol.md');
 
 /** The document text, with `\r\n` and `\r` line ends turned into `\n`. */
 export function readDoc(): string {

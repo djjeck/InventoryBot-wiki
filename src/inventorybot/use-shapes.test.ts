@@ -88,7 +88,7 @@ describe('use shapes', () => {
   it('players_and_typed_text_are_kept_by_kind_only', () => {
     expect(
       useShapes(
-        ['mandi a @bea il messaggio: "ciao".', 'mandi a @luigi il messaggio: "pagliaccio".'],
+        ['mandi a @bea il messaggio: "ciao".', 'mandi a @luigi il messaggio: "buonanotte".'],
         NAMES
       )
     ).toStrictEqual([

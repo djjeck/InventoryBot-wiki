@@ -19,7 +19,9 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "packages", "test", "scripts", "vitest.config.ts", "vite.config.ts"],
+  // The grammar (vendor/InventoryBotTron) is type-checked by its own repository, and here through
+  // the imports of the wiki's files.
+  "include": ["src", "test", "scripts", "vitest.config.ts", "vite.config.ts"],
   // Browser-only code, checked with the DOM types by tsconfig.web.json.
   "exclude": ["src/web/main.ts"]
 }

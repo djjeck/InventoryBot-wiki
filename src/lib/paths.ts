@@ -8,7 +8,7 @@
  * its subfolders, siblings by name), the order in which telegram/export/export-files.ts
  * walks folders.
  */
-import { compareStringLists } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { compareStringLists } from '@inventorybottron/grammar/lib/text.ts';
 
 /** Root and components of a POSIX path. */
 function splitPosix(p: string): [root: string, parts: string[]] {

@@ -22,7 +22,7 @@ const universe = (names: Partial<Record<keyof Universe, string[]>>): Universe =>
 describe('the test universe', () => {
   it('scans_the_repository_text_files_but_not_its_own', () => {
     const files = scannedFiles(ROOT);
-    expect(files).toContain('docs/bot-protocol.md');
+    expect(files).toContain('docs/telegram-export.md');
     expect(files).toContain('src/telegram/export/parse-export.ts');
     const own = files.filter(
       (f) => /^(test|scripts)\/universe\./u.test(f) || f === 'package-lock.json'
@@ -59,8 +59,8 @@ describe('unknownEntities', () => {
     for (const text of ['2x\tun sasso\t[C]', "'2x\\tun sasso\\t[C]'", '2x→un sasso→[C]'])
       expect(unknownEntities(text, U), text).toStrictEqual([]);
     expect(unknownEntities("'2x\\tuna mela\\t[C]'", U)).toHaveLength(1);
-    // Only at a word boundary: "un sassolino" is not "un sasso".
-    expect(unknownEntities('trovi un sassolino [C]', U)).toHaveLength(1);
+    // Only at a word boundary: "un sassofono" is not "un sasso".
+    expect(unknownEntities('trovi un sassofono [C]', U)).toHaveLength(1);
   });
 
   it('tags_without_a_name_before_them_are_not_items', () => {
@@ -120,6 +120,19 @@ describe('unknownEntities', () => {
   it('item_tuples_of_the_reply_builders', () => {
     const text = "T.inventory([['un sasso', 'C', 1], [\"una mela\", null, 2, true]])";
     expect(unknownEntities(text, U).map((x) => x.text)).toStrictEqual(['una mela']);
+    // A name with an apostrophe: in double quotes, escaped in single quotes, or in backticks.
+    const apostrophes = [
+      `[["una chiave d'ottone", 'X', 3]]`,
+      "[['una chiave d\\'ottone', 'X', 3]]",
+      '[[`una chiave d\'ottone`, "X", 3]]',
+    ];
+    for (const t of apostrophes)
+      expect(
+        unknownEntities(t, U).map((x) => [x.kind, normalizeName(x.text)]),
+        t
+      ).toStrictEqual([['item', "una chiave d'ottone"]]);
+    expect(unknownEntities(`[["una moneta d'oro", 'X', 3]]`, U)).toStrictEqual([]);
+    expect(unknownEntities("[['una moneta d\\'oro', 'X', 3]]", U)).toStrictEqual([]);
     // Expected values shaped like a tuple, without a quantity, are not items.
     expect(unknownEntities("[['cooldown', null, 'dissolved']]", U)).toStrictEqual([]);
     expect(unknownEntities('Ottieni: un sasso [C] [usabile]!', U)).toStrictEqual([]);

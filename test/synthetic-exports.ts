@@ -280,7 +280,7 @@ function jsonlMessage(m: Partial<Message> & { text: string }): string {
 /**
  * Stage-2 scenarios: Telegram exports (run through the whole pipeline by the golden
  * tests) covering titles, broadcasts, group matching, display-name voting, old
- * formats and every docs/bot-protocol.md example, plus one file of messages with
+ * formats and every example of InventoryBotTron's docs/bot-protocol.md, plus one file of messages with
  * values phase 1 rarely produces (null fields, control characters, odd dates).
  */
 export function writeStage2Scenarios(root: string): Scenario[] {

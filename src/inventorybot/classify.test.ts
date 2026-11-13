@@ -1,5 +1,6 @@
-/** classify.ts: what each bot reply is read as (docs/bot-protocol.md). */
-import { classify, itemFromLine, itemLines } from '@inventorybot-wiki/grammar/classify.ts';
+/** classify.ts: what each bot reply is read as (InventoryBotTron's docs/bot-protocol.md,
+ * https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md). */
+import { classify, itemFromLine, itemLines } from '@inventorybottron/grammar/classify.ts';
 import { describe, expect, it } from 'vitest';
 import { BOT, Chat, tgDate } from '#test/helpers.ts';
 import { byType, runExtract } from '#test/interpret.ts';
@@ -12,7 +13,7 @@ function item(name: string, rarity: string | null = null, usable = false, qty = 
 }
 
 const DROP =
-  '@djjeck, ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale ' +
+  '@djjeck, risali il torrente gelato di Valtorbo e tra i ciottoli del greto ' +
   'scorgi un torroncino al pistacchio [C]!';
 const ITEM_INFO =
   '@djjeck una sedia pieghevole [C] al momento ti serve nelle ricette: Giocare a scopa.\n' +
@@ -402,14 +403,14 @@ describe('travel', () => {
 
   it('arrival_with_unlock_text_and_arrivi_without_colon_leaves_the_place_to_phase_5', () => {
     const e = fields(
-      '@djjeck, ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀\n\n' +
+      '@djjeck, issi la vela della tua zattera di canne e prendi il largo! Dopo ore di onde, arrivi esausto nella baia di Scogliola 🦀\n\n' +
         'Puoi andare verso:\n - nella valle ventosa 🏞',
       '/viaggio baia'
     );
     expect([e['type'], e['location'], e['narrative']]).toStrictEqual([
       'travel',
       null,
-      'ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀',
+      'issi la vela della tua zattera di canne e prendi il largo! Dopo ore di onde, arrivi esausto nella baia di Scogliola 🦀',
     ]);
   });
 
@@ -446,8 +447,8 @@ describe('travel arrivals without a parsable place', () => {
   const RACCHETTA =
     '@mario_r, guidato dalla tua bussola fatata attraversi il canneto e finalmente ti trovi nella palude sussurrante 🌾\n\n' +
     'Puoi andare verso:\n - nel bosco nebbioso di Valtorbo 🌲';
-  const SNORKELING =
-    '@mario_r, ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀';
+  const RAFTING =
+    '@mario_r, issi la vela della tua zattera di canne e prendi il largo! Dopo ore di onde, arrivi esausto nella baia di Scogliola 🦀';
 
   it('item_narrated_arrival_with_exits', () => {
     expect(classify(RACCHETTA, '/viaggio palude')).toStrictEqual({
@@ -463,17 +464,17 @@ describe('travel arrivals without a parsable place', () => {
   });
 
   it('old_narrated_arrival_without_exits_needs_its_viaggio_command', () => {
-    expect(classify(SNORKELING, '/viaggio baia')).toStrictEqual({
+    expect(classify(RAFTING, '/viaggio baia')).toStrictEqual({
       type: 'travel',
       location: null,
       exits: [],
       narrative:
-        'ti infili la tua muta da palombaro e ti tuffi! Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀',
+        'issi la vela della tua zattera di canne e prendi il largo! Dopo ore di onde, arrivi esausto nella baia di Scogliola 🦀',
       written: {},
     });
     expect([
-      classify(SNORKELING, null).type,
-      classify(SNORKELING, '/viaggio').type,
+      classify(RAFTING, null).type,
+      classify(RAFTING, '/viaggio').type,
       classify('qualcosa di strano', '/viaggio baia').type,
     ]).toStrictEqual(['unknown', 'unknown', 'unknown']);
   });
@@ -607,7 +608,7 @@ describe('drop', () => {
       kind: 'adventure',
       rarity: 'C',
       usable: false,
-      raw: 'ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio',
+      raw: 'risali il torrente gelato di Valtorbo e tra i ciottoli del greto scorgi un torroncino al pistacchio',
     });
   });
 
@@ -929,7 +930,7 @@ describe('preferences and quests', () => {
 describe('the /esporta file', () => {
   const CAPTION = 'Inventario di @mario_r, al 2026/10/26 20:56:57';
   const FILE = T.inventoryFile([
-    ["una chiave d'argento 🔑", 'X', 3],
+    ['una chiave di ebano 🔑', 'X', 3],
     ['un fiorino ƒ', 'X', 2, true],
     ['un sasso', 'C+', 618],
   ]);
@@ -940,7 +941,7 @@ describe('the /esporta file', () => {
       filtered: false,
       truncated: false,
       items: [
-        item("una chiave d'argento 🔑", 'X', false, 3),
+        item('una chiave di ebano 🔑', 'X', false, 3),
         item('un fiorino ƒ', 'X', true, 2),
         item('un sasso', 'C+', false, 618),
       ],

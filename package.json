@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "vendor/InventoryBotTron/packages/grammar"
   ],
   "imports": {
     "#src/*": "./src/*",
@@ -21,8 +21,6 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "check:universe": "node scripts/check-universe.ts",
-    "check:grammar": "node scripts/check-grammar.ts",
-    "grammar:stamp": "node scripts/grammar-stamp.ts",
     "typecheck": "tsc && tsc -p tsconfig.web.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -31,8 +29,8 @@
     "web:dev": "vite",
     "web:build": "vite build",
     "web:preview": "vite preview",
-    "ci": "npm run format:check && npm run lint && npm run check:universe && npm run check:grammar && npm run typecheck && npm run test:coverage",
-    "validate": "npm run format && npm run format:check && npm run lint:fix && npm run lint && npm run check:universe && npm run check:grammar && npm run typecheck && npm run golden:update && npm run test:coverage"
+    "ci": "npm run format:check && npm run lint && npm run check:universe && npm run typecheck && npm run test:coverage",
+    "validate": "npm run format && npm run format:check && npm run lint:fix && npm run lint && npm run check:universe && npm run typecheck && npm run golden:update && npm run test:coverage"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
@@ -49,7 +47,7 @@
     "vitest": "4.1.11"
   },
   "dependencies": {
-    "@inventorybot-wiki/grammar": "*",
+    "@inventorybottron/grammar": "*",
     "htmlparser2": "12.0.0"
   }
 }

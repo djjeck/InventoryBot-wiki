@@ -1,4 +1,4 @@
-import { learnTitles } from '@inventorybot-wiki/grammar/titles.ts';
+import { learnTitles } from '@inventorybottron/grammar/titles.ts';
 import { describe, expect, it } from 'vitest';
 import { readConversation } from '#src/telegram/conversation/conversation.ts';
 import { BOT, Chat } from '#test/helpers.ts';

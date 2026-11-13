@@ -10,8 +10,8 @@
  * An ending condition that needs the user (no owner) is returned, not reported: the front
  * end words it for its own way of asking.
  */
-import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
-import { learnTitles } from '@inventorybot-wiki/grammar/titles.ts';
+import { compareCodePoints } from '@inventorybottron/grammar/lib/text.ts';
+import { learnTitles } from '@inventorybottron/grammar/titles.ts';
 import { INVENTORY_BOT } from './inventorybot/bot.ts';
 import { build, reportLines, toJson } from './inventorybot/build.ts';
 import { isChannelPost, readChannelPosts } from './inventorybot/channels.ts';

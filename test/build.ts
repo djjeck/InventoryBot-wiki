@@ -6,7 +6,7 @@
  *
  * No vitest imports here.
  */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
 import { build, type KB, toJson } from '#src/inventorybot/build.ts';
 import { playerOf } from '#src/inventorybot/dialect.ts';
 import { playerState } from '#src/inventorybot/player.ts';
