@@ -1,6 +1,7 @@
 /** build.ts: merging events into the wiki (phase 5). */
 import { classify } from '@inventorybottron/grammar/classify.ts';
 import { placeName } from '@inventorybottron/grammar/places.ts';
+import { isMine } from '@inventorybottron/state';
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
@@ -10,7 +11,6 @@ import * as T from '#test/texts.ts';
 import { ATLANTE, CITTADELLA, GRIMORIO } from './bot.ts';
 import {
   build,
-  isMine,
   iso as isoDate,
   recipeMatch,
   reportLines,

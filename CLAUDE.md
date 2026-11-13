@@ -145,13 +145,13 @@ order:
    which `build.ts` states with the rest of the rarity system rather than reading it from the bot's
    `/faq`), and the owner's own state (recipes made, items seen and how often each was used, places
    visited, an estimate of the inventory and how often it agreed with the bot's `/ricetta` lists,
-   and their Pakkomon, `player-pakkomon.ts`: each followed by name from its hatching or arrival to
-   its departure, given, extracted or left out of a list of all of them, with its record, equipment,
-   power-ups, fights, widest win and stun; and the shapes their shaped items had, the latest first,
-   on the item's card), kept apart so that the wiki can be shared. `build` merges the events into a
-   knowledge base, newest observation first, an item's `/usa` replies kept by shape, what varies in
-   them described as the channels' cards do (`use-shapes.ts`: "tiri il dado e fai N!", N from 1 to
-   6; an item slot with how many replies held each item), and an item a use takes (a chest's key, a
+   and their Pakkomon: each followed by name from its hatching or arrival to its departure, given,
+   extracted or left out of a list of all of them, with its record, equipment, power-ups, fights,
+   widest win and stun; and the shapes their shaped items had, the latest first, on the item's
+   card), kept apart so that the wiki can be shared. `build` merges the events into a knowledge
+   base, newest observation first, an item's `/usa` replies kept by shape, what varies in them
+   described as the channels' cards do (`use-shapes.ts`: "tiri il dado e fai N!", N from 1 to 6; an
+   item slot with how many replies held each item), and an item a use takes (a chest's key, a
    machine's inputs, a Pakkomon's equipment, `takes` in the use event) used with the item used
    (`used_with`), and where an item comes from besides adventures and recipes: the items whose use
    gave it (`from_use`), a level-up or a lottery draw (`rewards`), a fight against one of the bot's
@@ -167,8 +167,13 @@ order:
    of the places on its way from the village, along the way of the lowest level; an item is at least
    of its `Ln` rarity and of its easiest source (found anywhere: none; in one place: that place's; a
    recipe: its level and its ingredients'), computed in turn with the places until nothing changes.
-   `toJson` writes the wiki, `playerState` the player state. Phase 5 reads plain JSON copies of the
-   events (`buildFromEvents` in `src/pipeline.ts`), since `build` annotates them for `playerState`.
+   `toJson` writes the wiki, `playerState` the player state. The player state is InventoryBotTron's
+   (`@inventorybottron/state`, below, "The player state"): `player.ts` folds the events into it one
+   at a time and shows its view, giving it what only the whole export knows (`Know`: the items'
+   rarities, the recipes' ingredients, which uses consume their item, every item known), the events
+   with the game's renames applied, and a group `/dai` to the owner marked `notified` when its DM
+   notice counts it. Phase 5 reads plain JSON copies of the events (`buildFromEvents` in
+   `src/pipeline.ts`), since `build` annotates them for `playerState`.
 
 Phases 2 to 4 are InventoryBot's through its dialect (`src/inventorybot/dialect.ts`): addressing,
 player titles, broadcasts, what anonymisation designates, and which commands can produce each reply
@@ -331,15 +336,27 @@ lived here, as `packages/grammar`, named `@inventorybot-wiki/grammar` (the MegaB
 `inventorybot-grammar`); this repository no longer holds any module.
 
 The wiki vendors InventoryBotTron as a git submodule, `vendor/InventoryBotTron`, pinned to a commit
-of its `main`, and makes `vendor/InventoryBotTron/packages/grammar` one of its npm workspaces, so
-the wiki imports it by its name and may import any of its files (`@inventorybottron/grammar/<path>`
-is its `src/<path>`; the wiki's phases use `patterns.ts`, `places.ts`…). The wiki's own types build
-on its events (`src/inventorybot/types.ts` re-exports them). Its unit tests run in its repository,
-not here (`vendor/` is left out of the tests, the lint, the formatting and the content check); the
-wiki tests the classifier through its whole pipeline (`classify.test.ts`,
-`classify.docs-examples.test.ts`, which checks every `bot-reply` example of the grammar's
-specification, and `pakkomon.test.ts`, in `src/inventorybot/`). GitHub CI checks out the submodule
-(`submodules: true`). After cloning, `git submodule update --init` fetches it.
+of its `main`, and makes `vendor/InventoryBotTron/packages/grammar` one of its npm workspaces (and
+`packages/state`, below), so the wiki imports it by its name and may import any of its files
+(`@inventorybottron/grammar/<path>` is its `src/<path>`; the wiki's phases use `patterns.ts`,
+`places.ts`…). The wiki's own types build on its events (`src/inventorybot/types.ts` re-exports
+them). Its unit tests run in its repository, not here (`vendor/` is left out of the tests, the lint,
+the formatting and the content check); the wiki tests the classifier through its whole pipeline
+(`classify.test.ts`, `classify.docs-examples.test.ts`, which checks every `bot-reply` example of the
+grammar's specification, and `pakkomon.test.ts`, in `src/inventorybot/`). GitHub CI checks out the
+submodule (`submodules: true`). After cloning, `git submodule update --init` fetches it.
+
+### The player state
+
+The owner's state is not this repository's either: it is the package `packages/state` of
+InventoryBotTron, named `@inventorybottron/state` (the MegaBotTron1999 library module
+`inventorybot-player-state`), a reducer of one event at a time that a live bot keeps too. It holds
+the rules of the inventory estimate, the recipes made, the items seen and used, the places, the
+Pakkomon and the shapes, and the rules phase 5 shares with it (`isMine`, `queryArg`,
+`inventoryScope`, `isFailedUse`, `nameKey`), which `build.ts` imports from it. It is vendored as the
+grammar is, from the same submodule (`vendor/InventoryBotTron/packages/state`, an npm workspace),
+and a change to it is made there, never here: the goldens' `player.json` files are its output, so a
+pin move that changes it changes them.
 
 **The protocol doc** lives with the grammar too:
 [InventoryBotTron's `docs/bot-protocol.md`](https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md),
