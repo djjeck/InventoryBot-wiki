@@ -1162,7 +1162,7 @@ describe('travel unlocks', () => {
   it('longest_known_place_wins_and_later_events_count', () => {
     // The arrival comes first; the places are learned from a later /viaggio.
     const arrival = ev(
-      "@luigi, con dieci borracce piene d'acqua e dopo un lungo viaggio arrivi (stremato) nell'immenso deserto di Sabbiora 🏜",
+      "@luigi, sul dorso del tuo cammello di pezza attraversi le dune e al tramonto arrivi (impolverato) nell'immenso deserto di Sabbiora 🏜",
       '/viaggio deserto',
       { t: 0, dm: false, chat: 'Gruppo', match: 'user' }
     );
@@ -1172,7 +1172,7 @@ describe('travel unlocks', () => {
     ]);
     expect(f(arrival)['location']).toBe(P(DESERTO));
     expect(wiki.locations[P(DESERTO)]?.unlock_texts).toStrictEqual([
-      "con dieci borracce piene d'acqua e dopo un lungo viaggio arrivi (stremato)",
+      'sul dorso del tuo cammello di pezza attraversi le dune e al tramonto arrivi (impolverato)',
     ]);
   });
 

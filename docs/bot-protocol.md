@@ -278,18 +278,18 @@ ends with the article and name of the item, with no delimiter.
 DROP = ADDR NARRATIVE SP RARITY [ SP USABLE ] [ "!" ] EOT
 ```
 
-```bot-reply type=drop query="/avventura" kind=adventure rarity=C usable=false raw="ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio" addressee=mario_r
-@mario_r, ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio [C]!
+```bot-reply type=drop query="/avventura" kind=adventure rarity=C usable=false raw="risali il torrente gelato di Valtorbo e tra i ciottoli del greto scorgi un torroncino al pistacchio" addressee=mario_r
+@mario_r, risali il torrente gelato di Valtorbo e tra i ciottoli del greto scorgi un torroncino al pistacchio [C]!
 ```
 
 ```bot-reply type=drop query="/avventura" rarity=R usable=true
-@mario_r, al bazar della citta' inizi a mercanteggiare con un venditore, alla fine ottieni un baule di quercia 📦 [R] [usabile]!
+@mario_r, alla fiera del borgo giochi a dadi con un vecchio ambulante e come premio ricevi un baule di quercia 📦 [R] [usabile]!
 ```
 
 Another player's adventure reported in a group:
 
 ```bot-reply type=drop chat=group addressee=lucia_b rarity=S usable=true
-[W] @lucia_b, ti avventuri nell'intricata giungla di Ramafitta, nascondendoti dagli animali feroci che la popolano, quand'ecco che una scimmia ti tira un baule di ebano 📦 [S] [usabile]!
+[W] @lucia_b, attraversi la palude sussurrante saltando di sasso in sasso, quando una rana dispettosa ti lancia un baule di ebano 📦 [S] [usabile]!
 ```
 
 ### 6.2 Lucky adventure
@@ -418,7 +418,7 @@ Ottieni: un caffè ristretto!
 @mario_r, prendi in mano:
 - un apriscatole storto [C] x1
 - una latta di piselli [C] x1
-e hai trovato una latta di piselli in offerta al mercato e non vedi l’ora di assaggiarli! Appena arrivi a casa prendi il tuo apriscatole, apri la latta e te li mangi in un attimo!
+e fai leva sul coperchio con l'apriscatole storto finché la latta cede con uno sbuffo, e i piselli rotolano ovunque tranne che nel piatto!
 Ottieni: una manciata di linguette di latta!
 
 Hai raggiunto il livello 1! Per te 10x una moneta d'oro e un bel pacchettino regalo 🎁 in omaggio!
@@ -1234,8 +1234,8 @@ Group histories reach back to 2017. These formats belong to earlier periods:
 @mario_r, ti metti in cammino e dopo un lunghissimo viaggio arrivi in cima al monte Grevolo 🏔
 ```
 
-```bot-reply type=travel query="/viaggio baia" location=null exits=[] narrative="ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare la scogliera che blocca il passaggio. Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀"
-@mario_r, ti infili la tua muta da palombaro e ti tuffi! Via mare puoi finalmente superare la scogliera che blocca il passaggio. Dopo una bella nuotata, arrivi esausto nella baia di Scogliola 🦀
+```bot-reply type=travel query="/viaggio baia" location=null exits=[] narrative="issi la vela della tua zattera di canne e prendi il largo! Il vento ti spinge oltre gli scogli. Dopo ore di onde, arrivi esausto nella baia di Scogliola 🦀"
+@mario_r, issi la vela della tua zattera di canne e prendi il largo! Il vento ti spinge oltre gli scogli. Dopo ore di onde, arrivi esausto nella baia di Scogliola 🦀
 ```
 
 ```bot-reply type=item_info query="/esamina baule" item="un baule di ebano 📦" usable=true used_in_raw="Cera riciclata" count=null cooldown="23 ore"

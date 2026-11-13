@@ -59,8 +59,8 @@ describe('unknownEntities', () => {
     for (const text of ['2x\tun sasso\t[C]', "'2x\\tun sasso\\t[C]'", '2x→un sasso→[C]'])
       expect(unknownEntities(text, U), text).toStrictEqual([]);
     expect(unknownEntities("'2x\\tuna mela\\t[C]'", U)).toHaveLength(1);
-    // Only at a word boundary: "un sassolino" is not "un sasso".
-    expect(unknownEntities('trovi un sassolino [C]', U)).toHaveLength(1);
+    // Only at a word boundary: "un sassofono" is not "un sasso".
+    expect(unknownEntities('trovi un sassofono [C]', U)).toHaveLength(1);
   });
 
   it('tags_without_a_name_before_them_are_not_items', () => {

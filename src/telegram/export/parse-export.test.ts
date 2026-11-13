@@ -46,7 +46,7 @@ describe('common parsing', () => {
     const c = new Chat();
     c.user('Daniele', '/avventura', 0);
     c.bot(
-      '@djjeck, ti tuffi nel lago incantato di Mirtovalle, semisommerso nel fondale scorgi un torroncino al pistacchio [C]!',
+      '@djjeck, risali il torrente gelato di Valtorbo e tra i ciottoli del greto scorgi un torroncino al pistacchio [C]!',
       2
     );
     const p = parseHtml(BOT, [day('27 November 2025'), ...c.messages]);

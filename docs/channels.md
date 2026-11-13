@@ -92,8 +92,8 @@ BOOK   = "📒" | "📗" | "📘" | "📕" | "📙"        (* the colour of the 
 STAGE  = "🚩" | "🏃" | "🏃‍♂️" | "🏁"             (* the start, a stage, the place itself *)
 ```
 
-- `LOCATION` is written with the article ("la Valle degli Eroi") or the preposition ("nella valle
-  ventosa") of the bot's replies; the pipeline reads both in their article form.
+- `LOCATION` is written with the article ("il bosco nebbioso di Valtorbo") or the preposition
+  ("nella valle ventosa") of the bot's replies; the pipeline reads both in their article form.
 - The items found are the place's exclusive ones, `+` rarities; `[nessun oggetto inserito]` stands
   for none.
 - The route goes from the village to the place. Instead of a route, `🚩🏁` introduces a remark: the

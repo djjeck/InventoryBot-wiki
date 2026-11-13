@@ -544,8 +544,8 @@ Page 2 of an invented group export.
                 <a href="#go_to_message1000" onclick="return GoToMessage(1000)">this message</a>
               </div>
               <div class="text">
-                <a href="https://t.me/mario_r">@mario_r</a>, ti tuffi nel lago incantato di
-                Mirtovalle e scorgi un torroncino al pistacchio [C]!
+                <a href="https://t.me/mario_r">@mario_r</a>, risali il torrente gelato di Valtorbo e
+                scorgi un torroncino al pistacchio [C]!
               </div>
             </div>
           </div>
@@ -622,13 +622,13 @@ Page 2 of an invented group export.
 
 What it contains (all with chat `Gruppo Avventurieri`):
 
-| id   | sender       | original author | reply to | text                                                                                            |
-| ---- | ------------ | --------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| 1000 | Mario Rossi  |                 |          | `/ricetta@InventoryBot Pratica cestina`                                                         |
-| 1001 | InventoryBot |                 | 1000     | `@mario_r, ti tuffi nel lago incantato di Mirtovalle e scorgi un torroncino al pistacchio [C]!` |
-| 1002 | InventoryBot |                 |          | `Livello raggiunto!\nOra puoi fare un'altra ricetta.`                                           |
-| 1003 | Luigi Verdi  |                 |          | (sticker, no text)                                                                              |
-| 1004 | Luigi Verdi  | InventoryBot    | 998      | `@luigi_v, possiedi:\n- un sasso [C] x2`                                                        |
+| id   | sender       | original author | reply to | text                                                                                        |
+| ---- | ------------ | --------------- | -------- | ------------------------------------------------------------------------------------------- |
+| 1000 | Mario Rossi  |                 |          | `/ricetta@InventoryBot Pratica cestina`                                                     |
+| 1001 | InventoryBot |                 | 1000     | `@mario_r, risali il torrente gelato di Valtorbo e scorgi un torroncino al pistacchio [C]!` |
+| 1002 | InventoryBot |                 |          | `Livello raggiunto!\nOra puoi fare un'altra ricetta.`                                       |
+| 1003 | Luigi Verdi  |                 |          | (sticker, no text)                                                                          |
+| 1004 | Luigi Verdi  | InventoryBot    | 998      | `@luigi_v, possiedi:\n- un sasso [C] x2`                                                    |
 
 ## 11. The macOS export
 
