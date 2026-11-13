@@ -8,8 +8,8 @@
  * compreso tra 1 e 6"), an item slot with how often each item came, from which a use's
  * odds of giving it follow; players and the text players typed are not kept. Pure logic.
  */
-import { parseDuration } from '@inventorybot-wiki/grammar/patterns.ts';
-import { SHAPED_AS } from '@inventorybot-wiki/grammar/shapes.ts';
+import { parseDuration } from '@inventorybottron/grammar/patterns.ts';
+import { SHAPED_AS } from '@inventorybottron/grammar/shapes.ts';
 import { type WikiUseShape, type WikiUseSlot } from './types.ts';
 
 /** What the replies may name, known from the wiki: items, and places as the bot writes them. */

@@ -9,7 +9,7 @@
  * The document is a source file of the repository, so the examples are synthetic data
  * like any other test's (and its names are in the invented universe).
  */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
 import { describe, expect, it } from 'vitest';
 import {
   CHATS,

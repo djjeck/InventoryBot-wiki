@@ -1,5 +1,5 @@
 /**
- * The wiki's types built on the events of the grammar (packages/grammar, whose types it
+ * The wiki's types built on the events of the grammar (InventoryBotTron's, whose types it
  * re-exports): the event records of phase 4 (extract.ts), and the wiki and the player state
  * of phase 5 (build.ts, player.ts). Field names and key order are those of the JSON form
  * (snake_case).
@@ -9,11 +9,11 @@ import {
   type PakkomonRole,
   type StatsEvent,
   type UnknownEvent,
-} from '@inventorybot-wiki/grammar/types.ts';
+} from '@inventorybottron/grammar/types.ts';
 import { type ReplyContext } from '#src/telegram/conversation/conversation.ts';
 import { type MatchKind } from '#src/telegram/conversation/matcher.ts';
 
-export type * from '@inventorybot-wiki/grammar/types.ts';
+export type * from '@inventorybottron/grammar/types.ts';
 
 /**
  * Fields added to every classified event, after its own (same key order): phase 2's

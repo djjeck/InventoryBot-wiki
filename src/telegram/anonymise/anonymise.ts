@@ -25,7 +25,7 @@
  * the run is skipped. The display-name map of phase 2 keeps only its size: its keys
  * become opaque.
  */
-import { WORD_BODY } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { WORD_BODY } from '@inventorybottron/grammar/lib/text.ts';
 import { type BotReply, type Conversation } from '#src/telegram/conversation/conversation.ts';
 import { type BotDialect } from '#src/telegram/conversation/dialect.ts';
 import { PseudonymSource } from './pseudonyms.ts';

@@ -1,4 +1,6 @@
 # The built web app (npm run web:build).
 web-dist/
+# The grammar, vendored as a git submodule: formatted by its own repository.
+vendor/
 # Byte-exact pipeline outputs pinned by src/pipeline.golden.test.ts: never reformat them.
 test/golden/

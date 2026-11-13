@@ -12,10 +12,10 @@
  * - for anonymisation: the admin's public username (PUBLIC_NAMES), the usernames a reply
  *   designates (userSpans) and the arguments of commands that may name one (userArguments).
  */
-import { classify, producersOf } from '@inventorybot-wiki/grammar/classify.ts';
-import { pakkomonUserSpans } from '@inventorybot-wiki/grammar/pakkomon.ts';
-import { ANONYMOUS_RE, GIFT, GIVE, rx, W } from '@inventorybot-wiki/grammar/patterns.ts';
-import { replyNormalizer } from '@inventorybot-wiki/grammar/titles.ts';
+import { classify, producersOf } from '@inventorybottron/grammar/classify.ts';
+import { pakkomonUserSpans } from '@inventorybottron/grammar/pakkomon.ts';
+import { ANONYMOUS_RE, GIFT, GIVE, rx, W } from '@inventorybottron/grammar/patterns.ts';
+import { replyNormalizer } from '@inventorybottron/grammar/titles.ts';
 import { firstWord } from '#src/telegram/conversation/commands.ts';
 import { type BotDialect, type Compatible } from '#src/telegram/conversation/dialect.ts';
 import { type Event, type EventType } from './types.ts';

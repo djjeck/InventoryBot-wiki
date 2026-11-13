@@ -50,9 +50,9 @@
  *
  * Pure logic only (no Node APIs).
  */
-import { compareCodePoints } from '@inventorybot-wiki/grammar/lib/text.ts';
-import { PAKKOMON } from '@inventorybot-wiki/grammar/pakkomon.ts';
-import { shapeGiven, shapeOf, unshaped } from '@inventorybot-wiki/grammar/shapes.ts';
+import { compareCodePoints } from '@inventorybottron/grammar/lib/text.ts';
+import { PAKKOMON } from '@inventorybottron/grammar/pakkomon.ts';
+import { shapeGiven, shapeOf, unshaped } from '@inventorybottron/grammar/shapes.ts';
 import { isoDateSeconds } from '#src/lib/dates.ts';
 import { instant, inventoryScope, isFailedUse, isMine, type KB, queryArg } from './build.ts';
 import { ownerPakkomon, pakkomonOf } from './player-pakkomon.ts';

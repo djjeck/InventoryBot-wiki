@@ -1,6 +1,6 @@
 /** build.ts: merging events into the wiki (phase 5). */
-import { classify } from '@inventorybot-wiki/grammar/classify.ts';
-import { placeName } from '@inventorybot-wiki/grammar/places.ts';
+import { classify } from '@inventorybottron/grammar/classify.ts';
+import { placeName } from '@inventorybottron/grammar/places.ts';
 import { describe, expect, it } from 'vitest';
 import { ownerFromDm } from '#src/telegram/conversation/owner.ts';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';

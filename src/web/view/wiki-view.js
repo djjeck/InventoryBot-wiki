@@ -1,5 +1,5 @@
 /* global window, document, localStorage, location, history, matchMedia, URLSearchParams, getComputedStyle */
-import { ENDINGS, PAKKOMON, WOUNDS } from '@inventorybot-wiki/grammar/pakkomon.ts';
+import { ENDINGS, PAKKOMON, WOUNDS } from '@inventorybottron/grammar/pakkomon.ts';
 import { layoutMap, placeLabels } from '#src/web/map-layout.ts';
 import { lockedWay } from '#src/web/place-way.ts';
 

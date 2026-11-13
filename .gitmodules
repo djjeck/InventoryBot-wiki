@@ -1,0 +1,3 @@
+[submodule "vendor/InventoryBotTron"]
+	path = vendor/InventoryBotTron
+	url = https://github.com/djjeck/InventoryBotTron.git

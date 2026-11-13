@@ -16,7 +16,7 @@ import {
   stripWs,
   WORD_CLASS,
   WS_CLASS,
-} from '@inventorybot-wiki/grammar/lib/text.ts';
+} from '@inventorybottron/grammar/lib/text.ts';
 import {
   formatOffset,
   isTimeZone,

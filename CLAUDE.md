@@ -123,21 +123,21 @@ order:
    phase.
 
 4. **Interpretation** (`src/inventorybot/extract.ts`, `interpretReplies`): every reply becomes a
-   typed event (`types.ts`): the classifier (`classify.ts`, both in the grammar package, below)
-   reads it with the command phase 2 paired it with (and `/esporta`'s with its file, the whole
-   inventory), following the grammars of `docs/bot-protocol.md`, whose `bot-reply` examples are
-   checked against it (`classify.docs-examples.test.ts`). The Pakkomon replies are read by
-   `pakkomon.ts`: fights and boss hits (with the loser's stun their ending phrase states, `ENDINGS`,
-   and every player they name designated for phase 3), records, challenges, stuns, bosses, and the
-   uses of an item on a Pakkomon. A place is named in its article form (`places.ts`: "nella valle"
-   is "la valle"), whatever preposition the reply used, so that every source names it the same way;
-   a travel event also keeps the words its reply wrote each place with (`written`), from which the
-   wiki keeps how the bot writes a place (`at`, the latest wording). The posts of the bot's channels
-   become events too (`channels.ts`, `docs/channels.md`): each card, with the date of its post,
-   merged with the replies' events in date order. The phase ends by verifying the group pairs
-   (`verify.ts`): a reply that, read with its command, is not of that command's family is read again
-   without it, and so is a group `/usa` reply that does not fit the item its query names (which uses
-   phase 5's item catalogue).
+   typed event (`types.ts`): the classifier (`classify.ts`, both in the grammar, below) reads it
+   with the command phase 2 paired it with (and `/esporta`'s with its file, the whole inventory),
+   following the grammars of `docs/bot-protocol.md`, whose `bot-reply` examples are checked against
+   it (`classify.docs-examples.test.ts`). The Pakkomon replies are read by `pakkomon.ts`: fights and
+   boss hits (with the loser's stun their ending phrase states, `ENDINGS`, and every player they
+   name designated for phase 3), records, challenges, stuns, bosses, and the uses of an item on a
+   Pakkomon. A place is named in its article form (`places.ts`: "nella valle" is "la valle"),
+   whatever preposition the reply used, so that every source names it the same way; a travel event
+   also keeps the words its reply wrote each place with (`written`), from which the wiki keeps how
+   the bot writes a place (`at`, the latest wording). The posts of the bot's channels become events
+   too (`channels.ts`, `docs/channels.md`): each card, with the date of its post, merged with the
+   replies' events in date order. The phase ends by verifying the group pairs (`verify.ts`): a reply
+   that, read with its command, is not of that command's family is read again without it, and so is
+   a group `/usa` reply that does not fit the item its query names (which uses phase 5's item
+   catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, and the rarity legend,
@@ -308,74 +308,50 @@ The code has two layers. The generic Telegram-bot layer, `src/telegram/` with th
 `src/lib/`, knows nothing about the game: the bot is a parameter (`BotIdentity`,
 `src/telegram/bot.ts`), so the layer could serve another bot, and a change in the game's wording
 never touches it. Everything about InventoryBot belongs in its own layer, `src/inventorybot/` and
-the grammar package (below), and only `src/pipeline.ts` and the web app, `src/web/`, join the two.
+the grammar (below), and only `src/pipeline.ts` and the web app, `src/web/`, join the two.
 `src/layers.test.ts` fails on any import from the generic layer into either, with one exception: the
 text helpers (`stripWs`, `codePointLength`, the whitespace and word classes…), which know nothing of
-the game, live in the grammar package (`lib/text.ts`), and the generic layer imports them from there
-as `@inventorybot-wiki/grammar/lib/text.ts`. Ideally they would be a module of their own, outside
-this repository, since other bots could use them too; they are too small to justify a repository of
-their own, so they live in the grammar, and any other bot's grammar that needs them re-implements
-them.
+the game, live in the grammar (`lib/text.ts`), and the generic layer imports them from there as
+`@inventorybottron/grammar/lib/text.ts`. Ideally they would be a module of their own, outside this
+repository, since other bots could use them too; they are too small to justify a repository of their
+own, so they live in the grammar, and any other bot's grammar that needs them re-implements them.
 
-### The grammar module
+### The grammar
 
-The grammar of the bot's replies is an npm workspace package of its own, `packages/grammar/`, named
-`@inventorybot-wiki/grammar`: the classifier and its event types (`classify.ts`, `types.ts`), the
-Pakkomon replies (`pakkomon.ts`), the reply patterns and places (`patterns.ts`, `places.ts`), shaped
-items (`shapes.ts`), titles (`titles.ts`), drops (`drops.ts`) and the text helpers (`lib/text.ts`).
-The wiki imports it by that name: its `package.json` maps `<name>/<path>` to `src/<path>` and the
-name alone to `src/index.ts`. Inside this repository any of its files may be imported (the wiki's
-phases use `patterns.ts`, `places.ts`…); it imports nothing outside its folder, and the wiki's own
-types build on its events (`src/inventorybot/types.ts` re-exports them). Its unit tests sit beside
-its files; the classifier's tests that run the whole pipeline (`classify.test.ts`,
-`classify.docs-examples.test.ts`, `pakkomon.test.ts`) stay in `src/inventorybot/`, as they use the
-test helpers of `test/`, which a package's files cannot import.
+The grammar of the bot's replies is not this repository's: it is the package `packages/grammar` of
+[InventoryBotTron](https://github.com/djjeck/InventoryBotTron), named `@inventorybottron/grammar`,
+which holds InventoryBot's game logic for every program that reads the game (this wiki, and the
+MegaBotTron1999 modules that read it live). It is the classifier and its event types (`classify.ts`,
+`types.ts`), the Pakkomon replies (`pakkomon.ts`), the reply patterns and places (`patterns.ts`,
+`places.ts`), shaped items (`shapes.ts`), titles (`titles.ts`), drops (`drops.ts`) and the text
+helpers (`lib/text.ts`). Its API, its versions and its version lock are documented in
+InventoryBotTron's `CLAUDE.md`, and a change to it is made there, never here. Up to version 0.2.0 it
+lived here, as `packages/grammar`, named `@inventorybot-wiki/grammar` (the MegaBotTron1999 module
+`inventorybot-grammar`); this repository no longer holds any module.
 
-The package is also a library module of [MegaBotTron1999](https://github.com/djjeck/MegaBotTron1999)
-(its `docs/bot-os-api.md` §7), so that a bot that reads InventoryBot's replies live, one at a time,
-reads them with the very grammar the wiki uses. Its `module.json` makes it the module
-`inventorybot-grammar`, with no plugins, that provides `@inventorybot-wiki/grammar`, the package's
-name; MegaBotTron1999 installs it from the repository's folder or its GitHub link, finding it at
-`packages/grammar`. Its entry is `src/index.ts`, which that name alone imports, and it is the
-contract for everyone outside this repository:
+The wiki vendors InventoryBotTron as a git submodule, `vendor/InventoryBotTron`, pinned to a commit
+of its `main`, and makes `vendor/InventoryBotTron/packages/grammar` one of its npm workspaces, so
+the wiki imports it by its name and may import any of its files (`@inventorybottron/grammar/<path>`
+is its `src/<path>`; the wiki's phases use `patterns.ts`, `places.ts`…). The wiki's own types build
+on its events (`src/inventorybot/types.ts` re-exports them). Its unit tests run in its repository,
+not here (`vendor/` is left out of the tests, the lint, the formatting and the content check); the
+wiki tests the classifier through its whole pipeline (`classify.test.ts`,
+`classify.docs-examples.test.ts`, which checks every `bot-reply` example of `docs/bot-protocol.md`,
+the grammar's specification, and `pakkomon.test.ts`, in `src/inventorybot/`). GitHub CI checks out
+the submodule (`submodules: true`). After cloning, `git submodule update --init` fetches it.
 
-- `classify(text, query, file?)`, the classifier of phase 4, and the types of its events (`Event`,
-  `EventType` and each event's);
-- `normalizeReply(text, known)`: the reply as `classify` reads it, the player titles of
-  `known.titles` and the admin's "Sua Maestà" removed (`titles.ts`, which phase 2's dialect uses);
-- `resolveDrop(raw, known)`: the item of an adventure drop, from its `raw` narrative (`drops.ts`),
-  as `{item, sure, prefix}` or null: a known item of `known.items` that ends it (`sure`), else what
-  follows the longest sentence prefix of `known.prefixes` that starts it. `prefix` is the narrative
-  before the item, for the caller to learn. Phase 5 resolves every drop of a run with this same
-  function, after learning the items and prefixes from all of them (`resolveDrops` in `build.ts`);
-- `guessDropItem(raw)`: a guess at the item of a drop `resolveDrop` cannot resolve, for a caller
-  that must name it at once (what follows the last indefinite article, else all of `raw`); the wiki
-  never guesses, it reports such a drop, and nothing should be learned from a guess;
-- `Knowledge` (`items`, `prefixes`, optional `titles`), `DropKnowledge` and `DropResolution`.
+**Updating the grammar** is moving the pin, in a commit of its own, after the change has landed on
+InventoryBotTron's `main`:
 
-What the entry exports keeps its meaning within a major version of the module (`version` in
-`module.json`, which follows its API, not the wiki's releases): a change that breaks it raises the
-major version, an addition the minor one. Everything else, the other files it ships included, is
-internal and may change at any time. The module knows the grammar, never the game: the caller
-supplies the item names, prefixes and titles, and the repository ships none (see "No spoilers in the
-repository"). The folder is the module: MegaBotTron1999 installs all its files but its tests
-(`module.json`, `package.json`, `LICENSE` and `src/`), so it holds nothing else.
-`packages/grammar/src/index.test.ts` runs the entry in Node and fails if it loads anything but the
-package's own sources: no npm package, no Node API, nothing outside the folder.
+```bash
+git -C vendor/InventoryBotTron fetch && git -C vendor/InventoryBotTron checkout <commit>
+npm install   # the workspace's version in package-lock.json
+npm run validate
+git add vendor/InventoryBotTron package-lock.json
+```
 
-**Versions.** Any change to a file the module ships (all of `packages/grammar/` but its tests) gives
-it a new version, in its `module.json` and its `package.json` alike, since MegaBotTron1999 offers an
-update for a new commit whatever it holds, and the version is all the owner sees of it. Against the
-entry's contract: a patch for a change that keeps every export's meaning (a fix, a reply form newly
-read, a refactor, internal files), a minor version for an addition to the entry (a new export, a new
-event type or field, an optional parameter), a major version for anything that breaks a caller (an
-export removed or renamed, a meaning or a type changed). `packages/grammar/module.lock.json` records
-the version and a hash of the files shipped (`scripts/grammar-lock.ts`: each path, sorted, with the
-SHA-256 of its contents; the lock left out of its own hash, and only the files git tracks or would
-track counted). `npm run check:grammar`, run by `validate`, `ci` and GitHub CI, fails when that hash
-changed and the version did not, when the two versions differ, or when the lock was not stamped
-after a bump; after bumping, `npm run grammar:stamp` writes the lock, and refuses while the version
-is the one it records. A change to tests only changes nothing.
+`validate` regenerates the golden outputs: any change in `git diff test/golden/` must be explained
+by the grammar's change, and the commit says which grammar version it takes and why.
 
 ## Data rules
 
@@ -458,15 +434,15 @@ This project must stay on the right side of that.
 - **Strict TypeScript**, including `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
 - **Imports**: ESLint owns their style, and `npm run lint:fix` normalizes them (sorted in one group,
   inline `type` specifiers, unused ones removed). Import across directories through the `#src/*`
-  alias (`package.json` `imports`), and the grammar package by its name, never with `../`.
+  alias (`package.json` `imports`), and the grammar by its name, never with `../`.
 - **Formatting**: Prettier, for every file it supports, including Markdown, whose prose is wrapped
   at 100 columns (`proseWrap: "always"`), so every text has one canonical form.
 - **Tests** sit next to the code they test (`foo.ts`, `foo.test.ts`) and run with Vitest. Helpers
   shared by several tests live in `test/` and are imported through the `#test/*` alias; production
   code never imports them (ESLint rejects it), so it can be shipped without them. Coverage of `src/`
-  and `packages/*/src/` must stay at or above 90% on statements, branches, functions and lines. Test
-  data is synthetic: tests never read real exports. A known misbehaviour gets an `it.fails` test
-  asserting the correct behaviour, which becomes a plain `it` with the fix.
+  must stay at or above 90% on statements, branches, functions and lines. Test data is synthetic:
+  tests never read real exports. A known misbehaviour gets an `it.fails` test asserting the correct
+  behaviour, which becomes a plain `it` with the fix.
 - **Golden outputs**: `src/pipeline.golden.test.ts` runs the whole pipeline on the synthetic
   scenarios of `test/synthetic-exports.ts` (invented data, generated at test time) and compares
   every output byte for byte with `test/golden/`: per scenario, the conversation and the events

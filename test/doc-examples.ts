@@ -7,8 +7,8 @@ import {
   stripWs,
   WORD_BODY,
   WS_BODY,
-} from '@inventorybot-wiki/grammar/lib/text.ts';
-import { stripSuaMaesta, titleStripper } from '@inventorybot-wiki/grammar/titles.ts';
+} from '@inventorybottron/grammar/lib/text.ts';
+import { stripSuaMaesta, titleStripper } from '@inventorybottron/grammar/titles.ts';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';

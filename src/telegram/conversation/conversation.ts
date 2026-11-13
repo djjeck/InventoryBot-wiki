@@ -11,7 +11,7 @@
  * Everything else (ordinary chat, commands for other bots, forwarded commands) is dropped:
  * only the replies leave this phase.
  */
-import { stripWs } from '@inventorybot-wiki/grammar/lib/text.ts';
+import { stripWs } from '@inventorybottron/grammar/lib/text.ts';
 import { increment, mostCommon } from '#src/lib/counts.ts';
 import { type Message } from '#src/telegram/messages.ts';
 import { type ChatMessage, isBotCommand, resolveCommand } from './commands.ts';
