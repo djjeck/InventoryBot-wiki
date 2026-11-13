@@ -386,25 +386,41 @@ This project must stay on the right side of that.
   them is committed or published, and the repository holds none of their content.
 - **Read-only.** Nothing in this project sends messages to the bot or automates play. Do not add
   features that interact with Telegram or the bot.
-- **No spoilers in the repository.** Docs and tests describe the bot's message formats and the
-  game's mechanics, but never real game content that players are meant to discover: real recipes and
-  their ingredients or outputs, which item unlocks which place, where exclusive items drop, real
-  item, recipe and place names. Public facts the bot itself tells every player (the `/faq` legend
-  and rules, command names, fixed reply texts) are fine.
+- **Game content.** This repository holds no real game content:
+  - **Never here:** real item names, real locations, real recipes (their ingredients, their outputs,
+    which item unlocks which place, where an item drops), and real flavour text (the random
+    sentences of the drops, the craft texts, the unlock texts). Code, docs and tests use an invented
+    universe instead ([scripts/universe.md](scripts/universe.md)), in the bot's real formats.
+  - **Allowed:** the message formats, the grammars and templates that read them, the bot's fixed
+    reply texts (the same for every player, whatever they find: errors, the `/faq`, the lottery's
+    announcements, the Pakkomon fights' ending phrases), and the command names. These are not game
+    content. A real name that a fixed reply text holds (the game's currency in the level-up text) is
+    allowed as part of that text, and listed in the universe as `public`.
+  - **Usernames are always invented.** A real one identifies a person, which is worse than a real
+    item. The only real names are those the bot's own fixed texts hold (the bot, the game's admin),
+    as `public` entries of the universe.
+  - **Knowledge comes only from play:** a running bot learns the game live, from the replies it
+    reads, or by seeding its own store from the owner's own Telegram export at install time; this
+    wiki builds it in the player's browser from their own exports. What either learns stays there,
+    never here.
+  - **The grammar ships no knowledge at all:** no item names, no sentence prefixes, no titles, and
+    no cue words (words that would tell an item's name from the sentence before it). Everything it
+    resolves against is the caller's. A rule of the language is not knowledge: `guessDropItem`'s
+    indefinite article stays.
   - **One exception:** `src/web/demo-chat.ts`, the web app's example, holds real game content, which
     `check:universe` skips: what a player who has just started learns in an evening, a few level-1
     recipes of common items that drop everywhere (none made, so no output), one of each item, and
     the places a new player's `/viaggio` lists on the road from the village to the plain (no secret
     place). Nothing else holds real game content.
-  - Examples use the invented world of [scripts/universe.md](scripts/universe.md), in the real
-    format: take names from it, and when a new test case or example needs a new item, recipe, place
-    or Telegram username, invent one and add it there in the same change. Real usernames are worse
-    than real items: they identify people.
+  - Examples use the invented world of [scripts/universe.md](scripts/universe.md): take names from
+    it, and when a new test case or example needs a new item, recipe, place or Telegram username,
+    invent one and add it there in the same change.
   - This is enforced, not left to judgement: `npm run check:universe` (`scripts/check-universe.ts`,
     run by `validate`, `ci` and GitHub CI) fails on any entity, found where the bot's reply formats
     put one or in the item tuples of the tests' reply builders, and on any `@username`, that is not
     in the universe. Do not try to decide by eye whether a name is real; the author reviews
-    additions to the universe.
+    additions to the universe. The check cannot see flavour text: a drop's, a craft's or an unlock's
+    sentence in a test or doc is invented by hand, never copied or paraphrased from a real reply.
 - **Group history is other players' discoveries.** Using it for one's own page is what any member
   can do by scrolling the group; publishing it is not. Keep it out of anything shared.
 - **Group exports are supported, never suggested.** The pipeline reads them, but nothing a player
