@@ -6,7 +6,8 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
-    "vendor/InventoryBotTron/packages/grammar"
+    "vendor/InventoryBotTron/packages/grammar",
+    "vendor/InventoryBotTron/packages/state"
   ],
   "imports": {
     "#src/*": "./src/*",

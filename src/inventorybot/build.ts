@@ -23,15 +23,9 @@
  * a minimum keeps the first of equal candidates, dates are compared as instants, and
  * report entries print in one fixed form (formatReportEntry).
  */
-import {
-  INVENTORY_COMMANDS,
-  INVENTORY_LIST_COMMANDS,
-  useItems,
-  useTakes,
-} from '@inventorybottron/grammar/classify.ts';
+import { useItems, useTakes } from '@inventorybottron/grammar/classify.ts';
 import { resolveDrop } from '@inventorybottron/grammar/drops.ts';
 import {
-  codePointLength,
   compareCodePoints,
   isCombiningMark,
   parseDecimalInt,
@@ -46,6 +40,14 @@ import { PAKKOMON, USE_ROLES, wikiItemName } from '@inventorybottron/grammar/pak
 import { parseDuration, stripAddr } from '@inventorybottron/grammar/patterns.ts';
 import { placeLabel, placeName } from '@inventorybottron/grammar/places.ts';
 import { SHAPED_AS } from '@inventorybottron/grammar/shapes.ts';
+import {
+  inventoryScope,
+  isFailedUse,
+  isMine,
+  nameKey,
+  queryArg,
+  type RarityOf,
+} from '@inventorybottron/state';
 import { formatIso, isoDateSeconds, localNowIso, parseWindowsDate } from '#src/lib/dates.ts';
 import { placeLevels } from './levels.ts';
 import { type ReportEntry, type ReportKind, reportSections } from './report.ts';
@@ -93,16 +95,6 @@ export function iso(date: string | null): string | null {
   return d === null ? date : formatIso(d);
 }
 
-/** The argument of a command among `cmds` (`/ricetta torre` -> `torre`), "" without one, null for another command. */
-export function queryArg(q: string | null | undefined, ...cmds: string[]): string | null {
-  for (const c of cmds) {
-    if (truthy(q) && q.toLowerCase().startsWith(c + ' '))
-      return stripWs(sliceCodePoints(q, codePointLength(c) + 1));
-    if (truthy(q) && q.toLowerCase() === c) return '';
-  }
-  return null;
-}
-
 const instantCache = new Map<string, number>();
 
 /**
@@ -118,53 +110,6 @@ export function instant(isoDate: string | null | undefined): number {
     instantCache.set(isoDate, v);
   }
   return v;
-}
-
-/**
- * /inventario arguments that are rarity filters, as verified on the bot: "C" lists C and
- * C+ items, "C+" only C+, "L" every Ln, "L2" only L2. "M" is accepted but always lists nothing.
- * The letter is case-insensitive ("c" is "C", "l1" is "L1"); ASCII letters only.
- */
-export const RARITY_FILTER = /^(?:[CNRSXUcnrsxu]\+?|[Ll]\p{Nd}*)(?=\n?$)/u;
-
-export type RarityOf = (name: string) => string | null | undefined;
-
-/**
- * Which unlisted items an inventory reply proves the player does not have.
- *
- * Returns a predicate on item names (every one for the /esporta file), or null when the
- * reply says nothing about unlisted items: it was truncated (or is one /inv2 page of several), its command is
- * unknown (an unmatched group reply), it used the "M" filter, which does not work in
- * the bot, or it is a /collezioni or /inv2 with an argument.
- */
-export function inventoryScope(
-  e: BuildEvent,
-  rarityOf: RarityOf
-): ((name: string) => boolean) | null {
-  if (e.type !== 'inventory' || e.truncated) return null;
-  if (e.exported) return () => true;
-  if (e.query === null || e.query === undefined) return null;
-  // /collezioni and /inv2 list everything; nothing is known of what they do with an argument.
-  const list = queryArg(e.query, ...INVENTORY_LIST_COMMANDS);
-  if (list !== null) return list === '' ? () => true : null;
-  const raw = stripWs(queryArg(e.query, ...INVENTORY_COMMANDS) || '');
-  if (!raw) return () => true;
-  if (raw === 'M' || raw === 'm') return null;
-  if (RARITY_FILTER.test(raw)) {
-    const arg = raw.toUpperCase();
-    return (n) => {
-      const r = rarityOf(n) || '';
-      if (arg === 'L') return r.startsWith('L');
-      return arg.endsWith('+') || arg.startsWith('L') ? r === arg : stripEndChars(r, '+') === arg;
-    };
-  }
-  // Text filter: every word must appear in the name, case-insensitively, also inside
-  // another word ("otto" lists "un bottone"); "[C]" is text too and matches nothing.
-  const words = splitWords(raw.toLowerCase());
-  return (n) => {
-    const lower = n.toLowerCase();
-    return words.every((w) => lower.includes(w));
-  };
 }
 
 // ---- the rarity system ----------------------------------------------------------------
@@ -578,29 +523,6 @@ export function splitRecipes(raw: string, known: ReadonlySet<string>): string[] 
   return out;
 }
 
-/** The fields isMine() reads. */
-export interface Addressing {
-  player?: string | null | undefined;
-  dm?: boolean | undefined;
-  forwarded?: boolean | undefined;
-  broadcast?: boolean | undefined;
-}
-
-/**
- * Whether a bot reply is about the export owner (their moves, holdings, crafts).
- *
- * Addressed replies belong to the @username they name. Unaddressed ones ("Troppo
- * presto", gift notices) are the owner's only in the DM; in a group the conversation
- * phase already attributes them through the matched command when it can. Forwarded bot
- * messages and group broadcasts ("[W]", "[N]") belong to nobody: they did not
- * happen at that time and place.
- */
-export function isMine(e: Addressing, player: string | null): boolean {
-  if (e.forwarded || e.broadcast) return false;
-  if (truthy(e.player)) return e.player === player;
-  return Boolean(e.dm);
-}
-
 function addQty(c: Map<string, number>, name: string, qty: number): void {
   c.set(name, (c.get(name) ?? 0) + qty);
 }
@@ -633,20 +555,6 @@ export function itemCatalogue(events: readonly EventRecord[]): ReadonlyMap<strin
   const kb = new KB();
   merge(kb, structuredClone(events) as BuildEvent[], null);
   return kb.items;
-}
-
-/**
- * A name's key for matching names typed by hand with the bot's: whitespace as single
- * spaces, without the emoji variation selector, zero-width joiners, gender signs and skin
- * tones that a hand-typed emoji may add.
- */
-export function nameKey(name: string): string {
-  return stripWs(
-    name
-      .normalize('NFC')
-      .replace(/\u{FE0F}|\u{200D}|\u{2640}|\u{2642}|[\u{1F3FB}-\u{1F3FF}]/gu, '')
-      .replace(new RegExp(`${WS_CLASS}+`, 'gu'), ' ')
-  );
 }
 
 /**
@@ -1298,28 +1206,9 @@ const USE_NOISE: readonly (string | RegExp)[] = [
   /^qualcosa e' andato storto\.\./iu,
   'per giocare con me devi prima registrarti',
 ];
-/** /usa replies where the use failed for a reason worth keeping (a requirement). */
-export const USE_FAILED: readonly (string | RegExp)[] = [
-  'non hai la chiave giusta',
-  'non le hai ancora tutte',
-  'non puoi teletrasportarti in quei luoghi',
-  // A player named by the argument (echoed before these) lacks what the use needs.
-  ' non ha un walkie talkie',
-  " non e' un nuovo arrivato",
-  // A Pakkomon that cannot take the use.
-  "quel pakkomon ha gia' bevuto",
-  'i pakkomon boss vanno sfidati in Arena',
-  // What the use needs from the player: items, their number or rarity, an ability.
-  'non hai abbastanza ',
-  'devi introdurre esattamente ',
-  "gli oggetti inseriti devono essere tutti della stessa rarita'",
-  /^Rarità ammesse: /u,
-  'non ti senti in grado di ',
-];
 
 const hasAny = (text: string, keys: readonly (string | RegExp)[]): boolean =>
   keys.some((k) => (typeof k === 'string' ? text.includes(k) : k.test(text)));
-export const isFailedUse = (text: string): boolean => hasAny(text, USE_FAILED);
 
 const DIGITS = /\p{Nd}+/gu;
 

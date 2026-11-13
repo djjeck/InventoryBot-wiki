@@ -245,100 +245,14 @@ export interface Wiki {
   locations: Record<string, WikiLocation>;
 }
 
-/** How a holding was last set (Italian, shown on the page). */
-export type HoldingVia =
-  | 'inventario'
-  | 'collezioni'
-  | 'inv2'
-  | 'esporta'
-  | 'esamina'
-  | 'ricetta'
-  | 'mostra'
-  | 'dai'
-  | 'movimento';
-
-export interface Holding {
-  qty: number;
-  /** False when only a lower bound or a change is known. */
-  exact: boolean;
-  date: string | null;
-  via: HoldingVia;
-}
-
 /**
- * One of the owner's Pakkomon (player-pakkomon.ts), now or once: what the exports show of
- * it. Dates are ISO.
+ * The player state (player.ts) is InventoryBotTron's (`@inventorybottron/state`): the owner's
+ * state, as its view shows it, and its parts.
  */
-export interface PlayerPakkomon {
-  /** Its name and emoji, as last written. */
-  name: string;
-  /** How it came to the owner: hatched from a sphere, or received from a player; null when not shown. */
-  came: { via: 'hatched' | 'received'; from: string | null; date: string | null } | null;
-  /** The day it was hatched and by whom, as its record says. */
-  born: string | null;
-  maker: string | null;
-  first_seen: string | null;
-  last_seen: string | null;
-  /**
-   * No longer the owner's: given to a player, extracted, or left out of a list of all their
-   * Pakkomon (the scanner's, a complete inventory); null while the owner has it.
-   */
-  gone: { via: 'given' | 'extracted' | 'unlisted'; to: string | null; date: string | null } | null;
-  /** Its latest record. */
-  record: { wins: number; losses: number; date: string | null } | null;
-  /** Its equipment, from the latest equipping or record; null when it has none or none is known. */
-  equipment: string | null;
-  /** The power-ups its latest record shows, one icon each. */
-  power_ups: string[];
-  /** The items the owner gave it as power-ups. */
-  power_up_items: string[];
-  /** The fights the exports show: won, lost, and the wins after which it learned something. */
-  fights: { won: number; lost: number; learned: number };
-  /**
-   * Its widest win: the stun its ending phrase states, in minutes, which its strength and
-   * equipment's bonus together reach at least.
-   */
-  best_win: { min: number; max: number | null } | null;
-  /** Until when it is stunned, from the latest stun shown; null when ready, or not known. */
-  stunned_until: string | null;
-  /** The probe's latest reading of it. */
-  probe: string | null;
-}
-
-/** The player state: the export owner's own state. */
-export interface PlayerState {
-  player: string | null;
-  /** Date of the owner's latest event. */
-  as_of: string | null;
-  recipes: Record<string, { crafted: number; last_crafted: string | null }>;
-  /** Per item: when first seen; `used` and `last_used` only for an item the owner used successfully. */
-  items: Record<string, { first_seen: string | null; used?: number; last_used?: string | null }>;
-  locations: Record<string, { visited: boolean; adventures: number }>;
-  /** The latest /ricetta list: recipe -> `pronta` or `manca N`. */
-  /** The latest /ricetta list; `truncated`: it was cut, so a recipe missing from it may still be visible. */
-  recipe_list: { date: string | null; truncated: boolean; recipes: Record<string, string> } | null;
-  /** Estimated holdings above zero. */
-  inventory: Record<string, Holding>;
-  /**
-   * The recipes of the owner's /ricetta lists (with known ingredients) compared with the
-   * estimate of that moment, and those whose missing units it got right.
-   */
-  inventory_check: { compared: number; agreed: number };
-  /**
-   * The owner's Pakkomon, by their name (the items and the inventory count them as the
-   * wiki's one Pakkomon), current ones first, then by name.
-   */
-  pakkomon: PlayerPakkomon[];
-  /**
-   * The shapes the owner's shaped items had (the items and the inventory count each as the
-   * item it was shaped from), per item, the latest first.
-   */
-  shapes: Record<string, PlayerShape[]>;
-}
-
-/** A shape of one of the owner's shaped items: the text, and when it was seen. */
-export interface PlayerShape {
-  shape: string;
-  first_seen: string | null;
-  last_seen: string | null;
-}
+export type {
+  ViewHolding as Holding,
+  HoldingVia,
+  PlayerPakkomon,
+  PlayerShape,
+  PlayerView as PlayerState,
+} from '@inventorybottron/state';

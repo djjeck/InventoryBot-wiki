@@ -1,4 +1,4 @@
-/** player-pakkomon.ts: the owner's Pakkomon in the player state. */
+/** The owner's Pakkomon in the player state (InventoryBotTron's `@inventorybottron/state`, through player.ts). */
 import { describe, expect, it } from 'vitest';
 import { ev, type EvOptions, fieldsOf, runBuild } from '#test/build.ts';
 import * as T from '#test/texts.ts';

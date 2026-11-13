@@ -1,10 +1,10 @@
 /** player.ts: the export owner's personal state (phase 5). */
 import { placeName } from '@inventorybottron/grammar/places.ts';
+import { renamed, sameTransfer } from '@inventorybottron/state';
 import { describe, expect, it } from 'vitest';
 import { ev, type EvOptions, runBuild } from '#test/build.ts';
 import * as T from '#test/texts.ts';
 import { iso } from './build.ts';
-import { Holdings, renamed, sameTransfer } from './player.ts';
 import { type BuildEvent, type PlayerState } from './types.ts';
 
 const BOSCO = 'nel bosco nebbioso di Valtorbo 🌲';
@@ -523,22 +523,6 @@ describe('craft', () => {
       ev(T.craft([['un laccio', 'C', 2]], 'una cestina'), '/ricetta cestina', { t: 2 }),
     ]);
     expect(inv).toStrictEqual({ 'una cestina': 2 });
-  });
-
-  it('below_zero_becomes_not_exact', () => {
-    const h = new Holdings();
-    h.exact('un sasso', 1, 'd', 'esamina');
-    h.delta('un sasso', -2, 'd2');
-    expect(pick(h.h.get('un sasso'), ['qty', 'exact'])).toStrictEqual({ qty: 0, exact: false });
-    h.delta('una trave', 3, 'd3');
-    expect(h.h.get('una trave')).toStrictEqual({
-      qty: 3,
-      exact: false,
-      date: 'd3',
-      via: 'movimento',
-    });
-    h.delta('un chiodo', -1, 'd4');
-    expect(h.h.get('un chiodo')?.qty).toBe(0);
   });
 
   it('craft_with_exact_zero_ingredient', () => {
