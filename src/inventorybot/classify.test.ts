@@ -1,4 +1,5 @@
-/** classify.ts: what each bot reply is read as (docs/bot-protocol.md). */
+/** classify.ts: what each bot reply is read as (InventoryBotTron's docs/bot-protocol.md,
+ * https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md). */
 import { classify, itemFromLine, itemLines } from '@inventorybottron/grammar/classify.ts';
 import { describe, expect, it } from 'vitest';
 import { BOT, Chat, tgDate } from '#test/helpers.ts';

@@ -23,8 +23,9 @@ docs:
 - [README.md](README.md): what the project does, for end users (Italian).
 - [docs/telegram-export.md](docs/telegram-export.md): the Telegram Desktop HTML export format, the
   pipeline's input.
-- [docs/bot-protocol.md](docs/bot-protocol.md): the commands and messages of @InventoryBot, as they
-  appear in the export.
+- [InventoryBotTron's `docs/bot-protocol.md`](https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md):
+  the commands and messages of @InventoryBot, the grammar's specification. It lives with the grammar
+  (below, "The grammar"); read it in the submodule, `vendor/InventoryBotTron/docs/bot-protocol.md`.
 - [docs/channels.md](docs/channels.md): the cards of the encyclopedia channels the bot's `/gruppi`
   lists, as they appear in their exports.
 
@@ -125,19 +126,19 @@ order:
 4. **Interpretation** (`src/inventorybot/extract.ts`, `interpretReplies`): every reply becomes a
    typed event (`types.ts`): the classifier (`classify.ts`, both in the grammar, below) reads it
    with the command phase 2 paired it with (and `/esporta`'s with its file, the whole inventory),
-   following the grammars of `docs/bot-protocol.md`, whose `bot-reply` examples are checked against
-   it (`classify.docs-examples.test.ts`). The Pakkomon replies are read by `pakkomon.ts`: fights and
-   boss hits (with the loser's stun their ending phrase states, `ENDINGS`, and every player they
-   name designated for phase 3), records, challenges, stuns, bosses, and the uses of an item on a
-   Pakkomon. A place is named in its article form (`places.ts`: "nella valle" is "la valle"),
-   whatever preposition the reply used, so that every source names it the same way; a travel event
-   also keeps the words its reply wrote each place with (`written`), from which the wiki keeps how
-   the bot writes a place (`at`, the latest wording). The posts of the bot's channels become events
-   too (`channels.ts`, `docs/channels.md`): each card, with the date of its post, merged with the
-   replies' events in date order. The phase ends by verifying the group pairs (`verify.ts`): a reply
-   that, read with its command, is not of that command's family is read again without it, and so is
-   a group `/usa` reply that does not fit the item its query names (which uses phase 5's item
-   catalogue).
+   following the grammars of InventoryBotTron's `docs/bot-protocol.md`, whose `bot-reply` examples
+   are checked against it (`classify.docs-examples.test.ts`). The Pakkomon replies are read by
+   `pakkomon.ts`: fights and boss hits (with the loser's stun their ending phrase states, `ENDINGS`,
+   and every player they name designated for phase 3), records, challenges, stuns, bosses, and the
+   uses of an item on a Pakkomon. A place is named in its article form (`places.ts`: "nella valle"
+   is "la valle"), whatever preposition the reply used, so that every source names it the same way;
+   a travel event also keeps the words its reply wrote each place with (`written`), from which the
+   wiki keeps how the bot writes a place (`at`, the latest wording). The posts of the bot's channels
+   become events too (`channels.ts`, `docs/channels.md`): each card, with the date of its post,
+   merged with the replies' events in date order. The phase ends by verifying the group pairs
+   (`verify.ts`): a reply that, read with its command, is not of that command's family is read again
+   without it, and so is a group `/usa` reply that does not fit the item its query names (which uses
+   phase 5's item catalogue).
 
 5. **Wiki and player state** (`src/inventorybot/build.ts`, `player.ts`): the events become the wiki,
    facts about the game the same for every player (items, recipes, places, and the rarity legend,
@@ -336,9 +337,20 @@ is its `src/<path>`; the wiki's phases use `patterns.ts`, `places.ts`…). The w
 on its events (`src/inventorybot/types.ts` re-exports them). Its unit tests run in its repository,
 not here (`vendor/` is left out of the tests, the lint, the formatting and the content check); the
 wiki tests the classifier through its whole pipeline (`classify.test.ts`,
-`classify.docs-examples.test.ts`, which checks every `bot-reply` example of `docs/bot-protocol.md`,
-the grammar's specification, and `pakkomon.test.ts`, in `src/inventorybot/`). GitHub CI checks out
-the submodule (`submodules: true`). After cloning, `git submodule update --init` fetches it.
+`classify.docs-examples.test.ts`, which checks every `bot-reply` example of the grammar's
+specification, and `pakkomon.test.ts`, in `src/inventorybot/`). GitHub CI checks out the submodule
+(`submodules: true`). After cloning, `git submodule update --init` fetches it.
+
+**The protocol doc** lives with the grammar too:
+[InventoryBotTron's `docs/bot-protocol.md`](https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md),
+the grammar's specification, is where a change in the bot's replies is documented, never here. It
+lived here as `docs/bot-protocol.md` until the grammar moved. The wiki reads it from the submodule
+(`test/doc-examples.ts`), so `classify.docs-examples.test.ts` and the golden scenario
+`stage2-docs-examples`, which replays its `bot-reply` examples as a chat, use the doc of the pinned
+commit: a pin move that changes an example changes that scenario's golden files. Its game content is
+checked there, by InventoryBotTron's `check:universe`, as `vendor/` is left out of the check here.
+This repository's own docs (`docs/telegram-export.md`, `docs/channels.md`) are the wiki's inputs,
+the export formats, and stay here.
 
 **Updating the grammar** is moving the pin, in a commit of its own, after the change has landed on
 InventoryBotTron's `main`:

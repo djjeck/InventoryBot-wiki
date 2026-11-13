@@ -136,8 +136,8 @@ import { lockedWay } from '#src/web/place-way.ts';
         (I[n]?.used_in || []).some((o) => o !== r.name && lvl(o) > (r.level || 0))
       ).length;
 
-    // Freshness: until July 2021 the game ran on a previous bot (docs/bot-protocol.md,
-    // "Older formats"). A fact last confirmed only then may belong to the game's early
+    // Freshness: until July 2021 the game ran on a previous bot (InventoryBotTron's
+    // docs/bot-protocol.md, "Older formats", https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md). A fact last confirmed only then may belong to the game's early
     // days, or to a one-off since removed, and is flagged, with the reason on hover; one
     // confirmed by the current bot is likely still there, however long ago. A fixed date:
     // the flag does not spread to the current game as time passes.

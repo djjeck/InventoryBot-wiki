@@ -3,7 +3,8 @@
  * every item, recipe and place they mention belongs to it, so that no real game content
  * (which players are meant to discover) reaches the repository.
  *
- * Entities are found where the bot's reply formats put them (docs/bot-protocol.md), and
+ * Entities are found where the bot's reply formats put them (InventoryBotTron's docs/bot-protocol.md,
+ * https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md), and
  * the text there must end with a name of the universe (the bot may write words before it):
  *
  * - items: before a rarity tag (`un sasso [C]`: the text before the tag must end with an

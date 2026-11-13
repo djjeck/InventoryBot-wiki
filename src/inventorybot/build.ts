@@ -168,7 +168,8 @@ export function inventoryScope(
 }
 
 // ---- the rarity system ----------------------------------------------------------------
-// Every item carries a rarity code (docs/bot-protocol.md §2.2). The game's rules for it are
+// Every item carries a rarity code (InventoryBotTron's docs/bot-protocol.md §2.2,
+// https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md). The game's rules for it are
 // stated here rather than read from the bot's /faq, whose wording would change with them.
 
 /**

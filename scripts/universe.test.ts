@@ -22,7 +22,7 @@ const universe = (names: Partial<Record<keyof Universe, string[]>>): Universe =>
 describe('the test universe', () => {
   it('scans_the_repository_text_files_but_not_its_own', () => {
     const files = scannedFiles(ROOT);
-    expect(files).toContain('docs/bot-protocol.md');
+    expect(files).toContain('docs/telegram-export.md');
     expect(files).toContain('src/telegram/export/parse-export.ts');
     const own = files.filter(
       (f) => /^(test|scripts)\/universe\./u.test(f) || f === 'package-lock.json'

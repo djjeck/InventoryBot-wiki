@@ -370,7 +370,9 @@ block is a link to the file, with no `description`:
 The `href` is the path of the file in the export, relative to the page, as written on disk (spaces
 included, not percent-encoded); the title keeps the name the file was sent with, so only the link
 tells two files of one name apart. The bot's one kind of media is a text file with a caption
-([`bot-protocol.md`](bot-protocol.md) §6.8).
+(InventoryBotTron's
+[`bot-protocol.md`](https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md)
+§6.8).
 
 ### 5.7 Other blocks
 

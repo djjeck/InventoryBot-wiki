@@ -1,5 +1,7 @@
 /**
- * The `bot-reply` example blocks of docs/bot-protocol.md (convention in its section 8).
+ * The `bot-reply` example blocks of InventoryBot's protocol (convention in its section 8): the
+ * grammar's specification, InventoryBotTron's docs/bot-protocol.md (https://github.com/djjeck/InventoryBotTron/blob/main/docs/bot-protocol.md),
+ * read from the submodule, so the examples are those of the pinned commit.
  * No vitest imports here.
  */
 import {
@@ -15,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 /** Repository root (the parent of test/). */
 export const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const DOC = path.join(REPO, 'docs', 'bot-protocol.md');
+export const DOC = path.join(REPO, 'vendor', 'InventoryBotTron', 'docs', 'bot-protocol.md');
 
 /** The document text, with `\r\n` and `\r` line ends turned into `\n`. */
 export function readDoc(): string {
